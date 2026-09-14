@@ -24,7 +24,9 @@ The lab uses permanent identities:
 - `H####` — hypothesis
 - `A####` — ablation
 - `M####` — model artifact
-- `D####` — dataset
+- `S####` — immutable source snapshot
+- `N####` — normalization / standardization recipe
+- `D####` — frozen dataset manifest/view
 - `T####` — training recipe
 - `E####` — evaluation protocol
 - `R####` — execution/run
@@ -41,11 +43,23 @@ Examples:
 
 The short label is for humans. Every run also stores the complete immutable configuration and hashes.
 
+## Data model
+
+Data is treated as a versioned lineage rather than a mutable training folder:
+
+`S#### raw source -> N#### normalization -> canonical records -> accumulated labels -> D#### frozen dataset`
+
+Raw sources remain immutable. Labels retain their producer and authority. Live filters and source stacks can be explored interactively, but a training run consumes only a frozen `D####` manifest.
+
+When parsers, schemas, motif definitions, POV conventions, deduplication, or facts registries change, the lab creates a new `N####` and rebuilds from the original source. Historical datasets and runs remain unchanged, and the migration is diffed and documented.
+
+See `docs/DATA_LIFECYCLE.md`.
+
 ## Initial research phases
 
 ### Phase 0 — Lab foundation
 
-Build schemas, provenance, immutable run evidence, compute accounting, frozen evaluation suites, and the human GUI.
+Build schemas, provenance, immutable run evidence, data lineage/standardization, compute accounting, frozen evaluation suites, and the human GUI.
 
 ### Phase 1 — Raw NNUE scaling
 
@@ -81,20 +95,22 @@ Architectures and ideas advance only after smaller controlled experiments justif
 
 ## Human GUI
 
-The lab must be usable without editing config files. The GUI is part of the core research system, not a separate product.
+The GUI exists primarily to let a human understand the research system.
 
-A researcher should be able to:
+It should visualize:
 
-- browse generations, hypotheses, ablations, models, datasets, and runs;
-- create an ablation from a baseline using switches and numeric controls;
-- see exact parameter counts before launching;
-- configure search/data/label budgets;
-- queue and monitor runs;
-- compare controls and interventions;
-- filter by motif, strategy, architecture, generation, parameter budget, and result state;
-- inspect coverage and labeling-compute spend;
-- view capability-vs-parameters-vs-search-compute charts;
-- read standardized finding cards for supported, rejected, and inconclusive experiments.
+- live and historical model training performance;
+- supervision composition and label provenance;
+- corpus composition and filterable labeled data;
+- dataset stacking/sampling and effective training contribution;
+- raw -> standardized -> labeled -> frozen-dataset lineage;
+- re-standardization and migration differences;
+- ablation/control differences;
+- capability vs parameters/search compute;
+- promotion evidence, missing gates, and contradictory results;
+- standardized findings, including negative and inconclusive results.
+
+The GUI may create canonical experiment/data specifications, but hidden scientific logic belongs in the backend. Every displayed point must drill down to its immutable evidence and lineage.
 
 See `docs/GUI.md`.
 
@@ -109,6 +125,8 @@ Use evidence-oriented states rather than `good`/`bad`:
 - `INCONCLUSIVE`
 - `SUPERSEDED`
 - `INVALID`
+
+Promotion is a separate evidence decision and must expose its control, gates, uncertainty, integrity state, and dataset differences.
 
 A negative result is still a completed research result. An invalid run is never silently promoted into evidence.
 
