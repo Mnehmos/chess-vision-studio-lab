@@ -177,6 +177,39 @@ class SplitManifest(LabModel):
     record_ids_hash: str
 
 
+class LabelSetRef(LabModel):
+    """One append-only L2 label file pinned into a dataset manifest."""
+
+    path: str
+    file_hash: str
+    rows: int
+    families: dict[str, int]
+    authorities: dict[str, int]
+    producers: dict[str, int]
+    registry_version: int
+    label_schema_version: int
+
+
+class StackPolicy(str, Enum):
+    ALL = "all"
+    FIXED_ROWS = "fixed_rows"
+    FRACTION = "fraction"
+    BALANCE = "balance"
+
+
+class StackArm(LabModel):
+    """One component of a dataset stack: a filtered subpopulation plus an explicit sampling policy."""
+
+    name: str
+    filter: dict[str, ConfigValue] = {}
+    policy: StackPolicy = StackPolicy.ALL
+    rows: Optional[int] = None
+    fraction: Optional[float] = None
+    balance_bucket: Optional[str] = None
+    balance_cap: Optional[int] = None
+    seed: int = 0
+
+
 class ArtifactLocation(LabModel):
     root: str
     path: str
@@ -267,6 +300,8 @@ class Dataset(LabModel):
     dedup_policy: str
     split_policy: dict[str, ConfigValue]
     splits: list[SplitManifest]
+    stack: list[StackArm] = []
+    label_sets: list[LabelSetRef] = []
     counts: dict[str, int]
     coverage: dict[str, dict[str, int]]
     label_provenance: dict[str, int]
@@ -844,6 +879,82 @@ class SearchBacklog(LabModel):
     legacy_state_counts: dict[str, int]
 
 
+class CatalogRecord(LabModel):
+    """One canonical record rendered in the corpus catalog, labels joined and memberships resolved."""
+
+    record_id: str
+    group: str
+    source_id: str
+    source_row: int
+    ply: int
+    fen: str
+    epd: str
+    stm: str
+    phase: str
+    material: str
+    result: Optional[Union[bool, int, float, str]]
+    labels: list[dict[str, object]]
+    label_tiers: dict[str, int]
+    memberships: dict[str, list[str]]
+
+
+class CatalogResponse(LabModel):
+    normalization_id: str
+    record_count: int
+    unique_count: int
+    duplicate_count: int
+    label_count: int
+    filters_applied: dict[str, ConfigValue]
+    facets: dict[str, dict[str, int]]
+    page: list[CatalogRecord]
+    page_offset: int
+    page_size: int
+    total_matching: int
+
+
+class ArmPreview(LabModel):
+    name: str
+    policy: str
+    filter: dict[str, ConfigValue]
+    available: int
+    effective: int
+
+
+class StackPreview(LabModel):
+    normalization_id: str
+    arms: list[ArmPreview]
+    effective_total: int
+    unique_records: int
+    distributions: dict[str, dict[str, int]]
+
+
+class DatasetSplitChange(LabModel):
+    dataset_id: str
+    surviving_records: int
+    split_changes: int
+
+
+class MigrationDiff(LabModel):
+    from_normalization_id: str
+    to_normalization_id: str
+    records_from: int
+    records_to: int
+    added: int
+    removed: int
+    changed: int
+    duplicate_delta: int
+    rejected_delta: int
+    label_changes: dict[str, dict[str, int]]
+    coverage_from: dict[str, dict[str, int]]
+    coverage_to: dict[str, dict[str, int]]
+    source_contribution_from: dict[str, int]
+    source_contribution_to: dict[str, int]
+    split_changes: list[DatasetSplitChange]
+    affected_dataset_ids: list[str]
+    affected_run_ids: list[str]
+    notes: list[str]
+
+
 class ComputeTotals(LabModel):
     cpu_seconds: float
     gpu_seconds: float
@@ -932,6 +1043,38 @@ class FindingRequest(LabModel):
     non_claims: Optional[list[str]] = None
 
 
+class LabelsAppendRequest(LabModel):
+    """Append a new label set to a canonical corpus; existing records and labels are never modified."""
+
+    normalization_id: str
+    family: str
+    producer: str
+    authority: str
+    registry_version: int = 1
+    pov: str = "white"
+    rows: list[dict[str, object]] = Field(min_length=1)
+
+
+class StackFreezeRequest(LabModel):
+    normalization_id: str
+    name: str
+    arms: list[dict[str, object]] = Field(default_factory=list)
+    fractions: list[float] = [0.8, 0.1, 0.1]
+    split_seed: int = 0
+    required_labels: list[str] = ["eval_cp"]
+
+
+class MigrateRequest(LabModel):
+    from_normalization_id: str
+    name: str
+    settings_overrides: dict[str, ConfigValue] = {}
+    dedup: str = "exact-epd-keep-first"
+
+
+class RebuildDatasetRequest(LabModel):
+    new_normalization_id: str
+
+
 # ---------------------------------------------------------------------------
 # Registry and export
 # ---------------------------------------------------------------------------
@@ -955,8 +1098,10 @@ KINDS: dict[str, tuple[str, tuple[type[LabModel], ...]]] = {
 MUTABLE_STATE_PREFIXES = frozenset({"H", "A"})
 
 OBJECT_MODELS = [cls for _, classes in KINDS.values() for cls in classes]
-VIEW_MODELS = [Switch, AblationPreview, MatrixResponse, ScalingResponse, SearchBacklog, Overview]
-REQUEST_MODELS = [HypothesisCreate, AblationRequest, RunQueueRequest, FindingRequest]
+VIEW_MODELS = [Switch, AblationPreview, MatrixResponse, ScalingResponse, SearchBacklog, Overview,
+               CatalogResponse, StackPreview, MigrationDiff]
+REQUEST_MODELS = [HypothesisCreate, AblationRequest, RunQueueRequest, FindingRequest,
+                  LabelsAppendRequest, StackFreezeRequest, MigrateRequest, RebuildDatasetRequest]
 
 
 def export_json_schema() -> dict:

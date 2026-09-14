@@ -70,6 +70,15 @@
     "Overview": {
       "$ref": "#/$defs/Overview"
     },
+    "CatalogResponse": {
+      "$ref": "#/$defs/CatalogResponse"
+    },
+    "StackPreview": {
+      "$ref": "#/$defs/StackPreview"
+    },
+    "MigrationDiff": {
+      "$ref": "#/$defs/MigrationDiff"
+    },
     "HypothesisCreate": {
       "$ref": "#/$defs/HypothesisCreate"
     },
@@ -81,6 +90,18 @@
     },
     "FindingRequest": {
       "$ref": "#/$defs/FindingRequest"
+    },
+    "LabelsAppendRequest": {
+      "$ref": "#/$defs/LabelsAppendRequest"
+    },
+    "StackFreezeRequest": {
+      "$ref": "#/$defs/StackFreezeRequest"
+    },
+    "MigrateRequest": {
+      "$ref": "#/$defs/MigrateRequest"
+    },
+    "RebuildDatasetRequest": {
+      "$ref": "#/$defs/RebuildDatasetRequest"
     }
   },
   "required": [
@@ -106,10 +127,17 @@
     "ScalingResponse",
     "SearchBacklog",
     "Overview",
+    "CatalogResponse",
+    "StackPreview",
+    "MigrationDiff",
     "HypothesisCreate",
     "AblationRequest",
     "RunQueueRequest",
-    "FindingRequest"
+    "FindingRequest",
+    "LabelsAppendRequest",
+    "StackFreezeRequest",
+    "MigrateRequest",
+    "RebuildDatasetRequest"
   ],
   "additionalProperties": false,
   "$defs": {
@@ -477,6 +505,56 @@
       "title": "AblationRequest",
       "type": "object"
     },
+    "ArmPreview": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "policy": {
+          "title": "Policy",
+          "type": "string"
+        },
+        "filter": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Filter",
+          "type": "object"
+        },
+        "available": {
+          "title": "Available",
+          "type": "integer"
+        },
+        "effective": {
+          "title": "Effective",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "policy",
+        "filter",
+        "available",
+        "effective"
+      ],
+      "title": "ArmPreview",
+      "type": "object"
+    },
     "ArmSummary": {
       "additionalProperties": false,
       "properties": {
@@ -583,6 +661,204 @@
         "path"
       ],
       "title": "ArtifactLocation",
+      "type": "object"
+    },
+    "CatalogRecord": {
+      "additionalProperties": false,
+      "description": "One canonical record rendered in the corpus catalog, labels joined and memberships resolved.",
+      "properties": {
+        "record_id": {
+          "title": "Record Id",
+          "type": "string"
+        },
+        "group": {
+          "title": "Group",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_row": {
+          "title": "Source Row",
+          "type": "integer"
+        },
+        "ply": {
+          "title": "Ply",
+          "type": "integer"
+        },
+        "fen": {
+          "title": "Fen",
+          "type": "string"
+        },
+        "epd": {
+          "title": "Epd",
+          "type": "string"
+        },
+        "stm": {
+          "title": "Stm",
+          "type": "string"
+        },
+        "phase": {
+          "title": "Phase",
+          "type": "string"
+        },
+        "material": {
+          "title": "Material",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result"
+        },
+        "labels": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Labels",
+          "type": "array"
+        },
+        "label_tiers": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Label Tiers",
+          "type": "object"
+        },
+        "memberships": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Memberships",
+          "type": "object"
+        }
+      },
+      "required": [
+        "record_id",
+        "group",
+        "source_id",
+        "source_row",
+        "ply",
+        "fen",
+        "epd",
+        "stm",
+        "phase",
+        "material",
+        "result",
+        "labels",
+        "label_tiers",
+        "memberships"
+      ],
+      "title": "CatalogRecord",
+      "type": "object"
+    },
+    "CatalogResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "normalization_id": {
+          "title": "Normalization Id",
+          "type": "string"
+        },
+        "record_count": {
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "unique_count": {
+          "title": "Unique Count",
+          "type": "integer"
+        },
+        "duplicate_count": {
+          "title": "Duplicate Count",
+          "type": "integer"
+        },
+        "label_count": {
+          "title": "Label Count",
+          "type": "integer"
+        },
+        "filters_applied": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "title": "Filters Applied",
+          "type": "object"
+        },
+        "facets": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "title": "Facets",
+          "type": "object"
+        },
+        "page": {
+          "items": {
+            "$ref": "#/$defs/CatalogRecord"
+          },
+          "title": "Page",
+          "type": "array"
+        },
+        "page_offset": {
+          "title": "Page Offset",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "total_matching": {
+          "title": "Total Matching",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "normalization_id",
+        "record_count",
+        "unique_count",
+        "duplicate_count",
+        "label_count",
+        "filters_applied",
+        "facets",
+        "page",
+        "page_offset",
+        "page_size",
+        "total_matching"
+      ],
+      "title": "CatalogResponse",
       "type": "object"
     },
     "Compute": {
@@ -861,6 +1137,22 @@
           "title": "Splits",
           "type": "array"
         },
+        "stack": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/StackArm"
+          },
+          "title": "Stack",
+          "type": "array"
+        },
+        "label_sets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/LabelSetRef"
+          },
+          "title": "Label Sets",
+          "type": "array"
+        },
         "counts": {
           "additionalProperties": {
             "type": "integer"
@@ -928,6 +1220,8 @@
         "dedup_policy",
         "split_policy",
         "splits",
+        "stack",
+        "label_sets",
         "counts",
         "coverage",
         "label_provenance",
@@ -938,6 +1232,30 @@
         "created_at"
       ],
       "title": "Dataset",
+      "type": "object"
+    },
+    "DatasetSplitChange": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_id": {
+          "title": "Dataset Id",
+          "type": "string"
+        },
+        "surviving_records": {
+          "title": "Surviving Records",
+          "type": "integer"
+        },
+        "split_changes": {
+          "title": "Split Changes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dataset_id",
+        "surviving_records",
+        "split_changes"
+      ],
+      "title": "DatasetSplitChange",
       "type": "object"
     },
     "Effect": {
@@ -2370,6 +2688,115 @@
       "title": "IntegrityCheck",
       "type": "object"
     },
+    "LabelSetRef": {
+      "additionalProperties": false,
+      "description": "One append-only L2 label file pinned into a dataset manifest.",
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "file_hash": {
+          "title": "File Hash",
+          "type": "string"
+        },
+        "rows": {
+          "title": "Rows",
+          "type": "integer"
+        },
+        "families": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Families",
+          "type": "object"
+        },
+        "authorities": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Authorities",
+          "type": "object"
+        },
+        "producers": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Producers",
+          "type": "object"
+        },
+        "registry_version": {
+          "title": "Registry Version",
+          "type": "integer"
+        },
+        "label_schema_version": {
+          "title": "Label Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "file_hash",
+        "rows",
+        "families",
+        "authorities",
+        "producers",
+        "registry_version",
+        "label_schema_version"
+      ],
+      "title": "LabelSetRef",
+      "type": "object"
+    },
+    "LabelsAppendRequest": {
+      "additionalProperties": false,
+      "description": "Append a new label set to a canonical corpus; existing records and labels are never modified.",
+      "properties": {
+        "normalization_id": {
+          "title": "Normalization Id",
+          "type": "string"
+        },
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "producer": {
+          "title": "Producer",
+          "type": "string"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "registry_version": {
+          "default": 1,
+          "title": "Registry Version",
+          "type": "integer"
+        },
+        "pov": {
+          "default": "white",
+          "title": "Pov",
+          "type": "string"
+        },
+        "rows": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "minItems": 1,
+          "title": "Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "normalization_id",
+        "family",
+        "producer",
+        "authority",
+        "rows"
+      ],
+      "title": "LabelsAppendRequest",
+      "type": "object"
+    },
     "LegacyChampion": {
       "additionalProperties": false,
       "properties": {
@@ -3696,6 +4123,186 @@
       "title": "MetricValue",
       "type": "object"
     },
+    "MigrateRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "from_normalization_id": {
+          "title": "From Normalization Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "settings_overrides": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Settings Overrides",
+          "type": "object"
+        },
+        "dedup": {
+          "default": "exact-epd-keep-first",
+          "title": "Dedup",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from_normalization_id",
+        "name"
+      ],
+      "title": "MigrateRequest",
+      "type": "object"
+    },
+    "MigrationDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "from_normalization_id": {
+          "title": "From Normalization Id",
+          "type": "string"
+        },
+        "to_normalization_id": {
+          "title": "To Normalization Id",
+          "type": "string"
+        },
+        "records_from": {
+          "title": "Records From",
+          "type": "integer"
+        },
+        "records_to": {
+          "title": "Records To",
+          "type": "integer"
+        },
+        "added": {
+          "title": "Added",
+          "type": "integer"
+        },
+        "removed": {
+          "title": "Removed",
+          "type": "integer"
+        },
+        "changed": {
+          "title": "Changed",
+          "type": "integer"
+        },
+        "duplicate_delta": {
+          "title": "Duplicate Delta",
+          "type": "integer"
+        },
+        "rejected_delta": {
+          "title": "Rejected Delta",
+          "type": "integer"
+        },
+        "label_changes": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "title": "Label Changes",
+          "type": "object"
+        },
+        "coverage_from": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "title": "Coverage From",
+          "type": "object"
+        },
+        "coverage_to": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "title": "Coverage To",
+          "type": "object"
+        },
+        "source_contribution_from": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Source Contribution From",
+          "type": "object"
+        },
+        "source_contribution_to": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Source Contribution To",
+          "type": "object"
+        },
+        "split_changes": {
+          "items": {
+            "$ref": "#/$defs/DatasetSplitChange"
+          },
+          "title": "Split Changes",
+          "type": "array"
+        },
+        "affected_dataset_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Dataset Ids",
+          "type": "array"
+        },
+        "affected_run_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Affected Run Ids",
+          "type": "array"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "from_normalization_id",
+        "to_normalization_id",
+        "records_from",
+        "records_to",
+        "added",
+        "removed",
+        "changed",
+        "duplicate_delta",
+        "rejected_delta",
+        "label_changes",
+        "coverage_from",
+        "coverage_to",
+        "source_contribution_from",
+        "source_contribution_to",
+        "split_changes",
+        "affected_dataset_ids",
+        "affected_run_ids",
+        "notes"
+      ],
+      "title": "MigrationDiff",
+      "type": "object"
+    },
     "ModelArtifact": {
       "additionalProperties": false,
       "description": "M#### — a serialized model produced by exactly one lab run.",
@@ -4126,6 +4733,20 @@
       ],
       "title": "PromotionState",
       "type": "string"
+    },
+    "RebuildDatasetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "new_normalization_id": {
+          "title": "New Normalization Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "new_normalization_id"
+      ],
+      "title": "RebuildDatasetRequest",
+      "type": "object"
     },
     "Run": {
       "additionalProperties": false,
@@ -5108,6 +5729,213 @@
         "record_ids_hash"
       ],
       "title": "SplitManifest",
+      "type": "object"
+    },
+    "StackArm": {
+      "additionalProperties": false,
+      "description": "One component of a dataset stack: a filtered subpopulation plus an explicit sampling policy.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "filter": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Filter",
+          "type": "object"
+        },
+        "policy": {
+          "$ref": "#/$defs/StackPolicy",
+          "default": "all"
+        },
+        "rows": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rows"
+        },
+        "fraction": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fraction"
+        },
+        "balance_bucket": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Balance Bucket"
+        },
+        "balance_cap": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Balance Cap"
+        },
+        "seed": {
+          "default": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "filter",
+        "policy",
+        "rows",
+        "fraction",
+        "balance_bucket",
+        "balance_cap",
+        "seed"
+      ],
+      "title": "StackArm",
+      "type": "object"
+    },
+    "StackFreezeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "normalization_id": {
+          "title": "Normalization Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "arms": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Arms",
+          "type": "array"
+        },
+        "fractions": {
+          "default": [
+            0.8,
+            0.1,
+            0.1
+          ],
+          "items": {
+            "type": "number"
+          },
+          "title": "Fractions",
+          "type": "array"
+        },
+        "split_seed": {
+          "default": 0,
+          "title": "Split Seed",
+          "type": "integer"
+        },
+        "required_labels": {
+          "default": [
+            "eval_cp"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Labels",
+          "type": "array"
+        }
+      },
+      "required": [
+        "normalization_id",
+        "name"
+      ],
+      "title": "StackFreezeRequest",
+      "type": "object"
+    },
+    "StackPolicy": {
+      "enum": [
+        "all",
+        "fixed_rows",
+        "fraction",
+        "balance"
+      ],
+      "title": "StackPolicy",
+      "type": "string"
+    },
+    "StackPreview": {
+      "additionalProperties": false,
+      "properties": {
+        "normalization_id": {
+          "title": "Normalization Id",
+          "type": "string"
+        },
+        "arms": {
+          "items": {
+            "$ref": "#/$defs/ArmPreview"
+          },
+          "title": "Arms",
+          "type": "array"
+        },
+        "effective_total": {
+          "title": "Effective Total",
+          "type": "integer"
+        },
+        "unique_records": {
+          "title": "Unique Records",
+          "type": "integer"
+        },
+        "distributions": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "title": "Distributions",
+          "type": "object"
+        }
+      },
+      "required": [
+        "normalization_id",
+        "arms",
+        "effective_total",
+        "unique_records",
+        "distributions"
+      ],
+      "title": "StackPreview",
       "type": "object"
     },
     "StateChange": {

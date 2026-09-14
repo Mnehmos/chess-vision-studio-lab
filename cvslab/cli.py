@@ -104,8 +104,58 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--name", required=True)
     p.add_argument("--select", action="append", default=[], metavar="FIELD=VALUE",
                    help="selection filter; repeatable (phase, stm, source_id)")
+    p.add_argument("--arm", action="append", default=[], metavar="JSON",
+                   help='stack arm as JSON, e.g. \'{"name":"mid","filter":{"phase":"middlegame"},"policy":"all"}\'; repeatable')
+    p.add_argument("--required-labels", nargs="*", default=["eval_cp"])
     p.add_argument("--split-seed", type=int, default=0)
     p.add_argument("--fractions", type=float, nargs=3, default=[0.8, 0.1, 0.1], metavar=("TRAIN", "VAL", "TEST"))
+
+    p = command("stack-preview", "preview a stack: available vs effective rows per arm; writes nothing")
+    p.add_argument("normalization")
+    p.add_argument("--arm", action="append", default=[], metavar="JSON", required=True)
+
+    p = command("catalog", "filter the canonical corpus with facet counts")
+    p.add_argument("normalization")
+    p.add_argument("--filter", action="append", default=[], metavar="FIELD=VALUE",
+                   help="catalog filter; repeatable (phase, stm, source_id, material, result, eval_bucket, "
+                        "label_family, authority, tier, producer, dataset, split, ply_min, ply_max)")
+    p.add_argument("--offset", type=int, default=0)
+    p.add_argument("--limit", type=int, default=20)
+
+    p = command("labels-append", "append an L2 label set (new immutable file) to a canonical corpus")
+    p.add_argument("normalization")
+    p.add_argument("--family", required=True, help="registered label family, e.g. eval_cp, search_deep_cp")
+    p.add_argument("--producer", required=True)
+    p.add_argument("--authority", required=True)
+    p.add_argument("--rows", required=True, help="JSONL file with {record_id, value, ...} rows")
+    p.add_argument("--pov", default="white")
+    p.add_argument("--registry-version", type=int, default=1)
+
+    p = command("copy-labels", "carry label sets into a new normalization, keeping surviving record identities")
+    p.add_argument("from_normalization")
+    p.add_argument("to_normalization")
+
+    p = command("migrate", "re-standardize from the same immutable sources under new settings (new N####)")
+    p.add_argument("from_normalization")
+    p.add_argument("--name", required=True)
+    p.add_argument("--set", action="append", default=[], metavar="KEY=VALUE", help="settings override, repeatable")
+    p.add_argument("--dedup", default="exact-epd-keep-first", choices=["exact-epd-keep-first", "none"])
+
+    p = command("migration-diff", "diff two normalizations: records, labels, coverage, splits, affected evidence")
+    p.add_argument("from_normalization")
+    p.add_argument("to_normalization")
+
+    p = command("dataset-rebuild", "rebuild a frozen dataset under a new standard as a descendant D####")
+    p.add_argument("dataset")
+    p.add_argument("new_normalization")
+
+    p = command("source-pgn", "snapshot a PGN game file as an S#### source (second importer)")
+    p.add_argument("path")
+    p.add_argument("--name", required=True)
+    p.add_argument("--license", default="unspecified")
+    p.add_argument("--sample-every", type=int, default=2)
+    p.add_argument("--min-ply", type=int, default=6)
+    p.add_argument("--origin", default=None)
 
     # -- frozen instruments ---------------------------------------------------
     p = command("recipe", "freeze a training recipe (T####)")
@@ -273,9 +323,34 @@ def _dispatch(args) -> int:
     elif cmd == "normalize":
         _emit(service.normalize(args.sources, name=args.name, dedup=args.dedup))
     elif cmd == "dataset":
+        arms = [json.loads(arm) for arm in args.arm]
         _emit(service.freeze_dataset(args.normalization, name=args.name,
-                                     selection=_key_values(args.select), split_seed=args.split_seed,
+                                     selection=_key_values(args.select) or None, arms=arms or None,
+                                     required_labels=args.required_labels, split_seed=args.split_seed,
                                      fractions=tuple(args.fractions)))
+    elif cmd == "stack-preview":
+        _emit(service.stack_preview(args.normalization, [json.loads(arm) for arm in args.arm]))
+    elif cmd == "catalog":
+        _emit(service.catalog(args.normalization, filters=_key_values(args.filter),
+                              offset=args.offset, limit=args.limit))
+    elif cmd == "labels-append":
+        from .hashing import read_jsonl
+        _emit(service.register_labels(args.normalization, family=args.family, producer=args.producer,
+                                      authority=args.authority, rows=read_jsonl(args.rows), pov=args.pov,
+                                      registry_version=args.registry_version))
+    elif cmd == "copy-labels":
+        _emit(service.copy_label_sets(args.from_normalization, args.to_normalization))
+    elif cmd == "migrate":
+        _emit(service.migrate(args.from_normalization, name=args.name,
+                              settings_overrides=_key_values(args.set) or None, dedup=args.dedup))
+    elif cmd == "migration-diff":
+        _emit(service.migration_diff(args.from_normalization, args.to_normalization))
+    elif cmd == "dataset-rebuild":
+        _emit(service.rebuild_dataset(args.dataset, args.new_normalization))
+    elif cmd == "source-pgn":
+        _emit(service.import_pgn_source(args.path, name=args.name, license=args.license,
+                                        sample_every=args.sample_every, min_ply=args.min_ply,
+                                        origin=args.origin))
 
     elif cmd == "recipe":
         _emit(service.create_training_recipe(name=args.name, params=_key_values(args.set),

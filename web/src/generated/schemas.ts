@@ -162,13 +162,27 @@ export type Path5 = string;
 export type FileHash = string;
 export type RecordIdsHash = string;
 export type Splits = SplitManifest[];
+export type Name6 = string;
+export type StackPolicy = "all" | "fixed_rows" | "fraction" | "balance";
+export type Rows2 = number | null;
+export type Fraction = number | null;
+export type BalanceBucket = string | null;
+export type BalanceCap = number | null;
+export type Seed = number;
+export type Stack = StackArm[];
+export type Path6 = string;
+export type FileHash1 = string;
+export type Rows3 = number;
+export type RegistryVersion = number;
+export type LabelSchemaVersion = number;
+export type LabelSets = LabelSetRef[];
 export type ParentId = string | null;
 export type Frozen = boolean;
 export type ManifestHash = string;
 export type CreatedAt7 = string;
 export type Id8 = string;
 export type SchemaVersion8 = number;
-export type Name6 = string;
+export type Name7 = string;
 export type Family3 = string;
 export type Generation2 = string;
 export type Trainer = string;
@@ -179,13 +193,13 @@ export type CreatedAt8 = string;
 export type Id9 = string;
 export type SchemaVersion9 = number;
 export type Origin4 = "lab";
-export type Name7 = string;
+export type Name8 = string;
 export type Family4 = string;
 export type Generation3 = string;
 export type DatasetId2 = string;
 export type DatasetManifestHash = string;
 export type Split = string;
-export type Name8 = string;
+export type Name9 = string;
 export type LowerIsBetter = boolean;
 export type Description1 = string;
 export type Metrics = MetricDef[];
@@ -201,7 +215,7 @@ export type SchemaVersion10 = number;
 export type Origin5 = "legacy_catalog";
 export type Lineage3 = "LEGACY";
 export type IntakeId2 = string;
-export type Name9 = string;
+export type Name10 = string;
 export type Kind = string;
 export type Sha2562 = string;
 export type Bytes3 = number;
@@ -214,7 +228,7 @@ export type Origin6 = "lab";
 export type AblationId1 = string;
 export type HypothesisId1 = string | null;
 export type DisplayLabel1 = string;
-export type Seed = number;
+export type Seed1 = number;
 export type RunStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "INVALID";
 export type ConfigHash1 = string;
 export type IdentityHash1 = string;
@@ -244,7 +258,7 @@ export type ValLoss = number | null;
 export type ExamplesPerSecond = number;
 export type ElapsedSeconds = number;
 export type TrainingCurve = EpochLog[];
-export type Name10 = string;
+export type Name11 = string;
 export type Value1 = number;
 export type CiLow = number | null;
 export type CiHigh = number | null;
@@ -252,7 +266,7 @@ export type N = number;
 export type Kind1 = "measured" | "derived" | "estimate";
 export type Split1 = string;
 export type Metrics1 = MetricValue[];
-export type Name11 = string;
+export type Name12 = string;
 export type Status = "pass" | "warn" | "fail";
 export type Detail = string;
 export type Integrity = IntegrityCheck[];
@@ -288,7 +302,7 @@ export type SchemaVersion13 = number;
 export type Origin8 = "funnel";
 export type Lineage5 = "LEGACY";
 export type LineageNote = string;
-export type Name12 = string;
+export type Name13 = string;
 export type RunDir = string;
 export type FunnelSchemaVersion = number;
 export type FunnelConfigVersion = number;
@@ -302,7 +316,7 @@ export type StockfishSha256 = string | null;
 export type TaxonomyVersion = number | null;
 export type TaxonomySha256 = string | null;
 export type FactsRegistryVersion = number | null;
-export type Name13 = string;
+export type Name14 = string;
 export type Positions = number;
 export type EngineSeconds = number;
 export type MsPerPosition = number;
@@ -313,7 +327,7 @@ export type Tiers = FunnelTier[];
 export type TotalEngineSeconds = number;
 export type Underrepresented = string[];
 export type PriorityHistogram = number[];
-export type Name14 = string;
+export type Name15 = string;
 export type N1 = number;
 export type DeepNodes = number;
 export type DeepEngineSeconds = number;
@@ -321,7 +335,7 @@ export type Informative = number;
 export type InformativeRate = number;
 export type MoveChangeRate = number;
 export type Arms = FunnelArm[];
-export type Name15 = string;
+export type Name16 = string;
 export type N2 = number;
 export type DisagreementRate = number;
 export type MoveAgreementRate = number;
@@ -331,10 +345,10 @@ export type InformativeYieldRatio = number | null;
 export type ExperimentCaveat = string;
 export type ResearchStateSource = string | null;
 export type ComputeNote = string;
-export type Name16 = string;
+export type Name17 = string;
 export type Sha2564 = string;
 export type Bytes4 = number;
-export type Rows2 = number | null;
+export type Rows4 = number | null;
 export type CopiedTo = string | null;
 export type Files1 = FunnelFile[];
 export type Integrity1 = IntegrityCheck[];
@@ -373,7 +387,7 @@ export type DecisionRule = string;
 export type Integrity2 = IntegrityCheck[];
 export type PromotionState =
   "NOT_ELIGIBLE" | "READY_FOR_GATE" | "GATING" | "PROMOTED" | "REJECTED" | "HOLD" | "INVALID";
-export type Name17 = string;
+export type Name18 = string;
 export type Status1 = "pass" | "hold" | "fail" | "invalid" | "missing";
 export type Detail1 = string;
 export type PromotionGates = PromotionGate[];
@@ -389,8 +403,8 @@ export type SchemaVersion15 = number;
 export type Tool = string;
 export type CatalogDir = string;
 export type CatalogGeneratedAt = string;
-export type Name18 = string;
-export type Path6 = string | null;
+export type Name19 = string;
+export type Path7 = string | null;
 export type CatalogCommit = string | null;
 export type CurrentCommit = string | null;
 export type Dirty = boolean | null;
@@ -405,7 +419,7 @@ export type SearchProfile = string | null;
 export type MainNet = string | null;
 export type MainNetModelId = string | null;
 export type Engines = LegacyEngine[];
-export type Name19 = string;
+export type Name20 = string;
 export type Status3 = string | null;
 export type Args = string[];
 export type Notes1 = string | null;
@@ -486,7 +500,7 @@ export type Changed = boolean;
 export type Cells = MatrixCell[];
 export type MetricMean1 = number | null;
 export type FindingIds = string[];
-export type Rows3 = MatrixRow[];
+export type Rows5 = MatrixRow[];
 export type Metric4 = string;
 export type LowerIsBetter1 = boolean;
 export type AvailableMetrics = MetricDef[];
@@ -497,7 +511,7 @@ export type Family6 = string;
 export type Generation6 = string;
 export type Representation = string;
 export type IsBaseline2 = boolean;
-export type Seed1 = number;
+export type Seed2 = number;
 export type ParamCount6 = number;
 export type SearchNodes1 = number;
 export type CpuSeconds2 = number;
@@ -507,7 +521,7 @@ export type CiHigh3 = number | null;
 export type Kind4 = ("measured" | "derived" | "estimate") | null;
 export type Points = ScalingPoint[];
 export type ModelId1 = string;
-export type Name20 = string;
+export type Name21 = string;
 export type Role2 = string;
 export type ModelKind1 = string;
 export type SerializedParamCount1 = number | null;
@@ -552,6 +566,53 @@ export type Evidence1 = number;
 export type Findings1 = string[];
 export type FunnelRuns = FunnelRun[];
 export type IntegrityAlerts = string[];
+export type NormalizationId1 = string;
+export type RecordCount1 = number;
+export type UniqueCount = number;
+export type DuplicateCount1 = number;
+export type LabelCount = number;
+export type RecordId = string;
+export type Group = string;
+export type SourceId = string;
+export type SourceRow = number;
+export type Ply = number;
+export type Fen = string;
+export type Epd = string;
+export type Stm = string;
+export type Phase = string;
+export type Material = string;
+export type Result = boolean | number | string | null;
+export type Labels = {
+  [k: string]: unknown;
+}[];
+export type Page = CatalogRecord[];
+export type PageOffset = number;
+export type PageSize = number;
+export type TotalMatching = number;
+export type NormalizationId2 = string;
+export type Name22 = string;
+export type Policy = string;
+export type Available = number;
+export type Effective = number;
+export type Arms1 = ArmPreview[];
+export type EffectiveTotal = number;
+export type UniqueRecords = number;
+export type FromNormalizationId = string;
+export type ToNormalizationId = string;
+export type RecordsFrom = number;
+export type RecordsTo = number;
+export type Added = number;
+export type Removed = number;
+export type Changed1 = number;
+export type DuplicateDelta = number;
+export type RejectedDelta = number;
+export type DatasetId6 = string;
+export type SurvivingRecords = number;
+export type SplitChanges1 = number;
+export type SplitChanges = DatasetSplitChange[];
+export type AffectedDatasetIds = string[];
+export type AffectedRunIds = string[];
+export type Notes2 = string[];
 export type Title1 = string;
 export type Statement1 = string;
 export type Metric5 = string;
@@ -562,7 +623,7 @@ export type Generation7 = string | null;
 export type Tags1 = string[];
 export type BaselineId2 = string;
 export type HypothesisId3 = string | null;
-export type Notes2 = string;
+export type Notes3 = string;
 export type AblationId5 = string;
 /**
  * @minItems 1
@@ -574,6 +635,35 @@ export type InterventionAblationId = string;
 export type Interpretation1 = string | null;
 export type NextExperiment1 = string | null;
 export type NonClaims2 = string[] | null;
+export type NormalizationId3 = string;
+export type Family8 = string;
+export type Producer = string;
+export type Authority = string;
+export type RegistryVersion1 = number;
+export type Pov = string;
+/**
+ * @minItems 1
+ */
+export type Rows6 = [
+  {
+    [k: string]: unknown;
+  },
+  ...{
+    [k: string]: unknown;
+  }[]
+];
+export type NormalizationId4 = string;
+export type Name23 = string;
+export type Arms2 = {
+  [k: string]: unknown;
+}[];
+export type Fractions = number[];
+export type SplitSeed = number;
+export type RequiredLabels = string[];
+export type FromNormalizationId1 = string;
+export type Name24 = string;
+export type Dedup = string;
+export type NewNormalizationId = string;
 
 /**
  * CVS Lab canonical schemas, schema_version 1. Generated by `python -m cvslab schema export`; do not edit.
@@ -601,10 +691,17 @@ export interface CVSLab {
   ScalingResponse: ScalingResponse;
   SearchBacklog: SearchBacklog;
   Overview: Overview;
+  CatalogResponse: CatalogResponse;
+  StackPreview: StackPreview;
+  MigrationDiff: MigrationDiff;
   HypothesisCreate: HypothesisCreate;
   AblationRequest: AblationRequest;
   RunQueueRequest: RunQueueRequest;
   FindingRequest: FindingRequest;
+  LabelsAppendRequest: LabelsAppendRequest;
+  StackFreezeRequest: StackFreezeRequest;
+  MigrateRequest: MigrateRequest;
+  RebuildDatasetRequest: RebuildDatasetRequest;
 }
 export interface Hypothesis {
   id: Id;
@@ -841,6 +938,8 @@ export interface Dataset {
   dedup_policy: DedupPolicy1;
   split_policy: SplitPolicy;
   splits: Splits;
+  stack: Stack;
+  label_sets: LabelSets;
   counts: Counts;
   coverage: Coverage;
   label_provenance: LabelProvenance;
@@ -864,6 +963,44 @@ export interface SplitManifest {
   file_hash: FileHash;
   record_ids_hash: RecordIdsHash;
 }
+/**
+ * One component of a dataset stack: a filtered subpopulation plus an explicit sampling policy.
+ */
+export interface StackArm {
+  name: Name6;
+  filter: Filter;
+  policy: StackPolicy;
+  rows: Rows2;
+  fraction: Fraction;
+  balance_bucket: BalanceBucket;
+  balance_cap: BalanceCap;
+  seed: Seed;
+}
+export interface Filter {
+  [k: string]: boolean | number | string;
+}
+/**
+ * One append-only L2 label file pinned into a dataset manifest.
+ */
+export interface LabelSetRef {
+  path: Path6;
+  file_hash: FileHash1;
+  rows: Rows3;
+  families: Families;
+  authorities: Authorities;
+  producers: Producers;
+  registry_version: RegistryVersion;
+  label_schema_version: LabelSchemaVersion;
+}
+export interface Families {
+  [k: string]: number;
+}
+export interface Authorities {
+  [k: string]: number;
+}
+export interface Producers {
+  [k: string]: number;
+}
 export interface Counts {
   [k: string]: number;
 }
@@ -881,7 +1018,7 @@ export interface LabelProvenance {
 export interface TrainingRecipe {
   id: Id8;
   schema_version: SchemaVersion8;
-  name: Name6;
+  name: Name7;
   family: Family3;
   generation: Generation2;
   trainer: Trainer;
@@ -901,7 +1038,7 @@ export interface EvaluationProtocol {
   id: Id9;
   schema_version: SchemaVersion9;
   origin: Origin4;
-  name: Name7;
+  name: Name8;
   family: Family4;
   generation: Generation3;
   dataset_id: DatasetId2;
@@ -918,7 +1055,7 @@ export interface EvaluationProtocol {
   created_at: CreatedAt9;
 }
 export interface MetricDef {
-  name: Name8;
+  name: Name9;
   lower_is_better: LowerIsBetter;
   description: Description1;
 }
@@ -931,7 +1068,7 @@ export interface LegacyEvaluation {
   origin: Origin5;
   lineage: Lineage3;
   intake_id: IntakeId2;
-  name: Name9;
+  name: Name10;
   kind: Kind;
   sha256: Sha2562;
   bytes: Bytes3;
@@ -949,7 +1086,7 @@ export interface Run {
   ablation_id: AblationId1;
   hypothesis_id: HypothesisId1;
   display_label: DisplayLabel1;
-  seed: Seed;
+  seed: Seed1;
   status: RunStatus;
   effective_config: EffectiveConfig1;
   config_hash: ConfigHash1;
@@ -1012,7 +1149,7 @@ export interface EpochLog {
   elapsed_seconds: ElapsedSeconds;
 }
 export interface MetricValue {
-  name: Name10;
+  name: Name11;
   value: Value1;
   ci_low: CiLow;
   ci_high: CiHigh;
@@ -1021,7 +1158,7 @@ export interface MetricValue {
   split: Split1;
 }
 export interface IntegrityCheck {
-  name: Name11;
+  name: Name12;
   status: Status;
   detail: Detail;
 }
@@ -1066,7 +1203,7 @@ export interface FunnelRun {
   origin: Origin8;
   lineage: Lineage5;
   lineage_note: LineageNote;
-  name: Name12;
+  name: Name13;
   run_dir: RunDir;
   funnel_schema_version: FunnelSchemaVersion;
   funnel_config_version: FunnelConfigVersion;
@@ -1124,7 +1261,7 @@ export interface Sample {
   [k: string]: boolean | number | string;
 }
 export interface FunnelTier {
-  name: Name13;
+  name: Name14;
   positions: Positions;
   engine_seconds: EngineSeconds;
   ms_per_position: MsPerPosition;
@@ -1147,7 +1284,7 @@ export interface PriorityReasons {
   [k: string]: number;
 }
 export interface FunnelArm {
-  name: Name14;
+  name: Name15;
   n: N1;
   deep_nodes: DeepNodes;
   deep_engine_seconds: DeepEngineSeconds;
@@ -1160,7 +1297,7 @@ export interface AbsShallowDeepDeltaCp {
   [k: string]: number;
 }
 export interface FunnelOracleArm {
-  name: Name15;
+  name: Name16;
   n: N2;
   disagreement_rate: DisagreementRate;
   move_agreement_rate: MoveAgreementRate;
@@ -1173,10 +1310,10 @@ export interface AuditMiss {
   [k: string]: number;
 }
 export interface FunnelFile {
-  name: Name16;
+  name: Name17;
   sha256: Sha2564;
   bytes: Bytes4;
-  rows: Rows2;
+  rows: Rows4;
   copied_to: CopiedTo;
 }
 /**
@@ -1233,7 +1370,7 @@ export interface Effect {
   method: Method;
 }
 export interface PromotionGate {
-  name: Name17;
+  name: Name18;
   status: Status1;
   detail: Detail1;
 }
@@ -1267,8 +1404,8 @@ export interface CatalogFileHashes {
   [k: string]: string;
 }
 export interface LegacyRoot {
-  name: Name18;
-  path: Path6;
+  name: Name19;
+  path: Path7;
   catalog_commit: CatalogCommit;
   current_commit: CurrentCommit;
   dirty: Dirty;
@@ -1291,7 +1428,7 @@ export interface LegacyEngine {
   main_net_model_id: MainNetModelId;
 }
 export interface SearchProfile1 {
-  name: Name19;
+  name: Name20;
   status: Status3;
   args: Args;
   effective_options: EffectiveOptions;
@@ -1382,7 +1519,7 @@ export interface MatrixResponse {
   family: Family5;
   metric: Metric3;
   switches: Switches1;
-  rows: Rows3;
+  rows: Rows5;
 }
 export interface MatrixRow {
   ablation_id: AblationId3;
@@ -1423,7 +1560,7 @@ export interface ScalingPoint {
   representation: Representation;
   is_baseline: IsBaseline2;
   status: RunStatus;
-  seed: Seed1;
+  seed: Seed2;
   param_count: ParamCount6;
   search_nodes: SearchNodes1;
   cpu_seconds: CpuSeconds2;
@@ -1434,7 +1571,7 @@ export interface ScalingPoint {
 }
 export interface LegacyModelPoint {
   model_id: ModelId1;
-  name: Name20;
+  name: Name21;
   role: Role2;
   model_kind: ModelKind1;
   serialized_param_count: SerializedParamCount1;
@@ -1516,6 +1653,120 @@ export interface EvidenceStates {
 export interface SwitchLegacyStates {
   [k: string]: number;
 }
+export interface CatalogResponse {
+  normalization_id: NormalizationId1;
+  record_count: RecordCount1;
+  unique_count: UniqueCount;
+  duplicate_count: DuplicateCount1;
+  label_count: LabelCount;
+  filters_applied: FiltersApplied;
+  facets: Facets;
+  page: Page;
+  page_offset: PageOffset;
+  page_size: PageSize;
+  total_matching: TotalMatching;
+}
+export interface FiltersApplied {
+  [k: string]: boolean | number | string;
+}
+export interface Facets {
+  [k: string]: {
+    [k: string]: number;
+  };
+}
+/**
+ * One canonical record rendered in the corpus catalog, labels joined and memberships resolved.
+ */
+export interface CatalogRecord {
+  record_id: RecordId;
+  group: Group;
+  source_id: SourceId;
+  source_row: SourceRow;
+  ply: Ply;
+  fen: Fen;
+  epd: Epd;
+  stm: Stm;
+  phase: Phase;
+  material: Material;
+  result: Result;
+  labels: Labels;
+  label_tiers: LabelTiers;
+  memberships: Memberships;
+}
+export interface LabelTiers {
+  [k: string]: number;
+}
+export interface Memberships {
+  [k: string]: string[];
+}
+export interface StackPreview {
+  normalization_id: NormalizationId2;
+  arms: Arms1;
+  effective_total: EffectiveTotal;
+  unique_records: UniqueRecords;
+  distributions: Distributions;
+}
+export interface ArmPreview {
+  name: Name22;
+  policy: Policy;
+  filter: Filter1;
+  available: Available;
+  effective: Effective;
+}
+export interface Filter1 {
+  [k: string]: boolean | number | string;
+}
+export interface Distributions {
+  [k: string]: {
+    [k: string]: number;
+  };
+}
+export interface MigrationDiff {
+  from_normalization_id: FromNormalizationId;
+  to_normalization_id: ToNormalizationId;
+  records_from: RecordsFrom;
+  records_to: RecordsTo;
+  added: Added;
+  removed: Removed;
+  changed: Changed1;
+  duplicate_delta: DuplicateDelta;
+  rejected_delta: RejectedDelta;
+  label_changes: LabelChanges;
+  coverage_from: CoverageFrom;
+  coverage_to: CoverageTo;
+  source_contribution_from: SourceContributionFrom;
+  source_contribution_to: SourceContributionTo;
+  split_changes: SplitChanges;
+  affected_dataset_ids: AffectedDatasetIds;
+  affected_run_ids: AffectedRunIds;
+  notes: Notes2;
+}
+export interface LabelChanges {
+  [k: string]: {
+    [k: string]: number;
+  };
+}
+export interface CoverageFrom {
+  [k: string]: {
+    [k: string]: number;
+  };
+}
+export interface CoverageTo {
+  [k: string]: {
+    [k: string]: number;
+  };
+}
+export interface SourceContributionFrom {
+  [k: string]: number;
+}
+export interface SourceContributionTo {
+  [k: string]: number;
+}
+export interface DatasetSplitChange {
+  dataset_id: DatasetId6;
+  surviving_records: SurvivingRecords;
+  split_changes: SplitChanges1;
+}
 export interface HypothesisCreate {
   title: Title1;
   statement: Statement1;
@@ -1530,7 +1781,7 @@ export interface AblationRequest {
   baseline_id: BaselineId2;
   overrides?: Overrides2;
   hypothesis_id?: HypothesisId3;
-  notes?: Notes2;
+  notes?: Notes3;
 }
 export interface Overrides2 {
   [k: string]: boolean | number | string;
@@ -1546,4 +1797,36 @@ export interface FindingRequest {
   interpretation?: Interpretation1;
   next_experiment?: NextExperiment1;
   non_claims?: NonClaims2;
+}
+/**
+ * Append a new label set to a canonical corpus; existing records and labels are never modified.
+ */
+export interface LabelsAppendRequest {
+  normalization_id: NormalizationId3;
+  family: Family8;
+  producer: Producer;
+  authority: Authority;
+  registry_version?: RegistryVersion1;
+  pov?: Pov;
+  rows: Rows6;
+}
+export interface StackFreezeRequest {
+  normalization_id: NormalizationId4;
+  name: Name23;
+  arms?: Arms2;
+  fractions?: Fractions;
+  split_seed?: SplitSeed;
+  required_labels?: RequiredLabels;
+}
+export interface MigrateRequest {
+  from_normalization_id: FromNormalizationId1;
+  name: Name24;
+  settings_overrides?: SettingsOverrides;
+  dedup?: Dedup;
+}
+export interface SettingsOverrides {
+  [k: string]: boolean | number | string;
+}
+export interface RebuildDatasetRequest {
+  new_normalization_id: NewNormalizationId;
 }

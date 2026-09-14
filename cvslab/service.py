@@ -53,6 +53,7 @@ from .schemas import (
     MatrixRow,
     MetricValue,
     ModelArtifact,
+    Normalization,
     Overview,
     PromotionGate,
     PromotionState,
@@ -169,11 +170,44 @@ class LabService:
     def import_jsonl_source(self, path: str, **kwargs):
         return data.import_jsonl_source(self.store, path, **kwargs)
 
+    def import_pgn_source(self, path: str, **kwargs):
+        return data.import_pgn_source(self.store, path, **kwargs)
+
     def normalize(self, source_ids: Sequence[str], **kwargs):
         return data.normalize(self.store, source_ids, **kwargs)
 
     def freeze_dataset(self, normalization_id: str, **kwargs):
         return data.freeze_dataset(self.store, normalization_id, **kwargs)
+
+    def register_labels(self, normalization_id: str, **kwargs):
+        """Append one L2 label set; records and earlier labels are never modified."""
+        return data.register_labels(self.store, normalization_id, **kwargs)
+
+    def copy_label_sets(self, from_normalization_id: str, to_normalization_id: str) -> dict[str, int]:
+        return data.copy_label_sets(self.store, from_normalization_id, to_normalization_id)
+
+    def catalog(self, normalization_id: str, *, filters: Optional[Mapping[str, object]] = None,
+                offset: int = 0, limit: int = 50):
+        return data.catalog(self.store, normalization_id, filters=filters, offset=offset, limit=limit)
+
+    def stack_preview(self, normalization_id: str, arms: Sequence[Mapping[str, object]]):
+        return data.stack_preview(self.store, normalization_id, arms)
+
+    def migrate(self, from_normalization_id: str, *, name: str, settings_overrides: Optional[Mapping[str, object]] = None,
+                dedup: str = "exact-epd-keep-first") -> Normalization:
+        """Re-standardize from the same immutable sources under new settings: a new N####, never a rewrite."""
+        previous: Normalization = self.store.get_as(from_normalization_id, Normalization)
+        return data.normalize(self.store, previous.source_ids, name=name, dedup=dedup,
+                              settings_overrides=settings_overrides)
+
+    def migration_diff(self, old_normalization_id: str, new_normalization_id: str):
+        diff = data.migration_diff(self.store, old_normalization_id, new_normalization_id)
+        diff.affected_run_ids = [r.id for r in self.store.list("R", verify=False, kind=Run)
+                                 if r.dataset_id in diff.affected_dataset_ids]
+        return diff
+
+    def rebuild_dataset(self, dataset_id: str, new_normalization_id: str) -> Dataset:
+        return data.rebuild_dataset(self.store, dataset_id, new_normalization_id)
 
     def import_legacy_catalog(self, catalog_dir: str, **kwargs) -> IntakeRecord:
         """Bring the pre-lab engine/app inventory in as LEGACY evidence; never inherited, never promotable."""

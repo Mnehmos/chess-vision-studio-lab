@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import random
+import re
 import shutil
 import time
 from collections import Counter
@@ -16,10 +17,15 @@ from .schemas import (
     Compute,
     ConfigValue,
     Dataset,
+    DatasetSplitChange,
     IntegrityCheck,
+    LabelSetRef,
+    MigrationDiff,
     Normalization,
     SourceSnapshot,
     SplitManifest,
+    StackArm,
+    StackPolicy,
     make_check,
     utc_now,
 )
@@ -29,13 +35,36 @@ FIXTURE_GENERATOR = "cvslab.fixture.random_play"
 FIXTURE_GENERATOR_VERSION = 1
 IMPORTER = "cvslab.import.jsonl"
 IMPORTER_VERSION = 1
+PGN_IMPORTER = "cvslab.import.pgn"
+PGN_IMPORTER_VERSION = 1
 MATERIAL_AUTHORITY = "deterministic.material.v1"
 NORMALIZER = "cvslab.normalize"
 NORMALIZER_VERSION = 1
 CANONICAL_SCHEMA_VERSION = 1
+LABEL_SCHEMA_VERSION = 1
 DEDUP_POLICIES = ("exact-epd-keep-first", "none")
 SELECTABLE_FIELDS = ("phase", "stm", "source_id")
 SPLIT_NAMES = ("train", "val", "test")
+
+# L2 label registry: a family must be registered here before any producer may emit it.
+# tier groups families the way the GUI and supervision inspector reason about them.
+LABEL_FAMILIES: dict[str, dict] = {
+    "eval_cp": {"tier": "deterministic", "description": "scalar evaluation in centipawns, white POV"},
+    "facts": {"tier": "deterministic", "description": "deterministic CVS board facts"},
+    "motif": {"tier": "deterministic", "description": "tactical/structural motif presence"},
+    "strategy": {"tier": "deterministic", "description": "strategy/semantic family labels"},
+    "see_cp": {"tier": "deterministic", "description": "bounded tactical proof / SEE value"},
+    "move_best": {"tier": "transition", "description": "best move / transition label"},
+    "search_shallow_cp": {"tier": "search", "description": "shallow CVS search evaluation"},
+    "search_deep_cp": {"tier": "search", "description": "deep CVS search evaluation"},
+    "outcome": {"tier": "outcome", "description": "game outcome from the side to move"},
+    "oracle_cp": {"tier": "oracle", "description": "external oracle (e.g. Stockfish) evaluation"},
+    "human_cp": {"tier": "human", "description": "human annotation"},
+    "priority": {"tier": "derived", "description": "information-gain labeling priority"},
+}
+LABEL_SCALAR_KEYS = ("value",)  # must be JSON scalars inside label rows
+LABEL_ALLOWED_KEYS = frozenset({"record_id", "family", "value", "budget", "confidence", "note"})
+SCALAR = (bool, int, float, str)
 
 PIECE_VALUES = {chess.PAWN: 100, chess.KNIGHT: 320, chess.BISHOP: 330, chess.ROOK: 500, chess.QUEEN: 900}
 
@@ -54,11 +83,11 @@ def material_cp_white(board: chess.Board) -> int:
                for piece, value in PIECE_VALUES.items())
 
 
-def game_phase(board: chess.Board) -> str:
+def game_phase(board: chess.Board, opening_min: int = 5600, middlegame_min: int = 2600) -> str:
     non_pawn = sum(value * len(board.pieces(piece, color))
                    for piece, value in PIECE_VALUES.items() if piece != chess.PAWN
                    for color in (chess.WHITE, chess.BLACK))
-    return "opening" if non_pawn >= 5600 else "middlegame" if non_pawn >= 2600 else "endgame"
+    return "opening" if non_pawn >= opening_min else "middlegame" if non_pawn >= middlegame_min else "endgame"
 
 
 def material_signature(board: chess.Board) -> str:
@@ -153,12 +182,61 @@ def import_jsonl_source(store: Store, path: str | Path, *, name: str, license: s
     ))
 
 
+def import_pgn_source(store: Store, path: str | Path, *, name: str, license: str = "unspecified",
+                      sample_every: int = 2, min_ply: int = 6,
+                      origin: Optional[str] = None) -> SourceSnapshot:
+    """Second heterogeneous importer: PGN game files -> the same `{fen, cp, res}` row contract.
+
+    Positions are sampled from the mainline; eval labels are deterministic material balance and
+    `res` carries the game result (white POV) so outcome supervision can accumulate too.
+    """
+    import chess.pgn
+
+    src = Path(path)
+    if not src.is_file():
+        raise LabError(f"source file not found: {src}")
+    if sample_every < 1:
+        raise LabError("sample_every must be >= 1")
+    meter = _Meter()
+    rows: list[dict] = []
+    game_index = 0
+    with open(src, encoding="utf-8", errors="replace") as fh:
+        while True:
+            game = chess.pgn.read_game(fh)
+            if game is None:
+                break
+            game_index += 1
+            result = {"1-0": 1.0, "0-1": 0.0, "1/2-1/2": 0.5}.get(game.headers.get("Result", "*"))
+            board = game.board()
+            for ply, move in enumerate(game.mainline_moves(), start=1):
+                board.push(move)
+                if board.is_game_over():
+                    break
+                if ply >= min_ply and ply % sample_every == 0:
+                    rows.append({"game": f"g{game_index:05d}", "ply": ply, "fen": board.fen(),
+                                 "cp": material_cp_white(board), "res": result,
+                                 "label_authority": MATERIAL_AUTHORITY})
+    source_id = store.next_id("S")
+    rel = f"sources/{source_id}/{src.name}"
+    content_hash = write_jsonl(store.abs(rel), rows)
+    store.make_readonly(store.abs(rel))
+    return store.create(SourceSnapshot(
+        id=source_id, name=name, source_origin=origin or str(src.resolve()), locality="local", generator=None,
+        license=license, importer=PGN_IMPORTER, importer_version=PGN_IMPORTER_VERSION, path=rel,
+        content_hash=content_hash, row_count=len(rows), game_count=game_index,
+        label_authorities=[MATERIAL_AUTHORITY],
+        compute=meter.compute(labels_generated={MATERIAL_AUTHORITY: len(rows)}, accepted_examples=len(rows)),
+        created_at=utc_now(),
+    ))
+
+
 # ---------------------------------------------------------------------------
 # L1 canonical records
 # ---------------------------------------------------------------------------
 
 
-def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str = "exact-epd-keep-first") -> Normalization:
+def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str = "exact-epd-keep-first",
+              settings_overrides: Optional[Mapping[str, ConfigValue]] = None) -> Normalization:
     if dedup not in DEDUP_POLICIES:
         raise LabError(f"unknown dedup policy {dedup!r}; choose one of {DEDUP_POLICIES}")
     if not source_ids:
@@ -171,9 +249,19 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
     settings: dict[str, ConfigValue] = {
         "label_family": "eval_cp",
         "label_pov": "white",
-        "phase_rule": "non-pawn material >= 5600 opening, >= 2600 middlegame, else endgame",
+        "phase_opening_min_material": 5600,
+        "phase_middlegame_min_material": 2600,
         "record_identity": "sha256(EPD) — position without move clocks",
     }
+    for key, value in (settings_overrides or {}).items():
+        if key not in ("phase_opening_min_material", "phase_middlegame_min_material"):
+            raise LabError(f"unknown setting {key!r}; overridable settings: "
+                           "phase_opening_min_material, phase_middlegame_min_material")
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise LabError(f"setting {key!r} must be a non-negative integer material threshold")
+        settings[key] = value
+    settings["phase_rule"] = (f"non-pawn material >= {settings['phase_opening_min_material']} opening, "
+                              f">= {settings['phase_middlegame_min_material']} middlegame, else endgame")
     seen: set[str] = set()
     records, duplicates, rejected = [], 0, 0
     for src in sources:
@@ -201,7 +289,9 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
             records.append({
                 "record_id": record_id, "group": f"{src.id}:{game}", "source_id": src.id, "source_row": row_index,
                 "ply": row.get("ply", _ply_from_fen(row["fen"])), "fen": board.fen(), "epd": epd,
-                "stm": "w" if board.turn == chess.WHITE else "b", "phase": game_phase(board),
+                "stm": "w" if board.turn == chess.WHITE else "b",
+                "phase": game_phase(board, int(settings["phase_opening_min_material"]),
+                                    int(settings["phase_middlegame_min_material"])),
                 "material": material_signature(board), "labels": labels, "result": row.get("res"),
             })
     normalization_id = store.next_id("N")
@@ -247,7 +337,14 @@ def dataset_manifest_hash(dataset: Dataset) -> str:
 
 def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection: Optional[Mapping[str, str]] = None,
                    split_seed: int = 0, fractions: Sequence[float] = (0.8, 0.1, 0.1),
-                   required_labels: Sequence[str] = ("eval_cp",), parent_id: Optional[str] = None) -> Dataset:
+                   required_labels: Sequence[str] = ("eval_cp",), parent_id: Optional[str] = None,
+                   arms: Optional[Sequence[Mapping]] = None) -> Dataset:
+    """Freeze a live view into an immutable D####.
+
+    Two equivalent forms: a flat `selection` over record fields, or an explicit `stack` of
+    filtered subpopulations with per-arm sampling policies. Both pin every L2 label file that
+    exists for the normalization at freeze time and join those labels into the split rows.
+    """
     selection = {k: str(v) for k, v in (selection or {}).items()}
     bad = sorted(set(selection) - set(SELECTABLE_FIELDS))
     if bad:
@@ -258,15 +355,41 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
     norm: Normalization = store.get(normalization_id)
     if sha256_file(store.abs(norm.path)) != norm.output_hash:
         raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
-    kept, excluded, missing = [], 0, 0
-    for record in read_jsonl(store.abs(norm.path)):
-        if any(str(record.get(field)) != value for field, value in selection.items()):
-            excluded += 1
-            continue
-        if not set(required_labels) <= {lab["family"] for lab in record["labels"]}:
-            missing += 1
-            continue
-        kept.append(record)
+    records = _load_canonical(store, norm)
+
+    arm_list: list[StackArm] = []
+    stack_overlap = 0
+    if arms is not None:
+        arm_list = [_coerce_arm(arm) for arm in arms]
+        if not arm_list:
+            raise LabError("arms provided but empty; pass no arms for a flat selection")
+        if selection:
+            raise LabError("a stack freeze takes arms, not a flat selection")
+        chosen: dict[str, int] = {}
+        for arm in arm_list:
+            _, selected = _apply_arm(records, arm)
+            for index in selected:
+                record_id = records[index]["record_id"]
+                if record_id in chosen:
+                    stack_overlap += 1
+                else:
+                    chosen[record_id] = index
+        kept = [records[i] for i in chosen.values()]
+        excluded = len(records) - len(chosen)
+        missing = sum(1 for record in kept
+                      if not set(required_labels) <= {lab["family"] for lab in record["labels"]})
+        kept = [record for record in kept
+                if set(required_labels) <= {lab["family"] for lab in record["labels"]}]
+    else:
+        kept, excluded, missing = [], 0, 0
+        for record in records:
+            if any(str(record.get(field)) != value for field, value in selection.items()):
+                excluded += 1
+                continue
+            if not set(required_labels) <= {lab["family"] for lab in record["labels"]}:
+                missing += 1
+                continue
+            kept.append(record)
     if not kept:
         raise LabError("selection retains no records; nothing to freeze")
 
@@ -284,23 +407,31 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
             name=split_name, count=len(rows), group_count=len({r["group"] for r in rows}), path=rel, file_hash=file_hash,
             record_ids_hash=hash_obj(sorted(r["record_id"] for r in rows)),
         ))
+    if arm_list:
+        sampling_policy = "stack union (cross-arm duplicates dropped): " + "; ".join(
+            f"{arm.name}={arm.policy.value}" for arm in arm_list)
+    else:
+        sampling_policy = "natural concatenation of all selected records; no weighting or oversampling"
     dataset = Dataset(
         id=dataset_id, name=name, normalization_id=norm.id, normalization_recipe_hash=norm.recipe_hash,
         source_ids=norm.source_ids, canonical_schema_version=norm.canonical_schema_version,
         label_requirements=list(required_labels), selection=dict(selection),
-        sampling_policy="natural concatenation of all selected records; no weighting or oversampling",
+        sampling_policy=sampling_policy,
         dedup_policy=norm.dedup_policy,
         split_policy={"method": "group-hash", "group_key": "source game", "seed": split_seed,
                       "train": float(fractions[0]), "val": float(fractions[1]), "test": float(fractions[2])},
         splits=manifests,
+        stack=arm_list,
+        label_sets=[_label_set_ref(store, path) for path in label_set_paths(store, norm.id)],
         counts={"records": len(kept), "groups": len({r["group"] for r in kept}), "excluded_by_selection": excluded,
-                "missing_required_labels": missing},
+                "missing_required_labels": missing, "stack_overlap": stack_overlap},
         coverage={
             "split": {s: len(by_split[s]) for s in SPLIT_NAMES},
             "phase": dict(Counter(r["phase"] for r in kept)),
             "stm": dict(Counter(r["stm"] for r in kept)),
             "abs_cp_bucket": dict(Counter(_cp_bucket(r) for r in kept)),
             "source": dict(Counter(r["source_id"] for r in kept)),
+            **({"stack": dict(_stack_effectives(arm_list, records))} if arm_list else {}),
         },
         label_provenance=dict(Counter(lab["authority"] for r in kept for lab in r["labels"])),
         parent_id=parent_id, manifest_hash="",
@@ -309,6 +440,15 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
     )
     dataset.manifest_hash = dataset_manifest_hash(dataset)
     return store.create(dataset)
+
+
+def _stack_effectives(arm_list: list[StackArm], records: list[dict]) -> list[tuple[str, int]]:
+    """Per-arm effective counts recomputed from the same deterministic rules as the preview."""
+    out = []
+    for arm in arm_list:
+        _, selected = _apply_arm(records, arm)
+        out.append((arm.name, len(selected)))
+    return out
 
 
 def load_split(store: Store, dataset: Dataset, split_name: str) -> list[dict]:
@@ -345,3 +485,446 @@ def verify_dataset(store: Store, dataset: Dataset) -> list[IntegrityCheck]:
     checks.append(make_check("split_disjoint", not overlaps,
                              "; ".join(overlaps) or "no position or game appears in more than one split"))
     return checks
+
+
+# ---------------------------------------------------------------------------
+# L2 — append-only accumulated labels
+# ---------------------------------------------------------------------------
+
+
+def label_set_paths(store: Store, normalization_id: str) -> list[Path]:
+    folder = store.abs(f"canonical/{normalization_id}/labels")
+    return sorted(folder.glob("*.jsonl")) if folder.is_dir() else []
+
+
+def _label_set_ref(store: Store, path: Path) -> LabelSetRef:
+    rows = read_jsonl(path)
+    families: Counter = Counter()
+    authorities: Counter = Counter()
+    producers: Counter = Counter()
+    registry = 1
+    for row in rows:
+        families[row["family"]] += 1
+        authorities[row["authority"]] += 1
+        producers[row["producer"]] += 1
+        registry = int(row.get("registry_version", 1))
+    return LabelSetRef(path=store.rel(path), file_hash=sha256_file(path), rows=len(rows),
+                       families=dict(families), authorities=dict(authorities), producers=dict(producers),
+                       registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION)
+
+
+def _load_canonical(store: Store, normalization: Normalization) -> list[dict]:
+    """Canonical records with every registered L2 label file joined in registration order."""
+    records = read_jsonl(store.abs(normalization.path))
+    for record in records:
+        record["labels"] = list(record.get("labels") or [])
+    for path in label_set_paths(store, normalization.id):
+        by_id: dict[str, list[dict]] = {}
+        for row in read_jsonl(path):
+            by_id.setdefault(row["record_id"], []).append(row)
+        for record in records:
+            record["labels"].extend(by_id.get(record["record_id"], ()))
+    return records
+
+
+def register_labels(store: Store, normalization_id: str, *, family: str, producer: str, authority: str,
+                    rows: Sequence[Mapping], pov: str = "white", registry_version: int = 1) -> LabelSetRef:
+    """Append one label set as a new immutable file; existing records and labels are never modified."""
+    norm: Normalization = store.get_as(normalization_id, Normalization)
+    if family not in LABEL_FAMILIES:
+        raise LabError(f"unknown label family {family!r}; register it in LABEL_FAMILIES first: "
+                       f"{', '.join(sorted(LABEL_FAMILIES))}")
+    if sha256_file(store.abs(norm.path)) != norm.output_hash:
+        raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
+    if not rows:
+        raise LabError("a label set needs at least one row")
+    known = {record["record_id"] for record in read_jsonl(store.abs(norm.path))}
+    seen: set[str] = set()
+    stamped = utc_now()
+    clean_rows: list[dict] = []
+    for row in rows:
+        record_id = str(row.get("record_id", ""))
+        if record_id not in known:
+            raise LabError(f"label row references unknown record {record_id!r} in {norm.id}")
+        if record_id in seen:
+            raise LabError(f"two labels for {record_id} in one set; register separate sets per producer/pass")
+        seen.add(record_id)
+        if "value" not in row:
+            raise LabError(f"label for {record_id} carries no value")
+        value = row["value"]
+        clean: dict = {"record_id": record_id, "family": family,
+                       "value": value if isinstance(value, SCALAR) else str(value),
+                       "pov": pov, "authority": authority, "producer": producer,
+                       "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
+                       "produced_at": stamped}
+        for key in ("budget", "confidence", "note"):
+            if key in row:
+                extra = row[key]
+                if isinstance(extra, SCALAR):
+                    clean[key] = extra
+                elif isinstance(extra, dict):
+                    clean[key] = {str(k): v for k, v in extra.items() if isinstance(v, SCALAR)}
+                else:
+                    clean[key] = str(extra)
+        clean_rows.append(clean)
+    sequence = len(label_set_paths(store, normalization_id)) + 1
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", producer)[:24] or "producer"
+    rel = f"canonical/{normalization_id}/labels/labels-{sequence:04d}-{slug}.jsonl"
+    write_jsonl(store.abs(rel), clean_rows)
+    store.make_readonly(store.abs(rel))
+    return _label_set_ref(store, store.abs(rel))
+
+
+def copy_label_sets(store: Store, from_normalization_id: str, to_normalization_id: str) -> dict[str, int]:
+    """Carry label sets into a new canonical corpus, keeping only labels whose record identity survived.
+
+    Records whose EPD identity survived re-standardization keep their labels unchanged ("provably
+    unaffected"); dropped rows are counted and reported, and changed-semantics labels must be
+    re-registered by their producer under a new registry version.
+    """
+    source: Normalization = store.get_as(from_normalization_id, Normalization)
+    target: Normalization = store.get_as(to_normalization_id, Normalization)
+    if source.id == target.id:
+        raise LabError("copy_label_sets needs two different normalizations")
+    if sha256_file(store.abs(source.path)) != source.output_hash or sha256_file(store.abs(target.path)) != target.output_hash:
+        raise TamperError("canonical corpus no longer matches its normalization output hash")
+    target_ids = {record["record_id"] for record in read_jsonl(store.abs(target.path))}
+    kept_total = dropped_total = sets_copied = 0
+    for path in label_set_paths(store, source.id):
+        rows = read_jsonl(path)
+        kept_rows = [row for row in rows if row["record_id"] in target_ids]
+        kept_total += len(kept_rows)
+        dropped_total += len(rows) - len(kept_rows)
+        if not kept_rows:
+            continue
+        sets_copied += 1
+        rel = f"canonical/{target.id}/labels/copied-{sets_copied:04d}-{path.name}"
+        write_jsonl(store.abs(rel), kept_rows)
+        store.make_readonly(store.abs(rel))
+    return {"sets_copied": sets_copied, "labels_kept": kept_total, "labels_dropped": dropped_total}
+
+
+# ---------------------------------------------------------------------------
+# Catalog filtering and dataset stacking
+# ---------------------------------------------------------------------------
+
+ARM_FILTER_FIELDS = ("source_id", "phase", "stm", "material", "result", "group", "ply_min", "ply_max",
+                     "eval_bucket", "label_family", "authority", "tier", "producer")
+CATALOG_ONLY_FIELDS = ("dataset", "split")
+CATALOG_FILTER_FIELDS = ARM_FILTER_FIELDS + CATALOG_ONLY_FIELDS
+BALANCE_BUCKETS = ("phase", "stm", "material", "source_id", "eval_bucket")
+
+
+def _label_matches(record: dict, key: str, wanted: str) -> bool:
+    for label in record["labels"]:
+        if key == "label_family" and label["family"] == wanted:
+            return True
+        if key == "authority" and label.get("authority") == wanted:
+            return True
+        if key == "producer" and label.get("producer") == wanted:
+            return True
+        if key == "tier" and LABEL_FAMILIES.get(label["family"], {}).get("tier") == wanted:
+            return True
+    return False
+
+
+def _filter_matches(record: dict, flt: Mapping[str, ConfigValue]) -> bool:
+    for key, value in flt.items():
+        if key in ("label_family", "authority", "tier", "producer"):
+            if not _label_matches(record, key, str(value)):
+                return False
+        elif key == "eval_bucket":
+            if _cp_bucket(record) != str(value):
+                return False
+        elif key == "ply_min":
+            if record["ply"] < int(value):
+                return False
+        elif key == "ply_max":
+            if record["ply"] > int(value):
+                return False
+        elif str(record.get(key)) != str(value):
+            return False
+    return True
+
+
+def _coerce_arm(raw: Mapping) -> StackArm:
+    try:
+        arm = StackArm(**{k: v for k, v in raw.items()})
+    except Exception as exc:
+        raise LabError(f"invalid stack arm {raw.get('name', '?')!r}: {exc}") from None
+    unknown = sorted(set(arm.filter) - set(ARM_FILTER_FIELDS))
+    if unknown:
+        raise LabError(f"arm {arm.name!r} filters on unknown field(s) {unknown}; allowed: {ARM_FILTER_FIELDS}")
+    if arm.policy == StackPolicy.FIXED_ROWS and (arm.rows is None or arm.rows < 1):
+        raise LabError(f"arm {arm.name!r}: fixed_rows needs rows >= 1")
+    if arm.policy == StackPolicy.FRACTION and (arm.fraction is None or not 0 < arm.fraction <= 1):
+        raise LabError(f"arm {arm.name!r}: fraction needs 0 < fraction <= 1")
+    if arm.policy == StackPolicy.BALANCE and (arm.balance_bucket not in BALANCE_BUCKETS
+                                              or not arm.balance_cap or arm.balance_cap < 1):
+        raise LabError(f"arm {arm.name!r}: balance needs balance_bucket in {BALANCE_BUCKETS} and balance_cap >= 1")
+    return arm
+
+
+def _bucket_of(record: dict, bucket: str) -> str:
+    if bucket == "eval_bucket":
+        return _cp_bucket(record)
+    if bucket in ("phase", "stm", "material", "source_id"):
+        return str(record[bucket])
+    raise LabError(f"cannot bucket by {bucket!r}; buckets: {BALANCE_BUCKETS}")
+
+
+def _apply_arm(records: list[dict], arm: StackArm) -> tuple[list[int], list[int]]:
+    """Indices matching the arm's filter ('available') and indices selected by its policy ('effective')."""
+    matching = [i for i, record in enumerate(records) if _filter_matches(record, arm.filter)]
+    if arm.policy == StackPolicy.ALL:
+        return matching, matching
+    rng = random.Random(arm.seed)
+
+    def sample(count: int) -> list[int]:
+        if count > len(matching):
+            raise LabError(f"arm {arm.name!r}: requested {count} rows but only {len(matching)} match its filter")
+        if count == len(matching):
+            return matching
+        return sorted(rng.sample(matching, count))
+
+    if arm.policy == StackPolicy.FIXED_ROWS:
+        return matching, sample(int(arm.rows))
+    if arm.policy == StackPolicy.FRACTION:
+        return matching, sample(max(1, round(len(matching) * float(arm.fraction))))
+    # BALANCE: seeded stratified cap per bucket value
+    buckets: dict[str, list[int]] = {}
+    for index in matching:
+        buckets.setdefault(_bucket_of(records[index], str(arm.balance_bucket)), []).append(index)
+    chosen: list[int] = []
+    for value in sorted(buckets):
+        indices = buckets[value]
+        if len(indices) > int(arm.balance_cap):
+            indices = sorted(rng.sample(indices, int(arm.balance_cap)))
+        chosen.extend(indices)
+    return matching, sorted(chosen)
+
+
+def stack_preview(store: Store, normalization_id: str, arms: Sequence[Mapping]) -> "StackPreview":
+    """Raw available vs effective sampled contribution per arm, plus combined distributions."""
+    from .schemas import ArmPreview, StackPreview
+
+    norm: Normalization = store.get_as(normalization_id, Normalization)
+    if sha256_file(store.abs(norm.path)) != norm.output_hash:
+        raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
+    if not arms:
+        raise LabError("a stack needs at least one arm")
+    records = _load_canonical(store, norm)
+    previews: list[ArmPreview] = []
+    union: dict[str, int] = {}
+    for raw in arms:
+        arm = _coerce_arm(raw)
+        matching, selected = _apply_arm(records, arm)
+        previews.append(ArmPreview(name=arm.name, policy=arm.policy.value, filter=dict(arm.filter),
+                                   available=len(matching), effective=len(selected)))
+        for index in selected:
+            union.setdefault(records[index]["record_id"], index)
+    rows = [records[i] for i in union.values()]
+    distributions = {
+        "phase": dict(Counter(r["phase"] for r in rows)),
+        "stm": dict(Counter(r["stm"] for r in rows)),
+        "source": dict(Counter(r["source_id"] for r in rows)),
+        "abs_cp_bucket": dict(Counter(_cp_bucket(r) for r in rows)),
+        "tier": dict(Counter(tier for r in rows
+                             for tier in {LABEL_FAMILIES.get(lab["family"], {}).get("tier", "unknown")
+                                          for lab in r["labels"]})),
+    }
+    return StackPreview(normalization_id=norm.id, arms=previews, effective_total=len(rows),
+                        unique_records=len(rows), distributions=distributions)
+
+
+def catalog(store: Store, normalization_id: str, *, filters: Optional[Mapping[str, ConfigValue]] = None,
+            offset: int = 0, limit: int = 50) -> "CatalogResponse":
+    """Filterable corpus catalog: facet counts plus one page of canonical rows, labels joined."""
+    from .schemas import CatalogRecord, CatalogResponse
+
+    norm: Normalization = store.get_as(normalization_id, Normalization)
+    if sha256_file(store.abs(norm.path)) != norm.output_hash:
+        raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
+    flt = {k: v for k, v in (filters or {}).items() if v not in (None, "")}
+    unknown = sorted(set(flt) - set(CATALOG_FILTER_FIELDS))
+    if unknown:
+        raise LabError(f"unknown catalog filter(s) {unknown}; allowed: {CATALOG_FILTER_FIELDS}")
+    records = _load_canonical(store, norm)
+
+    memberships: dict[str, dict[str, list[str]]] = {}
+    for dataset in store.list("D", verify=False, kind=Dataset):
+        if dataset.normalization_id != norm.id:
+            continue
+        for manifest in dataset.splits:
+            path = store.abs(manifest.path)
+            if not path.exists():
+                continue
+            for row in read_jsonl(path):
+                memberships.setdefault(row["record_id"], {}).setdefault(dataset.id, []).append(manifest.name)
+    if "dataset" in flt:
+        wanted = str(flt.pop("dataset"))
+        records = [r for r in records if wanted in memberships.get(r["record_id"], {})]
+    if "split" in flt:
+        wanted = str(flt.pop("split"))
+        records = [r for r in records
+                   if any(wanted in splits for splits in memberships.get(r["record_id"], {}).values())]
+    matching = [r for r in records if _filter_matches(r, flt)]
+
+    def facet(source_records: list[dict], key: str) -> dict[str, int]:
+        counts: Counter = Counter()
+        for record in source_records:
+            if key == "eval_bucket":
+                counts[_cp_bucket(record)] += 1
+            elif key == "label_family":
+                counts.update(label["family"] for label in record["labels"])
+            elif key == "authority":
+                counts.update(label.get("authority", "?") for label in record["labels"])
+            elif key == "producer":
+                counts.update(label.get("producer", "?") for label in record["labels"])
+            elif key == "tier":
+                counts.update(LABEL_FAMILIES.get(label["family"], {}).get("tier", "unknown")
+                              for label in record["labels"])
+            elif key == "dataset":
+                counts.update(memberships.get(record["record_id"], {}).keys())
+            else:
+                counts[str(record.get(key))] += 1
+        return dict(counts)
+
+    facets = {key: facet(matching, key) for key in
+              ("source_id", "phase", "stm", "material", "result", "dataset")}
+    for key in ("eval_bucket", "label_family", "authority", "tier", "producer"):
+        facets[key] = facet(matching, key)
+    label_count = sum(facets["label_family"].values())
+
+    window = matching[max(0, offset): max(0, offset) + max(1, min(int(limit), 500))]
+    page = [CatalogRecord(
+        record_id=r["record_id"], group=r["group"], source_id=r["source_id"], source_row=r["source_row"],
+        ply=r["ply"], fen=r["fen"], epd=r["epd"], stm=r["stm"], phase=r["phase"], material=r["material"],
+        result=r.get("result"), labels=r["labels"],
+        label_tiers=dict(Counter(LABEL_FAMILIES.get(lab["family"], {}).get("tier", "unknown")
+                                 for lab in r["labels"])),
+        memberships=memberships.get(r["record_id"], {}),
+    ) for r in window]
+    return CatalogResponse(
+        normalization_id=norm.id, record_count=norm.record_count, unique_count=norm.record_count,
+        duplicate_count=norm.duplicate_count, label_count=label_count, filters_applied=dict(flt),
+        facets=facets, page=page, page_offset=max(0, offset), page_size=max(1, min(int(limit), 500)),
+        total_matching=len(matching),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Re-standardization: a new N#### from the same immutable sources, with a diff
+# ---------------------------------------------------------------------------
+
+
+def _label_map(normalization: Normalization, store: Store) -> dict[tuple, dict]:
+    out: dict[tuple, dict] = {}
+    for record in _load_canonical(store, normalization):
+        for label in record["labels"]:
+            key = (record["record_id"], label["family"], label.get("authority"), label.get("producer"))
+            out[key] = label
+    return out
+
+
+def _coverage(records: list[dict]) -> dict[str, dict[str, int]]:
+    return {
+        "phase": dict(Counter(r["phase"] for r in records)),
+        "stm": dict(Counter(r["stm"] for r in records)),
+        "abs_cp_bucket": dict(Counter(_cp_bucket(r) for r in records)),
+    }
+
+
+def migration_diff(store: Store, old_normalization_id: str, new_normalization_id: str) -> "MigrationDiff":
+    from .schemas import MigrationDiff as Diff
+
+    old_n = store.get_as(old_normalization_id, Normalization)
+    new_n = store.get_as(new_normalization_id, Normalization)
+    if old_n.id == new_n.id:
+        raise LabError("migration diff needs two different normalizations")
+    for norm in (old_n, new_n):
+        if sha256_file(store.abs(norm.path)) != norm.output_hash:
+            raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
+    old_rows = read_jsonl(store.abs(old_n.path))
+    new_rows = read_jsonl(store.abs(new_n.path))
+    old_map = {r["record_id"]: r for r in old_rows}
+    new_map = {r["record_id"]: r for r in new_rows}
+    shared = old_map.keys() & new_map.keys()
+
+    def payload(record: dict) -> dict:
+        return {k: v for k, v in record.items() if k != "labels"}
+
+    changed = sum(1 for rid in shared if payload(old_map[rid]) != payload(new_map[rid]))
+
+    old_labels, new_labels = _label_map(old_n, store), _label_map(new_n, store)
+    per_family: dict[str, Counter] = {}
+    for _rid, family, _auth, _prod in new_labels.keys() - old_labels.keys():
+        per_family.setdefault(family, Counter())["added"] += 1
+    for _rid, family, _auth, _prod in old_labels.keys() - new_labels.keys():
+        per_family.setdefault(family, Counter())["removed"] += 1
+    for key in old_labels.keys() & new_labels.keys():
+        if old_labels[key]["value"] != new_labels[key]["value"]:
+            per_family.setdefault(key[1], Counter())["value_changed"] += 1
+    label_changes = {family: dict(counts) for family, counts in sorted(per_family.items())}
+
+    # split membership: recompute each affected dataset's group-hash split for surviving records
+    split_changes: list[DatasetSplitChange] = []
+    affected_datasets: list[str] = []
+    for dataset in store.list("D", verify=False, kind=Dataset):
+        if dataset.normalization_id != old_n.id:
+            continue
+        affected_datasets.append(dataset.id)
+        fractions = (float(dataset.split_policy["train"]), float(dataset.split_policy["val"]),
+                     float(dataset.split_policy["test"]))
+        seed = int(dataset.split_policy["seed"])
+        changes = sum(1 for rid in shared
+                      if _split_for(old_map[rid]["group"], seed, fractions)
+                      != _split_for(new_map[rid]["group"], seed, fractions))
+        split_changes.append(DatasetSplitChange(dataset_id=dataset.id, surviving_records=len(shared),
+                                                split_changes=changes))
+
+    settings_delta = sorted(k for k in set(old_n.settings) | set(new_n.settings)
+                            if old_n.settings.get(k) != new_n.settings.get(k))
+    notes = [f"recipe hash {old_n.recipe_hash[:19]}... -> {new_n.recipe_hash[:19]}..."]
+    if settings_delta:
+        notes.append("settings changed: " + ", ".join(
+            f"{k} ({old_n.settings.get(k)!r} -> {new_n.settings.get(k)!r})" for k in settings_delta))
+    if old_n.dedup_policy != new_n.dedup_policy:
+        notes.append(f"dedup policy {old_n.dedup_policy} -> {new_n.dedup_policy}")
+
+    return Diff(
+        from_normalization_id=old_n.id, to_normalization_id=new_n.id,
+        records_from=len(old_rows), records_to=len(new_rows),
+        added=len(new_map.keys() - old_map.keys()), removed=len(old_map.keys() - new_map.keys()),
+        changed=changed,
+        duplicate_delta=new_n.duplicate_count - old_n.duplicate_count,
+        rejected_delta=new_n.rejected_count - old_n.rejected_count,
+        label_changes=label_changes,
+        coverage_from=_coverage(list(old_map.values())), coverage_to=_coverage(list(new_map.values())),
+        source_contribution_from=dict(Counter(r["source_id"] for r in old_rows)),
+        source_contribution_to=dict(Counter(r["source_id"] for r in new_rows)),
+        split_changes=split_changes, affected_dataset_ids=affected_datasets, affected_run_ids=[],
+        notes=notes,
+    )
+
+
+def rebuild_dataset(store: Store, dataset_id: str, new_normalization_id: str) -> Dataset:
+    """'Rebuild this dataset under the new standard': a descendant D####; the original never changes."""
+    old = store.get_as(dataset_id, Dataset)
+    new_norm = store.get_as(new_normalization_id, Normalization)
+    if new_norm.id == old.normalization_id:
+        raise LabError(f"{dataset_id} is already frozen on {new_norm.id}")
+    for existing in store.list("D", verify=False, kind=Dataset):
+        if existing.parent_id == old.id and existing.normalization_id == new_norm.id:
+            raise LabError(f"{old.id} was already rebuilt under {new_norm.id} as {existing.id}; "
+                           "a repeated rebuild would duplicate an identical descendant")
+    fractions = (float(old.split_policy["train"]), float(old.split_policy["val"]), float(old.split_policy["test"]))
+    arms = [arm.model_dump() for arm in old.stack] or None
+    return freeze_dataset(store, new_norm.id, name=old.name, selection=dict(old.selection) or None,
+                          split_seed=int(old.split_policy["seed"]), fractions=fractions,
+                          required_labels=list(old.label_requirements), parent_id=old.id, arms=arms)
+
+
+def label_set_refs(store: Store, normalization_id: str) -> list[LabelSetRef]:
+    """Every L2 label set registered under a normalization, in registration order."""
+    return [_label_set_ref(store, path) for path in label_set_paths(store, normalization_id)]

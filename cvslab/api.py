@@ -17,16 +17,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from pydantic import BaseModel
 
-from . import families
+from . import data, families
 from .schemas import (
     AblationRequest,
     Dataset,
     Finding,
     FindingRequest,
     HypothesisCreate,
+    LabelsAppendRequest,
+    MigrateRequest,
+    Normalization,
+    RebuildDatasetRequest,
     Run,
     RunQueueRequest,
     RunStatus,
+    SourceSnapshot,
+    StackFreezeRequest,
 )
 from .service import LAB_REPO, DEFAULT_FAMILY, LabService
 from .store import KINDS, LabError, Store
@@ -193,11 +199,63 @@ def create_app(home: Optional[str | Path] = None, *, worker: bool = True) -> Fas
     def draft_finding(body: FindingRequest):
         return service.draft_finding(**body.model_dump())
 
-    # -- data lineage and intake ---------------------------------------------
+    # -- data lineage, catalog, stacking and migration -------------------------
 
     @app.get("/api/datasets")
     def datasets():
         return service.store.list("D", verify=False, kind=Dataset)
+
+    @app.post("/api/sources/pgn", status_code=201)
+    def import_pgn(body: dict):
+        return service.import_pgn_source(body["path"], name=body["name"],
+                                         license=body.get("license", "unspecified"),
+                                         sample_every=int(body.get("sample_every", 2)),
+                                         min_ply=int(body.get("min_ply", 6)),
+                                         origin=body.get("origin"))
+
+    @app.post("/api/normalizations", status_code=201)
+    def migrate(body: MigrateRequest):
+        return service.migrate(body.from_normalization_id, name=body.name,
+                               settings_overrides=body.settings_overrides, dedup=body.dedup)
+
+    @app.get("/api/normalizations/{normalization_id}/labels")
+    def label_sets(normalization_id: str):
+        service.store.get_as(normalization_id, Normalization)
+        return data.label_set_refs(service.store, normalization_id)
+
+    @app.post("/api/labels", status_code=201)
+    def append_labels(body: LabelsAppendRequest):
+        return service.register_labels(body.normalization_id, family=body.family, producer=body.producer,
+                                       authority=body.authority, rows=body.rows, pov=body.pov,
+                                       registry_version=body.registry_version)
+
+    @app.post("/api/normalizations/{from_id}/copy-labels/{to_id}")
+    def copy_labels(from_id: str, to_id: str):
+        return service.copy_label_sets(from_id, to_id)
+
+    @app.get("/api/catalog")
+    def catalog(request: Request, normalization_id: str, offset: int = 0, limit: int = 50):
+        reserved = ("normalization_id", "offset", "limit")
+        filters = {key: value for key, value in request.query_params.items() if key not in reserved}
+        return service.catalog(normalization_id, filters=filters, offset=offset, limit=limit)
+
+    @app.post("/api/stacks/preview")
+    def stack_preview(body: dict):
+        return service.stack_preview(body["normalization_id"], body.get("arms", []))
+
+    @app.post("/api/datasets/freeze", status_code=201)
+    def freeze_stack(body: StackFreezeRequest):
+        return service.freeze_dataset(body.normalization_id, name=body.name, arms=body.arms,
+                                      split_seed=body.split_seed, fractions=tuple(body.fractions),
+                                      required_labels=body.required_labels)
+
+    @app.get("/api/migration-diff")
+    def migration_diff(from_id: str, to_id: str):
+        return service.migration_diff(from_id, to_id)
+
+    @app.post("/api/datasets/{dataset_id}/rebuild", status_code=201)
+    def rebuild(dataset_id: str, body: RebuildDatasetRequest):
+        return service.rebuild_dataset(dataset_id, body.new_normalization_id)
 
     dist = LAB_REPO / "web" / "dist"
     if dist.is_dir():

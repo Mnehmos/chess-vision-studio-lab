@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { api, usePolling } from "./api";
 import type { Overview } from "./generated/schemas";
 import Builder from "./screens/Builder";
+import Data from "./screens/Data";
 import FindingDetail from "./screens/FindingDetail";
 import Findings from "./screens/Findings";
 import Matrix from "./screens/Matrix";
@@ -37,6 +38,7 @@ function TopMeta() {
 
 const links = [
   { to: "/", label: "Overview" },
+  { to: "/data", label: "Data" },
   { to: "/build", label: "Ablation builder" },
   { to: "/runs", label: "Runs" },
   { to: "/matrix", label: "Switch matrix" },
@@ -63,6 +65,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<OverviewScreen />} />
+          <Route path="/data" element={<Data />} />
           <Route path="/build" element={<Builder />} />
           <Route path="/runs" element={<Runs />} />
           <Route path="/runs/:runId" element={<RunDetail />} />
