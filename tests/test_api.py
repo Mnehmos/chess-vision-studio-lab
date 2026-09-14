@@ -103,3 +103,56 @@ def test_switches_and_backlog_endpoints(client):
     assert http.get("/api/switches", params={"family": "NOPE"}).status_code == 400
     backlog = http.get("/api/backlog").json()
     assert backlog["intake_id"] is None and backlog["switches"] == []
+
+
+def test_data_workbench_endpoints(client):
+    http, service = client
+    # catalog with facet counts and dataset membership
+    catalog = http.get("/api/catalog", params={"normalization_id": "N0001", "phase": "opening"}).json()
+    assert catalog["total_matching"] > 0
+    assert catalog["facets"]["phase"]["opening"] == catalog["total_matching"]
+    assert "D0001" in catalog["facets"]["dataset"]
+    assert http.get("/api/catalog", params={"normalization_id": "N0001", "vibes": "x"}).status_code == 400
+
+    # append a second label authority, then see it in the catalog's tier facet
+    record_id = catalog["page"][0]["record_id"]
+    created = http.post("/api/labels", json={
+        "normalization_id": "N0001", "family": "oracle_cp", "producer": "sf-16",
+        "authority": "oracle.sf16", "rows": [{"record_id": record_id, "value": 12, "budget": {"depth": 20}}],
+    })
+    assert created.status_code == 201
+    assert created.json()["families"] == {"oracle_cp": 1}
+    assert http.post("/api/labels", json={
+        "normalization_id": "N0001", "family": "vibes", "producer": "x", "authority": "a",
+        "rows": [{"record_id": record_id, "value": 1}],
+    }).status_code == 400
+    tiered = http.get("/api/catalog", params={"normalization_id": "N0001", "tier": "oracle"}).json()
+    assert tiered["total_matching"] == 1
+    assert http.get("/api/normalizations/N0001/labels").json()[0]["rows"] == 1
+
+    # stack preview -> freeze -> manifest
+    arms = [{"name": "mid", "filter": {"phase": "middlegame"}, "policy": "fraction", "fraction": 0.5, "seed": 1}]
+    preview = http.post("/api/stacks/preview", json={"normalization_id": "N0001", "arms": arms}).json()
+    assert preview["arms"][0]["effective"] < preview["arms"][0]["available"]
+    frozen = http.post("/api/datasets/freeze", json={
+        "normalization_id": "N0001", "name": "mid-half", "arms": arms, "required_labels": ["eval_cp"],
+    })
+    assert frozen.status_code == 201
+    assert frozen.json()["coverage"]["stack"] == {"mid": preview["arms"][0]["effective"]}
+
+    # migrate -> diff -> rebuild descendant
+    migrated = http.post("/api/normalizations", json={
+        "from_normalization_id": "N0001", "name": "v2",
+        "settings_overrides": {"phase_middlegame_min_material": 4000},
+    })
+    assert migrated.status_code == 201
+    diff = http.get("/api/migration-diff", params={"from_id": "N0001", "to_id": "N0002"}).json()
+    assert diff["changed"] > 0
+    assert diff["affected_dataset_ids"] == ["D0001", "D0002"]  # every dataset frozen on the old standard
+    rebuilt = http.post("/api/datasets/D0001/rebuild", json={"new_normalization_id": "N0002"})
+    assert rebuilt.status_code == 201
+    assert rebuilt.json()["parent_id"] == "D0001"
+    assert http.post("/api/datasets/D0001/rebuild", json={"new_normalization_id": "N0002"}).status_code == 400
+    # historical manifests unchanged
+    original = http.get("/api/object/D0001").json()
+    assert original["parent_id"] is None

@@ -29,9 +29,19 @@ cvslab serve                          # local API + built GUI at http://127.0.0.
 ```
 
 The GUI ships the six Phase 0 screens — lab overview, ablation builder (exact diff and parameter
-count before launch), run queue/history, switch matrix, scaling explorer, and finding cards — and
-contains no scientific logic: it edits canonical specs and renders immutable evidence served by the
-API. Rebuild it with `cd web && npm install && npm run gen:types && npm run build`.
+count before launch), run queue/history, switch matrix, scaling explorer, and finding cards — plus
+the data workbench (corpus catalog with faceted filtering, dataset stack builder with
+available-vs-effective preview, and the lineage/migration view). It contains no scientific logic:
+it edits canonical specs and renders immutable evidence served by the API. Rebuild it with
+`cd web && npm install && npm run gen:types && npm run build`.
+
+The data lifecycle (issue #2) is end-to-end on the CLI as well: `cvslab source-fixture` /
+`source-import` / `source-pgn` → `cvslab normalize` → `cvslab labels-append` (append-only L2 label
+sets with per-authority provenance) → `cvslab catalog` (faceted corpus filtering) →
+`cvslab stack-preview` + `cvslab dataset --arm '{"name":"mid","filter":{"phase":"middlegame"},"policy":"fraction","fraction":0.5}'`
+(explicit stacking, frozen into D####) → `cvslab migrate` + `cvslab migration-diff` +
+`cvslab dataset-rebuild` (re-standardization into a new N#### with a full diff, and descendant
+datasets — history is never rewritten).
 
 Everything lives in `./labstore` (set `CVSLAB_HOME` to move it): one JSON file per canonical
 object, artifacts per run, sealed with record hashes once terminal. `cvslab --help` lists every

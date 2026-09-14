@@ -2,16 +2,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   Ablation,
   AblationPreview,
+  CatalogResponse,
   Dataset,
   Finding,
   FindingRequest,
   Hypothesis,
   HypothesisCreate,
+  LabelSetRef,
   MatrixResponse,
+  MigrationDiff,
+  Normalization,
   Overview,
   Run,
   ScalingResponse,
   SearchBacklog,
+  StackPreview,
   Switch,
 } from "./generated/schemas";
 
@@ -87,6 +92,41 @@ export const api = {
 
   datasets: () => request<Dataset[]>("/api/datasets"),
   object: <T>(id: string) => request<T>(`/api/object/${id}`),
+
+  normalizations: () => request<Normalization[]>("/api/objects/N"),
+  catalog: (params: Record<string, string | number | undefined>) =>
+    request<CatalogResponse>(`/api/catalog${query(params)}`),
+  labelSets: (normalizationId: string) => request<LabelSetRef[]>(`/api/normalizations/${normalizationId}/labels`),
+  appendLabels: (body: {
+    normalization_id: string;
+    family: string;
+    producer: string;
+    authority: string;
+    registry_version?: number;
+    pov?: string;
+    rows: { record_id: string; value: unknown; budget?: unknown; note?: string }[];
+  }) => request<LabelSetRef>("/api/labels", { method: "POST", body: JSON.stringify(body) }),
+  stackPreview: (normalizationId: string, arms: object[]) =>
+    request<StackPreview>("/api/stacks/preview", {
+      method: "POST",
+      body: JSON.stringify({ normalization_id: normalizationId, arms }),
+    }),
+  freezeStack: (body: {
+    normalization_id: string;
+    name: string;
+    arms: object[];
+    split_seed?: number;
+    required_labels?: string[];
+  }) => request<Dataset>("/api/datasets/freeze", { method: "POST", body: JSON.stringify(body) }),
+  migrate: (body: { from_normalization_id: string; name: string; settings_overrides: Record<string, number> }) =>
+    request<Normalization>("/api/normalizations", { method: "POST", body: JSON.stringify(body) }),
+  migrationDiff: (fromId: string, toId: string) =>
+    request<MigrationDiff>(`/api/migration-diff${query({ from_id: fromId, to_id: toId })}`),
+  rebuildDataset: (datasetId: string, newNormalizationId: string) =>
+    request<Dataset>(`/api/datasets/${datasetId}/rebuild`, {
+      method: "POST",
+      body: JSON.stringify({ new_normalization_id: newNormalizationId }),
+    }),
 };
 
 /** Fetch with periodic refresh; returns data, error and a manual refresh trigger. */
