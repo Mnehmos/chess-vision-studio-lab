@@ -1,0 +1,1190 @@
+[
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/bundle-regate-20260909/bundle-inv1/sprt.json"
+    },
+    "sha256": "ef8b40069a945fb8b050767fff883b51a20ed8c6b1a378d592bb14490427e662",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+bundle-inv1",
+    "games": 2000,
+    "wdl": [
+      852,
+      332,
+      816
+    ],
+    "llr": 0.269,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/caphist-regate-gate-20260909/caphist-regate/sprt.json"
+    },
+    "sha256": "393392892a87ff78c7740e333b41c67ad2345d2268a8159d4246bcf75ddb2109",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+caphist-regate",
+    "games": 2000,
+    "wdl": [
+      846,
+      301,
+      853
+    ],
+    "llr": -1.1632,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/caphist-regate-hp-20260910/caphist-regate/sprt.json"
+    },
+    "sha256": "585adf64a8a40685953e07ed3f73ce21be907016a164b66535fe5fbb5e1cac49",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+caphist-regate",
+    "games": 4000,
+    "wdl": [
+      1758,
+      553,
+      1689
+    ],
+    "llr": 0.411,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/conthist-big-gate-20260910/conthist/sprt.json"
+    },
+    "sha256": "478697d295c63ea7787e9901f4b3bbf8f00619ece374e3b21c8b1b42d236dd98",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+conthist",
+    "games": 1781,
+    "wdl": [
+      824,
+      248,
+      709
+    ],
+    "llr": 2.9488,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/conthist-gate-20260909/conthist/sprt.json"
+    },
+    "sha256": "f954abfd2eefd0deaf3077f64b93c4f2416b2e6eee0199f6e8f19c7742651e4e",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+conthist",
+    "games": 2000,
+    "wdl": [
+      869,
+      294,
+      837
+    ],
+    "llr": 0.1269,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/conthist2-gate-20260911/conthist2/sprt.json"
+    },
+    "sha256": "a905022a9a62bff6dccac6bf4d07dce3d8b320c07c90fbf029ed2191e5d44028",
+    "date": "20260911",
+    "baselineId": "master",
+    "candidateId": "master+conthist2",
+    "games": 2000,
+    "wdl": [
+      863,
+      308,
+      829
+    ],
+    "llr": 0.1961,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/countermove-gate-20260909/countermove/sprt.json"
+    },
+    "sha256": "d306e08b8f3302707846ae2f0e8ec9989fef9945ef8f177ac14451a1fd7e5fe5",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+countermove",
+    "games": 2000,
+    "wdl": [
+      826,
+      319,
+      855
+    ],
+    "llr": -1.9038,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/delta-big-gate-20260910/delta/sprt.json"
+    },
+    "sha256": "89edd1bd1a82088634cf56966c67c87fccd616d5de728c2d7c9d02eb1268f708",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+delta",
+    "games": 1201,
+    "wdl": [
+      477,
+      174,
+      550
+    ],
+    "llr": -2.964,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/delta-gate-20260909/delta/sprt.json"
+    },
+    "sha256": "c654aedfae2a2fc562c1534e4bba1c16e47dd30bca5a0a7890cc0c500de9776d",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+delta",
+    "games": 2000,
+    "wdl": [
+      874,
+      295,
+      831
+    ],
+    "llr": 0.4904,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/gen11-gate-20260913/gen11/sprt.json"
+    },
+    "sha256": "5db551f20da880844dfecdcb934784dc01cc3aef3d5542a58bf70e37ec095abb",
+    "date": "20260913",
+    "baselineId": "master",
+    "candidateId": "master+gen11",
+    "games": 2820,
+    "wdl": [
+      1264,
+      343,
+      1213
+    ],
+    "llr": 0.3559,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/gen11-gate2-20260913/gen11/sprt.json"
+    },
+    "sha256": "fd4cff5c730839fe411735a934a5479056da2d8c10686a8fcf5625effd39acc9",
+    "date": "20260913",
+    "baselineId": "master",
+    "candidateId": "master+gen11",
+    "games": 820,
+    "wdl": [
+      367,
+      103,
+      350
+    ],
+    "llr": 0.1745,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/iid-gate-20260909/iid/sprt.json"
+    },
+    "sha256": "4cdc57595bd9ef956ed02b89484df1c20b188300a816b807763b7e90ad41aa50",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+iid",
+    "games": 2000,
+    "wdl": [
+      837,
+      333,
+      830
+    ],
+    "llr": -0.7044,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/improving-regate-gate-20260909/improving-regate/sprt.json"
+    },
+    "sha256": "210a7addbccbe403a1b73aebc6aa389369ecb000c996c67775b80ac071e5ca2b",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+improving-regate",
+    "games": 2000,
+    "wdl": [
+      846,
+      307,
+      847
+    ],
+    "llr": -0.9661,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/improving-regate-hp-20260910/improving-regate/sprt.json"
+    },
+    "sha256": "f42b311f47b7e79ab1958634def8dad862608f8ee5c48582b4e094e506e351c2",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+improving-regate",
+    "games": 2784,
+    "wdl": [
+      1164,
+      405,
+      1215
+    ],
+    "llr": -2.9742,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/caphist/sprt.json"
+    },
+    "sha256": "3d796e5fbb16cf7744c9105a2062dbbe8e98a9c42107cde0d97c7c9c00116b8f",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+caphist",
+    "games": 293,
+    "wdl": [
+      159,
+      62,
+      72
+    ],
+    "llr": 2.9489,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/conthist/sprt.json"
+    },
+    "sha256": "8f9ee73ee0bf5ba214b38f7479dd168086d4bac8969381b839c9d2c1ae600233",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+conthist",
+    "games": 1389,
+    "wdl": [
+      405,
+      521,
+      463
+    ],
+    "llr": -2.976,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/countermove/sprt.json"
+    },
+    "sha256": "6af3e2ea360291db34e93003bb1263c340743b12e3d53c63af251513a6fffb45",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+countermove",
+    "games": 517,
+    "wdl": [
+      193,
+      44,
+      280
+    ],
+    "llr": -2.9539,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/delta/sprt.json"
+    },
+    "sha256": "fce5e00121347d41b9477bc51d37189011fa7fa85cf1a4ff1cacb9894e92cd48",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+delta",
+    "games": 575,
+    "wdl": [
+      168,
+      167,
+      240
+    ],
+    "llr": -2.965,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/futility-pv/sprt.json"
+    },
+    "sha256": "59cb868975942a0ce78b4a43a3415c2c5c006c01b23fb0ff854e2c83a20f2a6c",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+futility-pv",
+    "games": 3000,
+    "wdl": [
+      1375,
+      250,
+      1375
+    ],
+    "llr": -1.3367,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/iid/sprt.json"
+    },
+    "sha256": "7bc71d97e6df25776a5f0f77f9870530dff05814c14aa6690c47697da612e604",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+iid",
+    "games": 3000,
+    "wdl": [
+      1250,
+      500,
+      1250
+    ],
+    "llr": -1.4093,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/improving/sprt.json"
+    },
+    "sha256": "8c6c4a8b1e9b5bb86c71ac69afbbbb4abe2c505c636acd93f37925d3f5b98c0f",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+improving",
+    "games": 396,
+    "wdl": [
+      231,
+      34,
+      131
+    ],
+    "llr": 2.9657,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/kingact/sprt.json"
+    },
+    "sha256": "01c41f2eb4dadb97733a5e0c70af4dd1cf8e6ec0eb13d3c0a26d769aeea649e2",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+kingact",
+    "games": 3000,
+    "wdl": [
+      1500,
+      125,
+      1375
+    ],
+    "llr": 2.4559,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/rule50/sprt.json"
+    },
+    "sha256": "c2f0daa95e790d67458ec690b9f45234aae17d03dd62bc584eb10c3105fcc91a",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+rule50",
+    "games": 257,
+    "wdl": [
+      66,
+      41,
+      150
+    ],
+    "llr": -2.9704,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/seeprune/sprt.json"
+    },
+    "sha256": "867732c992279f068f0d790e30377f24ca56d3452cccd48ce3e3d85d0a317759",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+seeprune",
+    "games": 246,
+    "wdl": [
+      134,
+      61,
+      51
+    ],
+    "llr": 2.9468,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/singular/sprt.json"
+    },
+    "sha256": "6a0c8f755de4c393d7739c058261836cb0e7d94e376fe2de2af5fe6baac3f468",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+singular",
+    "games": 3000,
+    "wdl": [
+      1375,
+      375,
+      1250
+    ],
+    "llr": 2.6723,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/inv1-ladder-20260909/tt2/sprt.json"
+    },
+    "sha256": "d24f106fddee4d9744b597fc999781f567e33919baf97fa4e87dc3dd6be47103",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+tt2",
+    "games": 430,
+    "wdl": [
+      215,
+      90,
+      125
+    ],
+    "llr": 2.9535,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/kingact-regate-20260909/sprt.json"
+    },
+    "sha256": "a1d822780ef9ec9c3756446d74c8f02d8b3cb80be61b1a964756bf77f73bb546",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+kingact",
+    "games": 3569,
+    "wdl": [
+      1785,
+      149,
+      1635
+    ],
+    "llr": 2.9607,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/kingact-regate-gate-20260909/kingact-regate/sprt.json"
+    },
+    "sha256": "d471ba5af94826c67ef0828d98fdb9ac951956ad504bada4fa3167d47282597b",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+kingact-regate",
+    "games": 2000,
+    "wdl": [
+      856,
+      330,
+      814
+    ],
+    "llr": 0.4697,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/kingact-regate-hp-20260910/kingact-regate/sprt.json"
+    },
+    "sha256": "b707dc3526c9efc80cc15ecf4b9220f1c2369b722bd1634f8975613fe8be1785",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+kingact-regate",
+    "games": 4000,
+    "wdl": [
+      1702,
+      663,
+      1635
+    ],
+    "llr": 0.3699,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/lmp-regate-hp-20260910/lmp-regate/sprt.json"
+    },
+    "sha256": "6c503b832c4b896f1e0294d7766ac23f1f4628cd1c634dae63bdbbe42c45be62",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+lmp-regate",
+    "games": 515,
+    "wdl": [
+      271,
+      70,
+      174
+    ],
+    "llr": 2.948,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/lmrdiv175-gate-20260910/lmrdiv175/sprt.json"
+    },
+    "sha256": "cdaca75493ea6f55a89aeab6a39dfece9cca2ccdd3879ae672e73c5b22d0964d",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+lmrdiv175",
+    "games": 1798,
+    "wdl": [
+      765,
+      250,
+      783
+    ],
+    "llr": -1.4219,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/lmrdiv20-gate-20260910/lmrdiv20/sprt.json"
+    },
+    "sha256": "8eb84f710a129ac5edb413adf431b3c03f7b014a8f94046486f344a706ecb3a7",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+lmrdiv20",
+    "games": 1798,
+    "wdl": [
+      741,
+      271,
+      786
+    ],
+    "llr": -2.3279,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/lmrdiv25-gate-20260910/lmrdiv25/sprt.json"
+    },
+    "sha256": "459d1bc76c134cc42ada02a6120ae0b8beb02fc6967bed816a5bd88970907d61",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+lmrdiv25",
+    "games": 1798,
+    "wdl": [
+      744,
+      282,
+      772
+    ],
+    "llr": -1.7725,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/lmrdiv275-gate-20260910/lmrdiv275/sprt.json"
+    },
+    "sha256": "26a6561132cbf854438112ef7043c55f441f098cd262c47d81472fd4878bc93d",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+lmrdiv275",
+    "games": 1798,
+    "wdl": [
+      782,
+      268,
+      748
+    ],
+    "llr": 0.2879,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/loglmr-gate-20260909b/loglmr/sprt.json"
+    },
+    "sha256": "ef229dae5eebe1a0fce02910290034b42e021f614a864b957eb19406553ec798",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+loglmr",
+    "games": 1030,
+    "wdl": [
+      497,
+      141,
+      392
+    ],
+    "llr": 2.9645,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/nnuecal-gate-20260911/nnuecal/sprt.json"
+    },
+    "sha256": "1b93a8fc4919746bd3ca4279a432d665df29f803c5c46972f42300db98cb4ce6",
+    "date": "20260911",
+    "baselineId": "master",
+    "candidateId": "master+nnuecal",
+    "games": 1000,
+    "wdl": [
+      479,
+      146,
+      375
+    ],
+    "llr": 2.9709,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/nnuecal-sfprune-gate-20260911/nnuecal-sfprune/sprt.json"
+    },
+    "sha256": "7687068eb0b0d689a570a8f778e49924083863301e6a9964e4099b8ebb453d0d",
+    "date": "20260911",
+    "baselineId": "master",
+    "candidateId": "master+nnuecal-sfprune",
+    "games": 1500,
+    "wdl": [
+      643,
+      216,
+      641
+    ],
+    "llr": -0.6301,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/pawnhist-gate-20260912/pawnhist/sprt.json"
+    },
+    "sha256": "cc03da26222b53551ed79b8b9ac10bdf3f420f276d29e4cf4aadcd560fd10979",
+    "date": "20260912",
+    "baselineId": "master",
+    "candidateId": "master+pawnhist",
+    "games": 1236,
+    "wdl": [
+      481,
+      203,
+      552
+    ],
+    "llr": -2.96,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/pinmovegen-gate-20260912/pinmovegen/sprt.json"
+    },
+    "sha256": "ef6da63592c7f77c4384cfcaa31966d3a156fdac515697ae1ff981804ed6628c",
+    "date": "20260912",
+    "baselineId": "master",
+    "candidateId": "master+pinmovegen",
+    "games": 4000,
+    "wdl": [
+      1671,
+      658,
+      1671
+    ],
+    "llr": -1.8769,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/probcut-gate-20260910/probcut/sprt.json"
+    },
+    "sha256": "202d616d445e432de3861639026bbde3f060e9015255af2b9e2c56ba3d92ec37",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+probcut",
+    "games": 2001,
+    "wdl": [
+      840,
+      308,
+      853
+    ],
+    "llr": -1.3654,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/promo-bundle-confirm-20260909/sprt.json"
+    },
+    "sha256": "0eb846165d2d74034c9c35c6e6450d8b1c909f3a6fe2a346c050c88698cce32e",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+inv1-winners",
+    "games": 801,
+    "wdl": [
+      402,
+      100,
+      299
+    ],
+    "llr": 2.9738,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/razoring-gate-20260910/razoring/sprt.json"
+    },
+    "sha256": "fe0683e0874854b11853b2e56870effef088333ddd0487b51f8a75843f1074f6",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+razoring",
+    "games": 2000,
+    "wdl": [
+      873,
+      270,
+      857
+    ],
+    "llr": -0.4003,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/recapture-gate-20260910/recapture/sprt.json"
+    },
+    "sha256": "ac8cdb2755f78492259f6c1af5b2193e124e9abac08e0d806e2c7f24058fbd75",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+recapture",
+    "games": 2000,
+    "wdl": [
+      843,
+      294,
+      863
+    ],
+    "llr": -1.5898,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/rootsafequiet-gate-20260909/rootsafequiet/sprt.json"
+    },
+    "sha256": "8980b5df98d7e0896fa20e127e14d94824d31cff4bb76ab1225fbdee41ff67ce",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+rootsafequiet",
+    "games": 2000,
+    "wdl": [
+      855,
+      296,
+      849
+    ],
+    "llr": -0.7318,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/seeprune-regate-gate-20260909/seeprune-regate/sprt.json"
+    },
+    "sha256": "de95d29326a7e5c83444851ee76e92a01fe0d5601df878258985fdb116ee1b44",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+seeprune-regate",
+    "games": 2000,
+    "wdl": [
+      874,
+      289,
+      837
+    ],
+    "llr": 0.2906,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/seeprune-regate-hp-20260910/seeprune-regate/sprt.json"
+    },
+    "sha256": "45d7079d1d11c8a515270c2061951b7c57e24fa0e18034bcd1afc515e18874a3",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+seeprune-regate",
+    "games": 2748,
+    "wdl": [
+      1148,
+      401,
+      1199
+    ],
+    "llr": -2.9585,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/seeverify-gate-20260909/seeverify/sprt.json"
+    },
+    "sha256": "03f6416616b848644a3aeca14390a124e43730326fbc9ac576e8208392a9234b",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+seeverify",
+    "games": 1644,
+    "wdl": [
+      663,
+      252,
+      729
+    ],
+    "llr": -2.958,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/sfprune-12k-gate-20260910/sfprune/sprt.json"
+    },
+    "sha256": "e969724b7b4c275f1c942b23b7bb406827800f640a4985a593a650a7543bcd00",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+sfprune",
+    "games": 578,
+    "wdl": [
+      216,
+      62,
+      300
+    ],
+    "llr": -2.9445,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/sfprune-tc2-20260910/sprt.json"
+    },
+    "sha256": "22973849e57e3cd02254a74fd3c45602a3643c661f37bf78722cdaa06d8bd7bb",
+    "date": "20260910",
+    "baselineId": "champion",
+    "candidateId": "champion+--sfprune --sfnull",
+    "games": 335,
+    "wdl": [
+      108,
+      30,
+      197
+    ],
+    "llr": -2.9583,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/singular-regate-20260909/singular/sprt.json"
+    },
+    "sha256": "34dc59fb9d92f739920123a0cc7b41c5d788784aebaaaf4304b6d1b27c1e06c2",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+singular",
+    "games": 2000,
+    "wdl": [
+      860,
+      296,
+      844
+    ],
+    "llr": -0.4014,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/smallpos-bundle-gate-20260910/smallpos-bundle/sprt.json"
+    },
+    "sha256": "d4fb4b4f7784513666b32b22bed6551c5dfd3a5256d61f1bae7cb9d0226e60ec",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+smallpos-bundle",
+    "games": 1725,
+    "wdl": [
+      785,
+      268,
+      672
+    ],
+    "llr": 2.9545,
+    "boundary": "upper",
+    "decision": "promote",
+    "labState": "SUPPORTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/tt2-regate-gate-20260909/tt2-regate/sprt.json"
+    },
+    "sha256": "2861a28e264123302a7814a5ca3445ad04e49075b8637ff449be8678d8aae223",
+    "date": "20260909",
+    "baselineId": "master",
+    "candidateId": "master+tt2-regate",
+    "games": 2000,
+    "wdl": [
+      871,
+      271,
+      858
+    ],
+    "llr": -0.4984,
+    "boundary": "none",
+    "decision": "hold_for_more_data",
+    "labState": "INCONCLUSIVE"
+  },
+  {
+    "proposedKind": "R",
+    "type": "sprt-gate",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/results/tt2-regate-hp-20260910/tt2-regate/sprt.json"
+    },
+    "sha256": "4beb958e1fca8137a4c7b0cd7bede6d7cf9bfd917e32b52133b462d1d8a82002",
+    "date": "20260910",
+    "baselineId": "master",
+    "candidateId": "master+tt2-regate",
+    "games": 1214,
+    "wdl": [
+      481,
+      180,
+      553
+    ],
+    "llr": -2.9452,
+    "boundary": "lower",
+    "decision": "reject",
+    "labState": "REJECTED"
+  },
+  {
+    "proposedKind": "R",
+    "type": "anchor",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/ANCHOR_2026-09-11.json"
+    },
+    "sha256": "d35bb10714d421193c928b74d857c39a258797a710a5d333e1622eb9341865c8",
+    "labState": "SUPPORTED-AS-MEASUREMENT",
+    "note": "measurement record, not an intervention gate"
+  },
+  {
+    "proposedKind": "R",
+    "type": "efficiency",
+    "location": {
+      "root": "engine",
+      "path": "benchmarks/SF_EFFICIENCY_2026-09-10.json"
+    },
+    "sha256": "89312acbafb800c9c0156684b925234e325633d00eebef083ceba08ed719eadf",
+    "labState": "SUPPORTED-AS-MEASUREMENT",
+    "note": "measurement record, not an intervention gate"
+  }
+]

@@ -130,6 +130,25 @@ Promotion is a separate evidence decision and must expose its control, gates, un
 
 A negative result is still a completed research result. An invalid run is never silently promoted into evidence.
 
+## Legacy intake
+
+The engine and app repos predate the lab. Before Phase 0 assigns permanent identities,
+`tools/intake/legacy_catalog.py` inventories what already exists, so nothing has to be
+rediscovered:
+
+- `catalog/models.json`: every net and calibration (content hash, locations, metadata,
+  exact serialized parameter count, known role, whether training provenance is complete)
+- `catalog/sources.json`: every training corpus (per-file hashes, rows, sampled fields
+  mapped to provenance classes)
+- `catalog/evaluations.json`: position suites, opening books, SPRT gate protocols
+- `catalog/evidence.json`: every gate and anchor record, mapped to lab result states
+- `catalog/engines.json` and `catalog/switches.json`: the engine identity registry and
+  the generated search-switch registry
+- `catalog/manifest.json`: the repo commits the catalog was generated from
+
+No lab IDs are assigned here. The registry imports entries by content hash. See
+`catalog/README.md`.
+
 ## Principle
 
 CVS Lab is not trying to build the largest chess network possible.

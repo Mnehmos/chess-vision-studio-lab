@@ -1,0 +1,38 @@
+{
+  "tool": "legacy-catalog-v1",
+  "generatedAt": "2026-09-14T14:55:35",
+  "elapsedSec": 21.2,
+  "roots": {
+    "engine": {
+      "path": "F:\\Github\\chess-vision-studio-rust-engine",
+      "git": {
+        "commit": "91df20b888efb906e3b168207ae3bbda06ee5b00",
+        "branch": "master",
+        "dirty": false,
+        "remote": "https://github.com/Mnehmos/chess-vision-studio-rust-engine.git"
+      }
+    },
+    "app": {
+      "path": "F:\\Github\\chess-vision-studio",
+      "git": {
+        "commit": "83bffd68006a7c042179a00506137f7d1649c61d",
+        "branch": "master",
+        "dirty": false,
+        "remote": "https://github.com/Mnehmos/chess-vision-studio.git"
+      }
+    },
+    "tools": {
+      "path": "F:\\tools",
+      "git": null
+    }
+  },
+  "counts": {
+    "models.json": 23,
+    "sources.json": 80,
+    "evaluations.json": 23,
+    "evidence.json": 55,
+    "engines.json": null,
+    "switches.json": null
+  },
+  "identityPolicy": "no permanent lab IDs assigned; import by content hash"
+}

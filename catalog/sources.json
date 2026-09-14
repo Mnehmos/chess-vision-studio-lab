@@ -1,0 +1,3505 @@
+[
+  {
+    "proposedKind": "S",
+    "name": "gen9-cvs",
+    "contentSha256": "f4735bdea0ca4dbb41279690cc6de628303fd6e70f63d86f74136af4ab633d88",
+    "files": 79,
+    "rows": 7861317,
+    "bytes": 1130878803,
+    "sampleFields": [
+      "cp",
+      "features",
+      "features_bitset",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "features": "deterministic_geometry",
+      "features_bitset": "deterministic_geometry",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen9 NNUE training shards (train_matrix.py); cp = gen9 corpus label; features = CVS core ids registry v1. Shard metas carry checksums.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00000.jsonl",
+        "sha256": "322fabe5ae6806a483c79b38da2c6999ad9389ea76e01dabafa37a7296b34813",
+        "bytes": 14404361,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00001.jsonl",
+        "sha256": "7bd4dcabac6d8965b8e8f3fea10b0314fc86dec079f0f15356f606d52220d324",
+        "bytes": 14373251,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00002.jsonl",
+        "sha256": "68755b7edac0ee65747d44d6b05cdfbbd0cd0b973fc362f3f4301a9370a72466",
+        "bytes": 14385074,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00003.jsonl",
+        "sha256": "30a596494b86cf203d62b7ec90b2d33472d126f84ed5590d62f06cfdc0854761",
+        "bytes": 14394901,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00004.jsonl",
+        "sha256": "9bbdd67dac773cc8e14e2ffcb20bf22e804fcbb7ee9647fa53034165180207f1",
+        "bytes": 14382852,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00005.jsonl",
+        "sha256": "d7ef4e7924a497524f1f29223661005ad54c981c806d95391b297529eebec373",
+        "bytes": 14388959,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00006.jsonl",
+        "sha256": "b9c6b630bdcf1b4a3f66703e565f1a3f74f045867dbde2e86280047940584806",
+        "bytes": 14387464,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00007.jsonl",
+        "sha256": "f28b71f9585c721d6f9c5b0b8c9b0a8f4845271efd9089fee3a93473da19caab",
+        "bytes": 14381210,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00008.jsonl",
+        "sha256": "0fe2a8be84eb6a3bda4c7030239e8efc4783924ad8bf275d3382abc90cef849e",
+        "bytes": 14386009,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00009.jsonl",
+        "sha256": "8775572480d3e6f30163a6fa0d492e8f87ee93c94ad71d41f628f4f2e8310ec2",
+        "bytes": 14399047,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00010.jsonl",
+        "sha256": "145595757b6b17e6f561c45b155c2d9868c878a97948ee4098eb54de68602418",
+        "bytes": 14384371,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00011.jsonl",
+        "sha256": "2c15fbbe94d10bac5bc403b9f06ac4828988b69ad7bb2c7b7dd59f64aedc31b8",
+        "bytes": 14393200,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00012.jsonl",
+        "sha256": "1805b0a4438b058981f50405fc093c9ca7f88b6651e3cdca3445ce8416173a56",
+        "bytes": 14388516,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00013.jsonl",
+        "sha256": "9ab23d68a857c3dd7f6cff097929b08e2ebaddab1b7ee040c3408d8faffb1727",
+        "bytes": 14388262,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00014.jsonl",
+        "sha256": "c3e83f63935c44597c9f81287a14162f24cb69985cb2c3167614c2b6e898b214",
+        "bytes": 14370729,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00015.jsonl",
+        "sha256": "cf47086cf974741588361e2c60d1ac59baa791faeb9786670f751bed383e728f",
+        "bytes": 14389795,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00016.jsonl",
+        "sha256": "48ceb13baee2fdfee857c7aba5d382b9db560a8bdba4dc6177f53df413dd8786",
+        "bytes": 14376160,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00017.jsonl",
+        "sha256": "e99576d92b2bdf23d4956191c2b854e40e47fdd66a7d15d0746158df18b2a589",
+        "bytes": 14384928,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00018.jsonl",
+        "sha256": "61b14391b404539d0d741f79ebea3badb44836c201ab657fb08419b03246b114",
+        "bytes": 14402550,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00019.jsonl",
+        "sha256": "69342a9c6d3785384efee2e1c0c9ac8f83b6b5fbd063edee7e3a3ebde2c36562",
+        "bytes": 14387759,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00020.jsonl",
+        "sha256": "80d83177d16f44163ac08ed688a6547be6074b13d60a56ea6a08350798874c17",
+        "bytes": 14380740,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00021.jsonl",
+        "sha256": "4edcd71a51fa21846d2f1b40c097df2e2505c49c538e4afd433b89210d40010d",
+        "bytes": 14383016,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00022.jsonl",
+        "sha256": "c9fb3cb42514c662e2b485557d0f1984a747c81b77a24612d5b016815fcc59c0",
+        "bytes": 14386440,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00023.jsonl",
+        "sha256": "629bd10b04e1d0035436c35d66a56de71883c451b780b77d9fc4d888483ff3f2",
+        "bytes": 14381914,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00024.jsonl",
+        "sha256": "3b22a21e37be9fa2528eee8e5936342953ffc7a51744262d8de71d0470781600",
+        "bytes": 14391519,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00025.jsonl",
+        "sha256": "6a866ae8bda4a0710ccf82152a08ceebbaf2e01a3492d6078560fbabd7c1b257",
+        "bytes": 14373236,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00026.jsonl",
+        "sha256": "89ac8bade59f103615f026fa89e11e0f199370886b79eea90658e243a559382b",
+        "bytes": 14388034,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00027.jsonl",
+        "sha256": "22e50e7e9c744d9002d10b827cb055bc7b78bdb6e32af3f5046ac1499bd94aac",
+        "bytes": 14393139,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00028.jsonl",
+        "sha256": "4ced404ea70fd2664bb7daac9677467cbebe235b13c9a2072808491a7ad747c6",
+        "bytes": 14371907,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00029.jsonl",
+        "sha256": "389bab8d22faf7112aa6e536b5dc6c70fd3eca1047c860c4f1df9bd2257ebfb2",
+        "bytes": 14395869,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00030.jsonl",
+        "sha256": "20cd40106b9455ba07392f6c7ead7a1b467d9acf1a0370b39241680335d3c9cb",
+        "bytes": 14387196,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00031.jsonl",
+        "sha256": "3ca5444d68e72366e911b6e2d04175f3fb89b9d96d8f1b09bb4f352592c95b50",
+        "bytes": 14394954,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00032.jsonl",
+        "sha256": "5d834d1975841e79a3ff600304b14b4740e623e83198ac83a1b0e4924bc92a25",
+        "bytes": 14383286,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00033.jsonl",
+        "sha256": "9d8812dcaaa04e189acce411c211b1ddf59fd5f8b25b06cf1f07157b46c98b6d",
+        "bytes": 14378845,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00034.jsonl",
+        "sha256": "3f3b47be39980d8742625c5ff0c7c6fea3edf87e35dbdba1c34f739cb5878306",
+        "bytes": 14390931,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00035.jsonl",
+        "sha256": "97fe6e4aad286a337d5668acb29b599f19ebf1e2663d2642857602c285694d23",
+        "bytes": 14384920,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00036.jsonl",
+        "sha256": "a82b996b1a11de81d5dabcbbbefc6703b84d987ac424a944bc4f7438ce218210",
+        "bytes": 14383510,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00037.jsonl",
+        "sha256": "08a696a7a94e977f370a1182dd19c1278c36b5786ad61fc953e5ed7a11caa171",
+        "bytes": 14387312,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00038.jsonl",
+        "sha256": "8729fb51034ebf3ededb869c9a553a27f8f17c0bc468021e3c3e7098e048c7c1",
+        "bytes": 14377376,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00039.jsonl",
+        "sha256": "e53e4de3e26e78a2b67cb654f0f601dbc3e15d2b21e0344112805b2fc6c01037",
+        "bytes": 14390162,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00040.jsonl",
+        "sha256": "7a21076070ef90c46f015b8f240beab97e3ed926fa768228de19e620ce89e51a",
+        "bytes": 14376990,
+        "rows": 99996
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00041.jsonl",
+        "sha256": "3dc51afb45b48ae5e27529761484fc79ef25d1ac34d5286ed29f3874a99da4bd",
+        "bytes": 14389946,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00042.jsonl",
+        "sha256": "a4ff48741fe4ae4fe1f6f375a3f953dc96602f93ad6c64c189f2c8dcdbe51512",
+        "bytes": 14372277,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00043.jsonl",
+        "sha256": "37daf4b4a281a22b0e236791ff0ff66feb780eb95e6e7b289e34f10811000cc2",
+        "bytes": 14381491,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00044.jsonl",
+        "sha256": "fc534b2826a094e7715e9fe750fd88ca1ba578fb53a041eb0650ec408115835d",
+        "bytes": 14376696,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00045.jsonl",
+        "sha256": "fe6d53d6aa13af4c48b9cd6cc44f62fec4bcecef5a04b65738a88966b66da465",
+        "bytes": 14387082,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00046.jsonl",
+        "sha256": "f48bc1f03b89956c43fcb2740f50ed8d91b5cfefa5eb1d6f3b63609f477bea8e",
+        "bytes": 14380376,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00047.jsonl",
+        "sha256": "c392ee8ee9f36e7a71a078e6eb3a0776e069be0592a8c955271b319953eccdce",
+        "bytes": 14384282,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00048.jsonl",
+        "sha256": "9e233e1dbb06a67a0c0f554dfaa296d6483824e02d40ee256844b059052af097",
+        "bytes": 14393018,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00049.jsonl",
+        "sha256": "9429a3cb476ee23b43eac6e33e3ad76ecc7513f8a2143bd63962bf532fb97c7a",
+        "bytes": 14378970,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00050.jsonl",
+        "sha256": "c0623dea92fbed21152a9576b52aa5fecc049da58529bf81aaa4fea89ee64a68",
+        "bytes": 14387698,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00051.jsonl",
+        "sha256": "6b23caeb396c0f2c2981a44fef25895fbe74c20d225ba5a077bffeab79118ea6",
+        "bytes": 14385853,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00052.jsonl",
+        "sha256": "aef19c5fa0edc65fcb86bb4776bcff918cb077da985270d67453f7727cbbab06",
+        "bytes": 14390528,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00053.jsonl",
+        "sha256": "736f32177a8df0416951d49ce8c0bcb9586d152a61b66f8b952f48a0f4d02806",
+        "bytes": 14383156,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00054.jsonl",
+        "sha256": "097c7c34ec72867277902f470edf6fff8349c4efd80d1a1bfd9ce78b37a3da5f",
+        "bytes": 14384875,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00055.jsonl",
+        "sha256": "8711945cb9f96ccdd8491c101312ac890b20fb09e4e6b0566ed4a7aeb20c7518",
+        "bytes": 14384714,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00056.jsonl",
+        "sha256": "376f26451f33b0a44552a996a0f8c77641df1ee472e4f3729f1aaadc3c4250a0",
+        "bytes": 14389695,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00057.jsonl",
+        "sha256": "a69277f22ec0b389e4a2e57c00358854bdd3c1481fbd2a3e77ced7ff68c69cb2",
+        "bytes": 14375759,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00058.jsonl",
+        "sha256": "1a129adab8ecab60c61e11192fa88ca0d241836b36c6a4ed5e0a8123a534ac84",
+        "bytes": 14399007,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00059.jsonl",
+        "sha256": "b1e5ce2e21eef08de5687621084cdfb95396d00fcc9a282ba0be8c573c987b64",
+        "bytes": 14390528,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00060.jsonl",
+        "sha256": "aba692ffdee1608425db80b001857d76c4fd3f00c5da70df029d0db9398c257f",
+        "bytes": 14385865,
+        "rows": 99986
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00061.jsonl",
+        "sha256": "6746bfc9d3bf08d4068a1e56312f0f3a6bcfc37987881b16c2a3e660fd9f4353",
+        "bytes": 14382762,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00062.jsonl",
+        "sha256": "fe62631d8887d016bb04001858d72d1bfee3c725a22e46cbc5ef11c437b9dc93",
+        "bytes": 14383423,
+        "rows": 99985
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00063.jsonl",
+        "sha256": "89dffe68b312963102897db976fe79ce20b791652d9a2a0e94ecf51756e1b2be",
+        "bytes": 14383390,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00064.jsonl",
+        "sha256": "f308bfaf4c46e021081898645ae1955bbedc4f78b8786fabe05d8b0cef308f57",
+        "bytes": 14398266,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00065.jsonl",
+        "sha256": "c2c3f7f5eec1340ae2f14afe239b6799523ff43008bde9fb6b479430b7f996f3",
+        "bytes": 14377723,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00066.jsonl",
+        "sha256": "88c66d1cba22e231f8ce01ad7f73427a0bcbb3f1e184417a5c5223a44480c8f6",
+        "bytes": 14382533,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00067.jsonl",
+        "sha256": "69843f69683c4fa4128a3a8bca0e4ee947a0b703c9cb28a590bad37d798c1e7e",
+        "bytes": 14375978,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00068.jsonl",
+        "sha256": "485b9400a745580a88c4243fbe2d504b14b0963aa23bf36d001c24715ab32153",
+        "bytes": 14368693,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00069.jsonl",
+        "sha256": "636ed06c3b6b8ced45783a8274a369eb7af57e814ef93923898ffb7e6fc4562a",
+        "bytes": 14388313,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00070.jsonl",
+        "sha256": "d5a445fb3c29d99ff1ed819ef6f60f284116a9ecea71abcb6bc96178eab0143f",
+        "bytes": 14393377,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00071.jsonl",
+        "sha256": "07f786817d5ffa735ac0ca2374583d7f7a0e57f7db437c56e400954a9bb0d075",
+        "bytes": 14381277,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00072.jsonl",
+        "sha256": "f8e6f406bb4d91ba1a059a65bcf91cc29d6225171d6182c91fb78d3481885255",
+        "bytes": 14387287,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00073.jsonl",
+        "sha256": "8c9c2fab5108945ec377e7074fcfb50911b8bdf0fbcd1dcc60ca214d22c412f9",
+        "bytes": 14372880,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00074.jsonl",
+        "sha256": "d6b5ed5b61b78954c0e420f9aad71f495e1af830cc691cb2cb754b3baf0d32b8",
+        "bytes": 14378464,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00075.jsonl",
+        "sha256": "a011c8e0da46d5d005fc8fb92720cb3a4a24c1aa33e79b30a4bccf6a485b3c28",
+        "bytes": 14389262,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00076.jsonl",
+        "sha256": "88367838faf30dca9c6f01ae9eff0ee0df933484eb7556b247e95535ce9142c8",
+        "bytes": 14384448,
+        "rows": 99999
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00077.jsonl",
+        "sha256": "65d4ed6a4c592725d2a5fb6065c84bb68729b44c18b976a1b616a501caca5027",
+        "bytes": 14389857,
+        "rows": 100000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen9/gen9-cvs/shard-00078.jsonl",
+        "sha256": "d178c84d6113b2fdd636b096bb4f9b682db8a87175711ee88e7830ead6454a0b",
+        "bytes": 8828360,
+        "rows": 61376
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus",
+    "contentSha256": "e5d269760b0ead767be45ff7e327f0bfb09670736782019f0c7e49422f43bfaa",
+    "files": 14,
+    "rows": 113207,
+    "bytes": 13041972,
+    "sampleFields": [
+      "cp",
+      "cpShallow",
+      "cpStatic",
+      "fen",
+      "stable"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "cpShallow": "external_oracle (shallow)",
+      "cpStatic": "external_oracle",
+      "fen": "record",
+      "stable": "unknown-needs-audit"
+    },
+    "note": "build_corpus.py: cp = Stockfish d16, cpShallow = Stockfish d12, stability-filtered quiet positions sampled from gen9 shards.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-00.jsonl",
+        "sha256": "701a4e83849c718fa90b323c5d60c725a833931bcce80c1ae30d7e636b182144",
+        "bytes": 933017,
+        "rows": 8099
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-01.jsonl",
+        "sha256": "ad965b9c7bf79d5ac4e7caa36f432f58af0939e502a647ee86f22d83f6814455",
+        "bytes": 929179,
+        "rows": 8076
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-02.jsonl",
+        "sha256": "089d386717efaf1142fe8f94198c3d4669744dfd76c6ced666fd88c33b003718",
+        "bytes": 935895,
+        "rows": 8120
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-03.jsonl",
+        "sha256": "30688a26eb9c2832b785f8a6e430b066ff87c38299c613696f3c229099484228",
+        "bytes": 934434,
+        "rows": 8113
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-04.jsonl",
+        "sha256": "ff2eb76cb2cd2839ef35f31a64b7d05e932e60021d6e25f84cfa94bfea053495",
+        "bytes": 926652,
+        "rows": 8050
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-05.jsonl",
+        "sha256": "a1d19263f5ba8e5b3d8028f1787fdfbf55afe5d21a700b9d777c961c4f1591f9",
+        "bytes": 934416,
+        "rows": 8112
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-06.jsonl",
+        "sha256": "1ea5488bfe922424a6775e18fd5f91fbfab3cfd20254315efe012207e5a65db6",
+        "bytes": 933644,
+        "rows": 8103
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-07.jsonl",
+        "sha256": "4fb98d4d65e96f81dbf89df5551b98b53ac35dd1abcf18dc08b44ae835dcad43",
+        "bytes": 932916,
+        "rows": 8086
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-08.jsonl",
+        "sha256": "1dcac9dd9aa55020a3cffee391557a3cf035c132d989d7771737c16e879eb9b5",
+        "bytes": 928901,
+        "rows": 8069
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-09.jsonl",
+        "sha256": "b1db81966c48b35cbd81c457296f5560c1d6a80ace0036648cc2d88e6cd091af",
+        "bytes": 927829,
+        "rows": 8055
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-10.jsonl",
+        "sha256": "e814157bfd7394d6f91f08dc0ab96bbfd6f72c7968f071492322d7f1353b6871",
+        "bytes": 932756,
+        "rows": 8097
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-11.jsonl",
+        "sha256": "e03a3a6f3ad0c0b9c144c719ba2b5715bbb48fc6108ff6c9df9c06c6b367223f",
+        "bytes": 930026,
+        "rows": 8072
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-12.jsonl",
+        "sha256": "eb6038ba5e659df13749fe103fa93f9e582af55bc2e3ed7c18bca3fcef09c318",
+        "bytes": 930415,
+        "rows": 8070
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus/part-13.jsonl",
+        "sha256": "fb64bd6f4e74fd10b1a40f93a8df02341e506ed7dd3a7c1876adc2dce8376baa",
+        "bytes": 931892,
+        "rows": 8085
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus-d20",
+    "contentSha256": "a2576682816f6f55f5e0465534e080b7deba212956b2a9a0c85d91f2a43ecd5e",
+    "files": 14,
+    "rows": 599363,
+    "bytes": 142945056,
+    "sampleFields": [
+      "cp",
+      "cp_play",
+      "features",
+      "features_bitset",
+      "fen",
+      "label_depth",
+      "label_nodes",
+      "res",
+      "sf_best"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "cp_play": "search_derived",
+      "features": "deterministic_geometry",
+      "features_bitset": "deterministic_geometry",
+      "fen": "record",
+      "label_depth": "external_oracle",
+      "label_nodes": "external_oracle",
+      "res": "game_outcome",
+      "sf_best": "external_oracle"
+    },
+    "note": "run_generation.py (Railway): CVS NNUE self-play; cp = Stockfish d20, cp_play = CVS play-depth score, res = game result.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00001.jsonl",
+        "sha256": "a6fcf399c0056aed1fce1abb031354da10243f76fd27e4eec6eee4a89b140599",
+        "bytes": 10196672,
+        "rows": 42740
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00002.jsonl",
+        "sha256": "ee137eb7bf2b81849c666477ac73693a4a0f30c4949ee03ddc92fdc18fff6338",
+        "bytes": 10176873,
+        "rows": 42662
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00003.jsonl",
+        "sha256": "cd5c1bc7d7e5fe2e11fd78a3648f75b328a1c7f46c96f757c2f06d922a1274db",
+        "bytes": 10230466,
+        "rows": 42902
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00004.jsonl",
+        "sha256": "80cb0f7d0d10a21b8c4d429c182b5940de787ae61190fe39f95a35bf3bce86af",
+        "bytes": 10202352,
+        "rows": 42786
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00005.jsonl",
+        "sha256": "fa7b25235ea8230e4a4be1512ef3a40040855c3b276011d3309df0cdd20277f5",
+        "bytes": 10219325,
+        "rows": 42850
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00006.jsonl",
+        "sha256": "5afc8ddcfa7511afbb48c358793ba130cf2eb4f7aeef9a656a9778d0d769968c",
+        "bytes": 10205726,
+        "rows": 42796
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00007.jsonl",
+        "sha256": "fc776551230356ebfbc32000b06814a7d8f1bb1119a6f5362c685079c6eb4f06",
+        "bytes": 10205282,
+        "rows": 42793
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00008.jsonl",
+        "sha256": "9a2ecbddce9069edefd6eb8f926c91040a90bcb1dffb13528f18c27cc95777bb",
+        "bytes": 10241853,
+        "rows": 42953
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00009.jsonl",
+        "sha256": "d5becd9ccd9192c0a8a625fede21c03f62e2671741cae61c64ed25e7fc2b6b66",
+        "bytes": 10215469,
+        "rows": 42823
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00010.jsonl",
+        "sha256": "14012856f8a6a7e590e86c716260fff22f2bb54c1d148420a9acef6e5637cd02",
+        "bytes": 10213161,
+        "rows": 42824
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00011.jsonl",
+        "sha256": "7964bf072ef16bae51a94127b3130bd6ca04bbaf55f56923a31b1c8febccb887",
+        "bytes": 10192791,
+        "rows": 42733
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00012.jsonl",
+        "sha256": "68c967bb0b5be8f7f5b78bc3c4d011acbe8b7c2099526694dfeca32489fcec6a",
+        "bytes": 10225019,
+        "rows": 42872
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00013.jsonl",
+        "sha256": "05533b812a062266a8240263b83ad0abbfdf290514791dcd48f1ec9764bdabfa",
+        "bytes": 10207751,
+        "rows": 42809
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20/shards/training-2dab8924-7d5-00014.jsonl",
+        "sha256": "3dcf28ce6be747e7b7dd76c60734d0a92ed456275ffca282a03daf59aab14827",
+        "bytes": 10212316,
+        "rows": 42820
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus-d20-local",
+    "contentSha256": "ec5c9875e47333d03def2e13fc9e8e20b8270c55dc45ba2e0ea1cf732dab2783",
+    "files": 10,
+    "rows": 253113,
+    "bytes": 56905941,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "run_generation.py local run: same row contract as corpus-d20.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/selfplay-DESKTOP-KF0S-00001.jsonl",
+        "sha256": "5887676a5fe08ccac2de1e56aeb11e826d71a6dc87632babbf5174a315e1f216",
+        "bytes": 2054418,
+        "rows": 25219
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00001.jsonl",
+        "sha256": "91d877984763977dacc574121329c7bd55e791242e78ca3c07e4f8efeef6e5d7",
+        "bytes": 6100129,
+        "rows": 25344
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00002.jsonl",
+        "sha256": "7eab8fd24bcb4b8b118b32b4339bde7fc7eb436393f0ff96b8c53f47759e2d36",
+        "bytes": 6087467,
+        "rows": 25292
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00003.jsonl",
+        "sha256": "6811086e6e497ba87e233391e7f2bd073eeb28f71399a64d04f7d4153a6e41f3",
+        "bytes": 6087390,
+        "rows": 25292
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00004.jsonl",
+        "sha256": "c0783b58fc85b7280545a53a6a6d86d54007c5b05ed1b5a317b8d99144326f8d",
+        "bytes": 6087539,
+        "rows": 25292
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00005.jsonl",
+        "sha256": "bb339a8edf49651f0eaaef991a84137e7c83d07c42fac90aba7e953d2789f02a",
+        "bytes": 6099965,
+        "rows": 25344
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00006.jsonl",
+        "sha256": "3464ce120bd789a6b65a01fb81bb023eccd7a5e2a13de5a22d6e112655c8113b",
+        "bytes": 6100204,
+        "rows": 25344
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00007.jsonl",
+        "sha256": "bafc99cdfed18730345d4ce79e04114ede11673af6d63e64884e67a92ccdf71f",
+        "bytes": 6100035,
+        "rows": 25344
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00008.jsonl",
+        "sha256": "3e4ef3c13eea4b1d6443a748c9ad7ad64a882206151b4efffd8dde69a3387f67",
+        "bytes": 6094407,
+        "rows": 25321
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-d20-local/training-0-00009.jsonl",
+        "sha256": "ea4079be25874092b29c21f20db02383ea54fcd24ce968d941af70deae7ca626",
+        "bytes": 6094387,
+        "rows": 25321
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus-lich",
+    "contentSha256": "160ef29457e76328f31cb8baf01e97ff919b21628c66e9ff252d53ba7033d86b",
+    "files": 3,
+    "rows": 21168494,
+    "bytes": 1430512020,
+    "sampleFields": [
+      "cp",
+      "fen"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record"
+    },
+    "note": "Lichess evaluation-database extract (app arena/evaldb_extract.py) used for gen10/gen11 training.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-lich/lich-d16-40m.jsonl",
+        "sha256": "0143040dde1f19b9139739e9b3f6e1847b848b280343f001be0ad045c207ed9b",
+        "bytes": 1020001359,
+        "rows": 15124665
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-lich/lich-d16-v2.jsonl",
+        "sha256": "c049b542d4e3c8bf81ff4ea39887d6cef5c45902d106b8a5e3d6904359263a12",
+        "bytes": 407087952,
+        "rows": 6000000
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-lich/lich-d16.jsonl",
+        "sha256": "1b746d45e2daf9c2ebb4252aae22c965f3ed20639cdd58aa1c84f6ab207d03b5",
+        "bytes": 3422709,
+        "rows": 43829
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus-static",
+    "contentSha256": "0085bf8d59077ea4400f5002f212af3b52e7fb2f599a25c9d2748a5b39ace8e5",
+    "files": 14,
+    "rows": 1500000,
+    "bytes": 182739399,
+    "sampleFields": [
+      "cp",
+      "cpShallow",
+      "cpStatic",
+      "fen",
+      "stable"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "cpShallow": "external_oracle (shallow)",
+      "cpStatic": "external_oracle",
+      "fen": "record",
+      "stable": "unknown-needs-audit"
+    },
+    "note": "build_corpus.py --depth 0: cp = Stockfish static eval (static distillation), 1.5M quiet positions.",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-00.jsonl",
+        "sha256": "b917119dbbd9cd8c95aad038ba9ef16e7114de6d8c924da31544b2f3edaa7a61",
+        "bytes": 13047498,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-01.jsonl",
+        "sha256": "eada8bf7d073951e8028af9f2cfc81e8c59168a30ea4106006b7045bcdccc527",
+        "bytes": 13048511,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-02.jsonl",
+        "sha256": "fd487eacc79d231ad16c22b160fe3c9b5d1110d8d3ff5640c771e5fe8410da7e",
+        "bytes": 13054929,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-03.jsonl",
+        "sha256": "1769888519cb6597ab4aba4319c039ea1737a12e00a34a1ad9af827e40a6d108",
+        "bytes": 13048066,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-04.jsonl",
+        "sha256": "665127ecc628f25dacde8e077df6bab98b4da5da067bebe545024642b5d31a88",
+        "bytes": 13054248,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-05.jsonl",
+        "sha256": "aab78e04bdc7e70867d05e74e7bd2c6d34e401b08105ce8ca204698f70f33903",
+        "bytes": 13052611,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-06.jsonl",
+        "sha256": "9d74a13bb8db4ca6d206dcabfaafd20a30b1ca10871973d527e078a81d3c7748",
+        "bytes": 13058618,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-07.jsonl",
+        "sha256": "0ab32c9dfa4f3d820549ece0287329d56d2d73174b3f3d85bc37f4f8b0e1404e",
+        "bytes": 13058033,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-08.jsonl",
+        "sha256": "a686ed94b7b2917f0b15b5fca352a531c2427612e34ad28e6a6daef64e86949c",
+        "bytes": 13053790,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-09.jsonl",
+        "sha256": "e3b5b9eacc274b02e8ef7480e95287d4d43b86ca52743a09f270b87a00bc7627",
+        "bytes": 13052182,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-10.jsonl",
+        "sha256": "ed873c69ff88b835460b7be64e689e8bcc06e735eeea86178087cbaf71359e7d",
+        "bytes": 13050314,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-11.jsonl",
+        "sha256": "c968837893af06651b3d8378e97665eff0dd25064fd320eddf204ef2630c6201",
+        "bytes": 13050381,
+        "rows": 107143
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-12.jsonl",
+        "sha256": "11a9ec9bdf4451a3003d1f45a62f0ca7cfef7d28f17cc03e857c93d10f70ee27",
+        "bytes": 13057097,
+        "rows": 107142
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static/part-13.jsonl",
+        "sha256": "e7ba244a4fa86c732811e348c64a9bd7d76588b7e0d859d32dc408632957d272",
+        "bytes": 13053121,
+        "rows": 107142
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "gen10/corpus-static-full",
+    "contentSha256": "386e45a4f443dd2026c22140a6609fcef41dc48112e6f47f295bb6019290e826",
+    "files": 14,
+    "rows": 4143821,
+    "bytes": 508203058,
+    "sampleFields": [
+      "cp",
+      "cpShallow",
+      "cpStatic",
+      "fen",
+      "stable"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "cpShallow": "external_oracle (shallow)",
+      "cpStatic": "external_oracle",
+      "fen": "record",
+      "stable": "unknown-needs-audit"
+    },
+    "note": "build_corpus.py --depth 0 over the whole gen9 shard source (4.1M quiet deduped positions).",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-00.jsonl",
+        "sha256": "699e39610c741d80bfef4b3de8e25f23307920885e2308f4dbdfb1212d568818",
+        "bytes": 75507003,
+        "rows": 612742
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-01.jsonl",
+        "sha256": "b7da78f6fb847ba008ae897c4f867632c6c8876791ec28e483734e929aa70142",
+        "bytes": 75487559,
+        "rows": 612742
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-02.jsonl",
+        "sha256": "d4892edbfe362425af211fd88c9f6bf9caa83bd200d11e63408252386e343d81",
+        "bytes": 75472703,
+        "rows": 612742
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-03.jsonl",
+        "sha256": "9495e06c5c989febe9928c20ee09960eeebbd1d16439bb5484f83988dd9e499b",
+        "bytes": 75502761,
+        "rows": 612741
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-04.jsonl",
+        "sha256": "62b70177c5c26574bf1f9721993350c6f7a6b28999d19c9e8e03b65a5c0fffde",
+        "bytes": 20619931,
+        "rows": 169286
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-05.jsonl",
+        "sha256": "5c5f27d972b3899232607f2d8d18f7b0168d881166e7281727246d36a157dc72",
+        "bytes": 20622965,
+        "rows": 169286
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-06.jsonl",
+        "sha256": "4d3430fd8c1227ec7e8b251613073d4db37539d171b3afce143389b6eb569927",
+        "bytes": 20629377,
+        "rows": 169286
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-07.jsonl",
+        "sha256": "c618d4cf51e0e1ef763a4d0793eb0b1109f96b4a11dd102c231c25344e1491e2",
+        "bytes": 20622957,
+        "rows": 169286
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-08.jsonl",
+        "sha256": "2c758041b3c487d61a96c13e62f90c8e2423a72cee5491b397ec8a626c53988f",
+        "bytes": 20627289,
+        "rows": 169285
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-09.jsonl",
+        "sha256": "92ada1b3691ca12462d7f5bac6eff57ab1b4ac35e5760affa429d093589f51b5",
+        "bytes": 20627100,
+        "rows": 169285
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-10.jsonl",
+        "sha256": "43206c1a24968e04c81ecb1818ecc4f8c51989b71d040999aa829e817ce971fe",
+        "bytes": 20619252,
+        "rows": 169285
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-11.jsonl",
+        "sha256": "b7471502c4b614954cb28e0f91f51fda75280322e8b73bd9d53840183c5cfb0d",
+        "bytes": 20616144,
+        "rows": 169285
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-12.jsonl",
+        "sha256": "7dbfaab1bf85901e7e91bdaaccf4293d18daeb2774ce585da13cbace89f21b0b",
+        "bytes": 20626122,
+        "rows": 169285
+      },
+      {
+        "root": "engine",
+        "path": "training/gen10/corpus-static-full/part-13.jsonl",
+        "sha256": "09a3e99b3924429f90bb39102644703f1833dfd94ec760724865c4576ba6d0f0",
+        "bytes": 20621895,
+        "rows": 169285
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/endgameq-d20",
+    "contentSha256": "66f308630e54d19f4b708ee62c7f8789d0ccb41e6488f4f259c0c0395ef8fb76",
+    "files": 1,
+    "rows": 715544,
+    "bytes": 48938307,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "endgameq-d20.jsonl",
+        "sha256": "8047200986bd6189a9c41f22d5e77b7d649fcd241b9b93c09fc1cdba7986eebe",
+        "bytes": 48938307,
+        "rows": 715544
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen8-public-endgame-d20",
+    "contentSha256": "06cece4c015e752f0b04eefdfa049f3985bf63d8818805a22b0d0d1b2b9812cb",
+    "files": 1,
+    "rows": 1000000,
+    "bytes": 68874237,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen8-public-endgame-d20.jsonl",
+        "sha256": "57215ee814f22d93d90356dc17c64354c7d64fe1286374d06bfba66c44830977",
+        "bytes": 68874237,
+        "rows": 1000000
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen8-public-lichess-d20",
+    "contentSha256": "22075d4a428cdfad2569dee5221771fa984ae7a15888a26838fb5fca3423fdf0",
+    "files": 1,
+    "rows": 5000000,
+    "bytes": 425257601,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen8-public-lichess-d20.jsonl",
+        "sha256": "a400cf236c9e4f0c2e9413230a949fb5fe61bb25c18130b6e2ca5fea8f3b4dd6",
+        "bytes": 425257601,
+        "rows": 5000000
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen8-train-corpus",
+    "contentSha256": "ffc4e17441f1f7b47c87449c326bee6e5a5f1194f6e82a083be632b9c954b832",
+    "files": 1,
+    "rows": 6159020,
+    "bytes": 507078658,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen8-train-corpus.jsonl",
+        "sha256": "a6953c0a01aebfaa073c010cf3e5277d9520a91f16b0718dac8826625e71079d",
+        "bytes": 507078658,
+        "rows": 6159020
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen8-train-v2",
+    "contentSha256": "e291d5856b03a1059f9d90aad4e30698ac6df2b88cffb1808695fe68f78fa988",
+    "files": 1,
+    "rows": 5041938,
+    "bytes": 422515733,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen8-train-v2.jsonl",
+        "sha256": "0efa553b53ac75f9f0c7351d2b522d8e32dccf33e547c369d2985fa4d76007ce",
+        "bytes": 422515733,
+        "rows": 5041938
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen9-d20-train-test",
+    "contentSha256": "c1577ba393e18b617b0104b3c666ae7e8153290e35323d921e9f1d78a3949117",
+    "files": 1,
+    "rows": 219820,
+    "bytes": 26359773,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen9-d20-train-test.jsonl",
+        "sha256": "111d60e77ae0113983a5abc4e64ed687146d69562007e1c4fa3358d6ff6d46e1",
+        "bytes": 26359773,
+        "rows": 219820
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/gen9-train",
+    "contentSha256": "1de7aa374c672b39945ea628b8506eef3017dc0bbb2ac856d723390901d07b0e",
+    "files": 1,
+    "rows": 7861317,
+    "bytes": 755273951,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "gen9-train.jsonl",
+        "sha256": "6d9e4efe168d23c63a82a7c72bbea3346e082e79a969ce872e1300e6d321b5ee",
+        "bytes": 755273951,
+        "rows": 7861317
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-00",
+    "contentSha256": "bbb611e3e7dd8320cb58a0eebd4e06f6432743f8639cc3affc17138e73b41f68",
+    "files": 1,
+    "rows": 530931,
+    "bytes": 63848611,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-00.jsonl",
+        "sha256": "0efad76f6f2f76d72f8f1abb4cd9d245fe785dbbe8d30c8d3365510f6de003a1",
+        "bytes": 63848611,
+        "rows": 530931
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-01",
+    "contentSha256": "72ecebc9cb58a91300ad68fdb360d8e722dcd89b7aa6664331fc220b00b4c8a9",
+    "files": 1,
+    "rows": 534100,
+    "bytes": 64229894,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-01.jsonl",
+        "sha256": "3f7dc6bcdeb79c9f42ca89f62edbea5ce40930630d23d930cdd8c74c70925837",
+        "bytes": 64229894,
+        "rows": 534100
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-02",
+    "contentSha256": "b3d8750243628202715d2e3f1008107a311e589810497537d26d76f48c769087",
+    "files": 1,
+    "rows": 534093,
+    "bytes": 64226771,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-02.jsonl",
+        "sha256": "5c248aff52887595b7cf43d80c85e652789316a98088ee588d125c6b0954fa6c",
+        "bytes": 64226771,
+        "rows": 534093
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-03",
+    "contentSha256": "eb637696d2492c3f2573c23071f0b28d1a97826da764a10e9a41623a8994202a",
+    "files": 1,
+    "rows": 535324,
+    "bytes": 64375979,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-03.jsonl",
+        "sha256": "1cfe2df00af4e919dda8e72b8089668655270b8c9245f4d58f96bcfed906e2c9",
+        "bytes": 64375979,
+        "rows": 535324
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-04",
+    "contentSha256": "ba3ebd499ac09335754abb5916d9bec83208c2456a96a3bab5985ac9dc3a174c",
+    "files": 1,
+    "rows": 536998,
+    "bytes": 64578862,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-04.jsonl",
+        "sha256": "f291aa02393869d96b8d500d3c68b1e9f5fdd38f2cae44f81b593737bf54d798",
+        "bytes": 64578862,
+        "rows": 536998
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-05",
+    "contentSha256": "574b02fdd22d9d413c471cd840083495020c1b239b273662f278f4e2b6b0195d",
+    "files": 1,
+    "rows": 534657,
+    "bytes": 64296466,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-05.jsonl",
+        "sha256": "ded80e2eb3fbc43d542c0275da12f84939ad4a02f41a4559946fd357d461fe0f",
+        "bytes": 64296466,
+        "rows": 534657
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-06",
+    "contentSha256": "25cb1f0fe0e9260ed17efd1e6bb6e6d295bbc16b3f9eefdb85207ba05c50756d",
+    "files": 1,
+    "rows": 536192,
+    "bytes": 64481781,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-06.jsonl",
+        "sha256": "bd9693228806b7365d3f21d287777810b42efd53d96eccb46c418713400e3942",
+        "bytes": 64481781,
+        "rows": 536192
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-07",
+    "contentSha256": "8f0a2efc23a7b3089a9620956c6333cabf05170ea7e060b201317fb6c2454dc3",
+    "files": 1,
+    "rows": 535938,
+    "bytes": 64451821,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-07.jsonl",
+        "sha256": "ac58125db7cf54417869d78415481c2a34a7a2107eba68d0716aaa68a58b20ee",
+        "bytes": 64451821,
+        "rows": 535938
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-08",
+    "contentSha256": "e2c50678f2df5fa5d05e39edaa8873e4d63f3e961b9cae7a64042705b200d234",
+    "files": 1,
+    "rows": 531398,
+    "bytes": 63904850,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-08.jsonl",
+        "sha256": "953189b90493187ea2c5d3d34e2d108b1524391c58d02816cac1d27e00007e00",
+        "bytes": 63904850,
+        "rows": 531398
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-09",
+    "contentSha256": "54a6485d7eda5de9b82ddfef0d06f364593c935644fb0ba847f394e5b69cd2b7",
+    "files": 1,
+    "rows": 534317,
+    "bytes": 64256623,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-09.jsonl",
+        "sha256": "ef7ddd9f40c1755de9a3435f115c8bbacb8be5590c37e552d8921469d18c1a43",
+        "bytes": 64256623,
+        "rows": 534317
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-10",
+    "contentSha256": "d122414bb9982df13a5f5ea8fcc5b2c2a42c58f27ee8564d221484525a2db1d1",
+    "files": 1,
+    "rows": 536444,
+    "bytes": 64514463,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-10.jsonl",
+        "sha256": "cb4f8507b0ad04a675ee2ea19b079ad4a3764520c6dbd6cfa5d2809f65c00a3e",
+        "bytes": 64514463,
+        "rows": 536444
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-11",
+    "contentSha256": "eaf756e4ac5bad3835ca6aec7f357b9fac32841f62f25cc81d21e43eaaf1c24e",
+    "files": 1,
+    "rows": 535895,
+    "bytes": 64446218,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-11.jsonl",
+        "sha256": "e16d26cb5855dde175f9fbf1640993b231d924c1e134ef4f3b55dcaa800990f2",
+        "bytes": 64446218,
+        "rows": 535895
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-12",
+    "contentSha256": "b3878260b27105b99ef8626a886de10f11a8d3ed27f38245eeb0fcdc378ce54b",
+    "files": 1,
+    "rows": 531115,
+    "bytes": 63871771,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-12.jsonl",
+        "sha256": "e0ec4daffdedc9d50ed24501f141576beb5c0c8c5a3f21fb604cb4ec84a22d04",
+        "bytes": 63871771,
+        "rows": 531115
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/labels-sf-d12-shard-13",
+    "contentSha256": "8e5afae698a6e9807ed225aa1111e61b503b9730ec8d7e05b0c5e0bf3d3443dd",
+    "files": 1,
+    "rows": 532151,
+    "bytes": 63995440,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "labels-sf-d12-shard-13.jsonl",
+        "sha256": "2830edb5910136d035b9fa317688219aa2933861c5b52b3243d860164e7cc03f",
+        "bytes": 63995440,
+        "rows": 532151
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/nnue-data-gen1",
+    "contentSha256": "8fc5f6d2f56d4b9f565269c5b32f62f5e6abbe82851adbbccfae619fbeb22f9a",
+    "files": 1,
+    "rows": 779847,
+    "bytes": 63028606,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "nnue-data-gen1.jsonl",
+        "sha256": "f08873080bee8bef7b6feab10c81115009fae5db10ab464200fc6db3c22aab1e",
+        "bytes": 63028606,
+        "rows": 779847
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/nnue-data-gen1b",
+    "contentSha256": "ea7133ccbceaad211b45de2f412abeaa3b82af1daf79c5675b22cbf5bcf6c111",
+    "files": 1,
+    "rows": 241893,
+    "bytes": 19568322,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "nnue-data-gen1b.jsonl",
+        "sha256": "aa5f94256b90fbf38e308cf5607b1045c4ab95e326347d7a1ed76986c519a66b",
+        "bytes": 19568322,
+        "rows": 241893
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/nnue-data-gen1c",
+    "contentSha256": "a1b1e040716e3187c55f4446a8e2db8d473fce6994e7ce478b0c3f1bb6a11f4b",
+    "files": 1,
+    "rows": 263813,
+    "bytes": 21374360,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "nnue-data-gen1c.jsonl",
+        "sha256": "9f3ef01b8b70dee11fcf7a75d7b316ba395739ca925aecd70ac5eac93508ab9f",
+        "bytes": 21374360,
+        "rows": 263813
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/nnue-data-gen1e",
+    "contentSha256": "ed43216294b39c32db02d638bfd3b22b13966f715a8936b16208726ee93242a6",
+    "files": 1,
+    "rows": 6533759,
+    "bytes": 528047870,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "nnue-data-gen1e.jsonl",
+        "sha256": "e3b6fecff7714a8f7a4b9ac01cc0e7c78fabae5f023010c8097bfe07a665e06d",
+        "bytes": 528047870,
+        "rows": 6533759
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/nnue-data-gen2",
+    "contentSha256": "b0d2289a72068ae2ce5c18843e562db7095d80e5d335a569825ecd246bb5686e",
+    "files": 1,
+    "rows": 1102368,
+    "bytes": 89268185,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "nnue-data-gen2.jsonl",
+        "sha256": "c67007d0e66f011de0eaadfe220173f9e843f0406e6688ff83c5b2af524578f2",
+        "bytes": 89268185,
+        "rows": 1102368
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-00",
+    "contentSha256": "05f2cc1bfcefb2ab24cb9cd3f4b9a3d8ff6d10562a0ca6b68753c8c4a3ddb689",
+    "files": 1,
+    "rows": 344189,
+    "bytes": 40659243,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-00.jsonl",
+        "sha256": "fc87745f27a78c506cd3b07f490af194228412566d3a52d0a6441afcfb66716b",
+        "bytes": 40659243,
+        "rows": 344189
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-01",
+    "contentSha256": "e0d6f7af27d392d9643147b4807483ae2b5c9d31442179fbaf41864873fe9cd5",
+    "files": 1,
+    "rows": 346710,
+    "bytes": 40954961,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-01.jsonl",
+        "sha256": "bbb6633b7db473ead24e79877e0c627a7373f976a91c87d5c9862f67ce9fedc5",
+        "bytes": 40954961,
+        "rows": 346710
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-02",
+    "contentSha256": "a29abfda7b156ffc0a643199aecd0c824a0d868f75d8fafccfe9e8a8880e7b13",
+    "files": 1,
+    "rows": 346972,
+    "bytes": 40990007,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-02.jsonl",
+        "sha256": "b8bb972fe372b0c15e7a32bbaa87bdea4353a991f2b984db73b98e2dfd6ef6e3",
+        "bytes": 40990007,
+        "rows": 346972
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-03",
+    "contentSha256": "ed168a9a40cb4fae8d9087ac30ea64f3db05cba4570573df2f54fe244aac834a",
+    "files": 1,
+    "rows": 347411,
+    "bytes": 41039270,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-03.jsonl",
+        "sha256": "37237267c8df15e14d8831a5e4fe87b9a90b356d7d7f63ed56c2903eabff3eef",
+        "bytes": 41039270,
+        "rows": 347411
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-04",
+    "contentSha256": "90af0c52d94409d41b3d3afc19304b5f1ac6f06486f85211b4dcdccaa0cbd9ec",
+    "files": 1,
+    "rows": 348323,
+    "bytes": 41146766,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-04.jsonl",
+        "sha256": "cc0ccd66a98cd8e46d44a9249700f3c759c27c3e121849132209aba3eab8854b",
+        "bytes": 41146766,
+        "rows": 348323
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-05",
+    "contentSha256": "9908b90fe14032921aa9938b6c6504b8680fc92e1a4da5d9f09fac2f50cc4f56",
+    "files": 1,
+    "rows": 347662,
+    "bytes": 41068518,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-05.jsonl",
+        "sha256": "10727ecb8c7edb147b94f1c5e32cec823397bfe2cb733bde6feda92f4ce2bf53",
+        "bytes": 41068518,
+        "rows": 347662
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-06",
+    "contentSha256": "18fb1195af3e4415f231d099523754e2c59aafd2d1017b5fe6052f4bf330fb3b",
+    "files": 1,
+    "rows": 348466,
+    "bytes": 41162167,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-06.jsonl",
+        "sha256": "044f9c0a653c9a16b5faebdc8237b00690a94dd257861f65b563139ad3267a1b",
+        "bytes": 41162167,
+        "rows": 348466
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-07",
+    "contentSha256": "b282c97dd8d9340d4e118258a805d7b5b6029ef9e00cd90d7d4fbc9d1b31a442",
+    "files": 1,
+    "rows": 348174,
+    "bytes": 41129608,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-07.jsonl",
+        "sha256": "d83da6cd097168f2e7f769d102aa09e375bacc3baf9aba85a1283af235950cde",
+        "bytes": 41129608,
+        "rows": 348174
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-08",
+    "contentSha256": "8cae360f832990b4777383fd716e84fd066dd3533990196b2d98950523b0dba5",
+    "files": 1,
+    "rows": 345576,
+    "bytes": 40823074,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-08.jsonl",
+        "sha256": "64a95b40171f3d2da1a91fbb6631ab3d40b9c5d555847fbbfda1748fc4d99543",
+        "bytes": 40823074,
+        "rows": 345576
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-09",
+    "contentSha256": "7589f841360e0e72adbd449c97c501378c53618572eb5f16c424ee4017851391",
+    "files": 1,
+    "rows": 347573,
+    "bytes": 41061577,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-09.jsonl",
+        "sha256": "3b33dc45263a80e404135af461060a608a5e6758f6391f98617a1cdbd1bca572",
+        "bytes": 41061577,
+        "rows": 347573
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-10",
+    "contentSha256": "63deeac1c108d735fcfd55741cdb132f89676f7c4c8c2fe3ad11ad0fedefcdbf",
+    "files": 1,
+    "rows": 348152,
+    "bytes": 41130793,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-10.jsonl",
+        "sha256": "2332ff09bba91574a47f268ba2b4a97fad41cbd3554031aa27872e0b0cfde0fe",
+        "bytes": 41130793,
+        "rows": 348152
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-11",
+    "contentSha256": "6c6e18611d8d0437f1e89c9a687c43e0269981e90534ade0fbb3a8562144cac9",
+    "files": 1,
+    "rows": 348166,
+    "bytes": 41133919,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-11.jsonl",
+        "sha256": "1815031a05529e0686edd6a7ceb1577aa463d63db5c85583b3b156ac5854ca82",
+        "bytes": 41133919,
+        "rows": 348166
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-00",
+    "contentSha256": "affd481a28f2be7846970ed31abe820a12b922168541b1fc06d19d3baf5aa365",
+    "files": 1,
+    "rows": 175715,
+    "bytes": 20729806,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-00.jsonl",
+        "sha256": "68c617d454eb8d1d5867349172bb6717a0be1fc44d2ba5b6b4856703487ae164",
+        "bytes": 20729806,
+        "rows": 175715
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-01",
+    "contentSha256": "cbce3c1257fe44aab2ef9cc5e02d458d4b8c3ff114340595caccf7069663496c",
+    "files": 1,
+    "rows": 247279,
+    "bytes": 29189216,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-01.jsonl",
+        "sha256": "2c4a86ce7fa92543f234eb263ee094e7124ab3c4e469ca9df0a5e97baf5a4c63",
+        "bytes": 29189216,
+        "rows": 247279
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-02",
+    "contentSha256": "f964dc2da6dcee70d2801b0e73dfab47a686903e65e11e0b62281b68306148f9",
+    "files": 1,
+    "rows": 268431,
+    "bytes": 31692576,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-02.jsonl",
+        "sha256": "43ec406cd31fce571b875519dc7fc4c8a5acba1e7a18743275887bb75cd753d6",
+        "bytes": 31692576,
+        "rows": 268431
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-03",
+    "contentSha256": "cb637dad65806d2aaa38f636178c0ae1f4bd2ca363d83ea73a852d9d4f3676cc",
+    "files": 1,
+    "rows": 246127,
+    "bytes": 29052821,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-03.jsonl",
+        "sha256": "69d282538def889a4c5b059352489eae07c19fac8652c4072546dae79b18ff27",
+        "bytes": 29052821,
+        "rows": 246127
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-04",
+    "contentSha256": "f324866a7299d38ead92dc875f590316cd091683be561a0893f0f611de7e52d9",
+    "files": 1,
+    "rows": 268549,
+    "bytes": 31699392,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-04.jsonl",
+        "sha256": "53824cffc5869a752f0fc90282a690d87fe96407b32edfdeab6d5d5e252d2767",
+        "bytes": 31699392,
+        "rows": 268549
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-05",
+    "contentSha256": "b7fc386fcd8e88f1aad87b0fd9b4f7da9299f602e03344ac15c8aca466d3851b",
+    "files": 1,
+    "rows": 264759,
+    "bytes": 31253595,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-05.jsonl",
+        "sha256": "377dc3798106208a4de1452413dcb031114283d2f46686fd43f388ae5444afea",
+        "bytes": 31253595,
+        "rows": 264759
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-06",
+    "contentSha256": "65d5c90611a79a8f49ff42d039b52bc5f8569470cfd717293771583f1ddc2565",
+    "files": 1,
+    "rows": 254107,
+    "bytes": 29990200,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-06.jsonl",
+        "sha256": "ffad7a64469478bba4c4fc365c2db857aebfab8ee57018bdb910da4e648f1cd9",
+        "bytes": 29990200,
+        "rows": 254107
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-07",
+    "contentSha256": "a6c18edc382d3c1fe089d77b7ade39ec19fc9970afd80924ba49e7060a2a9a8d",
+    "files": 1,
+    "rows": 264950,
+    "bytes": 31275752,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-07.jsonl",
+        "sha256": "ccc66743563662ec6aabe00e6b564f3572d83ff4b649dde2887839be2e4fb6d4",
+        "bytes": 31275752,
+        "rows": 264950
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-08",
+    "contentSha256": "bd3c52e884484bbfa6d5fc1c7d8356c8d52809384cee2b71dc45dc4fc03cb37f",
+    "files": 1,
+    "rows": 235069,
+    "bytes": 27740984,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-08.jsonl",
+        "sha256": "731ba2f49a37efa1db55eea1112325ff97f1c8ec3cfab837da8fc2719c3d990c",
+        "bytes": 27740984,
+        "rows": 235069
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-09",
+    "contentSha256": "9324d7465008d6e4168c0a093bd468c522b41b09381b660543ecb17705376600",
+    "files": 1,
+    "rows": 209378,
+    "bytes": 24705227,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-09.jsonl",
+        "sha256": "56568aeac4fdc15d3e1c863990aaf752a788ba0858e15d46a3d5069b223909a9",
+        "bytes": 24705227,
+        "rows": 209378
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-10",
+    "contentSha256": "91dd9eb45a83f6bbc7706de5108f2102eae174d922ed1dc1100971eb12330ec5",
+    "files": 1,
+    "rows": 220701,
+    "bytes": 26045227,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-10.jsonl",
+        "sha256": "dafbac2567d8f719983c93bb9be569ac86f194eea734f8157dc4886f972faf1d",
+        "bytes": 26045227,
+        "rows": 220701
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-11",
+    "contentSha256": "e1929aeef74d99b78517077a8473b25847f2c4d2dbd08a37f843a83f2ed93abf",
+    "files": 1,
+    "rows": 164314,
+    "bytes": 19383422,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-11.jsonl",
+        "sha256": "15ad8b673b7743db247fc8a2c8b505a56506a62f14e291b08347c1f719df5775",
+        "bytes": 19383422,
+        "rows": 164314
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-packaged",
+    "contentSha256": "2b133aeddd2f28285d2cf2f45a5ec5e55ba96525d1a2f63c9046e849ee2ab94f",
+    "files": 1,
+    "rows": 2819379,
+    "bytes": 332758218,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-packaged.jsonl",
+        "sha256": "4f5de8866daf4b290c58cfd1b68484b51edf8fa73f79551496814159b55997a2",
+        "bytes": 332758218,
+        "rows": 2819379
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-quiet-strict-test",
+    "contentSha256": "890b21bdadfc6a75758d987e9874942eeac3d806c183dd68584bdf11dad8d18b",
+    "files": 1,
+    "rows": 100000,
+    "bytes": 11790068,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-quiet-strict-test.jsonl",
+        "sha256": "1b747d322d848d1961046d3700bb2a904b98ae0e28ca4c973ace20b145a30b98",
+        "bytes": 11790068,
+        "rows": 100000
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-quiet-strict",
+    "contentSha256": "2b133aeddd2f28285d2cf2f45a5ec5e55ba96525d1a2f63c9046e849ee2ab94f",
+    "files": 1,
+    "rows": 2819379,
+    "bytes": 332758218,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-quiet-strict.jsonl",
+        "sha256": "4f5de8866daf4b290c58cfd1b68484b51edf8fa73f79551496814159b55997a2",
+        "bytes": 332758218,
+        "rows": 2819379
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/ourq-d20-quiet",
+    "contentSha256": "2b133aeddd2f28285d2cf2f45a5ec5e55ba96525d1a2f63c9046e849ee2ab94f",
+    "files": 1,
+    "rows": 2819379,
+    "bytes": 332758218,
+    "sampleFields": [
+      "fen",
+      "res",
+      "sfCp",
+      "sfDepth",
+      "sfMate"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome",
+      "sfCp": "unknown-needs-audit",
+      "sfDepth": "unknown-needs-audit",
+      "sfMate": "unknown-needs-audit"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "ourq-d20-quiet.jsonl",
+        "sha256": "4f5de8866daf4b290c58cfd1b68484b51edf8fa73f79551496814159b55997a2",
+        "bytes": 332758218,
+        "rows": 2819379
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-00",
+    "contentSha256": "5edc04a9e0d5417f932d42c86ce89764099674c4b42f05fd930c3d2f041019cc",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40982140,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-00.jsonl",
+        "sha256": "35b3a789403732028230e883dfc7a6c1a13480eb55922da3bd19fd75aaf8789d",
+        "bytes": 40982140,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-01",
+    "contentSha256": "ee79b645ca895d9cf35cb500c73f3033b10832d4585630106daccc54f69c3f23",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40981102,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-01.jsonl",
+        "sha256": "f15219e41e9ead50881154754f2e96e95122ccbbb00943c2c7cdd64d90913d74",
+        "bytes": 40981102,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-02",
+    "contentSha256": "2d2ed3cf13bfff7336861f981315475a97e6572a7fb7f2daf9520dbbd7e423e4",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40978763,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-02.jsonl",
+        "sha256": "0df4f92cd86699e7b40ce35dfb27ce086db74f8bc7815c7732013e639cd73a78",
+        "bytes": 40978763,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-03",
+    "contentSha256": "bb75c1e5dd2c3fb897f03f15c82a77c7dc5e00c69256352ec3a550b53276d41a",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40979522,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-03.jsonl",
+        "sha256": "e4ebe8f4aa191250321b5d321c13d9edc42e7b09329a7067ce07380c7cfb5f2f",
+        "bytes": 40979522,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-04",
+    "contentSha256": "9e8eb06efbcf34df10c3c775edce3696b6548695437ef2d55a89dcf205d401d1",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40980989,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-04.jsonl",
+        "sha256": "ec1f3ec70758cd6a1a7495bb37acafc30c17ed74056be1d74219cab489e88463",
+        "bytes": 40980989,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-05",
+    "contentSha256": "e8e7df163a97d9b2ca6725ba8ef70032c10f9b68748b20cb02b56034ab29644b",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40981071,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-05.jsonl",
+        "sha256": "fe88822ef0994f2be6babc4ae7b2d3824d9a3f435b6e73894c8effec1b931a48",
+        "bytes": 40981071,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-06",
+    "contentSha256": "af7e3c03ab1341d1be3bf2207b505718bd9e665e9113fabffb680e23ca11d79e",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40980462,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-06.jsonl",
+        "sha256": "6b4b0118c3d654acbd7994865699dc3522e87cc93948e312b36114d7cdee7ff8",
+        "bytes": 40980462,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-07",
+    "contentSha256": "12dc4612d2e4861f81eb06ea1a18db57c86b665b59c0d0f3d41e56430b76f4b0",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40982101,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-07.jsonl",
+        "sha256": "a8ccebd77bd4a2b4712901ed65807ec40b32f17f0c8c5dad8de5c8f8cd3d20ae",
+        "bytes": 40982101,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-08",
+    "contentSha256": "1a8509148102562c04e1f079c8f27be5bc8ccc5250169c7a6e5dd21f7141587b",
+    "files": 1,
+    "rows": 537823,
+    "bytes": 40982089,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-08.jsonl",
+        "sha256": "2fba24a0b6960473679b16bc5c0ffc624bf473b0324f09bd88b21f6843cd0bc2",
+        "bytes": 40982089,
+        "rows": 537823
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-09",
+    "contentSha256": "efe37356beec470895cac26f20ba838745301aef0126845ae882348fddae70ec",
+    "files": 1,
+    "rows": 537822,
+    "bytes": 40982616,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-09.jsonl",
+        "sha256": "e4d1bc7c5eabeaac407576e0a23c03b1337bad474048f29da441191e4612487b",
+        "bytes": 40982616,
+        "rows": 537822
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-10",
+    "contentSha256": "a7f5d97d9272c0aa8c47474feea38e086c85099d7a0a61fe1d85142cd447799f",
+    "files": 1,
+    "rows": 537822,
+    "bytes": 40983690,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-10.jsonl",
+        "sha256": "24f6369f63decf5e5819868db8687136373718b584ef9630d43d66ce7bb22d78",
+        "bytes": 40983690,
+        "rows": 537822
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-11",
+    "contentSha256": "cdc9d31f1af072f4a9113c09a43a8dec03d18a5759d73a94c7e9054ceb6d24b6",
+    "files": 1,
+    "rows": 537822,
+    "bytes": 40982650,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-11.jsonl",
+        "sha256": "98a3dfa1a8853e1bafcbd4927db2f15a05c6397927f1f46553373a89c82d462a",
+        "bytes": 40982650,
+        "rows": 537822
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-12",
+    "contentSha256": "c0a0e4ed2e6ea567df7dd1591b003df8a60ba34b9107e4918682f1f843c5fee5",
+    "files": 1,
+    "rows": 537822,
+    "bytes": 40982801,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-12.jsonl",
+        "sha256": "1676ad5367b96e51c38b9aaf0fc32328e3ca9be40750debcf788f59930fa6cdd",
+        "bytes": 40982801,
+        "rows": 537822
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/relabel-shard-13",
+    "contentSha256": "e77f6cf816f9229f57d68bd8d27951eefdfd00c1028d6f81613560aa23a1c510",
+    "files": 1,
+    "rows": 537822,
+    "bytes": 40982260,
+    "sampleFields": [
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "relabel-shard-13.jsonl",
+        "sha256": "bfbeea62ee3b3396994bd2c9240a50a364f672c18150febb2a467bffdbae5a8d",
+        "bytes": 40982260,
+        "rows": 537822
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/selfplay-gen9-20260626",
+    "contentSha256": "5acb243fff411b442d9bf47b55ad9d80b9eb6e3498e3d57902223091ad12f744",
+    "files": 1,
+    "rows": 3691758,
+    "bytes": 298524808,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "selfplay-gen9-20260626.jsonl",
+        "sha256": "d41d8657572d24e2daab856ccaf89c9684bdc4b4637bff94ae119401d10fe090",
+        "bytes": 298524808,
+        "rows": 3691758
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "tools/selfplay-gen9-dedup-1m",
+    "contentSha256": "9914cd67c385266bae421c9a3bf271cdfe26c7a206bec64261d150495113a913",
+    "files": 1,
+    "rows": 1000000,
+    "bytes": 86870628,
+    "sampleFields": [
+      "cp",
+      "fen",
+      "res"
+    ],
+    "fieldAuthority": {
+      "cp": "ambiguous: external_oracle or search_derived depending on the producing pipeline (see note)",
+      "fen": "record",
+      "res": "game_outcome"
+    },
+    "note": "gen8-era label/corpus file (see engine docs/GEN8_TRAINING_PLAN.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "tools",
+        "path": "selfplay-gen9-dedup-1m.jsonl",
+        "sha256": "77b35952293402bdfc2430696683b6bd4f8190de6ac0413c497fc8bb40f7ef8e",
+        "bytes": 86870628,
+        "rows": 1000000
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "app/lichess-dataset",
+    "contentSha256": "6e040abeadd465b0eeb522836787bcbfccaf3db3cee7da793dde1babc21c2b6a",
+    "files": 1,
+    "rows": 29276,
+    "bytes": 31582000,
+    "sampleFields": [
+      "bestMove",
+      "classification",
+      "cpLoss",
+      "features",
+      "fen",
+      "legalMoves",
+      "playedMove",
+      "sideToMove",
+      "source"
+    ],
+    "fieldAuthority": {
+      "bestMove": "unknown-needs-audit",
+      "classification": "unknown-needs-audit",
+      "cpLoss": "unknown-needs-audit",
+      "features": "deterministic_geometry",
+      "fen": "record",
+      "legalMoves": "unknown-needs-audit",
+      "playedMove": "unknown-needs-audit",
+      "sideToMove": "unknown-needs-audit",
+      "source": "unknown-needs-audit"
+    },
+    "note": "arena pipeline output (see app docs/RSI_OODA_PIPELINE.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "app",
+        "path": "arena/out/lichess-dataset.jsonl",
+        "sha256": "86c62f9cee48e749cce16d56e82610082130f10b373565919544b18c8129815f",
+        "bytes": 31582000,
+        "rows": 29276
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "app/sf-eval-cache",
+    "contentSha256": "1f40152fab62b17202140e5385e6badcfe932ad20640d6117655f0323d709ffb",
+    "files": 1,
+    "rows": 27729,
+    "bytes": 4406710,
+    "sampleFields": [
+      "e",
+      "k"
+    ],
+    "fieldAuthority": {
+      "e": "unknown-needs-audit",
+      "k": "unknown-needs-audit"
+    },
+    "note": "arena pipeline output (see app docs/RSI_OODA_PIPELINE.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "app",
+        "path": "arena/out/sf-eval-cache.jsonl",
+        "sha256": "e59c64923e219395aed4af0419d6bf42b76f6d398eb80460a5c41d220d098e87",
+        "bytes": 4406710,
+        "rows": 27729
+      }
+    ]
+  },
+  {
+    "proposedKind": "S",
+    "name": "app/unique-harvested",
+    "contentSha256": "d6734ba107c2a2ffcc0dc5700ab53ff96934d0b297fbe442e6f012a1709d3c44",
+    "files": 1,
+    "rows": 4346,
+    "bytes": 3724122,
+    "sampleFields": [
+      "bestMove",
+      "classification",
+      "cpLoss",
+      "features",
+      "fen",
+      "legalMoves",
+      "playedMove",
+      "sideToMove",
+      "source"
+    ],
+    "fieldAuthority": {
+      "bestMove": "unknown-needs-audit",
+      "classification": "unknown-needs-audit",
+      "cpLoss": "unknown-needs-audit",
+      "features": "deterministic_geometry",
+      "fen": "record",
+      "legalMoves": "unknown-needs-audit",
+      "playedMove": "unknown-needs-audit",
+      "sideToMove": "unknown-needs-audit",
+      "source": "unknown-needs-audit"
+    },
+    "note": "arena pipeline output (see app docs/RSI_OODA_PIPELINE.md)",
+    "bytesAvailability": "local",
+    "fileManifest": [
+      {
+        "root": "app",
+        "path": "arena/out/unique-harvested.jsonl",
+        "sha256": "9edc819a4b4bd1d7a896de71c82b6381826c62a7cc12a7c4c30087c137d09fda",
+        "bytes": 3724122,
+        "rows": 4346
+      }
+    ]
+  }
+]

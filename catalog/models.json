@@ -1,0 +1,598 @@
+[
+  {
+    "proposedKind": "M",
+    "sha256": "89e79a1b7aa8fc510c7c8925eed9d505373738cf5190b7be347fef9b15651fd6",
+    "bytes": 543,
+    "name": "eval-cal.json",
+    "modelKind": "eval-calibration",
+    "serializedParameterCount": 22,
+    "metadata": {
+      "name": "eval-cal-20260911",
+      "fitted_on": "1500 positions from training/gen9/gen9-cvs shards vs Stockfish static eval",
+      "holdout_mae": 84.7,
+      "raw_mae": 127.9,
+      "classical_mae": 114.5
+    },
+    "role": "flagship-eval-calibration",
+    "roleEvidence": "engine:benchmarks/results/nnuecal-gate-20260911 (promote)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "nets/eval-cal.json"
+      },
+      {
+        "root": "engine",
+        "path": "target-cvs/eval-cal-20260911.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "d2a98888ad83a356cc1aa1a5a74086fa9741247ccd676086f0db9d022693fcfc",
+    "bytes": 2090581,
+    "name": "matrix-residual.json",
+    "modelKind": "cvs_residual_nnue",
+    "serializedParameterCount": 200512,
+    "metadata": {
+      "registryVersion": 1,
+      "registryHash": "58cb4e1e461a607d",
+      "modelKind": "cvs_residual_nnue",
+      "arch": "PS(768x256cReLU) + CVS(104x32cReLU)",
+      "psInputs": 768,
+      "psHidden": 256,
+      "cvsDim": 104,
+      "cvsHidden": 32,
+      "outputScaleCp": 400.0,
+      "b2": -0.038069963455200195,
+      "cvsStmRelative": true
+    },
+    "role": "flagship-helper-net",
+    "roleEvidence": "engine:benchmarks/N0-identity.json",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "nets/matrix-residual.json"
+      },
+      {
+        "root": "engine",
+        "path": "target-cvs/matrix-residual.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "b23c75b8e25d7480038f270255b3625556ecbdb1d53964cd60719871ff47c4e1",
+    "bytes": 2054637,
+    "name": "matrix-raw.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.004144385457038879
+    },
+    "role": "flagship-main-net",
+    "roleEvidence": "engine:benchmarks/N0-identity.json",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "nets/matrix-raw.json"
+      },
+      {
+        "root": "engine",
+        "path": "target-cvs/matrix-raw.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "0fc87d5c863364cfc4c89bf6a29f601b071f9846dc4241c01140aa47edf76d34",
+    "bytes": 1866466,
+    "name": "gen10-D1-old-113k.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": 0.028841732069849968
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-D1-old-113k.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "bc9b21badf6818d4ddc93abf2306e1de884a541ee891fffac79da6d6253a14ab",
+    "bytes": 1866728,
+    "name": "gen10-D2-clean-113k.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": 0.03256334736943245
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-D2-clean-113k.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "72a6ee048ff934af2d1da902e76120fd14d8085d5a53cccb20de73a38d363671",
+    "bytes": 1858424,
+    "name": "gen10-L-2m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": 0.009395681321620941
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-L-2m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "71265b08a04642e98dec4a9912fe9850fd77f78c6ea00f7df1ccfc934259321b",
+    "bytes": 1843754,
+    "name": "gen10-cp-2m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.02007230930030346
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-cp-2m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "23162598276fa97ee3f32aa0f682b9e293df8e6122ba288e261fd2ec0c470a37",
+    "bytes": 1851162,
+    "name": "gen10-lin-b1.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.007730909623205662
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-lin-b1.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "d7252700b2064d171b20687e80a715ef071351ede0e7bf732d8652ba2dd98c44",
+    "bytes": 1858187,
+    "name": "gen10-lin-clean.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.0006990552064962685
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-lin-clean.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "76b7f4b53c09e046289e8c0357104e8906a57caaa5d415a76010b54dfa06fbb9",
+    "bytes": 1856672,
+    "name": "gen10-linear-dlr.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.0051310439594089985
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-linear-dlr.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "c43a3074b3e19012f251acdb5889c23f89ccd2cff5193632b3289c869d70f94d",
+    "bytes": 1856244,
+    "name": "gen10-linear-ft.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.005311156157404184
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-linear-ft.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "b6e667182e4e65f550647cd5fdd1c4049c246f31e8b05fca3e552d14710c5ac9",
+    "bytes": 1856856,
+    "name": "gen10-linear-r2.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.0037752906791865826
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-linear-r2.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "dc8cd557c7b7b0fcd7a903b4f1de8ba4d8a788b7a13cccb6a43fe6c358152b48",
+    "bytes": 1855116,
+    "name": "gen10-mid-1.5m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.0020980415865778923
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-mid-1.5m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "6427fe0059004392626d8c1101e076305f3135df619f8f355299bc0b8d17cac7",
+    "bytes": 1856258,
+    "name": "gen10-mse-4m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.004971546120941639
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-mse-4m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "1b03eadb6e1b13ad1abfef2174a4a5d47db120b000058036266d7e00ec8a08dc",
+    "bytes": 1826451,
+    "name": "gen10-sig-2m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": 0.017803490161895752
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-sig-2m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "1e0972061e702ff41b4b896645e1d24ea8cb7fe7e4a658df3b01a20c1ef0f2f0",
+    "bytes": 1851927,
+    "name": "gen10-static-1.5m.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": 0.005541798193007708
+    },
+    "role": "gen10-experimental",
+    "roleEvidence": "engine:training/gen10/README.md (not shippable)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen10-static-1.5m.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "12bbb288c03c6815acc70ba002eb46b5ad8df715b5fb1cac700d7005f51c6bdc",
+    "bytes": 1858278,
+    "name": "gen11-lich.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x256cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.04291465878486633
+    },
+    "role": "gen11-candidate",
+    "roleEvidence": "engine:benchmarks/results/gen11-gate-20260913 (hold)",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen11-lich.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "4cc9765c35c92d510ea41a1536a097931e91147de4b03da24baa816c64e755ac",
+    "bytes": 2056050,
+    "name": "raw-nnue-h256-sf-d12-v3.json",
+    "modelKind": "nnue-unlabelled",
+    "serializedParameterCount": 197120,
+    "metadata": {
+      "arch": "768x128cReLU-1",
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "k": 256.0,
+      "lambda": 0.6,
+      "rows": 4776862,
+      "epochs": 30,
+      "b2": -0.07405643910169601,
+      "note": "stm-POV, mirror+colorswap for black; UNPROMOTED"
+    },
+    "role": "gen7-frozen-baseline",
+    "roleEvidence": "engine:benchmarks/engines.json g7.raw-h256.sf-d12.v3",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "tools",
+        "path": "cvs-baselines/raw-nnue-h256-sf-d12-v3.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "d747b4d28d5657e17c5cd51d4fc739e504e25a3673430878fd8fe9a2127853c9",
+    "bytes": 2332043,
+    "name": "matrix-flat.json",
+    "modelKind": "cvs_nnue",
+    "serializedParameterCount": 223744,
+    "metadata": {
+      "modelKind": "cvs_nnue",
+      "arch": "872x256cReLU-1",
+      "psInputs": 768,
+      "cvsDim": 104,
+      "hidden": 256,
+      "outputScaleCp": 400.0,
+      "b2": -0.03175501152873039,
+      "cvsStmRelative": true,
+      "registryHash": "58cb4e1e461a607d",
+      "registryVersion": 1
+    },
+    "role": "gen9-candidate",
+    "roleEvidence": "engine:benchmarks/engines.json g9.flat-core104.h256",
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/matrix-flat.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "542a1a7187660ba7f4bb8518e7d848842ae79f9ca0c90836594f6cb4d6d47a5a",
+    "bytes": 189890,
+    "name": "matrix-ranker.json",
+    "modelKind": "cvs_ranker_b",
+    "serializedParameterCount": 18272,
+    "metadata": {
+      "modelKind": "cvs_ranker_b",
+      "registryHash": "25c15688f9f4ebba",
+      "anchorSchemaVersion": 1,
+      "featureCount": 168,
+      "sparseInputCount": 504,
+      "trainingCommit": "quiet-hybrid-b-initial",
+      "datasetManifestHash": "manifest-hash",
+      "rankerTemperature": 1.0,
+      "rankerMaxBonus": 4000,
+      "outputScaleCp": 400.0,
+      "cvsHidden": 32,
+      "b2": 0.0
+    },
+    "role": "gen9-experimental-ranker",
+    "roleEvidence": "engine:benchmarks/engines.json g9.hybrid-b.raw-plus-ranker",
+    "provenanceComplete": true,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/matrix-ranker.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "ce7e4307dbee47a6ba56af1ce9dcc9f026eee5e134c63d5509da2f9adfeb23f6",
+    "bytes": 3706198,
+    "name": "400k-v1.json",
+    "modelKind": "nnue",
+    "serializedParameterCount": 394240,
+    "metadata": {
+      "modelKind": "nnue",
+      "arch": "768x512cReLU-1(cp)",
+      "psInputs": 768,
+      "hidden": 512,
+      "outputScaleCp": 400.0,
+      "b2": -0.0014858596259728074
+    },
+    "role": "unregistered",
+    "roleEvidence": null,
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/400k-v1.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "602ee2d0e1e48797fc3d777d9e0b6c47383d1bae0fe0ae38861dadf9765f2905",
+    "bytes": 797,
+    "name": "eval-cal-refit.json",
+    "modelKind": "eval-calibration",
+    "serializedParameterCount": 40,
+    "metadata": {
+      "name": "eval-cal-refit",
+      "fitted_on": "40000 positions",
+      "holdout_mae": 200.8,
+      "shipped_curve_holdout_mae": 96.5,
+      "raw_holdout_mae": 145.5
+    },
+    "role": "unregistered",
+    "roleEvidence": null,
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/eval-cal-refit.json"
+      }
+    ]
+  },
+  {
+    "proposedKind": "M",
+    "sha256": "c0ca7cacafcf6b73ef73d71347e594c1ebcba1bf21ecfd684d1f79c1704d8207",
+    "bytes": 413,
+    "name": "gen11-cal.json",
+    "modelKind": "eval-calibration",
+    "serializedParameterCount": 26,
+    "metadata": {},
+    "role": "unregistered",
+    "roleEvidence": null,
+    "provenanceComplete": false,
+    "locations": [
+      {
+        "root": "engine",
+        "path": "target-cvs/gen11-cal.json"
+      }
+    ]
+  }
+]
