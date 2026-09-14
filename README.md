@@ -15,6 +15,29 @@ The core rule is simple:
 
 We start deliberately tiny, establish controls, then scale only ideas that survive controlled ablation.
 
+## Quickstart (Phase 0)
+
+```bash
+pip install -e .[dev]                 # python >= 3.11, numpy, pydantic, fastapi, python-chess
+python -m pytest                      # 49 tests: schemas, immutability, fail-closed INVALID, API, CLI
+
+cvslab init --engine-repo /path/to/chess-vision-studio-rust-engine   # pin the engine (optional)
+cvslab demo                           # one tiny experiment through every layer:
+                                      # S -> N -> D -> T -> E -> H -> A -> runs -> sealed finding card
+
+cvslab serve                          # local API + built GUI at http://127.0.0.1:8000
+```
+
+The GUI ships the six Phase 0 screens — lab overview, ablation builder (exact diff and parameter
+count before launch), run queue/history, switch matrix, scaling explorer, and finding cards — and
+contains no scientific logic: it edits canonical specs and renders immutable evidence served by the
+API. Rebuild it with `cd web && npm install && npm run gen:types && npm run build`.
+
+Everything lives in `./labstore` (set `CVSLAB_HOME` to move it): one JSON file per canonical
+object, artifacts per run, sealed with record hashes once terminal. `cvslab --help` lists every
+command; `cvslab schema` exports the JSON Schema shared by the CLI, API and generated TypeScript
+types (`schemas/cvslab.schema.json` → `web/src/generated/schemas.ts`).
+
 ## Research model
 
 CVS Lab treats the production engine as a pinned subject under test. The engine repository is not silently modified during an experiment. Every experiment records the exact engine commit, model identities, dataset manifests, search budget, seeds, hardware, and evaluation protocol.

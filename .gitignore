@@ -1,0 +1,16 @@
+# Lab store: runs, artifacts and datasets are local evidence, reproducible via `cvslab demo`
+labstore/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+build/
+dist/
+
+# Web
+web/node_modules/
+web/dist/
+*.tsbuildinfo
