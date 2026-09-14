@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cvslab"
+version = "0.1.0"
+description = "Chess Vision Studio research lab: canonical experiment objects, immutable run evidence, CLI and local API"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pydantic>=2.6",
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "chess>=1.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+cvslab = "cvslab.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cvslab*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,220 @@
+"""Local HTTP API: a thin shell over :mod:`cvslab.service`.
+
+The GUI talks only to this API; it contains no scientific logic of its own.
+Every mutating route names the canonical object it creates, and every view is
+recomputed from the store. Run with ``cvslab serve`` or
+``uvicorn cvslab.api:app``; ``CVSLAB_HOME`` (or ``create_app(home=...)``)
+selects the store.
+"""
+from __future__ import annotations
+
+from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Optional
+
+from fastapi import FastAPI, Query, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, PlainTextResponse
+from pydantic import BaseModel
+
+from . import families
+from .schemas import (
+    AblationRequest,
+    Dataset,
+    Finding,
+    FindingRequest,
+    HypothesisCreate,
+    Run,
+    RunQueueRequest,
+    RunStatus,
+)
+from .service import LAB_REPO, DEFAULT_FAMILY, LabService
+from .store import KINDS, LabError, Store
+
+
+class BaselineCreate(BaseModel):
+    name: str
+    dataset_id: str
+    training_recipe_id: str
+    eval_protocol_id: str
+    overrides: dict[str, object] = {}
+    family: str = DEFAULT_FAMILY
+    notes: str = ""
+
+
+class LabConfigUpdate(BaseModel):
+    generation: Optional[str] = None
+    engine_repo: Optional[str] = None
+
+
+def create_app(home: Optional[str | Path] = None, *, worker: bool = True) -> FastAPI:
+    service = LabService(Store.open(home))
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI):
+        if worker:
+            service.start_worker()
+        yield
+        if worker:
+            service.stop_worker()
+
+    app = FastAPI(title="CVS Research Lab", version="0.1.0", lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_methods=["*"], allow_headers=["*"],
+    )
+    app.state.service = service
+
+    @app.exception_handler(LabError)
+    async def lab_error_handler(_request: Request, exc: LabError):
+        return JSONResponse(status_code=exc.status_code, content={"error": str(exc)})
+
+    # -- lab configuration ---------------------------------------------------
+
+    @app.get("/api/config")
+    def get_config():
+        return service.config()
+
+    @app.post("/api/config")
+    def update_config(body: LabConfigUpdate):
+        return service.init_lab(generation=body.generation, engine_repo=body.engine_repo)
+
+    # -- views ---------------------------------------------------------------
+
+    @app.get("/api/overview")
+    def overview():
+        return service.overview()
+
+    @app.get("/api/switches")
+    def registry(family: str = DEFAULT_FAMILY):
+        return families.switches(family)
+
+    @app.get("/api/matrix")
+    def matrix(family: str = DEFAULT_FAMILY, generation: Optional[str] = None, baseline: Optional[str] = None,
+               dataset_id: Optional[str] = None, min_params: Optional[int] = None, max_params: Optional[int] = None,
+               state: Optional[str] = None, metric: str = "test_loss"):
+        return service.matrix(family=family, generation=generation, baseline=baseline, dataset_id=dataset_id,
+                              min_params=min_params, max_params=max_params, state=state, metric=metric)
+
+    @app.get("/api/scaling")
+    def scaling(metric: str = "test_loss", family: str = DEFAULT_FAMILY):
+        return service.scaling(metric=metric, family=family)
+
+    @app.get("/api/backlog")
+    def backlog():
+        return service.search_backlog()
+
+    # -- canonical objects ---------------------------------------------------
+
+    @app.get("/api/objects/{prefix}")
+    def list_objects(prefix: str):
+        if prefix not in KINDS:
+            raise LabError(f"unknown object kind {prefix!r}; kinds: {', '.join(KINDS)}")
+        return service.store.list(prefix, verify=False)
+
+    @app.get("/api/object/{obj_id}")
+    def get_object(obj_id: str):
+        return service.store.get(obj_id)
+
+    # -- hypotheses ----------------------------------------------------------
+
+    @app.get("/api/hypotheses")
+    def hypotheses():
+        return service.store.list("H")
+
+    @app.post("/api/hypotheses", status_code=201)
+    def create_hypothesis(body: HypothesisCreate):
+        return service.create_hypothesis(**body.model_dump())
+
+    # -- ablations -----------------------------------------------------------
+
+    @app.get("/api/baselines")
+    def baselines():
+        return [a for a in service.store.list("A") if a.is_baseline]
+
+    @app.post("/api/baselines", status_code=201)
+    def register_baseline(body: BaselineCreate):
+        return service.register_baseline(name=body.name, dataset_id=body.dataset_id,
+                                         training_recipe_id=body.training_recipe_id,
+                                         eval_protocol_id=body.eval_protocol_id,
+                                         model_config=body.overrides, family=body.family, notes=body.notes)
+
+    @app.get("/api/ablations")
+    def ablations():
+        return service.store.list("A")
+
+    @app.post("/api/ablations/preview")
+    def preview_ablation(body: AblationRequest):
+        return service.preview_ablation(baseline_id=body.baseline_id, overrides=body.overrides)
+
+    @app.post("/api/ablations", status_code=201)
+    def create_ablation(body: AblationRequest):
+        return service.create_ablation(baseline_id=body.baseline_id, overrides=body.overrides,
+                                       hypothesis_id=body.hypothesis_id, notes=body.notes)
+
+    # -- runs ----------------------------------------------------------------
+
+    @app.get("/api/runs")
+    def runs(status: Optional[str] = Query(None)):
+        wanted = status.upper() if status else None
+        if wanted and wanted not in RunStatus.__members__:
+            raise LabError(f"unknown run status {status!r}; one of {', '.join(RunStatus.__members__)}")
+        return [r for r in service.store.list("R", verify=False, kind=Run)
+                if wanted is None or r.status.value == wanted]
+
+    @app.post("/api/runs", status_code=201)
+    def queue_runs(body: RunQueueRequest):
+        return service.queue_runs(body.ablation_id, body.seeds)
+
+    @app.get("/api/runs/{run_id}")
+    def get_run(run_id: str):
+        return service.store.get_as(run_id, Run)
+
+    @app.post("/api/runs/{run_id}/execute")
+    def execute_run(run_id: str):
+        return service.execute_run(run_id)
+
+    @app.get("/api/runs/{run_id}/log", response_class=PlainTextResponse)
+    def run_log(run_id: str):
+        return service.run_log(run_id)
+
+    # -- findings ------------------------------------------------------------
+
+    @app.get("/api/findings")
+    def findings(query: Optional[str] = None, result: Optional[str] = None):
+        return service.list_findings(query=query, result=result)
+
+    @app.get("/api/findings/{finding_id}")
+    def get_finding(finding_id: str):
+        return service.store.get_as(finding_id, Finding)
+
+    @app.post("/api/findings", status_code=201)
+    def draft_finding(body: FindingRequest):
+        return service.draft_finding(**body.model_dump())
+
+    # -- data lineage and intake ---------------------------------------------
+
+    @app.get("/api/datasets")
+    def datasets():
+        return service.store.list("D", verify=False, kind=Dataset)
+
+    dist = LAB_REPO / "web" / "dist"
+    if dist.is_dir():
+        from fastapi.responses import FileResponse
+
+        @app.get("/{full_path:path}", include_in_schema=False)
+        def spa(full_path: str):
+            # Client-side routes (e.g. /runs/R0001) fall back to index.html;
+            # unknown API paths stay 404 instead of returning the app shell.
+            if full_path.startswith("api/") or full_path == "api":
+                raise LabError(f"no such API route: /{full_path}")
+            candidate = (dist / full_path).resolve()
+            if full_path and candidate.is_file() and dist in candidate.parents:
+                return FileResponse(candidate)
+            return FileResponse(dist / "index.html")
+
+    return app
+
+
+app = create_app()
