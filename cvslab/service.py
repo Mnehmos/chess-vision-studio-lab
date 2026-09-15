@@ -494,6 +494,11 @@ class LabService:
             problems = self.verify_experiment_arm(arm, dataset, recipe)
             if problems:
                 raise LabError(f"{ablation.id}: " + "; ".join(problems))
+            allowed = {int(value) for value in experiment.seeds}
+            outside = [int(seed) for seed in seeds if int(seed) not in allowed]
+            if outside:
+                raise LabError(f"seeds {outside} are outside {experiment.id}'s frozen seed list "
+                               f"{sorted(allowed)}; an experiment's cells are its design")
         runs = []
         for seed in seeds:
             runs.append(self.store.create(Run(
@@ -772,6 +777,16 @@ class LabService:
             problems.append(f"recipe {recipe.id} does not reproduce the arm's frozen recipe hash")
         if (spec_hash or "") != arm.train_target_spec_hash:
             problems.append(f"recipe training spec {spec_hash} is not the arm's {arm.train_target_spec_hash}")
+        split = next((candidate for candidate in dataset.splits if candidate.name == "train"), None)
+        if split is None:
+            problems.append(f"{dataset.id} has no train split; an experiment arm is all-train")
+        else:
+            if split.count != arm.prefix_size:
+                problems.append(f"arm declares prefix_size {arm.prefix_size} but {dataset.id}'s train "
+                                f"split holds {split.count} rows")
+            if split.record_ids_hash != arm.record_ids_hash:
+                problems.append(f"arm declares record_ids_hash {arm.record_ids_hash[:19]}… but {dataset.id}'s "
+                                f"train split records {split.record_ids_hash[:19]}…")
         return problems
 
     def verify_experiment_run(self, run: Run, experiment, arm) -> list[str]:
@@ -817,6 +832,19 @@ class LabService:
         if eval_spec is None:
             raise LabError(f"{protocol.id} pins no TargetSpec; an experiment needs a frozen exam")
 
+        declared_scales = {str(key) for key in scales}
+        declared_budgets = {int(budget) for budget in node_budgets}
+        declared_widths = {int(width) for width in widths}
+        cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
+        if len(cells) != len(list(arms)):
+            raise LabError("the design names the same (scale, node budget) cell more than once")
+        lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
+        missing_cells = sorted(lattice - cells)
+        undeclared_cells = sorted(cells - lattice)
+        if missing_cells or undeclared_cells:
+            raise LabError(f"the design must be exactly the declared lattice: missing {missing_cells}, "
+                           f"not declared {undeclared_cells}")
+
         frozen_arms: list[ExperimentArm] = []
         seen: set[str] = set()
         for arm in arms:
@@ -846,6 +874,7 @@ class LabService:
             problems = self.verify_experiment_arm(entry, dataset, recipe)
             if problems:
                 raise LabError(f"arm {arm_id} does not match its frozen identities: " + "; ".join(problems))
+            arm_widths: dict = {}
             for ablation_id in entry.ablations:
                 ablation: Ablation = self.store.get_as(ablation_id, Ablation)
                 if (ablation.family, ablation.generation) != (family, generation):
@@ -853,6 +882,17 @@ class LabService:
                 if (ablation.dataset_id, ablation.training_recipe_id, ablation.eval_protocol_id) != \
                         (dataset.id, recipe.id, protocol.id):
                     raise LabError(f"{ablation_id} is not defined on this arm's dataset/recipe/protocol")
+                if "H" not in ablation.effective_config:
+                    raise LabError(f"{ablation_id} carries no H; an arm must cover the declared widths")
+                arm_widths.setdefault(int(ablation.effective_config["H"]), []).append(ablation_id)
+            covered = set(arm_widths)
+            if covered != declared_widths:
+                raise LabError(f"arm {arm_id} covers widths {sorted(covered)} but the design declares "
+                               f"{sorted(declared_widths)}")
+            duplicated = {width: ids for width, ids in arm_widths.items() if len(ids) > 1}
+            if duplicated:
+                raise LabError(f"arm {arm_id} lists more than one ablation for width(s) "
+                               f"{sorted(duplicated)}: {duplicated}")
             frozen_arms.append(entry)
 
         # The X<->A binding must be REAL: take the id before creation so ablations can carry it,

@@ -183,10 +183,14 @@ class PoolConfig:
         return self.epd_positions() if self.start_source == "epd-file" else self.effective_openings()
 
     def opening_offset(self) -> int:
-        """v2 opening offset: derived from its own stream so no game state is needed."""
+        """v2/v3 opening offset: derived from its own stream so no game state is needed.
+
+        It ranges over the ACTUAL start-position count (the 12 declared lines, or the whole
+        frozen EPD file), never over the other mode's count.
+        """
         if self.rng_mode != "per-game":
             raise LabError("opening_offset() is defined for per-game generation")
-        return random.Random(f"{self.seed}:openings").randrange(len(self.effective_openings()))
+        return random.Random(f"{self.seed}:openings").randrange(len(self.start_entries()))
 
     def game_rng(self, index: int) -> "random.Random":
         if self.rng_mode != "per-game":
@@ -198,6 +202,8 @@ class PoolConfig:
             "generator": GENERATOR, "generator_version": self.generator_version,
             "rng_mode": self.rng_mode,
             "start_source": self.start_source,
+            # the CONTENT hash is the identity; the path is machine-specific and deliberately
+            # absent from the canonical form (it stays as a loader argument)
             "openingSourceSha256": self.opening_source_sha256(),
             "seed": self.seed, "games": self.games, "max_plies": self.max_plies,
             "diversification_plies": list(self.diversification_plies),
@@ -208,9 +214,9 @@ class PoolConfig:
             "sample_every": self.sample_every, "min_ply": self.min_ply,
         }
         if self.start_source == "epd-file":
-            payload["epd_path"] = self.epd_path
             payload["epd_sha256"] = self.epd_sha256
             payload["epd_limit"] = self.epd_limit
+            payload["startPositions"] = len(self.start_entries())
         return payload
 
 
