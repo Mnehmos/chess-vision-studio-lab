@@ -412,6 +412,8 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
                    split_seed: int = 0, fractions: Sequence[float] = (0.8, 0.1, 0.1),
                    required_labels: Sequence[str] = ("eval_cp",), parent_id: Optional[str] = None,
                    arms: Optional[Sequence[Mapping]] = None,
+                   record_ids: Optional[Sequence[str]] = None,
+                   campaign: Optional[Mapping[str, object]] = None,
                    unknown_grouping: str = "refuse") -> Dataset:
     """Freeze a live view into an immutable D####.
 
@@ -435,7 +437,20 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
 
     arm_list: list[StackArm] = []
     stack_overlap = 0
-    if arms is not None:
+    if record_ids is not None:
+        if arms is not None or selection:
+            raise LabError("record_ids is an exact selection; do not combine it with arms or a flat selection")
+        wanted = list(dict.fromkeys(record_ids))
+        by_id = {record["record_id"]: record for record in records}
+        missing_ids = [record_id for record_id in wanted if record_id not in by_id]
+        if missing_ids:
+            raise LabError(f"{len(missing_ids)} requested record ids are not in the corpus "
+                           f"(e.g. {missing_ids[0]})")
+        kept = [by_id[record_id] for record_id in wanted]
+        excluded, missing = len(records) - len(kept), 0
+        kept = [record for record in kept
+                if set(required_labels) <= {lab["family"] for lab in record["labels"]}]
+    elif arms is not None:
         arm_list = [_coerce_arm(arm) for arm in arms]
         if not arm_list:
             raise LabError("arms provided but empty; pass no arms for a flat selection")
@@ -521,7 +536,7 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
             **({"stack": dict(_stack_effectives(arm_list, records))} if arm_list else {}),
         },
         label_provenance=dict(Counter(lab["authority"] for r in kept for lab in r["labels"])),
-        parent_id=parent_id, manifest_hash="",
+        parent_id=parent_id, campaign=dict(campaign or {}), manifest_hash="",
         compute=meter.compute(accepted_examples=len(kept), discarded_examples=excluded + missing),
         created_at=utc_now(),
     )

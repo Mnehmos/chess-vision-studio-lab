@@ -64,6 +64,8 @@ class PlannedRun:
     seed: int
     param_count: int
     controls_hash: str
+    recipe_id: Optional[str] = None
+    eval_protocol_id: Optional[str] = None
 
     @property
     def cell_id(self) -> str:
@@ -103,9 +105,24 @@ class CampaignPlan:
             "init_policy": self.init_policy,
         })
 
-    def expand(self, *, split_policy_hash: str) -> list[PlannedRun]:
-        controls = self.controls_hash(split_policy_hash)
-        runs = [PlannedRun(width, arm, seed, EXPECTED_PARAMS[width], controls)
+    def expand(self, *, split_policy_hash: str, recipe_id: Optional[str] = None,
+               recipe_hash: Optional[str] = None, eval_semantics_hash: Optional[str] = None,
+               eval_ids_by_arm: Optional[dict[str, str]] = None) -> list[PlannedRun]:
+        """Cells carry the real T####/E#### identities when the freeze stage supplies them.
+
+        A runnable campaign must not be generated from planner-only `None` identities:
+        pass the frozen T recipe identity/hash and the arm-specific E protocols (verified
+        equal on semantics) here.
+        """
+        if eval_ids_by_arm is not None:
+            missing = [arm for arm in self.arms if not eval_ids_by_arm.get(arm)]
+            if missing:
+                raise LabError(f"eval_ids_by_arm is missing {missing}; every arm needs its own E####")
+        controls = self.controls_hash(split_policy_hash, recipe_id=recipe_id,
+                                      recipe_hash=recipe_hash, eval_semantics_hash=eval_semantics_hash)
+        runs = [PlannedRun(width, arm, seed, EXPECTED_PARAMS[width], controls,
+                           recipe_id=recipe_id,
+                           eval_protocol_id=(eval_ids_by_arm or {}).get(arm))
                 for width in self.widths for arm in self.arms for seed in self.seeds]
         cells = [run.cell_id for run in runs]
         if len(cells) != len(set(cells)):
@@ -386,3 +403,71 @@ def eval_semantics_hash(protocol) -> str:
         "bootstrap_samples": protocol.bootstrap_samples, "bootstrap_seed": protocol.bootstrap_seed,
         "protocol_version": protocol.protocol_version, "non_claims": list(protocol.non_claims),
     })
+
+
+def verify_arm_protocols(protocols_by_arm: dict) -> str:
+    """Arm-specific E#### protocols must differ only by their D#### binding."""
+    hashes = {arm: eval_semantics_hash(protocol) for arm, protocol in protocols_by_arm.items()}
+    if len(set(hashes.values())) != 1:
+        raise LabError(f"arm evaluation protocols differ beyond the dataset binding: {hashes}")
+    return next(iter(hashes.values()))
+
+
+def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe,
+                        deep_engine_seconds: Optional[dict[str, float]] = None,
+                        name_prefix: str = "s6") -> dict:
+    """Freeze the PRIORITY and UNIFORM D#### arms from the RECORDED memberships.
+
+    Membership comes exclusively from ``universe.arms`` (the recorded
+    ``selection.deep`` / ``selection.uniform`` fields) — never from the presence of a
+    deep label, so audit/holdout labels cannot leak into an arm. Fails closed before
+    returning: parity per the plan's declared tolerance, shared split policy, equal
+    rows, and every provenance relationship recorded in the campaign block.
+    """
+    from ..schemas import TrainingRecipe
+    from ..data import freeze_dataset
+
+    if not isinstance(recipe, TrainingRecipe):
+        raise LabError("freeze_arm_datasets needs the frozen T#### TrainingRecipe")
+    parity = compute_parity(universe, tolerance=plan.compute_parity_tolerance)
+    identity = split_identity(universe)
+    datasets, report_rows = {}, {}
+    for arm in ("PRIORITY", "UNIFORM"):
+        record_ids = list(universe.arms[arm])
+        dataset = freeze_dataset(
+            store, universe.normalization_id, name=f"{name_prefix}-{arm.lower()}-arm",
+            record_ids=record_ids, required_labels=["search_deep_cp"],
+            campaign={
+                "arm": arm,
+                "membership_source": "selection.deep" if arm == "PRIORITY" else "selection.uniform",
+                "source_id": universe.source_id, "normalization_id": universe.normalization_id,
+                "funnel_run_id": universe.funnel_run_id,
+                "policy_version": universe.policy_version, "policy_hash": universe.policy_hash,
+                "split_policy_hash": identity["split_policy_hash"],
+                "candidate_universe_hash": universe.candidate_universe_hash(),
+                "universe_hash": universe.universe_hash(),
+                "recipe_id": recipe.id, "recipe_hash": recipe.recipe_hash,
+                "deep_nodes": parity["deep_nodes"][arm],
+                "deep_engine_seconds": (deep_engine_seconds or {}).get(arm),
+                "compute_parity_tolerance": plan.compute_parity_tolerance})
+        if dataset.counts["records"] != len(record_ids):
+            raise LabError(f"{arm}: frozen {dataset.counts['records']} rows for {len(record_ids)} selected ids; "
+                           "missing deep labels must fail closed")
+        datasets[arm] = dataset
+        report_rows[arm] = {"dataset_id": dataset.id, "rows": dataset.counts["records"],
+                            "manifest_hash": dataset.manifest_hash, "deep_nodes": parity["deep_nodes"][arm],
+                            "deep_engine_seconds": (deep_engine_seconds or {}).get(arm)}
+    if datasets["PRIORITY"].counts["records"] != datasets["UNIFORM"].counts["records"]:
+        raise LabError("frozen arms are not row-matched")
+    return {
+        "source_id": universe.source_id, "normalization_id": universe.normalization_id,
+        "funnel_run_id": universe.funnel_run_id, "policy_version": universe.policy_version,
+        "policy_hash": universe.policy_hash,
+        "split_policy_hash": identity["split_policy_hash"],
+        "candidate_universe_hash": universe.candidate_universe_hash(),
+        "universe_hash": universe.universe_hash(),
+        "recipe_id": recipe.id, "recipe_hash": recipe.recipe_hash,
+        "arms": report_rows, "parity": parity,
+        "note": "arm-specific E#### protocols are verified separately via verify_arm_protocols(); "
+                "the D#### campaign blocks record recipe/split/universe/parity provenance.",
+    }

@@ -308,6 +308,7 @@ class Dataset(LabModel):
     label_provenance: dict[str, int]
     parent_id: Optional[str] = None
     frozen: bool = True
+    campaign: dict[str, object] = {}
     manifest_hash: str
     compute: Compute
     created_at: str

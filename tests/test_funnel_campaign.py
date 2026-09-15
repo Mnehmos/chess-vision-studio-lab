@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from cvslab.funnel.campaign import (
@@ -245,3 +247,73 @@ def test_eval_semantics_hash_excludes_dataset_binding(lab, tmp_path):
     assert protocol_a.id != protocol_b.id and protocol_a.dataset_id != protocol_b.dataset_id
     differing = lab.create_eval_protocol(name="ec", dataset_id=dataset_a.id, bootstrap_seed=7)
     assert eval_semantics_hash(differing) != eval_semantics_hash(protocol_a)
+
+
+def test_expand_propagates_real_identities_and_requires_per_arm_protocols():
+    plan = CampaignPlan()
+    runs = plan.expand(split_policy_hash=SPLIT_HASH, recipe_id="T0001", recipe_hash="sha256:" + "e" * 64,
+                       eval_semantics_hash="sha256:" + "f" * 64,
+                       eval_ids_by_arm={"PRIORITY": "E0001", "UNIFORM": "E0002"})
+    assert all(run.recipe_id == "T0001" for run in runs)
+    assert {run.eval_protocol_id for run in runs if run.arm == "PRIORITY"} == {"E0001"}
+    assert {run.eval_protocol_id for run in runs if run.arm == "UNIFORM"} == {"E0002"}
+    assert len({run.controls_hash for run in runs}) == 1
+    with pytest.raises(LabError, match="missing \\['UNIFORM'\\]"):
+        plan.expand(split_policy_hash=SPLIT_HASH, eval_ids_by_arm={"PRIORITY": "E0001"})
+    planner_only = CampaignPlan().expand(split_policy_hash=SPLIT_HASH)
+    bound = plan.expand(split_policy_hash=SPLIT_HASH, recipe_id="T0001", recipe_hash="sha256:" + "e" * 64)
+    assert planner_only[0].controls_hash != bound[0].controls_hash  # real identities change the hash
+
+
+def test_freeze_arm_pair_records_full_provenance_and_excludes_non_members(lab):
+    from cvslab.funnel.campaign import freeze_arm_datasets
+    from cvslab.hashing import write_jsonl
+    from cvslab.schemas import SourceSnapshot, utc_now
+
+    # a small canonical corpus with explicit game grouping
+    import chess
+    rows = []
+    for game in range(4):
+        board = chess.Board()
+        for ply, move in enumerate(("e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "f8c5"), start=1):
+            board.push_uci(move)
+        rows.append({"fen": board.fen(), "game": f"g{game}", "ply": 6, "res": 1.0})
+    source_id = lab.store.next_id("S")
+    rel = f"sources/{source_id}/positions.jsonl"
+    write_jsonl(lab.store.abs(rel), rows)
+    lab.store.make_readonly(lab.store.abs(rel))
+    from cvslab.hashing import sha256_file
+    lab.store.create(SourceSnapshot(id=source_id, name="corpus", locality="local", source_origin="test",
+                                    generator={"name": "t"}, license="t", importer="t", importer_version=1,
+                                    path=rel, content_hash=sha256_file(lab.store.abs(rel)), row_count=len(rows),
+                                    game_count=4, label_authorities=[], compute={}, created_at=utc_now()))
+    normalization = lab.normalize([source_id], name="n")
+    records = [json.loads(line) for line in
+               lab.store.abs(normalization.path).read_text(encoding="utf-8").splitlines()]
+    # only ONE record survives (all four games transpose to the same position) -> use two distinct positions
+    assert len(records) == 1
+    record_id = records[0]["record_id"]
+    # the arms must be row-matched and deep-labeled; duplicate the corpus to get two distinct positions
+    from cvslab.data import _load_canonical
+    subset = _load_canonical(lab.store, lab.store.get(normalization.id))
+    universe = freeze_universe(
+        source_id=source_id, normalization_id=normalization.id, funnel_run_id="R0001",
+        policy_version="priority-v1", policy_hash="sha256:" + "a" * 64,
+        candidates=[{"record_id": r["record_id"], "group": r["group"], "train_eligible": True} for r in subset],
+        deep_nodes={r["record_id"]: 400_000 for r in subset},
+        selections={"deep": [record_id], "uniform": [record_id]}, split_seed=0)
+    recipe = lab.create_training_recipe(name="s6-recipe", params={"EPOCHS": 2})
+    report = freeze_arm_datasets(lab.store, universe, CampaignPlan(), recipe=recipe,
+                                 deep_engine_seconds={"PRIORITY": 12.5, "UNIFORM": 12.4})
+    for key in ("source_id", "normalization_id", "funnel_run_id", "policy_hash", "split_policy_hash",
+                "candidate_universe_hash", "universe_hash", "recipe_id", "recipe_hash", "parity"):
+        assert key in report
+    for arm in ("PRIORITY", "UNIFORM"):
+        entry = report["arms"][arm]
+        assert entry["rows"] == 1 and entry["manifest_hash"].startswith("sha256:")
+        dataset = lab.store.get(entry["dataset_id"])
+        assert dataset.campaign["arm"] == arm
+        assert dataset.campaign["membership_source"] in ("selection.deep", "selection.uniform")
+        assert dataset.campaign["deep_nodes"] == 400_000
+        assert dataset.campaign["universe_hash"] == universe.universe_hash()
+    assert report["parity"]["relative_gap"] == 0.0
