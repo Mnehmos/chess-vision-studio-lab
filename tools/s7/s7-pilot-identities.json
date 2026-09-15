@@ -1,0 +1,112 @@
+{
+ "control": {
+  "dataset": "D0009",
+  "protocol": "E0004",
+  "recipe": "T0004",
+  "runs": [
+   "R0054",
+   "R0055",
+   "R0056",
+   "R0057",
+   "R0058",
+   "R0064",
+   "R0065",
+   "R0066",
+   "R0067",
+   "R0068",
+   "R0074",
+   "R0075",
+   "R0076",
+   "R0077",
+   "R0078",
+   "R0084",
+   "R0085",
+   "R0086",
+   "R0087",
+   "R0088"
+  ]
+ },
+ "frozen": {
+  "ablations": {
+   "P2": {
+    "1": "A0021",
+    "16": "A0020",
+    "32": "A0023",
+    "4": "A0022"
+   },
+   "P3": {
+    "1": "A0025",
+    "16": "A0024",
+    "32": "A0027",
+    "4": "A0026"
+   },
+   "P4": {
+    "1": "A0029",
+    "16": "A0028",
+    "32": "A0031",
+    "4": "A0030"
+   }
+  },
+  "arms": {
+   "P2": {
+    "ablations": {
+     "1": "A0021",
+     "16": "A0020",
+     "32": "A0023",
+     "4": "A0022"
+    },
+    "dataset": "D0011",
+    "manifest": "sha256:4748691075d6923f1416ddeec0cd9d0477a806f81a17692db917d8b6ed9b0322",
+    "protocol": "E0004",
+    "recipe": "T0005",
+    "recipe_hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+    "rows": 94,
+    "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb"
+   },
+   "P3": {
+    "ablations": {
+     "1": "A0025",
+     "16": "A0024",
+     "32": "A0027",
+     "4": "A0026"
+    },
+    "dataset": "D0012",
+    "manifest": "sha256:65774cf519d962e3feacb85cef644b720be33c4ead6fe6ff9ca101aaf13610fb",
+    "protocol": "E0004",
+    "recipe": "T0005",
+    "recipe_hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+    "rows": 926,
+    "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb"
+   },
+   "P4": {
+    "ablations": {
+     "1": "A0029",
+     "16": "A0028",
+     "32": "A0031",
+     "4": "A0030"
+    },
+    "dataset": "D0013",
+    "manifest": "sha256:40666bc662c3b101b166f102775d158109ba014138532e30fdd3af75c5164e84",
+    "protocol": "E0004",
+    "recipe": "T0006",
+    "recipe_hash": "sha256:e49052a76df57dd3b681aaea99646766d74056d4e93ae05bd805d901ebc59f38",
+    "rows": 926,
+    "spec": "sha256:0c2d52a25a5e2168c62b6efbade4001218b71f66388c02541e26810e0da68ff8"
+   }
+  },
+  "normalization": "N0005",
+  "recipes": {
+   "16k": {
+    "hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+    "id": "T0005",
+    "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb"
+   },
+   "2k": {
+    "hash": "sha256:e49052a76df57dd3b681aaea99646766d74056d4e93ae05bd805d901ebc59f38",
+    "id": "T0006",
+    "spec": "sha256:0c2d52a25a5e2168c62b6efbade4001218b71f66388c02541e26810e0da68ff8"
+   }
+  }
+ },
+ "inventory_hash": "sha256:67e781a0b5f4922c213b27518f42495a0aa28e1d1a1588df7726fa122ffe91dc"
+}

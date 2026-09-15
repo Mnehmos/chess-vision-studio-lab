@@ -1,0 +1,209 @@
+{
+ "arms": {
+  "P2": {
+   "dataset": "D0011",
+   "manifest": "sha256:4748691075d6923f1416ddeec0cd9d0477a806f81a17692db917d8b6ed9b0322",
+   "rows": 94,
+   "recipe": "T0005",
+   "recipe_hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+   "protocol": "E0004",
+   "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb",
+   "ablations": {
+    "16": "A0020",
+    "1": "A0021",
+    "4": "A0022",
+    "32": "A0023"
+   }
+  },
+  "P3": {
+   "dataset": "D0012",
+   "manifest": "sha256:65774cf519d962e3feacb85cef644b720be33c4ead6fe6ff9ca101aaf13610fb",
+   "rows": 926,
+   "recipe": "T0005",
+   "recipe_hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+   "protocol": "E0004",
+   "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb",
+   "ablations": {
+    "16": "A0024",
+    "1": "A0025",
+    "4": "A0026",
+    "32": "A0027"
+   }
+  },
+  "P4": {
+   "dataset": "D0013",
+   "manifest": "sha256:40666bc662c3b101b166f102775d158109ba014138532e30fdd3af75c5164e84",
+   "rows": 926,
+   "recipe": "T0006",
+   "recipe_hash": "sha256:e49052a76df57dd3b681aaea99646766d74056d4e93ae05bd805d901ebc59f38",
+   "protocol": "E0004",
+   "spec": "sha256:0c2d52a25a5e2168c62b6efbade4001218b71f66388c02541e26810e0da68ff8",
+   "ablations": {
+    "16": "A0028",
+    "1": "A0029",
+    "4": "A0030",
+    "32": "A0031"
+   }
+  }
+ },
+ "recipes": {
+  "16k": {
+   "id": "T0005",
+   "hash": "sha256:2f2ce8e4023133291b03acfdb72d913eef4173a34fe0e786cd304162ae23a6b5",
+   "spec": "sha256:f35949a85ef4297e7815a242be11c295264583a58bd909f269bf5d94ffb5dadb"
+  },
+  "2k": {
+   "id": "T0006",
+   "hash": "sha256:e49052a76df57dd3b681aaea99646766d74056d4e93ae05bd805d901ebc59f38",
+   "spec": "sha256:0c2d52a25a5e2168c62b6efbade4001218b71f66388c02541e26810e0da68ff8"
+  }
+ },
+ "queued": {
+  "P2-H16": [
+   "R0089",
+   "R0090",
+   "R0091",
+   "R0092",
+   "R0093"
+  ],
+  "P2-H1": [
+   "R0094",
+   "R0095",
+   "R0096",
+   "R0097",
+   "R0098"
+  ],
+  "P2-H4": [
+   "R0099",
+   "R0100",
+   "R0101",
+   "R0102",
+   "R0103"
+  ],
+  "P2-H32": [
+   "R0104",
+   "R0105",
+   "R0106",
+   "R0107",
+   "R0108"
+  ],
+  "P3-H16": [
+   "R0109",
+   "R0110",
+   "R0111",
+   "R0112",
+   "R0113"
+  ],
+  "P3-H1": [
+   "R0114",
+   "R0115",
+   "R0116",
+   "R0117",
+   "R0118"
+  ],
+  "P3-H4": [
+   "R0119",
+   "R0120",
+   "R0121",
+   "R0122",
+   "R0123"
+  ],
+  "P3-H32": [
+   "R0124",
+   "R0125",
+   "R0126",
+   "R0127",
+   "R0128"
+  ],
+  "P4-H16": [
+   "R0129",
+   "R0130",
+   "R0131",
+   "R0132",
+   "R0133"
+  ],
+  "P4-H1": [
+   "R0134",
+   "R0135",
+   "R0136",
+   "R0137",
+   "R0138"
+  ],
+  "P4-H4": [
+   "R0139",
+   "R0140",
+   "R0141",
+   "R0142",
+   "R0143"
+  ],
+  "P4-H32": [
+   "R0144",
+   "R0145",
+   "R0146",
+   "R0147",
+   "R0148"
+  ]
+ },
+ "results": {
+  "R0089": "COMPLETED",
+  "R0090": "COMPLETED",
+  "R0091": "COMPLETED",
+  "R0092": "COMPLETED",
+  "R0093": "COMPLETED",
+  "R0094": "COMPLETED",
+  "R0095": "COMPLETED",
+  "R0096": "COMPLETED",
+  "R0097": "COMPLETED",
+  "R0098": "COMPLETED",
+  "R0099": "COMPLETED",
+  "R0100": "COMPLETED",
+  "R0101": "COMPLETED",
+  "R0102": "COMPLETED",
+  "R0103": "COMPLETED",
+  "R0104": "COMPLETED",
+  "R0105": "COMPLETED",
+  "R0106": "COMPLETED",
+  "R0107": "COMPLETED",
+  "R0108": "COMPLETED",
+  "R0109": "COMPLETED",
+  "R0110": "COMPLETED",
+  "R0111": "COMPLETED",
+  "R0112": "COMPLETED",
+  "R0113": "COMPLETED",
+  "R0114": "COMPLETED",
+  "R0115": "COMPLETED",
+  "R0116": "COMPLETED",
+  "R0117": "COMPLETED",
+  "R0118": "COMPLETED",
+  "R0119": "COMPLETED",
+  "R0120": "COMPLETED",
+  "R0121": "COMPLETED",
+  "R0122": "COMPLETED",
+  "R0123": "COMPLETED",
+  "R0124": "COMPLETED",
+  "R0125": "COMPLETED",
+  "R0126": "COMPLETED",
+  "R0127": "COMPLETED",
+  "R0128": "COMPLETED",
+  "R0129": "COMPLETED",
+  "R0130": "COMPLETED",
+  "R0131": "COMPLETED",
+  "R0132": "COMPLETED",
+  "R0133": "COMPLETED",
+  "R0134": "COMPLETED",
+  "R0135": "COMPLETED",
+  "R0136": "COMPLETED",
+  "R0137": "COMPLETED",
+  "R0138": "COMPLETED",
+  "R0139": "COMPLETED",
+  "R0140": "COMPLETED",
+  "R0141": "COMPLETED",
+  "R0142": "COMPLETED",
+  "R0143": "COMPLETED",
+  "R0144": "COMPLETED",
+  "R0145": "COMPLETED",
+  "R0146": "COMPLETED",
+  "R0147": "COMPLETED",
+  "R0148": "COMPLETED"
+ }
+}
