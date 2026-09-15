@@ -62,6 +62,20 @@ def test_parse_sf_output_extracts_depth_and_bestmove():
     assert parsed[-1]["scoreValue"] == "22"
 
 
+def test_leak_guard_rejects_nested_search_keys():
+    nested = {"id": "x", "stage": "tier0", "status": "ok",
+              "bounded_tactical_proof": {"opportunities": {"stm": [{"scoreCp": 12}]}}}
+    with pytest.raises(ValueError, match="leaks"):
+        assert_static_input_safe(nested)
+    for key in ("nodes", "pv", "bestMove", "gameOutcome", "oracle", "priority", "depth"):
+        payload = {"id": "x", "stage": "tier0", "status": "ok",
+                   "deterministic_geometry": {"structures": [{"inner": {key: 1}}]}}
+        with pytest.raises(ValueError, match="leaks"):
+            assert_static_input_safe(payload)
+    # declared timing metadata subtree stays allowed
+    assert_static_input_safe({"id": "x", "stage": "tier0", "status": "ok", "cost": {"wallMs": 6.1}})
+
+
 def test_leak_guard_accepts_clean_and_rejects_leaks():
     clean = {"id": "x", "stage": "tier0", "status": "ok",
              "deterministic_geometry": {"pieces": {}},
@@ -133,30 +147,40 @@ def test_summarize_facts_sides_unmapped_and_uncomputed():
 
 @pytest.mark.skipif(not os.path.isfile(ANALYZE), reason="legacy analyze binary not present")
 def test_live_provider_facts_and_search_smoke():
-    from cvslab.funnel.providers import AnalyzeServeProvider
+    from cvslab.funnel.providers import AnalyzeFactsProvider, AnalyzeSearchProvider, AnalyzeTransport
     from cvslab.funnel.protocols import Position
 
-    provider = AnalyzeServeProvider(ENGINE_ROOT, cwd=ENGINE_ROOT, args=[
+    transport = AnalyzeTransport(ENGINE_ROOT, cwd=ENGINE_ROOT, args=[
         "--depth", "64",
         "--nnue", "target-cvs/matrix-raw.json",
         "--nnue-cal", "nets/eval-cal.json",
         "--helper-nnue", "target-cvs/matrix-residual.json",
     ])
     try:
-        batch = provider.label(Position(fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
+        assert len(transport.analyze_sha256) == 64  # full identity, not truncated
+        assert len(transport.analyze_sha256_short) == 16  # display-only form
+        assert len(transport.taxonomy_sha256) == 64
+        assert transport.taxonomy["family"]
+
+        facts = AnalyzeFactsProvider(transport)
+        batch = facts.label(Position(fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"))
         assert batch.rows, batch.uncomputed
         record = batch.rows[0]
         assert record["status"] == "ok"
         assert record["deterministic_geometry"]["legalMoves"] == 20
         assert record["factsRegistryVersion"] and record["factsRegistryVersion"] > 0
+        assert facts.producer_hash == transport.analyze_sha256  # full hash in provenance
 
-        search = provider.search(Position(fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
-                                 node_budget=2000, pv_plies=8)
-        assert search.nodes > 0
-        assert search.best_move
-        assert search.pv
+        search = AnalyzeSearchProvider(transport, family="search_shallow_cp")
+        assert search.family == "search_shallow_cp"
+        label = search.search(Position(fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
+                              node_budget=2000, pv_plies=8)
+        assert label.nodes > 0
+        assert label.best_move
+        assert label.pv
+        assert "trajectory" in label.extra and "stabilization" in label.extra
     finally:
-        provider.close()
+        transport.close()
 
 
 @pytest.mark.skipif(not os.path.isfile(TAXONOMY), reason="taxonomy file not present")

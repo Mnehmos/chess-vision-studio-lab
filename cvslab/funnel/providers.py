@@ -1,15 +1,16 @@
-"""Legacy-engine provider: wraps the frozen funnel's `analyze --serve` protocol.
+"""Legacy-engine providers: shared `analyze --serve` transport + method-scoped identities.
 
 Ports, from `chess-vision-studio-rust-engine/training/funnel/labeling_funnel.py`:
-``Serve`` (persistent JSON-lines subprocess), ``board_geometry`` (python-chess,
-search-free), ``compact_search`` (search response -> label shape) and
-``parse_sf_output`` (Stockfish UCI). The provider is pinned by the analyze
-binary's sha256 so a run manifest can prove which teacher produced its labels.
+the persistent JSON-lines transport, ``board_geometry`` (python-chess, search-free),
+``compact_search`` (search response -> full compact payload) and ``parse_sf_output``
+(Stockfish UCI).
 
-Deliberately NOT here yet (S1 remainder, tracked in the parity harness):
-``summarize_facts`` taxonomy mapping — the facts bundle is currently returned
-raw alongside board geometry. Fixture parity for tier0 cannot pass until that
-mapping is ported, and the harness reports it as the next pending port step.
+Identity rules (review of PR #24):
+
+* the transport is shared; **facts and search are separate providers** with their own
+  provenance classes, so label provenance is never guessed by later slices;
+* full SHA256 identities for the analyze binary and taxonomy are preserved for
+  canonical provenance/manifests — ``*_short`` forms are display-only conveniences.
 """
 from __future__ import annotations
 
@@ -34,6 +35,11 @@ def sha256_file(path: str | Path) -> str:
         for chunk in iter(lambda: fh.read(1 << 20), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def short_hash(value: str, length: int = 16) -> str:
+    """Display-only shortening; canonical provenance always keeps the full hash."""
+    return value[:length]
 
 
 def board_geometry(fen: str) -> tuple[dict, str]:
@@ -62,6 +68,15 @@ def board_geometry(fen: str) -> tuple[dict, str]:
         "phase": phase,
         "materialBucket": bucket,
     }, (min(move.uci() for move in legal) if legal else "")
+
+
+# The scientific payload every search label carries. Timing fields are excluded
+# here and handled by declared tolerances in the parity harness.
+COMPACT_SEARCH_KEYS = (
+    "nodes", "depth", "scoreCpStm", "mate", "bestMove", "pv", "termination",
+    "resultSource", "stabilization", "trajectory", "avgCutoffMoveIndex",
+    "avgLegalMoves", "qNodes",
+)
 
 
 def compact_search(response: dict, pv_plies: int) -> dict:
@@ -93,23 +108,22 @@ def compact_search(response: dict, pv_plies: int) -> dict:
 
 
 def parse_sf_output(text: str) -> list[Optional[dict]]:
-    """Stockfish `go` output -> one dict per ply-ish line (port of the funnel's parser)."""
+    """Stockfish `go` output -> one dict per info line (port of the funnel's parser)."""
     out: list[Optional[dict]] = []
-    current: Optional[dict] = None
     for line in text.splitlines():
         if line.startswith("info depth"):
             parts = line.split()
             info: dict = {}
-            for i, token in enumerate(parts):
+            for index, token in enumerate(parts):
                 if token in ("depth", "seldepth", "nodes", "time", "score", "pv", "multipv", "hashfull"):
-                    info[token] = parts[i + 1] if i + 1 < len(parts) else None
-                    if token == "score" and i + 2 < len(parts):
-                        info["scoreKind"] = parts[i + 1]
-                        info["scoreValue"] = parts[i + 2]
-            current = info
-            out.append(current)
+                    info[token] = parts[index + 1] if index + 1 < len(parts) else None
+                    if token == "score" and index + 2 < len(parts):
+                        info["scoreKind"] = parts[index + 1]
+                        info["scoreValue"] = parts[index + 2]
+            out.append(info)
         elif line.startswith("bestmove") and out:
-            out[-1] = {**(out[-1] or {}), "bestmove": line.split()[1] if len(line.split()) > 1 else None}
+            parts = line.split()
+            out[-1] = {**(out[-1] or {}), "bestmove": parts[1] if len(parts) > 1 else None}
     return out
 
 
@@ -135,10 +149,13 @@ class Serve:
             self.process.kill()
 
 
-class AnalyzeServeProvider:
-    """Deterministic facts (tier0) + cold fixed-node search (tier1/tier3) from the legacy engine."""
+class AnalyzeTransport:
+    """Shared, identity-pinned connection to the frozen legacy engine.
 
-    provenance_class = "deterministic_geometry"
+    Owns the binary-sha (full) and taxonomy-sha (full) identities; facts and
+    search providers are separate views over one transport so a run never spawns
+    two engine processes, while each provider keeps its own provenance class.
+    """
 
     def __init__(self, repo_root: str | Path, analyze: str = "target/release/analyze.exe",
                  args: Optional[list[str]] = None, cwd: Optional[str | Path] = None):
@@ -150,15 +167,23 @@ class AnalyzeServeProvider:
         # Relative net paths in args resolve against the artifact root, like the
         # legacy funnel's --artifact-root.
         self.cwd = str(cwd or self.repo_root)
-        self.producer_hash = sha256_file(self.analyze_path)[:16]
+        self.analyze_sha256 = sha256_file(self.analyze_path)  # full identity
         self.taxonomy_path = self.repo_root / TAXONOMY_SUFFIX
         if self.taxonomy_path.is_file():
             from .taxonomy import load_taxonomy  # lazy: taxonomy imports this module's sha256_file
             self.taxonomy = load_taxonomy(self.taxonomy_path)
         else:
             self.taxonomy = {"schemaVersion": None, "sha256": "", "family": {}}
-        self.taxonomy_hash = (self.taxonomy["sha256"] or "")[:16]
+        self.taxonomy_sha256 = self.taxonomy["sha256"]  # full identity
         self._serve: Optional[Serve] = None
+
+    @property
+    def analyze_sha256_short(self) -> str:
+        return short_hash(self.analyze_sha256)
+
+    @property
+    def taxonomy_sha256_short(self) -> str:
+        return short_hash(self.taxonomy_sha256)
 
     @property
     def serve(self) -> Serve:
@@ -166,13 +191,35 @@ class AnalyzeServeProvider:
             self._serve = Serve([str(self.analyze_path), "--serve", *self.args], cwd=self.cwd)
         return self._serve
 
-    def geometry(self, position: Position) -> tuple[dict, str]:
-        return board_geometry(position.fen)
+    def request_facts(self, fen_before: str, played_move_uci: str, options: dict) -> dict:
+        return self.serve.request({"cmd": "facts", "schemaVersion": 1, "fenBefore": fen_before,
+                                   "playedMoveUci": played_move_uci, "options": options})
+
+    def request_search(self, fen: str, node_budget: int) -> dict:
+        return self.serve.request({"cmd": "go", "fen": fen, "nodeBudget": node_budget})
+
+    def close(self) -> None:
+        if self._serve is not None:
+            self._serve.close()
+            self._serve = None
+
+
+class AnalyzeFactsProvider:
+    """Tier-0 deterministic facts from the legacy engine. Provenance: deterministic_geometry."""
+
+    provenance_class = "deterministic_geometry"
+
+    def __init__(self, transport: AnalyzeTransport):
+        self.transport = transport
+
+    @property
+    def producer_hash(self) -> str:
+        return self.transport.analyze_sha256  # full
 
     def label(self, position: Position, *, options: Optional[dict] = None) -> LabelBatch:
-        """Tier-0 facts for one position. Search-free: the lexicographically first
-        legal move is passed because the position-level ``before`` block does not
-        depend on the played move (same trick as the legacy funnel)."""
+        """Search-free: the lexicographically first legal move is passed because the
+        position-level ``before`` block does not depend on the played move (same
+        trick as the legacy funnel)."""
         from .leakguard import assert_static_input_safe
         from .taxonomy import summarize_facts
 
@@ -181,35 +228,48 @@ class AnalyzeServeProvider:
         if not first_move:
             return LabelBatch(provenance_class="deterministic_geometry", producer=self.producer_hash,
                               uncomputed=("no-legal-moves",))
-        bundle = self.serve.request({
-            "cmd": "facts", "schemaVersion": 1, "fenBefore": position.fen,
-            "playedMoveUci": first_move,
-            "options": {"includeMotifOpportunities": options.get("includeMotifOpportunities", True),
-                        "includeCounterfactual": False},
-        })
+        bundle = self.transport.request_facts(
+            position.fen, first_move,
+            {"includeMotifOpportunities": options.get("includeMotifOpportunities", True),
+             "includeCounterfactual": False})
         if "error" in bundle:
             return LabelBatch(provenance_class="deterministic_geometry", producer=self.producer_hash,
                               uncomputed=(f"facts-error: {bundle['error']}",))
-        summary = summarize_facts(bundle, self.taxonomy["family"])
+        summary = summarize_facts(bundle, self.transport.taxonomy["family"])
         summary["deterministic_geometry"] = {**geo, **summary["deterministic_geometry"]}
         record = {"id": position.fen, "stage": "tier0", "status": "ok", **summary}
         assert_static_input_safe(record)
         return LabelBatch(provenance_class="deterministic_geometry", producer=self.producer_hash,
                           rows=(record,), registry_version=int(summary["factsRegistryVersion"] or 0))
 
+
+class AnalyzeSearchProvider:
+    """Cold fixed-node search from the legacy engine. Provenance: search_derived.
+
+    ``family`` names which label family this instance produces (search_shallow_cp
+    for tier1 budgets, search_deep_cp for tier3), so downstream provenance is
+    never guessed from the provider type.
+    """
+
+    provenance_class = "search_derived"
+
+    def __init__(self, transport: AnalyzeTransport, *, family: str = "search_deep_cp"):
+        if family not in ("search_shallow_cp", "search_deep_cp"):
+            raise ValueError(f"unknown search label family {family!r}")
+        self.transport = transport
+        self.family = family
+
+    @property
+    def producer_hash(self) -> str:
+        return self.transport.analyze_sha256  # full
+
     def search(self, position: Position, *, node_budget: int, pv_plies: int = 8) -> SearchLabel:
-        """Cold fixed-node search at one budget (tier1/tier3 contract)."""
-        response = self.serve.request({"cmd": "go", "fen": position.fen, "nodeBudget": node_budget})
+        response = self.transport.request_search(position.fen, node_budget)
         compact = compact_search(response, pv_plies)
         return SearchLabel(
             score_cp_stm=compact["scoreCpStm"], mate=compact["mate"], best_move=compact["bestMove"],
-            pv=tuple(compact["pv"]), nodes=compact["nodes"], wall_ms=float(response.get("wallMs", 0.0)),
-            extra={key: compact[key] for key in ("depth", "trajectory", "stabilization",
-                                                  "termination", "resultSource", "qNodes",
-                                                  "avgCutoffMoveIndex", "avgLegalMoves")},
+            pv=tuple(compact["pv"]), nodes=compact["nodes"],
+            wall_ms=float(response.get("timeMs", 0.0)),
+            extra={key: compact[key] for key in COMPACT_SEARCH_KEYS
+                   if key not in ("scoreCpStm", "mate", "bestMove", "pv", "nodes")},
         )
-
-    def close(self) -> None:
-        if self._serve is not None:
-            self._serve.close()
-            self._serve = None
