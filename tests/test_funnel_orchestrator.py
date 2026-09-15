@@ -271,13 +271,63 @@ def test_prior_counts_are_resolved_and_pinned(tmp_path):
     (tmp_path / "prior.json").write_text(json.dumps({"counts": {"__positions__": 5, "fork": 2}}), encoding="utf-8")
     policy, _digest = prepare_policy(config, artifact_root=str(tmp_path))
     prior = policy["coverage_prior"]["prior_counts"]
-    assert prior["source_path"] == "prior.json" and prior["counts_hash"].startswith("sha256:")
+    assert prior["counts_hash"].startswith("sha256:") and "source_path" not in prior  # content identity only
     base = build_policy(json.loads(json.dumps(CONFIG)))
     assert policy_hash(policy) != policy_hash(base)  # the prior is part of the identity
 
+    with pytest.raises(LabError, match="pass its counts"):
+        make_orchestrator(tmp_path, policy=policy).run()  # content required for the run-local copy
+
     orchestrator = make_orchestrator(tmp_path, policy=policy)
+    orchestrator.prior_counts = {"__positions__": 5, "fork": 2}
+    orchestrator.prior_source_path = "prior.json"
     manifest = orchestrator.run()
-    assert manifest["coveragePrior"]["counts_hash"] == prior["counts_hash"]
+    assert manifest["coveragePrior"] == {"counts_hash": prior["counts_hash"],
+                                         "local_copy": "coverage-prior.json",
+                                         "original_source_path": "prior.json"}
+    assert (tmp_path / "run" / "coverage-prior.json").is_file()
+
+
+def test_prior_is_portable_after_external_file_removed(tmp_path, lab):
+    """The run directory alone must rebuild its policy: the local prior copy carries it."""
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+
+    config = json.loads(json.dumps(CONFIG))
+    config["tiers"]["tier2"]["coverage"]["priorCountsPath"] = "prior.json"
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    prior_counts = {"__positions__": 5, "fork": 2}
+    (tmp_path / "prior.json").write_text(json.dumps({"counts": prior_counts}), encoding="utf-8")
+    policy, _digest = prepare_policy(config, artifact_root=str(tmp_path))
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run", policy=policy,
+                                      facts_provider=StubFacts(), search_provider=StubSearch(),
+                                      prior_counts=prior_counts, prior_source_path="prior.json")
+    orchestrator.run()
+
+    (tmp_path / "prior.json").unlink()  # the external original disappears
+    counts = import_funnel_run_evidence(lab.store, tmp_path / "run", name="portable", link_funnel_run=False)
+    assert counts["policy_hash"] == policy_hash(policy)  # rebuilt from the run-local copy
+
+
+def test_import_fails_closed_when_pinned_policy_unreconstructable(tmp_path, lab):
+    """A pinned modern run with a missing/corrupt config must not import as if unpinned."""
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+
+    make_orchestrator(tmp_path).run()
+    (tmp_path / "run" / "funnel-config.json").write_text("{ not valid json", encoding="utf-8")
+    with pytest.raises(LabError, match="could not be reconstructed"):
+        import_funnel_run_evidence(lab.store, tmp_path / "run", name="unreconstructable", link_funnel_run=False)
+
+
+def test_input_rows_survive_resume(tmp_path):
+    """Dedup/multiplicity evidence must not collapse when a run is resumed."""
+    make_orchestrator(tmp_path).run()
+    first = json.loads((tmp_path / "run" / "manifest.json").read_text(encoding="utf-8"))
+    assert first["positionsSource"]["inputRows"] > first["positionsSource"]["uniqueIdentities"]
+
+    (tmp_path / "run" / "tier3.jsonl").unlink()  # force a resume in a fresh orchestrator (empty memory)
+    resumed_manifest = make_orchestrator(tmp_path).run()
+    assert resumed_manifest["positionsSource"]["inputRows"] == first["positionsSource"]["inputRows"]
+    assert resumed_manifest["positionsSource"]["uniqueIdentities"] == first["positionsSource"]["uniqueIdentities"]
 
 
 def test_orchestrated_evidence_flows_through_s2_import(tmp_path, lab):

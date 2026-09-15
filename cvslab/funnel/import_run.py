@@ -240,17 +240,26 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
             _policy, policy_digest = prepare_policy(
                 json.loads(config_path.read_text(encoding="utf-8")),
                 artifact_root=str(directory), store=store)
-        except _LabError as exc:
-            policy_digest = None  # run predates or omits the triage config; reported, never guessed
-            policy_note = str(exc)
-        if policy_digest is not None:
-            pinned_hash = manifest.get("policyHash")
-            if pinned_hash and policy_digest != pinned_hash:
-                # loud, not soft: importing evidence whose decision rule cannot be reproduced
-                # from its own pinned policy would break the provenance chain
-                raise LabError(
-                    f"policy hash mismatch: run manifest pins {pinned_hash} but the run's config "
-                    f"rebuilds to {policy_digest}; refusing to import this evidence")
+        except (_LabError, ValueError, OSError) as exc:
+            # missing/corrupt config or prior: reconstructed = nothing. A run WITHOUT a pinned
+            # hash keeps the soft note (older runs may predate triage config); a pinned run
+            # fails closed below.
+            policy_digest = None
+            policy_note = f"policy reconstruction failed: {exc}"
+        pinned_hash = manifest.get("policyHash")
+        if pinned_hash and policy_digest is None:
+            # A pinned run whose decision rule cannot be reconstructed at all (missing or
+            # corrupt config/prior) must fail closed, not fall back to unlabelled provenance.
+            raise LabError(
+                f"run manifest pins policyHash {pinned_hash} but its policy could not be reconstructed "
+                f"from the run directory ({policy_note}); refusing to import evidence whose decision "
+                "rule is unreproducible")
+        if policy_digest is not None and pinned_hash and policy_digest != pinned_hash:
+            # loud, not soft: importing evidence whose decision rule cannot be reproduced
+            # from its own pinned policy would break the provenance chain
+            raise LabError(
+                f"policy hash mismatch: run manifest pins {pinned_hash} but the run's config "
+                f"rebuilds to {policy_digest}; refusing to import this evidence")
     priority_rows = []
     policy_note = locals().get("policy_note")
     for record_id, row in keyed.items():

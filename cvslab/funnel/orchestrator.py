@@ -132,7 +132,8 @@ class FunnelOrchestrator:
     """Executes the staged funnel with resume, cost accounting and an immutable manifest."""
 
     def __init__(self, config: FunnelRunConfig, run_dir: str | Path, *, policy: dict,
-                 facts_provider, search_provider, oracle_provider=None, positions: Optional[list[dict]] = None):
+                 facts_provider, search_provider, oracle_provider=None, positions: Optional[list[dict]] = None,
+                 prior_counts: Optional[dict] = None, prior_source_path: Optional[str] = None):
         self.config = config
         self.run_dir = Path(run_dir)
         self.run_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +144,8 @@ class FunnelOrchestrator:
         self._positions = positions
         self.costs: dict[str, dict] = {}
         self.pool_input_rows = 0  # raw input rows before identity dedup (workset transparency)
+        self.prior_counts = prior_counts  # content of a configured coverage prior (for the run-local copy)
+        self.prior_source_path = prior_source_path
 
     # -- paths -----------------------------------------------------------------
 
@@ -427,7 +430,9 @@ class FunnelOrchestrator:
             # legacy-compatible aliases (same values, older key names) so pre-S4 consumers
             # never silently lose provenance
             "prioritizerVersion": self.policy["policy_version"],
-            "coveragePrior": ({"source_path": prior["source_path"], "counts_hash": prior["counts_hash"]}
+            "coveragePrior": ({"counts_hash": prior["counts_hash"],
+                               "local_copy": "coverage-prior.json",
+                               "original_source_path": self.prior_source_path}
                               if prior else None),
             "identity": self._identity(),
             "engine": {"analyzeSha256": facts_provider_hash or None,
@@ -446,8 +451,7 @@ class FunnelOrchestrator:
                 "note": "identity-deduped labeling workset; NOT a substitute for the raw S5 source "
                         "snapshot, which must retain game_id/opening_id/ply multiplicity so splits "
                         "can stay leakage-safe",
-                "inputRows": self.pool_input_rows or (len(_read_jsonl(positions_path))
-                                                        if positions_path.is_file() else 0),
+                "inputRows": self._count_pool_inputs(),
                 "uniqueIdentities": len(_read_jsonl(positions_path)) if positions_path.is_file() else 0,
             },
             "stages": {stage: {**entry,
@@ -520,6 +524,22 @@ class FunnelOrchestrator:
 
     # -- cost accounting -------------------------------------------------------
 
+    def _count_pool_inputs(self) -> int:
+        """Raw input row count recomputed from the configured source files.
+
+        Survives resume (the first invocation's in-memory count is gone) so the manifest
+        keeps the dedup/multiplicity evidence S5 needs.
+        """
+        if self.pool_input_rows:
+            return self.pool_input_rows
+        total = 0
+        for file_name in self.config.pool_files:
+            path = Path(file_name)
+            if not path.is_absolute() and self.config.artifact_root:
+                path = Path(self.config.artifact_root) / file_name
+            total += len(_read_jsonl(path))
+        return total
+
     def _stage_costs_from_files(self) -> dict[str, dict]:
         """Costs derived from the stage files themselves, so a resumed run reports the
         compute that produced the FULL corpus, not just this invocation's share."""
@@ -561,7 +581,8 @@ class FunnelOrchestrator:
                     "weights": self.policy["weights"], "caps": self.policy["caps"],
                     "coverage": {"targetShare": self.policy["coverage_prior"]["target_share"],
                                  "minTarget": self.policy["coverage_prior"]["min_target"],
-                                 "priorCountsPath": prior["source_path"] if prior else None}},
+                                 # the run-local copy: a run must rebuild its policy from its own files
+                                 "priorCountsPath": "coverage-prior.json" if prior else None}},
                 "tier3": {"nodeBudget": self.config.tier3_node_budget, "pvPlies": self.config.tier3_pv_plies},
                 "tier4": {"enabled": self.config.tier4_enabled, "depth": self.config.tier4_depth,
                           "movetimeMs": self.config.tier4_movetime_ms,
@@ -573,8 +594,10 @@ class FunnelOrchestrator:
         }
 
     def _write_config_copy(self) -> None:
-        """Write the policy-shaped config (no trailing newline) so anyone can rebuild the
-        exact policy from the run directory alone."""
+        """Write the policy-shaped config (no trailing newline) plus a run-local copy of any
+        configured coverage prior, so the run directory alone rebuilds the exact policy."""
+        if self.policy["coverage_prior"]["prior_counts"]:
+            self.path("coverage-prior.json").write_bytes(canonical_json({"counts": self.prior_counts}))
         self.path("funnel-config.json").write_bytes(canonical_json(self.to_funnel_config()))
 
     def run(self) -> dict:
@@ -584,6 +607,9 @@ class FunnelOrchestrator:
                 "provider connections (a shared analyze --serve connection must not be driven concurrently). "
                 "Run with workers=1; parallelism is deferred to its own issue.")
         self._init_or_verify_identity()
+        if self.policy["coverage_prior"]["prior_counts"] and self.prior_counts is None:
+            raise LabError("this policy pins a coverage prior; pass its counts so the run directory can "
+                           "carry a self-contained copy (the run must reconstruct its own policy)")
         self._write_config_copy()
         stages = [("tier0", self.stage_tier0), ("tier1", self.stage_tier1), ("triage", self.stage_triage),
                   ("tier3", self.stage_tier3), ("tier4", self.stage_tier4)]
