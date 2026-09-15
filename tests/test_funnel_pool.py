@@ -132,8 +132,7 @@ def test_raw_pool_keeps_transposed_position_in_both_games(tmp_path, lab):
     prefixed_a, prefixed_b = f"{source.id}:{game_a}", f"{source.id}:{game_b}"
     shared_records = [record for record in records if prefixed_a in record.get("games", [])
                       and prefixed_b in record.get("games", [])]
-    assert shared_records and all(record["group"].endswith(record["group"].split(":")[-1])
-                                  and ":xc" in record["group"] for record in shared_records)
+    assert shared_records and all(record["group"].startswith("xc") for record in shared_records)
     # every record of the A/B family carries the full two-game provenance
     ab_records = [record for record in records if prefixed_a in record.get("games", [])]
     assert len(ab_records) == 5 and all(
@@ -222,3 +221,89 @@ def test_live_selfplay_deterministic_replay(tmp_path):
     assert first["manifest"]["engine"]["netHashes"]
     report = first["report"]
     assert report["games"] == 1 and report["rawPositions"] > 0
+
+
+class FixedCandidatesTeacher:
+    """Returns a fixed candidate set (asserted legal) so the window can be tested exactly."""
+
+    producer_hash = "fixedcandidates" * 4
+
+    def __init__(self, candidates: list[tuple[str, int]], first_moves: list[str] | None = None):
+        self.candidates = candidates
+        self.queue = list(first_moves or [])
+
+    def search(self, fen: str, *, node_budget: int):
+        if self.queue:
+            return self.queue.pop(0), 0
+        board = chess.Board(fen)
+        return (min(m.uci() for m in board.legal_moves) if board.legal_moves else None), 0
+
+    def root_candidates(self, fen: str, *, candidates: int, node_budget: int):
+        board = chess.Board(fen)
+        legal = {m.uci() for m in board.legal_moves}
+        for move, _score in self.candidates:
+            assert move in legal, f"{move} not legal in {fen}"
+        return list(self.candidates)
+
+
+def test_window_is_turn_aware_for_black_to_move():
+    """Black maximizes its own advantage = minimizes the White score; the window must
+    select around the MOVER's best, not the global White maximum."""
+    # legal in the pinned position after 3...Bc5 4.d3: White-POV scores, Black's best is -50
+    candidates = [("a7a6", 300), ("b7b6", -50), ("c5a3", -40)]
+    # declared opening so the ply-7/ply-8 positions are known: after 1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5
+    # White plays d2d3 (ply 7) and Black is to move at ply 8 with a7/b7/c7 pawns available
+    cfg = config(seed=5, games=1, max_plies=8, sample_every=1, min_ply=1,
+                 diversification_plies=(8,), diversification_candidates=3,
+                 diversification_window_cp=25, opening_lines=(ITALIAN_A,))
+    teacher = FixedCandidatesTeacher(candidates, first_moves=["d2d3"])
+    generated = SelfPlayGenerator(cfg, teacher).generate()
+    audit = generated["games"][0]["diversification"]
+    assert audit and audit[0]["ply"] == 8
+    entry = audit[0]
+    assert entry["bestScoreCpWhite"] == -50          # best FOR BLACK, in White units
+    assert "a7a6" not in entry["withinWindow"]       # +300 is 350cp from Black's best
+    assert entry["selected"] in entry["withinWindow"] and entry["selected"] != "a7a6"
+
+
+def test_transposition_across_sources_has_one_global_group(lab):
+    """A component spanning two S#### sources must get ONE group and one eventual split."""
+    from cvslab.hashing import write_jsonl
+    from cvslab.schemas import SourceSnapshot, utc_now
+    from cvslab.store import Store
+
+    shared_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"  # identity only, legality not needed for grouping
+    positions_a = [{"fen": shared_fen.replace("0 1", "0 3"), "game": "gA", "ply": 2},   # same EPD
+                   {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 9", "game": "gA", "ply": 4}]
+    positions_b = [{"fen": shared_fen.replace("0 1", "0 5"), "game": "gB", "ply": 2},   # same EPD, other source
+                   {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", "game": "gB", "ply": 3}]
+
+    source_ids = []
+    for index, rows in enumerate((positions_a, positions_b), start=1):
+        source_id = lab.store.next_id("S")
+        rel = f"sources/{source_id}/positions.jsonl"
+        write_jsonl(lab.store.abs(rel), rows)
+        lab.store.make_readonly(lab.store.abs(rel))
+        lab.store.create(SourceSnapshot(
+            id=source_id, name=f"pool-{index}", locality="local", source_origin="test",
+            generator={"name": "test"}, license="test", importer="test", importer_version=1,
+            path=rel, content_hash=__import__("cvslab.hashing", fromlist=["sha256_file"]).sha256_file(
+                lab.store.abs(rel)),
+            row_count=len(rows), game_count=1, label_authorities=[], compute={}, created_at=utc_now()))
+        source_ids.append(source_id)
+
+    normalization = lab.normalize(source_ids, name="cross-source")
+    records = [json.loads(line) for line in
+               lab.store.abs(normalization.path).read_text(encoding="utf-8").splitlines()]
+    groups = {record["group"] for record in records}
+    assert len(groups) == 1 and groups.pop().startswith("xc")  # ONE global component group
+    for record in records:
+        assert record["games"] == sorted([f"{source_ids[0]}:gA", f"{source_ids[1]}:gB"])
+
+    dataset = lab.freeze_dataset(normalization.id, name="cross-source-split", required_labels=[])
+    split_by_group: dict[str, set[str]] = {}
+    for manifest in dataset.splits:
+        for row in json.loads(json.dumps(__import__("cvslab.data", fromlist=["read_jsonl"]).read_jsonl(
+                lab.store.abs(manifest.path)))):
+            split_by_group.setdefault(row["group"], set()).add(manifest.name)
+    assert all(len(splits) == 1 for splits in split_by_group.values())  # one split for the component

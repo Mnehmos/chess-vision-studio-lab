@@ -162,13 +162,22 @@ class SelfPlayGenerator:
                 node_budget=self.config.diversification_node_budget)]
             known = [(move, score) for move, score in scored if score is not None]
             if known:
-                best = max(score for _, score in known)
-                within = [move for move, score in known if best - score <= self.config.diversification_window_cp]
+                # The mover's best depends on the turn: White maximizes the White score,
+                # Black minimizes it. The window is "within N cp of the mover's best".
+                if board.turn == chess.WHITE:
+                    best = max(score for _, score in known)
+                    within = [move for move, score in known
+                              if best - score <= self.config.diversification_window_cp]
+                else:
+                    best = min(score for _, score in known)
+                    within = [move for move, score in known
+                              if score - best <= self.config.diversification_window_cp]
                 if within:
                     selected = within[rng.randrange(len(within))]
                     audit.append({
                         "ply": ply, "candidates": [{"move": move, "scoreCpWhite": score} for move, score in scored],
-                        "windowCp": self.config.diversification_window_cp, "bestScoreCpWhite": best,
+                        "windowCp": self.config.diversification_window_cp,
+                        "bestScoreCpWhite": best,  # best FOR THE MOVER, in White score units
                         "withinWindow": within, "selected": selected,
                     })
                     return selected, next(score for move, score in scored if move == selected)

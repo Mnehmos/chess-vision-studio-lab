@@ -317,7 +317,10 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
         if len(members) == 1:
             groups[(src_id, row_index)] = (game, [game])
         else:
-            label = f"{src_id}:xc{hash_obj(members)[7:15]}"
+            # The component label must not depend on which source the surviving row came
+            # from: it is derived solely from the sorted fully-qualified member games, so a
+            # component spanning S0001 and S0002 gets ONE group (and one eventual split).
+            label = f"xc{hash_obj(sorted(members))[7:15]}"
             groups[(src_id, row_index)] = (label, members)
 
     for src in sources:
