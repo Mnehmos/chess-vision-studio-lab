@@ -731,3 +731,88 @@ the new pool's component count and its collision rate with the instrument.
 
 **Unknown and left open:** whether CVS 16k-node targets carry enough signal to train a
 useful evaluator at all — that is the experiment's question, not an assumption.
+
+---
+
+## 4.5 Pilot result (sealed)
+
+Executed on existing labels only: **0 new observations bought, 0 engine searches run**.
+60 new runs (R0089–R0148) plus the twenty reused S6 UNIFORM cells explicitly identified as
+R0054–R0058 (H1), R0064–R0068 (H4), R0074–R0078 (H16), R0084–R0088 (H32).
+
+Inputs proven before freezing (`tools/s7/s7-pilot-inventory.json`): the S4 artifacts match
+the hashes R0008 recorded; the 94 UNIFORM identities recover exactly from D0009's stored
+split and agree with the triage flags; the 926 train-eligible identities recover and
+`hash_obj(sorted(ids))` equals the `candidate_universe_hash` (sha256:67e781a0…) the S6 arms
+were frozen against; every record has **exactly one** 16k and 2k observation and every one
+of the 94 has exactly one 400k observation; no pilot record shares a transposition
+component with the D0010 instrument.
+
+New identities: **D0011** (94×16k), **D0012** (926×16k), **D0013** (926×2k), **T0005**
+(16k spec), **T0006** (2k spec), ablations **A0020–A0031**. Every new run declares its
+train/eval divergence before existing, records both supervision hashes, and passes the P1
+authority check; all 60 are COMPLETED with the common instrument E0004/D0010.
+
+Paired seed differences (five seeds, t-CI df=4, t=2.776), negative favours the first term:
+
+| width | P_depth 16k−400k | P_rows 926−94 | P_econ 926×16k − 94×400k |
+|---|---|---|---|
+| H1 | −0.000154 [−0.001348, +0.001041] | −0.003955 [−0.014056, +0.006145] | −0.004109 [−0.014356, +0.006137] |
+| H4 | −0.000526 [−0.001659, +0.000606] | **+0.006657 [+0.002564, +0.010749]** | **+0.006130 [+0.001817, +0.010443]** |
+| H16 | +0.000195 [−0.000747, +0.001137] | +0.000634 [−0.002386, +0.003653] | +0.000829 [−0.001927, +0.003585] |
+| H32 | **−0.001014 [−0.001918, −0.000111]** | −0.000586 [−0.002082, +0.000911] | **−0.001600 [−0.002743, −0.000456]** |
+
+Realized teacher cost of each arm, summed from the observations themselves (not nominal
+rows × budget — `tools/s7/s7_pilot_economics.py`, cross-checked against the deep-node total
+R0008 recorded, which it reproduces exactly):
+
+| arm | rows | budget | realized nodes | vs P1 | engine seconds |
+|---|---:|---:|---:|---:|---:|
+| P1 (reused S6 UNIFORM) | 94 | 400k | 37,285,491 | 1.00 | 30.75 |
+| P2 | 94 | 16k | 1,504,000 | 0.040 | — (shares the tier1 scan with the 2k search) |
+| P3 | 926 | 16k | 14,748,202 | **0.396** | — (same shared scan) |
+| P4 (exploratory) | 926 | 2k | 1,847,572 | 0.050 | — (same shared scan) |
+
+So the "~40 % of the compute" headline is confirmed by realized nodes (39.6 %), not
+assumed from configuration.
+
+Effect sizes relative to the ≈0.043 level: the largest single-width effect is `P_rows` at H4
+= +0.006657, i.e. **15.4 % of the level**; other resolving contrasts are −2.4 % (`P_depth`
+H32), +14.2 % (`P_econ` H4) and −3.7 % (`P_econ` H32); the unresolved ones span 0.4 %–9.5 %,
+and the two H1 contrasts near 9 % have intervals far wider than their estimates.
+
+**Reading (preregistered, per §4.3).**
+
+* `P_econ` = **UNRESOLVED_AT_40_PERCENT_COMPUTE**: there was **no consistent all-width
+  advantage or disadvantage** at ~40 % of the teacher compute. H4 significantly favours
+  narrow-deep (+0.006130 [+0.001817, +0.010443]) and H32 significantly favours
+  broad-shallow (−0.001600 [−0.002743, −0.000456]); the two remaining widths are
+  unresolved. This is **not** a non-inferiority result: it does not show that the cheaper
+  regime is equally good, only that neither regime won at every width.
+* `P_depth`: **400k never showed an advantage over 16k.** Three widths are unresolved; at
+  H32 the shallower 16k labels are significantly *better* (−0.001014 [−0.001918,
+  −0.000111]). There is a measurable effect at H32 — in the opposite direction to the
+  hypothesis that deeper supervision teaches better.
+* `P_rows`: **no consistent row-count effect.** Three widths are unresolved; at H4 the
+  larger set is significantly *worse* (+0.006657 [+0.002564, +0.010749]) — and that is the
+  arm which received ~10× the optimizer steps (926 rows / 256 batch × 40 epochs vs 94 rows)
+  at fixed epochs, the asymmetry declared in §6. Breadth did not win.
+* Exploratory 2k arm (no decision authority): indistinguishable from 16k at three widths;
+  at H16 the 2k arm leans better [−0.001128, +0.000132].
+
+**Teaching statement.** *We held the chess positions fixed and changed teacher depth; then
+held teacher depth fixed and changed the number of positions. Depth never showed an
+advantage: 400k supervision beat 16k at no width, and at H32 the shallow labels were
+significantly better. Breadth did not show an advantage either: at H1, H16 and H32 the
+926-row arm was unresolved, and at H4 it was significantly worse despite ~10× the optimizer
+steps. The economically interesting arm — 926 rows of 16k labels, 39.6 % of the realized
+teacher nodes — had no consistent all-width advantage or disadvantage, which is a
+statement about inconsistency, not about equivalence. This pilot can therefore separate
+neither label precision nor dataset breadth from noise at this scale, which is exactly why
+the matched-compute frontier (§5) is the experiment that decides, and why running the
+cheaper regime inside that frontier is worth measuring rather than assuming.*
+
+**Non-claims.** Not matched compute. The 94-row arms are nested inside the 926-row arm by
+construction. Different widths disagree, so no width-pooled claim is made. Scope: this
+pool, this teacher, RAW-768, H∈{1,4,16,32}. Pilot results never enter the S7-F decision
+rule.

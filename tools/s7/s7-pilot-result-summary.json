@@ -1,0 +1,294 @@
+{
+ "contrasts": {
+  "P_depth": {
+   "1": {
+    "ci": [
+     -0.001348,
+     0.001041
+    ],
+    "effect": -0.000154,
+    "n": 5,
+    "relative_to_level": -0.0036
+   },
+   "16": {
+    "ci": [
+     -0.000747,
+     0.001137
+    ],
+    "effect": 0.000195,
+    "n": 5,
+    "relative_to_level": 0.0045
+   },
+   "32": {
+    "ci": [
+     -0.001918,
+     -0.000111
+    ],
+    "effect": -0.001014,
+    "n": 5,
+    "relative_to_level": -0.0236
+   },
+   "4": {
+    "ci": [
+     -0.001659,
+     0.000606
+    ],
+    "effect": -0.000526,
+    "n": 5,
+    "relative_to_level": -0.0123
+   }
+  },
+  "P_econ": {
+   "1": {
+    "ci": [
+     -0.014356,
+     0.006137
+    ],
+    "effect": -0.004109,
+    "n": 5,
+    "relative_to_level": -0.095
+   },
+   "16": {
+    "ci": [
+     -0.001927,
+     0.003585
+    ],
+    "effect": 0.000829,
+    "n": 5,
+    "relative_to_level": 0.0192
+   },
+   "32": {
+    "ci": [
+     -0.002743,
+     -0.000456
+    ],
+    "effect": -0.0016,
+    "n": 5,
+    "relative_to_level": -0.037
+   },
+   "4": {
+    "ci": [
+     0.001817,
+     0.010443
+    ],
+    "effect": 0.00613,
+    "n": 5,
+    "relative_to_level": 0.1416
+   }
+  },
+  "P_rows": {
+   "1": {
+    "ci": [
+     -0.014056,
+     0.006145
+    ],
+    "effect": -0.003955,
+    "n": 5,
+    "relative_to_level": -0.0918
+   },
+   "16": {
+    "ci": [
+     -0.002386,
+     0.003653
+    ],
+    "effect": 0.000634,
+    "n": 5,
+    "relative_to_level": 0.0147
+   },
+   "32": {
+    "ci": [
+     -0.002082,
+     0.000911
+    ],
+    "effect": -0.000586,
+    "n": 5,
+    "relative_to_level": -0.0136
+   },
+   "4": {
+    "ci": [
+     0.002564,
+     0.010749
+    ],
+    "effect": 0.006657,
+    "n": 5,
+    "relative_to_level": 0.1545
+   }
+  }
+ },
+ "design": "same positions different depth (P_depth); same depth more rows (P_rows); the economic combination (P_econ, not matched compute)",
+ "economics": {
+  "P1": {
+   "budget": 400000,
+   "relative_to_P1": 1.0,
+   "rows": 94,
+   "teacher_nodes_estimate": 37600000
+  },
+  "P2": {
+   "budget": 16000,
+   "relative_to_P1": 0.04,
+   "rows": 94,
+   "teacher_nodes_estimate": 1504000
+  },
+  "P3": {
+   "budget": 16000,
+   "relative_to_P1": 0.394,
+   "rows": 926,
+   "teacher_nodes_estimate": 14816000
+  },
+  "P4": {
+   "budget": 2000,
+   "relative_to_P1": 0.0493,
+   "rows": 926,
+   "teacher_nodes_estimate": 1852000
+  }
+ },
+ "economics_realized": {
+  "P1": {
+   "engine_seconds": 30.748,
+   "node_budget": 400000,
+   "realized_nodes": 37285491,
+   "relative_to_P1_realized": 1.0,
+   "rows": 94,
+   "source": "tier3 cost over the 94 uniform records"
+  },
+  "P2": {
+   "engine_seconds": null,
+   "node_budget": 16000,
+   "realized_nodes": 1504000,
+   "relative_to_P1_realized": 0.0403,
+   "rows": 94,
+   "source": "tier1 16k budget over the 94 uniform records",
+   "tier1_scan_seconds_combined_2k_and_16k": 2.036
+  },
+  "P3": {
+   "engine_seconds": null,
+   "node_budget": 16000,
+   "realized_nodes": 14748202,
+   "relative_to_P1_realized": 0.3955,
+   "rows": 926,
+   "source": "tier1 16k budget over the 926 train-eligible records",
+   "tier1_scan_seconds_combined_2k_and_16k": 19.832
+  },
+  "P4": {
+   "engine_seconds": null,
+   "node_budget": 2000,
+   "realized_nodes": 1847572,
+   "relative_to_P1_realized": 0.0496,
+   "rows": 926,
+   "source": "tier1 2k budget over the 926 train-eligible records",
+   "tier1_scan_seconds_combined_2k_and_16k": 19.832
+  }
+ },
+ "evidence": {
+  "identities": "tools/s7/s7-pilot-identities.json",
+  "inventory": "tools/s7/s7-pilot-inventory.json",
+  "result": "tools/s7/s7-pilot-result.json",
+  "reused_cells": [
+   "R0054",
+   "R0055",
+   "R0056",
+   "R0057",
+   "R0058",
+   "R0064",
+   "R0065",
+   "R0066",
+   "R0067",
+   "R0068",
+   "R0074",
+   "R0075",
+   "R0076",
+   "R0077",
+   "R0078",
+   "R0084",
+   "R0085",
+   "R0086",
+   "R0087",
+   "R0088"
+  ]
+ },
+ "exploratory": {
+  "P_2k_vs_16k_same_rows": {
+   "1": {
+    "ci": [
+     -0.004246,
+     0.000926
+    ],
+    "effect": -0.00166,
+    "n": 5
+   },
+   "16": {
+    "ci": [
+     -0.001128,
+     0.000132
+    ],
+    "effect": -0.000498,
+    "n": 5
+   },
+   "32": {
+    "ci": [
+     -0.002265,
+     0.003057
+    ],
+    "effect": 0.000396,
+    "n": 5
+   },
+   "4": {
+    "ci": [
+     -0.005804,
+     0.005342
+    ],
+    "effect": -0.000231,
+    "n": 5
+   }
+  },
+  "P_2k_vs_400k": {
+   "1": {
+    "ci": [
+     -0.01623,
+     0.004691
+    ],
+    "effect": -0.00577,
+    "n": 5
+   },
+   "16": {
+    "ci": [
+     -0.002085,
+     0.002748
+    ],
+    "effect": 0.000331,
+    "n": 5
+   },
+   "32": {
+    "ci": [
+     -0.004647,
+     0.002239
+    ],
+    "effect": -0.001204,
+    "n": 5
+   },
+   "4": {
+    "ci": [
+     0.001807,
+     0.009991
+    ],
+    "effect": 0.005899,
+    "n": 5
+   }
+  }
+ },
+ "largest_effect": {
+  "absolute": 0.006657,
+  "contrast": "P_rows",
+  "relative_to_level": 0.1545,
+  "width": "4"
+ },
+ "pilot": "S7-P existing-label pilot",
+ "reading": {
+  "P_depth": "400k never showed an advantage over 16k: three widths unresolved, H32 significantly favoured the shallower 16k labels (-0.001014 [-0.001918, -0.000111])",
+  "P_econ": "UNRESOLVED_AT_40_PERCENT_COMPUTE",
+  "P_econ_qualifier": "no consistent all-width advantage or disadvantage at ~40 % of the teacher compute; H4 significantly favours narrow-deep (+0.006130) and H32 significantly favours broad-shallow (-0.001600). This is NOT a non-inferiority claim, and it is not a claim that the cheaper regime is equally good.",
+  "P_rows": "no consistent row-count effect: three widths unresolved, H4 significantly favoured the smaller 94-row set (+0.006657 [+0.002564, +0.010749])",
+  "magnitudes": "pooled test_loss is ~0.043 per arm; the largest single-width effect is P_rows at H4 = 0.006657, i.e. 15.4 % of that level; the other resolving contrasts are 2.4 %-14.2 % in absolute value, and the unresolved ones span 0.4 %-9.5 % with intervals wider than their estimates"
+ },
+ "scope": "this pool, this teacher, these four arms; not matched compute; requires P1; pilot results never enter the frontier decision rule"
+}
