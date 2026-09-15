@@ -95,6 +95,20 @@ DEFAULT_NON_CLAIMS = [
 ]
 
 
+def protocol_target_spec(protocol: EvaluationProtocol):
+    """The frozen TargetSpec a protocol pins (stored as canonical JSON in its params)."""
+    from .targets import TargetSpec
+    raw = protocol.params.get("TARGET_SPEC")
+    if not raw:
+        return None
+    payload = json.loads(str(raw))
+    return TargetSpec(family=payload["family"], authority=payload["authority"],
+                      producer=payload["producer"], budget=payload.get("budget") or {},
+                      value_path=tuple(payload.get("value_path") or ["value"]),
+                      pov=payload.get("pov", "stm"), target_type=payload.get("target_type", "cp"),
+                      k=float(payload.get("k", 256.0)), lam=float(payload.get("lam", 1.0)))
+
+
 def recipe_hash(recipe: TrainingRecipe) -> str:
     return hash_obj(recipe.model_dump(mode="json", exclude={"id", "created_at", "recipe_hash"}))
 
@@ -244,7 +258,8 @@ class LabService:
     def create_eval_protocol(self, *, name: str, dataset_id: str, family: str = DEFAULT_FAMILY,
                              generation: Optional[str] = None, split: str = "test", bootstrap_samples: int = 1000,
                              bootstrap_seed: int = 0, k: float = 256.0, lam: float = 1.0, description: str = "",
-                             non_claims: Optional[list[str]] = None) -> EvaluationProtocol:
+                             non_claims: Optional[list[str]] = None,
+                             target_spec=None) -> EvaluationProtocol:
         dataset: Dataset = self.store.get_as(dataset_id, Dataset)
         if split not in {s.name for s in dataset.splits}:
             raise LabError(f"{dataset_id} has no split {split!r}")
@@ -253,7 +268,10 @@ class LabService:
         protocol = EvaluationProtocol(
             id=self.store.next_id("E"), name=name, family=family, generation=self._generation(generation),
             dataset_id=dataset.id, dataset_manifest_hash=dataset.manifest_hash, split=split,
-            metrics=nnue.METRIC_DEFS, params={"K": float(k), "LAMBDA": float(lam)},
+            metrics=nnue.METRIC_DEFS,
+            params={"K": float(k), "LAMBDA": float(lam),
+                    **({"TARGET_SPEC": json.dumps(target_spec.canonical(), sort_keys=True)}
+                       if target_spec is not None else {})},
             bootstrap_samples=bootstrap_samples, bootstrap_seed=bootstrap_seed, protocol_version=1,
             non_claims=non_claims or DEFAULT_NON_CLAIMS, description=description, protocol_hash="",
             created_at=utc_now(),
@@ -288,8 +306,12 @@ class LabService:
         for obj in (recipe, protocol):
             if (obj.family, obj.generation) != (family, generation):
                 raise LabError(f"{obj.id} belongs to {obj.family}-{obj.generation}, not {family}-{generation}")
-        if protocol.dataset_id != dataset.id:
-            raise LabError(f"{protocol.id} is frozen on {protocol.dataset_id}, not {dataset.id}")
+        # The protocol owns its evaluation dataset and may point at a COMMON instrument
+        # shared by several training datasets (S6 evaluates every arm on one D_EVAL).
+        eval_dataset: Dataset = self.store.get_as(protocol.dataset_id, Dataset)
+        if eval_dataset.manifest_hash != protocol.dataset_manifest_hash:
+            raise LabError(f"{protocol.id} pins {protocol.dataset_manifest_hash} but "
+                           f"{eval_dataset.id} records {eval_dataset.manifest_hash}")
         return dataset, recipe, protocol
 
     @staticmethod
@@ -408,6 +430,7 @@ class LabService:
                 identity_hash=ablation.identity_hash, param_count=ablation.param_count, dataset_id=dataset.id,
                 dataset_manifest_hash=dataset.manifest_hash, training_recipe_id=recipe.id,
                 recipe_hash=recipe.recipe_hash, eval_protocol_id=protocol.id, protocol_hash=protocol.protocol_hash,
+                eval_dataset_id=protocol.dataset_id, eval_dataset_manifest_hash=protocol.dataset_manifest_hash,
                 queued_at=utc_now(),
             )))
         self._wake.set()
@@ -436,7 +459,14 @@ class LabService:
             dataset: Dataset = self.store.get(run.dataset_id)
             recipe: TrainingRecipe = self.store.get(run.training_recipe_id)
             protocol: EvaluationProtocol = self.store.get(run.eval_protocol_id)
+            eval_dataset: Dataset = self.store.get_as(protocol.dataset_id, Dataset)
             checks.extend(data.verify_dataset(self.store, dataset))
+            if eval_dataset.id != dataset.id:
+                checks.extend(data.verify_dataset(self.store, eval_dataset))
+                checks.append(make_check("eval_dataset_pinned",
+                                         eval_dataset.manifest_hash == protocol.dataset_manifest_hash
+                                         == (run.eval_dataset_manifest_hash or protocol.dataset_manifest_hash),
+                                         f"evaluation corpus {eval_dataset.id} matches the protocol binding"))
             checks += [
                 make_check("dataset_pinned", dataset.manifest_hash == run.dataset_manifest_hash,
                            f"run pinned {run.dataset_manifest_hash}; {dataset.id} records {dataset.manifest_hash}"),
@@ -445,8 +475,8 @@ class LabService:
                 make_check("recipe_frozen", recipe_hash(recipe) == recipe.recipe_hash == run.recipe_hash,
                            f"{recipe.id} recomputes to the recipe hash pinned at queue time"),
                 make_check("protocol_frozen", protocol_hash(protocol) == protocol.protocol_hash == run.protocol_hash
-                           and protocol.dataset_manifest_hash == dataset.manifest_hash,
-                           f"{protocol.id} recomputes to its pinned hash and is pinned to {dataset.id}"),
+                           and protocol.dataset_manifest_hash == eval_dataset.manifest_hash,
+                           f"{protocol.id} recomputes to its pinned hash and is pinned to {eval_dataset.id}"),
                 make_check("param_count_formula",
                            families.param_count(ablation.family, run.effective_config) == run.param_count,
                            f"shape-derived parameter count {run.param_count}"),
@@ -455,9 +485,17 @@ class LabService:
                 raise _PreflightFailed("pre-flight integrity checks failed; training was not started")
 
             cfg = run.effective_config
-            train_split, dropped_train = nnue.encode_records(data.load_split(self.store, dataset, "train"))
-            val_split, dropped_val = nnue.encode_records(data.load_split(self.store, dataset, "val"))
-            eval_split, dropped_eval = nnue.encode_records(data.load_split(self.store, dataset, protocol.split))
+            spec = protocol_target_spec(protocol)  # frozen in the protocol's own hash
+            if spec is not None:
+                checks.append(make_check("target_spec_pinned", True,
+                                         f"supervision {spec.family} / {'.'.join(spec.value_path)} / "
+                                         f"{spec.spec_hash()[:19]}…"))
+            train_split, dropped_train = nnue.encode_records(data.load_split(self.store, dataset, "train"),
+                                                             target_spec=spec)
+            val_split, dropped_val = nnue.encode_records(data.load_split(self.store, dataset, "val"),
+                                                         target_spec=spec)
+            eval_split, dropped_eval = nnue.encode_records(
+                data.load_split(self.store, eval_dataset, protocol.split), target_spec=spec)
             compute.accepted_examples = len(train_split) + len(val_split) + len(eval_split)
             compute.discarded_examples = dropped_train + dropped_val + dropped_eval
             if not len(train_split) or not len(eval_split):

@@ -426,6 +426,10 @@ class Run(LabModel):
     recipe_hash: str
     eval_protocol_id: str
     protocol_hash: str
+    # evaluation may use a DIFFERENT (common) dataset than training; explicit so no
+    # future reader assumes dataset_id is also the evaluation corpus
+    eval_dataset_id: Optional[str] = None
+    eval_dataset_manifest_hash: Optional[str] = None
     queued_at: str
     started_at: Optional[str] = None
     finished_at: Optional[str] = None

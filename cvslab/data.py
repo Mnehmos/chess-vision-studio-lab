@@ -414,6 +414,7 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
                    arms: Optional[Sequence[Mapping]] = None,
                    record_ids: Optional[Sequence[str]] = None,
                    campaign: Optional[Mapping[str, object]] = None,
+                   target_spec=None,
                    unknown_grouping: str = "refuse") -> Dataset:
     """Freeze a live view into an immutable D####.
 
@@ -483,6 +484,11 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
             kept.append(record)
     if not kept:
         raise LabError("selection retains no records; nothing to freeze")
+    if target_spec is not None:
+        # detect malformed supervision BEFORE materialising runs: every kept record must
+        # have exactly one label satisfying the complete spec (family alone is not enough)
+        from .targets import validate_records
+        validate_records(kept, target_spec)
     unknown = [record for record in kept if record.get("group_unknown")]
     if unknown and unknown_grouping == "refuse":
         raise LabError(
