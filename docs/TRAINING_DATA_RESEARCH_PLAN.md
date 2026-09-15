@@ -180,9 +180,25 @@ class TriagePolicy(Protocol):              # lab-owned, versioned
 Built-in providers: `AnalyzeServeProvider` (wraps the legacy `analyze --serve` protocol —
 `facts` and `go` — with pinned binary hash), `StockfishProvider` (UCI), `LabFactsProvider`
 (`cvslab/facts.py`), and later `LabEngineProvider` (clean-room engine, same `go` shape).
-Triage policies are stored as immutable lab objects: **reuse `T####`** with
-`trainer="cvslab.triage.priority"`, `trainer_version=1`, `params={weights, caps, versions}` —
-no new prefix, same hashing/immutability rules.
+Triage policy identity is a **content-addressed scientific config**, not a lab object prefix:
+the policy document (schema below) is stored immutably at `policies/<policy_hash>.json` and
+referenced by `(policy_version, policy_hash)` everywhere it matters. `T####` remains
+exclusively `TrainingRecipe` — a triage policy is not a training recipe, and the first campaign
+needs both identities unambiguously.
+
+```json
+{
+  "policy_version": "priority-v1",
+  "weights": {"scoreInstability": 3.0, "...": 0.0},
+  "caps": {"scoreDeltaCp": 150, "...": 0},
+  "selection": {"deepFraction": 0.10, "auditFraction": 0.02, "holdoutFraction": 0.01,
+                 "holdoutSeed": 20260914},
+  "coverage_prior": {"kind": "none", "ref": null}
+}
+```
+`policy_hash = sha256(canonical_json(policy))`. Any weight, cap, fraction or prior change
+changes the hash and therefore the recorded identity — no version bump bookkeeping beyond
+`policy_version` naming the formula generation.
 
 ## 7. Mapping funnel evidence → canonical lab objects
 
@@ -191,16 +207,17 @@ no new prefix, same hashing/immutability rules.
 | `positions.jsonl` rows | canonical records: new `S####` snapshot of the pool + `N####` normalization (EPD identity dedup); `game_id` → record `group` (leakage-safe splits); `gameOutcome` → `outcome` label |
 | `tier0.deterministic_geometry`, `bounded_tactical_proof`, `taxonomy`, `uncomputed` | `facts` / `motif` / `strategy` label sets (authority `legacy.cvs.analyze.<sha8>`, registry_version = `factsRegistryVersion`); `uncomputed` preserved per record |
 | `tier1` per-budget search + derived | `search_shallow_cp` labels, one per node budget; `budget={"nodeBudget": n}`; derived deltas preserved in label `note` |
-| `triage` priority/components/selection/trainEligible | `priority` labels (value = priority, `note` = top reasons, `budget` = component contributions) + selection flags recorded in the triage manifest |
+| `triage` priority/components/selection/trainEligible | `priority` labels (value = priority; `note` = top reasons; component contributions in a dedicated `components` field — never in `budget`) whose provenance references `policy_version` + `policy_hash`; selection flags recorded in the triage manifest |
 | `tier3` deep + shallowToDeep + targets | `search_deep_cp` labels (scoreCpStm/White, expectedScoreStm) with `budget={"nodeBudget":400000}` |
 | `tier4` Stockfish | `oracle_cp` labels (authority `oracle.stockfish.<ver>`, `budget={depth, movetimeMs, nodes}`) |
 | `manifest.json`, `report.json`, `coverage.json`, `triage-misses.jsonl` | already imported losslessly as `FunnelRun` (R####) by `intake.import_funnel_run`; add `position_pool` link to the new `S####`/`N####` |
 
 **Missing lab schema fields (minimal, additive):** (1) `FunnelRun.position_pool: Optional[str]` —
-the `S####`/`N####` the per-position rows were imported into; (2) `FunnelRun.triage_policy_id:
-Optional[str]` — the `T####` identity of the prioritizer used (today only the version string is
-funnel-internal); (3) optional `LabelSetRef.policy_id` mirroring (2) on triage-produced label
-sets. Nothing else is required: label rows already carry family/authority/producer/registry_
+the `S####`/`N####` the per-position rows were imported into; (2)
+`FunnelRun.triage_policy_version: Optional[str]` **plus** `FunnelRun.triage_policy_hash:
+Optional[str]` — the content-addressed policy identity the run used; (3) optional
+`policy_hash: Optional[str]` on label rows and `LabelSetRef` so triage-produced label provenance
+references the policy hash directly. Label `budget` stays strictly about search/compute budgets. Nothing else is required: label rows already carry family/authority/producer/registry_
 version/budget/note, and `FunnelRun` already preserves tier costs, arms, oracle arms, coverage,
 priority histogram/reasons, audit-miss, compute, and file hashes.
 
@@ -228,8 +245,9 @@ One pool, one funnel run, three frozen datasets, identical downstream everything
    `game_id`/`opening_id` for leakage-safe splits. Size follows measured Tier-0/1 throughput.
 2. **Cheap pass on all**: tier0 facts (lab facts and/or legacy analyze) + tier1 shallow at
    `[2k, 16k]` nodes.
-3. **Triage**: priority-v1 (unchanged). Emit deep/uniform/audit/holdout selections at identical
-   row counts (e.g. 10% deep, 10% uniform, 2% audit, 1% hash-holdout).
+3. **Triage**: priority-v1 as a content-addressed policy (`(policy_version, policy_hash)` pinned
+   in the run manifest). Emit deep/uniform/audit/holdout selections at identical row counts
+   (e.g. 10% deep, 10% uniform, 2% audit, 1% hash-holdout).
 4. **Deep label**: tier3 at identical node budget per row across arms — assert equal total deep
    nodes in the run manifest before training.
 5. **Import**: per-position rows → canonical records + L2 labels (§7); freeze three `D####`
@@ -244,25 +262,26 @@ One pool, one funnel run, three frozen datasets, identical downstream everything
 
 ## 10. Staged implementation plan (each slice independently shippable)
 
-Tracked as issues #8–#13. Each slice ships independently; S1's fixture parity gates everything
-after it.
+Tracked as issues #8, #9, #15, #10, #11, #12, #13 (S1–S7). Each slice ships independently;
+S1's fixture parity gates everything after it, and S4 depends on S3 (#15).
 
-| stage | deliverable | acceptance |
-|---|---|---|
-| S1 | `cvslab/funnel/` package skeleton + `AnalyzeServeProvider` + leak-guard port + fixture replay harness | lab funnel reproduces legacy tier0/tier1 rows byte-for-byte-equivalent on the fixture (exact field compare) |
-| S2 | Per-position import: funnel run rows → `S####`/`N####` + label sets (§7) + `FunnelRun.position_pool` | importing the measured legacy run yields records whose facts/motifs match tier0; catalog facets reproduce coverage.json counts |
-| S3 | Triage as lab object: `T####` policy identity + `select()` port + parity test vs `triage.jsonl` | per-position priority/flags identical on fixture; policy hash pinned |
-| S4 | Orchestrator: stages, workers, resume, cost accounting, manifest write (lab-shaped) | resume test: kill mid-tier1, rerun, no duplicates; manifest pins all identities |
-| S5 | Candidate pool generation: self-play provider + opening diversification + sampling | deterministic pool from seed; EPD dedup reported; game/opening ids retained |
-| S6 | Arms → `D####`: UNIFORM/PRIORITY/MIXED builder with equal-compute assertions | freeze refuses arms whose deep-node totals differ beyond tolerance; manifests expose arm vs effective rows |
-| S7 | Campaign runner + GUI visibility (tier positions, compute, reasons, coverage, disagreement, audit misses, source mix) | first campaign runs end-to-end and renders in the Data/Lab Map screens |
+| stage | issue | deliverable | acceptance |
+|---|---|---|---|
+| S1 | #8 | `cvslab/funnel/` package skeleton + `AnalyzeServeProvider` + leak-guard port + fixture replay harness | lab funnel reproduces legacy tier0/tier1 rows byte-for-byte-equivalent on the fixture (exact field compare) |
+| S2 | #9 | Per-position import: funnel run rows → `S####`/`N####` + label sets (§7) + `FunnelRun.position_pool` | importing the measured legacy run yields records whose facts/motifs match tier0; catalog facets reproduce coverage.json counts |
+| S3 | #15 | priority-v1 triage with content-addressed policy identity (`policy_version` + `policy_hash`) + `select()` port + parity test vs `triage.jsonl` | per-position priority/flags identical on fixture; policy hash recorded in labels and manifest |
+| S4 | #10 | Orchestrator: stages, workers, resume, cost accounting, manifest write (lab-shaped); depends on #15 | resume test: kill mid-tier1, rerun, no duplicates; manifest pins all identities including the triage policy hash |
+| S5 | #11 | Candidate pool generation: self-play provider + opening diversification + sampling | deterministic pool from seed; EPD dedup reported; game/opening ids retained |
+| S6 | #12 | Arms → `D####`: UNIFORM/PRIORITY/MIXED builder with equal-compute assertions | freeze refuses arms whose deep-node totals differ beyond tolerance; manifests expose arm vs effective rows |
+| S7 | #13 | Campaign runner + GUI visibility (tier positions, compute, reasons, coverage, disagreement, audit misses, source mix) | first campaign runs end-to-end and renders in the Data/Lab Map screens |
 
 ## 11. Risks and guardrails
 
 - **Parity drift**: taxonomy or tie-breaking drift silently changes the instrument → fixture
   replay in CI (S1) is non-negotiable before any retirement.
 - **Prioritizer over-tuning**: do not change weights or components until §9's causal test
-  reports; version every change as a new `T####`.
+  reports; every change is a new policy document with a new `policy_hash` (never an edit in
+  place).
 - **Leakage**: tier0 label sets must keep the static-input guard; search/outcome/oracle labels
   and `bucket`/`sort` filters must never feed static model inputs unless an ablation explicitly
   requests it (declare in the ablation, not in the data).
