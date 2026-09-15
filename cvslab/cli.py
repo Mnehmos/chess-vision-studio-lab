@@ -253,6 +253,21 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--state", default=None)
     p.add_argument("--family", default=None)
 
+    p = command("pool", "candidate-pool generation (S5): fresh legacy-CVS self-play, raw source")
+    pool_sub = p.add_subparsers(dest="pool_command", required=True)
+    g = pool_sub.add_parser("generate", parents=[home])
+    g.add_argument("--engine-root", required=True, help="legacy engine checkout (frozen teacher)")
+    g.add_argument("--out", required=True, help="output directory for the raw pool")
+    g.add_argument("--games", type=int, default=10)
+    g.add_argument("--seed", type=int, default=20260915)
+    g.add_argument("--max-plies", type=int, default=80)
+    g.add_argument("--sample-every", type=int, default=2)
+    g.add_argument("--min-ply", type=int, default=6)
+    g.add_argument("--diversify-plies", type=int, nargs="*", default=[6, 8, 10])
+    g.add_argument("--window-cp", type=int, default=25)
+    g.add_argument("--play-nodes", type=int, default=20000)
+    g.add_argument("--snapshot", action="store_true", help="also snapshot the raw pool as an S#### source")
+
     # -- intake ---------------------------------------------------------------
     p = command("intake-legacy", "import the legacy catalog as LEGACY evidence (I####)")
     p.add_argument("--catalog", default="catalog")
@@ -418,6 +433,19 @@ def _dispatch(args) -> int:
     elif cmd == "map":
         _emit(service.map_view(args.projection, generation=args.generation,
                                state=args.state, family=args.family))
+    elif cmd == "pool":
+        from .funnel.pool import PoolConfig, generate_and_write
+        result = generate_and_write(
+            args.engine_root, args.out,
+            config=PoolConfig(seed=args.seed, games=args.games, max_plies=args.max_plies,
+                              sample_every=args.sample_every, min_ply=args.min_ply,
+                              diversification_plies=tuple(args.diversify_plies),
+                              diversification_window_cp=args.window_cp,
+                              play_node_budget=args.play_nodes),
+            store=service.store if args.snapshot else None)
+        _emit({"report": result["report"], "source": result["source"],
+               "configSha256": result["manifest"]["configSha256"],
+               "manifestSha256": result["manifest"]["manifestSha256"]})
     elif cmd == "intake-legacy":
         roots = {}
         for pair in args.root:

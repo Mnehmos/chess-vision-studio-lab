@@ -264,6 +264,65 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
                               f">= {settings['phase_middlegame_min_material']} middlegame, else endgame")
     seen: set[str] = set()  # canonical record identities (EPD), keep-first dedup
     records, duplicates, rejected = [], 0, 0
+    # Games connected by any shared canonical position (transpositions) must not be split
+    # apart later: leakage safety is a property of the whole connected component, so
+    # components are resolved before dedup and every record of a component carries the
+    # component's group. Union-find over game ids; deterministic by construction.
+    parent: dict[str, str] = {}
+
+    def find(game: str) -> str:
+        parent.setdefault(game, game)
+        while parent[game] != game:
+            parent[game] = parent[parent[game]]
+            game = parent[game]
+        return game
+
+    def union(a: str, b: str) -> None:
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            # stable merge direction: lexicographically smaller root wins
+            high, low = (ra, rb) if ra > rb else (rb, ra)
+            parent[high] = low
+
+    game_of_row: dict[tuple[str, int], str] = {}
+    games_of_record: dict[str, set[str]] = {}
+    for src in sources:
+        rows = read_jsonl(store.abs(src.path))
+        inferred = infer_games(rows)
+        for row_index, (row, inferred_game) in enumerate(zip(rows, inferred)):
+            if row.get("game_unknown"):
+                continue
+            game = f"{src.id}:{inferred_game}"
+            game_of_row[(src.id, row_index)] = game
+            try:
+                epd = chess.Board(row["fen"]).epd()
+            except (KeyError, ValueError):
+                continue
+            games_of_record.setdefault(epd, set()).add(game)
+    for games in games_of_record.values():
+        if len(games) > 1:
+            first = min(games)
+            for other in sorted(games):
+                union(first, other)
+    for game in set(game_of_row.values()):  # materialize every game, linked or not
+        find(game)
+
+    groups: dict[tuple[str, int], tuple[str, list[str]]] = {}
+    component_members: dict[str, list[str]] = {}
+    for game in sorted(parent):
+        component_members.setdefault(find(game), []).append(game)
+    for (src_id, row_index), game in game_of_row.items():
+        root = find(game)
+        members = component_members[root]
+        if len(members) == 1:
+            groups[(src_id, row_index)] = (game, [game])
+        else:
+            # The component label must not depend on which source the surviving row came
+            # from: it is derived solely from the sorted fully-qualified member games, so a
+            # component spanning S0001 and S0002 gets ONE group (and one eventual split).
+            label = f"xc{hash_obj(sorted(members))[7:15]}"
+            groups[(src_id, row_index)] = (label, members)
+
     for src in sources:
         rows = read_jsonl(store.abs(src.path))
         inferred = infer_games(rows)
@@ -272,7 +331,10 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
             # row-level game_unknown marker are trusted; a heuristic is never upgraded
             # into an identity.
             game_unknown = bool(row.get("game_unknown"))
-            game = "UNKNOWN" if game_unknown else inferred_game
+            if game_unknown:
+                group_label, member_games = f"{src.id}:UNKNOWN", []
+            else:
+                group_label, member_games = groups[(src.id, row_index)]
             try:
                 board = chess.Board(row["fen"])
                 if not board.is_valid():
@@ -293,7 +355,7 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
                                "authority": row.get("label_authority") or src.label_authorities[0],
                                "producer": src.id, "label_schema_version": 1})
             record = {
-                "record_id": record_id, "group": f"{src.id}:{game}", "source_id": src.id, "source_row": row_index,
+                "record_id": record_id, "group": group_label, "source_id": src.id, "source_row": row_index,
                 "ply": row.get("ply", _ply_from_fen(row["fen"])), "fen": board.fen(), "epd": epd,
                 "stm": "w" if board.turn == chess.WHITE else "b",
                 "phase": game_phase(board, int(settings["phase_opening_min_material"]),
@@ -302,6 +364,8 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
             }
             if game_unknown:
                 record["group_unknown"] = True
+            else:
+                record["games"] = member_games  # full provenance: every game that can reach it
             records.append(record)
     normalization_id = store.next_id("N")
     rel = f"canonical/{normalization_id}/records.jsonl"
