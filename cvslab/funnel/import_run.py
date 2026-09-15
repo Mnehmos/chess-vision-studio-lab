@@ -91,8 +91,13 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     if not positions:
         raise LabError(f"{directory} has no positions.jsonl rows")
 
-    analyze_sha = str((manifest.get("engine") or {}).get("binarySha256") or "")
-    sf_sha = str((manifest.get("stockfish") or {}).get("binarySha256") or "")
+    # Modern (lab-shaped) manifest names first, legacy names as fallback: provenance must
+    # never be silently lost just because a run was produced by the S4 orchestrator.
+    engine_block = manifest.get("engine") or {}
+    analyze_sha = str(engine_block.get("analyzeSha256") or engine_block.get("binarySha256") or "")
+    oracle_block = manifest.get("oracle") or {}
+    sf_sha = str(oracle_block.get("providerHash")
+                 or (manifest.get("stockfish") or {}).get("binarySha256") or "")
     registry_version = int(next((r.get("factsRegistryVersion") or 0 for r in tier0.values()), 0) or 0)
 
     # -- L0: candidate pool ------------------------------------------------------
@@ -224,19 +229,28 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     add_set("outcome", OUTCOME_AUTHORITY, "legacy.funnel.sample", outcome_rows)
 
     # triage -> priority (per-record evidence only; policy identity belongs to S3/#15)
-    from .policy import build_policy, store_policy
+    from .policy import prepare_policy, store_policy
 
-    policy_version = str(manifest.get("prioritizerVersion") or "unknown")
+    policy_version = str(manifest.get("prioritizerVersion") or manifest.get("policyVersion") or "unknown")
     policy_digest = None
     config_path = directory / "funnel-config.json"
     if config_path.is_file():
         from ..store import LabError as _LabError
         try:
-            policy_digest = store_policy(store, build_policy(
-                json.loads(config_path.read_text(encoding="utf-8")), policy_version=policy_version))
+            _policy, policy_digest = prepare_policy(
+                json.loads(config_path.read_text(encoding="utf-8")),
+                artifact_root=str(directory), store=store)
         except _LabError as exc:
             policy_digest = None  # run predates or omits the triage config; reported, never guessed
             policy_note = str(exc)
+        if policy_digest is not None:
+            pinned_hash = manifest.get("policyHash")
+            if pinned_hash and policy_digest != pinned_hash:
+                # loud, not soft: importing evidence whose decision rule cannot be reproduced
+                # from its own pinned policy would break the provenance chain
+                raise LabError(
+                    f"policy hash mismatch: run manifest pins {pinned_hash} but the run's config "
+                    f"rebuilds to {policy_digest}; refusing to import this evidence")
     priority_rows = []
     policy_note = locals().get("policy_note")
     for record_id, row in keyed.items():

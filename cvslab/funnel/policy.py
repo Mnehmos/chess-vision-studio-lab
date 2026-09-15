@@ -108,3 +108,28 @@ def load_policy(store: Store, digest: str) -> dict:
 def policies_dir(store: Store) -> list[Path]:
     folder = store.abs(POLICY_DIR)
     return sorted(folder.glob("*.json")) if folder.is_dir() else []
+
+
+def prepare_policy(config: dict, *, artifact_root=None, store=None):
+    """Build the run's policy, resolving a configured coverage prior **explicitly**.
+
+    A non-null ``priorCountsPath`` is read (relative to the artifact root when not
+    absolute); its content hash becomes part of the policy identity. Returns
+    (policy, stored_policy_hash_if_store_given).
+    """
+    import json
+    from pathlib import Path as _Path
+
+    tier2 = config.get("tiers", {}).get("tier2", {})
+    prior_path = (tier2.get("coverage") or {}).get("priorCountsPath")
+    prior_counts = None
+    if prior_path:
+        resolved = _Path(prior_path)
+        if not resolved.is_absolute() and artifact_root:
+            resolved = _Path(artifact_root) / prior_path
+        if not resolved.is_file():
+            raise LabError(f"coverage prior not found: {resolved} (configured as {prior_path})")
+        prior_counts = json.loads(resolved.read_text(encoding="utf-8"))["counts"]
+    policy = build_policy(config, prior_counts=prior_counts)
+    digest = store_policy(store, policy) if store is not None else None
+    return policy, digest

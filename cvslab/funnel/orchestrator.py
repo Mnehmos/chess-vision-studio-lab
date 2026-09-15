@@ -28,7 +28,7 @@ from typing import Iterable, Optional
 
 from ..hashing import canonical_json, hash_obj, sha256_file
 from ..store import LabError
-from .policy import build_policy, policy_hash, store_policy
+from .policy import build_policy, policy_hash, prepare_policy, store_policy
 from .import_run import row_outcome
 from .triage import clamp_cp, common_prefix, coverage_counts, priority_components, score_priority, select, white_pov
 
@@ -142,6 +142,7 @@ class FunnelOrchestrator:
         self.oracle_provider = oracle_provider
         self._positions = positions
         self.costs: dict[str, dict] = {}
+        self.pool_input_rows = 0  # raw input rows before identity dedup (workset transparency)
 
     # -- paths -----------------------------------------------------------------
 
@@ -158,10 +159,12 @@ class FunnelOrchestrator:
             return _read_jsonl(target)
         rows: list[dict] = []
         for file_name in self.config.pool_files:
+            pass  # (kept for readability; rows accumulate below)
             path = Path(file_name)
             if not path.is_absolute() and self.config.artifact_root:
                 path = Path(self.config.artifact_root) / file_name
             rows.extend(_read_jsonl(path))
+        self.pool_input_rows = len(rows)
         seen: set[str] = set()
         unique = []
         for row in rows:
@@ -198,7 +201,8 @@ class FunnelOrchestrator:
                               "schemaVersion": FUNNEL_SCHEMA_VERSION, "cost": {"wallMs": wall_ms}}
                 else:
                     record = {"id": row["id"], "stage": "tier0", "schemaVersion": FUNNEL_SCHEMA_VERSION,
-                              "status": "uncomputed", "uncomputed": list(batch.uncomputed)}
+                              "status": "uncomputed", "uncomputed": list(batch.uncomputed),
+                              "cost": {"wallMs": wall_ms}}
                 _append_jsonl(fh, record)
                 engine_seconds += wall_ms / 1000.0
         self._record_cost("tier0", positions=len(positions), processed=len(pending),
@@ -332,7 +336,8 @@ class FunnelOrchestrator:
                 record = {"id": row["id"], "stage": "tier4", "schemaVersion": FUNNEL_SCHEMA_VERSION,
                           "scoreCp": label.score_cp_stm, "mate": label.mate, "bestMove": label.best_move,
                           "pv": list(label.pv), "depth": label.reached_depth, "nodes": label.nodes,
-                          "cost": {"wallMs": round((time.perf_counter() - tick) * 1000, 3)}}
+                          "cost": {"wallMs": round((time.perf_counter() - tick) * 1000, 3),
+                                   "nodes": label.nodes}}  # accounting reads cost.nodes
                 _append_jsonl(fh, record)
                 engine_seconds += record["cost"]["wallMs"] / 1000.0
                 total_nodes += label.nodes
@@ -379,6 +384,8 @@ class FunnelOrchestrator:
         report = {
             "funnelSchemaVersion": FUNNEL_SCHEMA_VERSION,
             "prioritizerVersion": self.policy["policy_version"],
+            "manifest": {"configSha256": hash_obj(self.config.canonical())},
+            "engineBinarySha256": getattr(self.facts_provider, "producer_hash", None),
             "policyHash": policy_hash(self.policy),
             "tiers": {stage: {"positions": entry.get("positions", 0),
                               "engineSec": entry["engine_seconds"],
@@ -413,20 +420,36 @@ class FunnelOrchestrator:
             "seed": self.config.seed,
             "config": self.config.canonical(),
             "configSha256": hash_obj(self.config.canonical()),
+            "funnelConfigSha256": sha256_file(self.path("funnel-config.json"))
+            if self.path("funnel-config.json").is_file() else None,
             "policyVersion": self.policy["policy_version"],
             "policyHash": policy_hash(self.policy),
+            # legacy-compatible aliases (same values, older key names) so pre-S4 consumers
+            # never silently lose provenance
+            "prioritizerVersion": self.policy["policy_version"],
             "coveragePrior": ({"source_path": prior["source_path"], "counts_hash": prior["counts_hash"]}
                               if prior else None),
             "identity": self._identity(),
             "engine": {"analyzeSha256": facts_provider_hash or None,
+                       "binarySha256": facts_provider_hash or None,  # legacy alias
                        "searchProviderHash": getattr(self.search_provider, "producer_hash", None),
                        "taxonomySha256": getattr(self.facts_provider, "taxonomy_sha256", None),
                        "taxonomySchemaVersion": getattr(self.facts_provider, "taxonomy_schema_version", None)},
             "oracle": {"providerHash": oracle_provider_hash or None,
                        "enabled": bool(self.config.tier4_enabled and self.oracle_provider),
                        "depth": self.config.tier4_depth, "movetimeMs": self.config.tier4_movetime_ms},
-            "positionsSource": {"path": str(positions_path),
-                                "sha256": sha256_file(positions_path) if positions_path.is_file() else None},
+            "stockfish": {"binarySha256": oracle_provider_hash or None},  # legacy alias
+            "positionsSource": {
+                "path": str(positions_path),
+                "sha256": sha256_file(positions_path) if positions_path.is_file() else None,
+                "kind": "labeling_workset",
+                "note": "identity-deduped labeling workset; NOT a substitute for the raw S5 source "
+                        "snapshot, which must retain game_id/opening_id/ply multiplicity so splits "
+                        "can stay leakage-safe",
+                "inputRows": self.pool_input_rows or (len(_read_jsonl(positions_path))
+                                                        if positions_path.is_file() else 0),
+                "uniqueIdentities": len(_read_jsonl(positions_path)) if positions_path.is_file() else 0,
+            },
             "stages": {stage: {**entry,
                                "processedThisInvocation": self.costs.get(stage, {}).get("processed", 0),
                                "wallSecondsThisInvocation": self.costs.get(stage, {}).get("wall_seconds", 0.0)}
@@ -517,8 +540,51 @@ class FunnelOrchestrator:
 
     # -- driver ----------------------------------------------------------------
 
+    def to_funnel_config(self) -> dict:
+        """The run's policy-shaped config (legacy funnel shape): this file must rebuild the
+        exact policy, which is what lets import provenance-check it."""
+        prior = self.policy["coverage_prior"]["prior_counts"]
+        return {
+            "funnelConfigVersion": 1,
+            "prioritizerVersion": self.policy["policy_version"],
+            "seed": self.config.seed,
+            "source": {"positionsFiles": self.config.pool_files, "positions": self.config.positions},
+            "workers": self.config.workers,
+            "tiers": {
+                "tier0": {"includeMotifOpportunities": self.config.include_motif_opportunities},
+                "tier1": {"nodeBudgets": self.config.tier1_budgets, "pvPlies": self.config.tier1_pv_plies},
+                "tier2": {
+                    "deepFraction": self.policy["selection"]["deep_fraction"],
+                    "auditFraction": self.policy["selection"]["audit_fraction"],
+                    "holdoutFraction": self.policy["selection"]["holdout_fraction"],
+                    "holdoutSeed": self.policy["selection"]["holdout_seed"],
+                    "weights": self.policy["weights"], "caps": self.policy["caps"],
+                    "coverage": {"targetShare": self.policy["coverage_prior"]["target_share"],
+                                 "minTarget": self.policy["coverage_prior"]["min_target"],
+                                 "priorCountsPath": prior["source_path"] if prior else None}},
+                "tier3": {"nodeBudget": self.config.tier3_node_budget, "pvPlies": self.config.tier3_pv_plies},
+                "tier4": {"enabled": self.config.tier4_enabled, "depth": self.config.tier4_depth,
+                          "movetimeMs": self.config.tier4_movetime_ms,
+                          "priorityFraction": self.policy["stockfish"]["priority_fraction"],
+                          "uniformFraction": self.policy["stockfish"]["uniform_fraction"],
+                          "auditFraction": self.policy["stockfish"]["audit_fraction"]},
+            },
+            "report": {"informativeDeltaCp": self.config.report_informative_delta_cp},
+        }
+
+    def _write_config_copy(self) -> None:
+        """Write the policy-shaped config (no trailing newline) so anyone can rebuild the
+        exact policy from the run directory alone."""
+        self.path("funnel-config.json").write_bytes(canonical_json(self.to_funnel_config()))
+
     def run(self) -> dict:
+        if self.config.workers != 1:
+            raise LabError(
+                f"workers={self.config.workers} is not supported yet: parallel workers need worker-local "
+                "provider connections (a shared analyze --serve connection must not be driven concurrently). "
+                "Run with workers=1; parallelism is deferred to its own issue.")
         self._init_or_verify_identity()
+        self._write_config_copy()
         stages = [("tier0", self.stage_tier0), ("tier1", self.stage_tier1), ("triage", self.stage_triage),
                   ("tier3", self.stage_tier3), ("tier4", self.stage_tier4)]
         for name, stage in stages:
@@ -536,25 +602,3 @@ def verify_manifest(run_dir: str | Path) -> tuple[bool, str]:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     stored = manifest.pop("manifestSha256", "")
     return hash_obj(manifest) == stored, stored
-
-
-def prepare_policy(config: dict, *, artifact_root: Optional[str] = None, store=None) -> tuple[dict, Optional[str]]:
-    """Build the run's policy, resolving a configured coverage prior **explicitly**.
-
-    A non-null ``priorCountsPath`` is read (relative to the artifact root when not
-    absolute); its content hash becomes part of the policy identity. Returns
-    (policy, stored_policy_hash_if_store_given).
-    """
-    tier2 = config.get("tiers", {}).get("tier2", {})
-    prior_path = (tier2.get("coverage") or {}).get("priorCountsPath")
-    prior_counts = None
-    if prior_path:
-        resolved = Path(prior_path)
-        if not resolved.is_absolute() and artifact_root:
-            resolved = Path(artifact_root) / prior_path
-        if not resolved.is_file():
-            raise LabError(f"coverage prior not found: {resolved} (configured as {prior_path})")
-        prior_counts = json.loads(resolved.read_text(encoding="utf-8"))["counts"]
-    policy = build_policy(config, prior_counts=prior_counts)
-    digest = store_policy(store, policy) if store is not None else None
-    return policy, digest

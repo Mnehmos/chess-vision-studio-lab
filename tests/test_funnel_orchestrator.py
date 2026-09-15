@@ -325,3 +325,108 @@ def test_pool_dedups_by_position_identity_not_row_id(tmp_path):
     assert len({row["id"] for row in positions}) == 2  # identity unique
     keep_first = next(row for row in positions if row.get("sourceId") == "a")
     assert keep_first["fen"].split()[5] == "1"  # the first occurrence of the position was kept
+
+
+# --- S4 review pass 2: S4->S2 provenance, complete cost accounting, workers, workset ---
+
+
+def test_orchestrated_import_preserves_producer_and_policy_identity(tmp_path, lab):
+    """The critical boundary: orchestrated evidence must import WITH its real identities."""
+    from cvslab.data import label_set_refs
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+
+    orchestrator = make_orchestrator(tmp_path)
+    orchestrator.run()
+    counts = import_funnel_run_evidence(lab.store, tmp_path / "run", name="provenance")
+    assert counts["analyze_sha256"] == StubFacts.producer_hash  # modern manifest name was read
+    assert counts["policy_hash"] == policy_hash(orchestrator.policy)
+
+    refs = label_set_refs(lab.store, counts["normalization"])
+    facts_ref = next(ref for ref in refs if "facts" in ref.families)
+    assert set(facts_ref.producers) == {StubFacts.producer_hash}  # labels keep the true producer
+    priority_ref = next(ref for ref in refs if "priority" in ref.families)
+    assert priority_ref.policy_hash == counts["policy_hash"]
+
+    funnel_run = lab.store.get(counts["funnel_run"])
+    assert funnel_run.triage_policy_hash == counts["policy_hash"]
+    assert funnel_run.triage_policy_version == "priority-v1"
+    assert funnel_run.position_pool == counts["source"]
+
+
+def test_import_refuses_policy_hash_mismatch(tmp_path, lab):
+    """A run whose pinned policy cannot be reproduced from its config must not import."""
+    import json as _json
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+
+    make_orchestrator(tmp_path).run()
+    manifest_path = tmp_path / "run" / "manifest.json"
+    manifest = _json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["policyHash"] = "sha256:" + "d" * 64
+    manifest_path.write_text(_json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(LabError, match="policy hash mismatch"):
+        import_funnel_run_evidence(lab.store, tmp_path / "run", name="mismatch", link_funnel_run=False)
+
+
+def test_tier4_nodes_are_counted_in_compute(tmp_path):
+    config = json.loads(json.dumps(CONFIG))
+    config["tiers"]["tier4"] = {"enabled": True, "depth": 18, "movetimeMs": 3000,
+                                "priorityFraction": 0.5, "uniformFraction": 0.5, "auditFraction": 0.5}
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    oracle = StubOracle()
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config), facts_provider=StubFacts(),
+                                      search_provider=StubSearch(), oracle_provider=oracle)
+    manifest = orchestrator.run()
+    assert oracle.calls
+    assert manifest["stages"]["tier4"]["nodes"] == 1000 * len(oracle.calls)  # cost.nodes is the source
+    assert manifest["compute"]["nodes"] == sum(stage.get("nodes", 0) for stage in manifest["stages"].values())
+
+
+def test_uncomputed_tier0_rows_keep_measured_cost(tmp_path):
+    from cvslab.funnel.protocols import LabelBatch
+
+    class EmptyFacts:
+        provenance_class = "deterministic_geometry"
+        producer_hash = "emptyfacts" * 6
+        taxonomy_sha256 = "0" * 64
+        taxonomy_schema_version = 2
+
+        def label(self, position, *, options=None):
+            return LabelBatch(provenance_class="deterministic_geometry", producer=self.producer_hash,
+                              rows=(), uncomputed=("unsupported-position",))
+
+    config = json.loads(json.dumps(CONFIG))
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config), facts_provider=EmptyFacts(),
+                                      search_provider=StubSearch())
+    manifest = orchestrator.run()
+    tier0_rows = [json.loads(line) for line in (tmp_path / "run" / "tier0.jsonl").read_text().splitlines()]
+    assert tier0_rows and all("cost" in row for row in tier0_rows)
+    assert manifest["stages"]["tier0"]["engine_seconds"] == round(
+        sum(row["cost"]["wallMs"] for row in tier0_rows) / 1000.0, 4)
+
+
+def test_workers_other_than_one_fail_loudly(tmp_path):
+    config = json.loads(json.dumps(CONFIG))
+    config["workers"] = 4
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config), facts_provider=StubFacts(),
+                                      search_provider=StubSearch())
+    with pytest.raises(LabError, match="workers=4 is not supported"):
+        orchestrator.run()
+
+
+def test_workset_boundary_is_explicit(tmp_path):
+    """positions.jsonl is a labeling workset; the raw S5 source keeps game multiplicity."""
+    config = json.loads(json.dumps(CONFIG))
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config), facts_provider=StubFacts(),
+                                      search_provider=StubSearch())
+    manifest = orchestrator.run()
+    source = manifest["positionsSource"]
+    assert source["kind"] == "labeling_workset"
+    assert "raw S5 source" in source["note"]
+    assert source["inputRows"] > source["uniqueIdentities"]  # the stub pool carries a duplicate
