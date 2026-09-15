@@ -1,10 +1,11 @@
+import json
 import os
 import stat
 
 import pytest
 
 from cvslab.schemas import EvidenceState, Hypothesis, Run, RunStatus, TrainingRecipe, utc_now
-from cvslab.store import ImmutableError, Store, TamperError
+from cvslab.store import ImmutableError, Store, TamperError, payload_hash
 
 
 def make_hypothesis(store, number=1):
@@ -89,3 +90,48 @@ def test_list_filters_by_object_class(lab, tmp_path):
     make_hypothesis(lab.store, 1)
     assert len(lab.store.list("H")) == 1
     assert lab.store.list("R") == []
+
+
+def make_run(store, *, status=RunStatus.COMPLETED):
+    return store.create(Run(
+        id="R0001", ablation_id="A0001", hypothesis_id=None, display_label="x", seed=0, status=status,
+        effective_config={}, config_hash="sha256:c", identity_hash="sha256:i", param_count=1,
+        dataset_id="D0001", dataset_manifest_hash="sha256:d", training_recipe_id="T0001",
+        recipe_hash="sha256:r", eval_protocol_id="E0001", protocol_hash="sha256:p", queued_at=utc_now(),
+    ))
+
+
+def rewrite(path, payload):
+    """Write a payload back exactly as another schema version would have recorded it."""
+    path.chmod(0o644)
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def test_record_seal_covers_the_recording_not_the_current_schema(lab):
+    """A later schema addition must never turn historical evidence into apparent tampering.
+
+    Simulated exactly as it happens in practice: an object written before a field existed
+    keeps its recorded payload, and loading it under the current schema must still verify.
+    """
+    make_run(lab.store)
+    path = lab.store.object_path("R0001")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    recorded = {key: value for key, value in payload.items() if key != "train_target_spec_hash"}
+    assert len(recorded) < len(payload)  # the field exists in today's schema, not in the recording
+    recorded = dict(recorded, record_hash=payload_hash(recorded))
+    rewrite(path, recorded)
+
+    loaded = lab.store.get("R0001")  # must not raise
+    assert loaded.train_target_spec_hash is None  # the schema default fills the gap
+    assert payload_hash(recorded) == loaded.record_hash
+
+
+def test_record_seal_still_detects_tampering_with_recorded_values(lab):
+    """The repair must not weaken the seal: changing anything recorded is still detected."""
+    make_run(lab.store)
+    path = lab.store.object_path("R0001")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["seed"] = 7  # recorded value changed, hash left as written
+    rewrite(path, payload)
+    with pytest.raises(TamperError):
+        lab.store.get("R0001")
