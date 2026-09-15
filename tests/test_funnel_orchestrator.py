@@ -1,0 +1,228 @@
+import json
+from pathlib import Path
+
+import pytest
+
+from cvslab.funnel.orchestrator import (
+    FunnelOrchestrator,
+    FunnelRunConfig,
+    prepare_policy,
+    verify_manifest,
+)
+from cvslab.funnel.policy import build_policy, policy_hash
+from cvslab.funnel.providers import board_geometry
+from cvslab.funnel.protocols import LabelBatch, Position, SearchLabel
+from cvslab.funnel.triage import triage_corpus
+from cvslab.store import LabError
+
+CONFIG = {
+    "prioritizerVersion": "priority-v1", "seed": 111,
+    "tiers": {
+        "tier0": {"includeMotifOpportunities": True},
+        "tier1": {"nodeBudgets": [2000], "pvPlies": 8},
+        "tier2": {"deepFraction": 0.5, "auditFraction": 0.1, "holdoutFraction": 0.1, "holdoutSeed": 7,
+                  "weights": {"scoreInstability": 3.0, "bestMoveChange": 2.0, "trajectoryUnstable": 1.5,
+                              "pvDisagreement": 0.5, "tacticalDensity": 1.0, "rarity": 1.5,
+                              "outcomeDisagreement": 1.0, "selectivityEdge": 0.5, "forcedness": 0.25},
+                  "caps": {"scoreDeltaCp": 150, "tacticalItems": 10, "seePruneSkips": 4,
+                           "forcedLegalMoves": 3, "outcomeMarginCp": 100, "outcomeScaleCp": 400},
+                  "coverage": {"targetShare": 0.02, "minTarget": 5, "priorCountsPath": None}},
+        "tier3": {"nodeBudget": 10000, "pvPlies": 12},
+        "tier4": {"enabled": False},
+    },
+}
+
+
+class StubFacts:
+    """Deterministic facts provider with the real tier-0 record shape (search-free)."""
+
+    provenance_class = "deterministic_geometry"
+    producer_hash = "stubfacts" * 8
+
+    def label(self, position: Position, *, options=None) -> LabelBatch:
+        geometry, _first_move = board_geometry(position.fen)
+        slug = "fork" if geometry["legalMoves"] % 2 else "skewer"
+        record = {
+            "status": "ok",
+            "deterministic_geometry": geometry,
+            # schema-faithful tactics block: `tacticalItems` is recomputed from
+            # kindCounts + hazards on import, so a stub omitting them would silently
+            # change triage (this bit the first version of this test)
+            "bounded_tactical_proof": {
+                "opportunities": {"stm": [slug], "opp": []},
+                "kindCounts": {f"stm:Motifs:{slug}": 1},
+                "captures": {"stm": {"count": geometry["legalCaptures"], "seePositive": 0},
+                             "opp": {"count": 0, "seePositive": 0}},
+                "hanging": {"stm": 0, "opp": 0}, "hazards": {}, "tacticalItems": 1},
+            "taxonomy": {"slugs": [slug], "families": ["tactics"], "unmapped": []},
+            "uncomputed": [], "factsErrors": 0, "factsRegistryVersion": 23,
+        }
+        return LabelBatch(provenance_class="deterministic_geometry", producer=self.producer_hash,
+                          rows=(record,), registry_version=23)
+
+
+class StubSearch:
+    provenance_class = "search_derived"
+    family = "search_shallow_cp"
+    producer_hash = "stubsearch" * 6
+
+    def search(self, position: Position, *, node_budget: int, pv_plies: int = 8) -> SearchLabel:
+        seed = int(position.fen.split()[5]) + node_budget % 97 + len(position.fen)
+        score = (seed * 13) % 400 - 200
+        return SearchLabel(score_cp_stm=score, mate=None, best_move="e2e4", pv=("e2e4", "e7e5")[:pv_plies],
+                           nodes=node_budget, wall_ms=1.0, extra={"depth": 4, "trajectory": [[4, "e2e4", score]],
+                                                                  "stabilization": {"status": "stable-at-budget"},
+                                                                  "termination": "nodes", "resultSource": "completed",
+                                                                  "qNodes": 0})
+
+
+def make_pool(tmp_path: Path, count: int = 12) -> Path:
+    """Three distinct opening lines cycling across games (so positions differ), plus one
+    deliberate identity-duplicate to prove the pool stage dedups by position identity."""
+    import chess
+    lines = [("e2e4", "e7e5", "g1f3", "b8c6", "f1b5", "a7a6"),
+             ("d2d4", "d7d5", "c2c4", "e7e6", "b1c3", "g8f6"),
+             ("c2c4", "e7e5", "b1c3", "g8f6", "g2g3", "d7d5")]
+    rows = []
+    for game in range(count):
+        board = chess.Board()
+        for ply, move in enumerate(lines[game % len(lines)], start=1):
+            board.push_uci(move)
+            if ply % 2 == 0:
+                rows.append({"id": f"pos{game}x{ply}", "fen": board.fen(),
+                             "gameOutcome": {"whiteScore": 1.0 if game % 2 else 0.0},
+                             "source": {"file": "stub", "line": game * 10 + ply}})
+    pool = tmp_path / "pool.jsonl"
+    pool.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+    return pool
+
+
+def make_orchestrator(tmp_path: Path, *, count: int = 12, policy: dict | None = None) -> FunnelOrchestrator:
+    config = json.loads(json.dumps(CONFIG))
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path, count))], "positions": 0}
+    run_config = FunnelRunConfig.from_dict(config)
+    return FunnelOrchestrator(run_config, tmp_path / "run", policy=policy or build_policy(config),
+                              facts_provider=StubFacts(), search_provider=StubSearch())
+
+
+def test_staged_run_produces_evidence_and_verifiable_manifest(tmp_path):
+    orchestrator = make_orchestrator(tmp_path)
+    manifest = orchestrator.run()
+    for name in ("positions.jsonl", "tier0.jsonl", "tier1.jsonl", "triage.jsonl", "tier3.jsonl",
+                 "coverage.json", "report.json", "manifest.json"):
+        assert (tmp_path / "run" / name).is_file(), name
+    ok, stored = verify_manifest(tmp_path / "run")
+    assert ok and stored == manifest["manifestSha256"]
+    assert manifest["policyHash"] == policy_hash(orchestrator.policy)
+    assert manifest["policyVersion"] == "priority-v1"
+    assert manifest["coveragePrior"] is None
+    assert "not a dataset" in manifest["note"]
+
+    report = json.loads((tmp_path / "run" / "report.json").read_text(encoding="utf-8"))
+    assert report["policyHash"] == manifest["policyHash"]
+    assert set(report["arms"]) == {"deep", "uniform", "audit", "holdout"}
+    tier3_rows = [json.loads(line) for line in (tmp_path / "run" / "tier3.jsonl").read_text().splitlines()]
+    assert tier3_rows and all(row["search_derived"]["targets"]["expectedScoreStm"] for row in tier3_rows)
+
+
+def test_resume_continues_without_duplicates(tmp_path):
+    orchestrator = make_orchestrator(tmp_path)
+    orchestrator.run()
+    full_tier1 = (tmp_path / "run" / "tier1.jsonl").read_text(encoding="utf-8").splitlines()
+
+    # simulate an interruption: the last 3 tier1 rows and the whole tier3 stage are missing
+    (tmp_path / "run" / "tier1.jsonl").write_text("\n".join(full_tier1[:-3]) + "\n", encoding="utf-8")
+    (tmp_path / "run" / "tier3.jsonl").unlink()
+
+    resumed = make_orchestrator(tmp_path)
+    resumed.run()
+    rows = [json.loads(line) for line in (tmp_path / "run" / "tier1.jsonl").read_text().splitlines()]
+    ids = [row["id"] for row in rows]
+    assert len(ids) == len(set(ids)) == len(full_tier1)  # no duplicates, nothing lost
+    strip = lambda row: {k: v for k, v in row.items() if k != "cost"}
+    first = sorted(json.dumps(strip(json.loads(line)), sort_keys=True) for line in full_tier1)
+    again = sorted(json.dumps(strip(row), sort_keys=True) for row in rows)
+    assert first == again  # identical final content modulo per-attempt timing
+
+
+def test_cost_accounting_totals_match_stage_sums(tmp_path):
+    orchestrator = make_orchestrator(tmp_path)
+    manifest = orchestrator.run()
+    stages = manifest["stages"]
+    assert manifest["compute"]["engineSeconds"] == round(sum(s["engine_seconds"] for s in stages.values()), 4)
+    assert manifest["compute"]["nodes"] == sum(s.get("nodes", 0) for s in stages.values())
+    assert stages["tier1"]["nodes"] > 0 and stages["tier3"]["processed"] > 0
+
+
+def test_manifest_detects_tampering(tmp_path):
+    make_orchestrator(tmp_path).run()
+    path = tmp_path / "run" / "manifest.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["seed"] = manifest["seed"] + 1
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    ok, _stored = verify_manifest(tmp_path / "run")
+    assert ok is False
+
+
+def test_prior_counts_are_resolved_and_pinned(tmp_path):
+    config = json.loads(json.dumps(CONFIG))
+    config["tiers"]["tier2"]["coverage"]["priorCountsPath"] = "prior.json"
+    with pytest.raises(LabError, match="coverage prior not found"):
+        prepare_policy(config, artifact_root=str(tmp_path))
+    (tmp_path / "prior.json").write_text(json.dumps({"counts": {"__positions__": 5, "fork": 2}}), encoding="utf-8")
+    policy, _digest = prepare_policy(config, artifact_root=str(tmp_path))
+    prior = policy["coverage_prior"]["prior_counts"]
+    assert prior["source_path"] == "prior.json" and prior["counts_hash"].startswith("sha256:")
+    base = build_policy(json.loads(json.dumps(CONFIG)))
+    assert policy_hash(policy) != policy_hash(base)  # the prior is part of the identity
+
+    orchestrator = make_orchestrator(tmp_path, policy=policy)
+    manifest = orchestrator.run()
+    assert manifest["coveragePrior"]["counts_hash"] == prior["counts_hash"]
+
+
+def test_orchestrated_evidence_flows_through_s2_import(tmp_path, lab):
+    """The run dir is evidence: importing via S2 yields canonical records + labels."""
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+
+    make_orchestrator(tmp_path).run()
+    counts = import_funnel_run_evidence(lab.store, tmp_path / "run", name="s4-evidence", link_funnel_run=False)
+    assert counts["canonical_records"] > 0
+    assert counts["label_rows"]["facts"] == counts["canonical_records"]
+    assert counts["label_rows"]["search_shallow_cp"] >= counts["canonical_records"]
+    assert lab.store.list("D", verify=False) == []  # still no implicit dataset
+
+
+def test_orchestrated_triage_is_reproducible_from_imported_evidence(tmp_path, lab):
+    """Lab-produced triage over lab-produced evidence equals the run's own triage.jsonl."""
+    from cvslab.funnel.import_run import import_funnel_run_evidence
+    from cvslab.funnel.triage import compare_triage
+
+    orchestrator = make_orchestrator(tmp_path)
+    orchestrator.run()
+    counts = import_funnel_run_evidence(lab.store, tmp_path / "run", name="s4-parity", link_funnel_run=False)
+    lab_rows, _counts = triage_corpus(lab.store, counts["normalization"], orchestrator.policy)
+    legacy_rows = [json.loads(line) for line in (tmp_path / "run" / "triage.jsonl").read_text().splitlines()]
+    report = compare_triage(lab_rows, legacy_rows)
+    assert report["ok"], {field: report[field] for field in ("priority", "rank", "reasons", "selection")}
+
+
+def test_pool_dedups_by_position_identity_not_row_id(tmp_path):
+    """Two records with different ids but the same position are one candidate."""
+    import json as _json
+    pool = tmp_path / "pool.jsonl"
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    rows = [{"id": "a", "fen": fen, "source": {"line": 1}},
+            {"id": "b", "fen": fen.replace("0 1", "0 9"), "source": {"line": 2}},  # same position, clocks differ
+            {"id": "c", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", "source": {"line": 3}}]
+    pool.write_text("\n".join(_json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+    config = _json.loads(_json.dumps(CONFIG))
+    config["source"] = {"positionsFiles": [str(pool)], "positions": 0}
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config),
+                                      facts_provider=StubFacts(), search_provider=StubSearch())
+    positions = orchestrator.stage_pool()
+    assert len(positions) == 2  # a and b collapse (same position); c differs by side to move
+    assert len({row["id"] for row in positions}) == 2  # identity unique
+    keep_first = next(row for row in positions if row.get("sourceId") == "a")
+    assert keep_first["fen"].split()[5] == "1"  # the first occurrence of the position was kept
