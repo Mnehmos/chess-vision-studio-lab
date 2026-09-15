@@ -62,7 +62,7 @@ def main() -> int:
     plan = CampaignPlan()
     ablations: dict[tuple[str, int], str] = {}
     for arm in ("PRIORITY", "UNIFORM"):
-        baseline = svc.register_baseline(name=f"S6-{arm}", dataset_id=arm_binding[arm]["dataset_id"],
+        baseline = svc.register_baseline(name=f"S6_{arm}", dataset_id=arm_binding[arm]["dataset_id"],
                                          training_recipe_id=arm_binding[arm]["recipe_id"],
                                          eval_protocol_id=arm_binding[arm]["eval_protocol_id"],
                                          model_config={"INPUT": "RAW", "H": 1},

@@ -1,0 +1,433 @@
+{
+ "campaign": "S6 PRIORITY vs UNIFORM",
+ "pins": {
+  "universe_hash": "sha256:284161f2604354ca3afe0c69390adb9bde3172e68f6360c0be231959918d8a06",
+  "split_policy_hash": "sha256:215de947b6c1d98b10ca82a399d101e25c5f25096606e8b3e37c24ea40cc4d6a",
+  "candidate_universe_hash": "sha256:67e781a0b5f4922c213b27518f42495a0aa28e1d1a1588df7726fa122ffe91dc",
+  "policy_hash": "sha256:62bf2043dab7fb6a56eba68e1cfa9c924ffec8e5e0e492fa364fc5fb00201384",
+  "D_PRIORITY": "sha256:e6d34d3fb3521ec168d7a9ca6b8f0af9e8d636b425e3da09891ecffcf33b551e",
+  "D_UNIFORM": "sha256:52882a98bcee9ed52363396fe2630ebd7d95a1a2d6b944b664829761e87dc8b5"
+ },
+ "arm_binding": {
+  "PRIORITY": {
+   "dataset_id": "D0003",
+   "eval_protocol_id": "E0002",
+   "recipe_id": "T0003"
+  },
+  "UNIFORM": {
+   "dataset_id": "D0004",
+   "eval_protocol_id": "E0003",
+   "recipe_id": "T0003"
+  }
+ },
+ "cells_total": 40,
+ "cells_complete": 0,
+ "invalid": {
+  "H01-PRIORITY-s0": {
+   "status": "INVALID",
+   "run_id": "R0009",
+   "ablation_id": "A0004",
+   "width": 1,
+   "arm": "PRIORITY",
+   "seed": 0,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-PRIORITY-s1": {
+   "status": "INVALID",
+   "run_id": "R0010",
+   "ablation_id": "A0004",
+   "width": 1,
+   "arm": "PRIORITY",
+   "seed": 1,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-PRIORITY-s2": {
+   "status": "INVALID",
+   "run_id": "R0011",
+   "ablation_id": "A0004",
+   "width": 1,
+   "arm": "PRIORITY",
+   "seed": 2,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-PRIORITY-s3": {
+   "status": "INVALID",
+   "run_id": "R0012",
+   "ablation_id": "A0004",
+   "width": 1,
+   "arm": "PRIORITY",
+   "seed": 3,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-PRIORITY-s4": {
+   "status": "INVALID",
+   "run_id": "R0013",
+   "ablation_id": "A0004",
+   "width": 1,
+   "arm": "PRIORITY",
+   "seed": 4,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-UNIFORM-s0": {
+   "status": "INVALID",
+   "run_id": "R0014",
+   "ablation_id": "A0008",
+   "width": 1,
+   "arm": "UNIFORM",
+   "seed": 0,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-UNIFORM-s1": {
+   "status": "INVALID",
+   "run_id": "R0015",
+   "ablation_id": "A0008",
+   "width": 1,
+   "arm": "UNIFORM",
+   "seed": 1,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-UNIFORM-s2": {
+   "status": "INVALID",
+   "run_id": "R0016",
+   "ablation_id": "A0008",
+   "width": 1,
+   "arm": "UNIFORM",
+   "seed": 2,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-UNIFORM-s3": {
+   "status": "INVALID",
+   "run_id": "R0017",
+   "ablation_id": "A0008",
+   "width": 1,
+   "arm": "UNIFORM",
+   "seed": 3,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H01-UNIFORM-s4": {
+   "status": "INVALID",
+   "run_id": "R0018",
+   "ablation_id": "A0008",
+   "width": 1,
+   "arm": "UNIFORM",
+   "seed": 4,
+   "param_count": 771,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-PRIORITY-s0": {
+   "status": "INVALID",
+   "run_id": "R0019",
+   "ablation_id": "A0005",
+   "width": 4,
+   "arm": "PRIORITY",
+   "seed": 0,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-PRIORITY-s1": {
+   "status": "INVALID",
+   "run_id": "R0020",
+   "ablation_id": "A0005",
+   "width": 4,
+   "arm": "PRIORITY",
+   "seed": 1,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-PRIORITY-s2": {
+   "status": "INVALID",
+   "run_id": "R0021",
+   "ablation_id": "A0005",
+   "width": 4,
+   "arm": "PRIORITY",
+   "seed": 2,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-PRIORITY-s3": {
+   "status": "INVALID",
+   "run_id": "R0022",
+   "ablation_id": "A0005",
+   "width": 4,
+   "arm": "PRIORITY",
+   "seed": 3,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-PRIORITY-s4": {
+   "status": "INVALID",
+   "run_id": "R0023",
+   "ablation_id": "A0005",
+   "width": 4,
+   "arm": "PRIORITY",
+   "seed": 4,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-UNIFORM-s0": {
+   "status": "INVALID",
+   "run_id": "R0024",
+   "ablation_id": "A0009",
+   "width": 4,
+   "arm": "UNIFORM",
+   "seed": 0,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-UNIFORM-s1": {
+   "status": "INVALID",
+   "run_id": "R0025",
+   "ablation_id": "A0009",
+   "width": 4,
+   "arm": "UNIFORM",
+   "seed": 1,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-UNIFORM-s2": {
+   "status": "INVALID",
+   "run_id": "R0026",
+   "ablation_id": "A0009",
+   "width": 4,
+   "arm": "UNIFORM",
+   "seed": 2,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-UNIFORM-s3": {
+   "status": "INVALID",
+   "run_id": "R0027",
+   "ablation_id": "A0009",
+   "width": 4,
+   "arm": "UNIFORM",
+   "seed": 3,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H04-UNIFORM-s4": {
+   "status": "INVALID",
+   "run_id": "R0028",
+   "ablation_id": "A0009",
+   "width": 4,
+   "arm": "UNIFORM",
+   "seed": 4,
+   "param_count": 3081,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-PRIORITY-s0": {
+   "status": "INVALID",
+   "run_id": "R0029",
+   "ablation_id": "A0006",
+   "width": 16,
+   "arm": "PRIORITY",
+   "seed": 0,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-PRIORITY-s1": {
+   "status": "INVALID",
+   "run_id": "R0030",
+   "ablation_id": "A0006",
+   "width": 16,
+   "arm": "PRIORITY",
+   "seed": 1,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-PRIORITY-s2": {
+   "status": "INVALID",
+   "run_id": "R0031",
+   "ablation_id": "A0006",
+   "width": 16,
+   "arm": "PRIORITY",
+   "seed": 2,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-PRIORITY-s3": {
+   "status": "INVALID",
+   "run_id": "R0032",
+   "ablation_id": "A0006",
+   "width": 16,
+   "arm": "PRIORITY",
+   "seed": 3,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-PRIORITY-s4": {
+   "status": "INVALID",
+   "run_id": "R0033",
+   "ablation_id": "A0006",
+   "width": 16,
+   "arm": "PRIORITY",
+   "seed": 4,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-UNIFORM-s0": {
+   "status": "INVALID",
+   "run_id": "R0034",
+   "ablation_id": "A0010",
+   "width": 16,
+   "arm": "UNIFORM",
+   "seed": 0,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-UNIFORM-s1": {
+   "status": "INVALID",
+   "run_id": "R0035",
+   "ablation_id": "A0010",
+   "width": 16,
+   "arm": "UNIFORM",
+   "seed": 1,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-UNIFORM-s2": {
+   "status": "INVALID",
+   "run_id": "R0036",
+   "ablation_id": "A0010",
+   "width": 16,
+   "arm": "UNIFORM",
+   "seed": 2,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-UNIFORM-s3": {
+   "status": "INVALID",
+   "run_id": "R0037",
+   "ablation_id": "A0010",
+   "width": 16,
+   "arm": "UNIFORM",
+   "seed": 3,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H16-UNIFORM-s4": {
+   "status": "INVALID",
+   "run_id": "R0038",
+   "ablation_id": "A0010",
+   "width": 16,
+   "arm": "UNIFORM",
+   "seed": 4,
+   "param_count": 12321,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-PRIORITY-s0": {
+   "status": "INVALID",
+   "run_id": "R0039",
+   "ablation_id": "A0007",
+   "width": 32,
+   "arm": "PRIORITY",
+   "seed": 0,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-PRIORITY-s1": {
+   "status": "INVALID",
+   "run_id": "R0040",
+   "ablation_id": "A0007",
+   "width": 32,
+   "arm": "PRIORITY",
+   "seed": 1,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-PRIORITY-s2": {
+   "status": "INVALID",
+   "run_id": "R0041",
+   "ablation_id": "A0007",
+   "width": 32,
+   "arm": "PRIORITY",
+   "seed": 2,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-PRIORITY-s3": {
+   "status": "INVALID",
+   "run_id": "R0042",
+   "ablation_id": "A0007",
+   "width": 32,
+   "arm": "PRIORITY",
+   "seed": 3,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-PRIORITY-s4": {
+   "status": "INVALID",
+   "run_id": "R0043",
+   "ablation_id": "A0007",
+   "width": 32,
+   "arm": "PRIORITY",
+   "seed": 4,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-UNIFORM-s0": {
+   "status": "INVALID",
+   "run_id": "R0044",
+   "ablation_id": "A0011",
+   "width": 32,
+   "arm": "UNIFORM",
+   "seed": 0,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-UNIFORM-s1": {
+   "status": "INVALID",
+   "run_id": "R0045",
+   "ablation_id": "A0011",
+   "width": 32,
+   "arm": "UNIFORM",
+   "seed": 1,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-UNIFORM-s2": {
+   "status": "INVALID",
+   "run_id": "R0046",
+   "ablation_id": "A0011",
+   "width": 32,
+   "arm": "UNIFORM",
+   "seed": 2,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-UNIFORM-s3": {
+   "status": "INVALID",
+   "run_id": "R0047",
+   "ablation_id": "A0011",
+   "width": 32,
+   "arm": "UNIFORM",
+   "seed": 3,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  },
+  "H32-UNIFORM-s4": {
+   "status": "INVALID",
+   "run_id": "R0048",
+   "ablation_id": "A0011",
+   "width": 32,
+   "arm": "UNIFORM",
+   "seed": 4,
+   "param_count": 24641,
+   "cause": "preflight: the training or evaluation split is empty"
+  }
+ },
+ "losses": {},
+ "effects_by_width": {},
+ "interaction": null,
+ "decision": "INVALID",
+ "analysis_error": "40 INVALID cells; preregistered analysis requires all 40",
+ "preregistration": "paired seed-level differences, t 95% CI, every width required"
+}

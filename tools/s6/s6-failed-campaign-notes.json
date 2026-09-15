@@ -1,0 +1,29 @@
+{
+  "campaign": "S6 PRIORITY vs UNIFORM",
+  "cause": "preflight: the training or evaluation split is empty (all 40 cells)",
+  "cells_complete": 0,
+  "cells_total": 40,
+  "decision": "INVALID",
+  "invalid_count": 40,
+  "lessons_for_the_corrected_campaign": [
+    "evaluation must be a COMMON instrument (shared hash-holdout D_EVAL) so arms differ only in training selection",
+    "supervision must be selectable via an explicit frozen TargetSpec (search_deep_cp, scoreCpStm, stm POV, 400k budget)",
+    "arm membership may never be repaired by truncation; recorded counts must match exactly"
+  ],
+  "pins": {
+    "D_PRIORITY": "sha256:e6d34d3fb3521ec168d7a9ca6b8f0af9e8d636b425e3da09891ecffcf33b551e",
+    "D_UNIFORM": "sha256:52882a98bcee9ed52363396fe2630ebd7d95a1a2d6b944b664829761e87dc8b5",
+    "candidate_universe_hash": "sha256:67e781a0b5f4922c213b27518f42495a0aa28e1d1a1588df7726fa122ffe91dc",
+    "policy_hash": "sha256:62bf2043dab7fb6a56eba68e1cfa9c924ffec8e5e0e492fa364fc5fb00201384",
+    "split_policy_hash": "sha256:215de947b6c1d98b10ca82a399d101e25c5f25096606e8b3e37c24ea40cc4d6a",
+    "universe_hash": "sha256:284161f2604354ca3afe0c69390adb9bde3172e68f6360c0be231959918d8a06"
+  },
+  "root_cause": "the trainer consumed eval_cp labels while the S6 arms are supervised by the search_deep_cp Tier-3 targets; the funnel pool has no eval_cp labels, so every training row was discarded",
+  "status": "FAILED CLOSED \u2014 no scientific claim",
+  "what_this_establishes": [
+    "the launcher materialized exactly 40 cells with correct arm/width/seed bindings",
+    "fail-closed preflight refused every run instead of training on empty data",
+    "runs R0009..R0048 are INVALID forever and belong to the old T0003/E0002/E0003 identity",
+    "no tuning or retry happened after seeing results"
+  ]
+}
