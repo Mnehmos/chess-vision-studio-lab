@@ -72,7 +72,7 @@ without search.
 ```
   gen9 shard corpus (7,861,317 rows)                     [M] engine docs/GENERATIONS.md
         │
-        └─ corpus-d20: self-play sampled every ply       599,363 rows / 43,536 unique  [M]
+        └─ corpus-d20: self-play sampled every ply       599,363 rows / 43,405 unique  [M]
               └─ Stockfish 17.1, `go depth 20`, 1 thread  ~0.54 s/position             [M]
                     cp = White-POV SF score · cp_play = CVS play score · res = result
                     kept: fen, res, cp, cp_play, label_depth, label_nodes, sf_best,
@@ -80,9 +80,30 @@ without search.
         parallel gen10 corpora:
               corpus            113,207 rows  SF d16 (+ d12 shallow), stability-filtered  [M]
               corpus-static   1,500,000 rows  SF static eval                                [M]
-              corpus-static-full 4,143,821 rows — but only 2,364,478 unique (43 % dup)     [M]
+              corpus-static-full 4,143,821 rows — 2,364,478 unique; 1,779,343 duplicate
+                                 rows (43.0 %)                                          [M]
               corpus-lich     21,168,494 rows  Lichess eval DB d16                          [M]
 ```
+
+Unique-position counts are counted three legitimate ways and only one of them is the
+documented figure, so the definition travels with the number. Verified against the
+committed inventory artifacts (`tools/intake/gen10_corpus_inventory.py`,
+`tools/intake/gen10-*-inventory.json`, reproducible with one command):
+
+| corpus | rows | unique FEN (with clocks) | unique FEN − clocks | unique EPD (python-chess) | duplicate rows |
+|---|---:|---:|---:|---:|---:|
+| `corpus-d20` | 599,363 | 43,536 | **43,405** ← engine docs' number, reproduced | 43,404 | 555,958 |
+| `corpus-static-full` | 4,143,821 | 2,364,478 | 2,364,478 | — | **1,779,343 (43.0 %)** |
+| `corpus-static` | 1,500,000 | 1,497,720 | 1,497,720 | — | 2,280 |
+| `corpus` (search) | 113,207 | 113,196 | 113,196 | — | 11 |
+
+The reconciliation: the engine's committed "43,405 unique positions" is *unique raw FEN
+with move clocks stripped*, and it reproduces exactly; 43,536 is the same corpus under
+exact FEN strings (move clocks included); 43,404 is python-chess's stricter EPD, which
+canonicalizes one extra en-passant/castling pair. An earlier draft of this document quoted
+43,536 without saying which definition it used — the artifact now carries all three. The
+43 % duplicate-row figure for `corpus-static-full` is the same definitional care: the
+loader does not dedup and the append-on-resume path re-labelled FENs already on disk.
 
 Documented Gen10 facts **[D]** (`chess-vision-studio-rust-engine/training/gen10/README.md`,
 `docs/GENERATIONS.md`, commit messages):
@@ -117,7 +138,7 @@ holds its teacher fixed and varies only how the same budget is spent.
 
 | regime | labels | unique positions | labels/unique | teacher time per unique position |
 |---|---:|---:|---:|---:|
-| Gen10 `corpus-d20` | 599,363 | 43,536 **[M]** | 13.8 | **7.44 s** (0.54 s × 13.8) **[E]** |
+| Gen10 `corpus-d20` | 599,363 | 43,405 **[M]** | 13.8 | **7.46 s** (0.54 s × 13.81) **[E]** |
 | Gen10 `corpus-static-full` | 4,143,821 | 2,364,478 **[M]** | 1.75 | 0.53 ms **[E]** (≈3,300 labels/s) |
 | Funnel tier0 facts | 1 per position | 1 per position | 1.0 | 6.5 ms **[M]** |
 | Funnel wide-shallow (S7 widest arm) | 1 per position | 1 per position | 1.0 | **19 ms** (16k nodes) **[E]** |
@@ -315,22 +336,39 @@ estimates; §5.3's construction determines the realized prefixes.
 Then `snapshot_source` → **S####** (rows carry explicit `game`), `normalize` → **N####**
 (EPD identity, transposition components via `group`, duplicates counted and reported).
 
-**Leakage control on the training pool** (before any arm is built):
+**Leakage control on the training pool** (before any arm is built). The join is against
+the **full evaluation-source population, not the 200-record instrument** — an unselected
+evaluation-source record can be the transitive bridge between a training position and a
+selected instrument record, and a check that ignores it would prove the wrong thing.
 
-1. Compute the joint transposition components of the new pool ∪ the instrument's 575
-   clean records, using the same union rule S6 used (shared EPD record_id → union of
-   `group`s; `tools/s6/s6_round3.py` lines 119–155).
-2. If **zero** of D0010's 200 records touch a new-pool component → `E0004`/`D0010` stays
-   the instrument, byte-identical.
-3. Otherwise: **remove the colliding new-pool records from the candidate universe**
-   (deterministic, preregistered, and it never inspects a label value). If the removed
-   fraction exceeds 5 % of the pool, **STOP** and build a fresh instrument (new held-out
-   openings, new labels, new `D`/`E`) *before* any training.
-4. The candidate universe is then frozen and hashed; every later selection is over it.
+1. Take the **575 records of `N0010`** (the evaluation source: `S0009` → `N0010`), not
+   just the 200 that D0010 selected.
+2. Build the joint transposition components of `new pool ∪ all 575 records` with the same
+   union rule S6 used — shared EPD `record_id` → union of the two `group`s — then
+   recompute roots (`tools/s6/s6_round3.py` lines 119–155; that code unions over *all*
+   evaluation records and only then filters the selection, which is why the S6 proof
+   already has this property).
+3. Let `instrument_components` be the joint roots of the **200 D0010 records**. A pool
+   record is *instrument-adjacent* iff its joint root is in that set. **Required
+   invariant: `instrument_adjacent_with_200 = 0`.** If the invariant fails, remove the
+   offending pool records from the candidate universe; if removal cannot make the 200
+   disconnected (i.e. one of the 200 itself shares a joint component with a kept pool
+   record), **STOP**.
+4. Conservative exclusion, applied at the same time: also remove pool records whose joint
+   root contains **any** of the 575 evaluation-source records. The 575 is the instrument's
+   reusable source population (S8 will want to re-select from it), so a pool position that
+   transposes with any of it is spent for future instruments too. Report both counts:
+   `instrument_adjacent_with_200` (must be 0) and `removed_vs_575_population`.
+5. If the conservative removal exceeds **5 %** of the pool → **STOP** and build a fresh
+   instrument (new held-out openings, new labels, new `D`/`E`) *before* any training.
+6. The candidate universe is then frozen and hashed; every later selection is over it, and
+   the removal rule is deterministic and never inspects a label value.
 
-Reuse is expected to succeed: the instrument's 575 clean records were proven disjoint
-from **all 12 components** of the S5 pool, and it was built from a disjoint opening
-partition. The check is still mandatory because the new pool is new.
+Reuse is expected to succeed: the current 575 clean records were proven disjoint from
+**all 12 components** of the S5 pool with a union taken over all 575, and the instrument
+was built from a disjoint opening partition. The check is mandatory anyway, because the
+new pool is new. The **pilot inherits that existing proof** (round3's `clean` set was
+computed over all 575 records), so it needs no new leakage work.
 
 ### 5.3 Calibration and the executable budget-fill
 
@@ -368,9 +406,15 @@ This is the whole equal-compute mechanism (review amendment 2):
   the parity error is bounded by half a label: **≤ 0.54 % of T for A1** (one 400k label
   against 37.3M nodes) and tighter for A2–A4. The ±2 % window in §5.7 is therefore a
   *check that the construction behaved*, not an expectation the arms have to satisfy;
-* nesting is automatic: a deeper budget consumes `T` in fewer records, so
-  `n_A1 ≤ n_A2 ≤ n_A3 ≤ n_A4` and A1 ⊂ A2 ⊂ A3 ⊂ A4. The freeze step asserts the prefix
-  relation explicitly.
+* *expected and asserted* nesting, not automatic: a deeper budget usually consumes `T` in
+  fewer records, so `n_A1 ≤ n_A2 ≤ n_A3 ≤ n_A4` is expected. It is not a theorem — it
+  depends on realized node use being monotone in the budget per record, which is an
+  empirical property of the engine's termination rules, not a guarantee of the fill
+  procedure. The freeze step **asserts** the prefix relation `A1 ⊂ A2 ⊂ A3 ⊂ A4` and treats
+  a violation as **STOP**. As a preregistered diagnostic, per-record monotonicity can be
+  measured directly on the shared prefix — because the arms are nested, every record in A1
+  carries labels at all four budgets — and it is reported alongside the frozen prefixes.
+  The assertion, not the diagnostic, is what guards the construction.
 
 The realized prefix sizes and realized node totals are materialized into
 `tools/s7/s7-preregistration.json` and a copy of the record list is sealed **before any
@@ -418,6 +462,7 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
 | **A####** | 16 ablations: per arm, one baseline (H=16) + three H∈{1,4,32} ablations, each recording the supervision-divergence declaration (§5.8) |
 | **R####** | 16 ablations × 5 seeds = **80 runs**; every run pins `eval_dataset_id = D0010`, `eval_protocol_id = E0004`, its own dataset/recipe |
 | **H####** | hypothesis: "at fixed teacher node budget, supervision density (more rows × shallower labels) beats a few deep labels on the common instrument" |
+| **X####** | the experiment: preregistration hash, four arms (dataset/recipe/train-spec/prefix/realized nodes), common instrument (E0004 + eval spec + D0010 manifest), widths/seeds/order hash, explicit run membership, analysis rules (§5.8, P2) |
 | **F####** | finding, sealed, with the decision and all per-cell numbers |
 
 ### 5.6 Statistical analysis (preregistered)
@@ -464,8 +509,9 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
    STOP (this is the S1-parity discipline applied to a new session).
 3. **Pool adequacy** — unique records < 4 × n_A4 (≈9,364), or the 2,400-game cap reached
    without reaching it → STOP.
-4. **Instrument collisions** — > 5 % of pool records collide with the instrument's 200
-   records → STOP (build a fresh instrument).
+4. **Instrument leakage** — any pool record instrument-adjacent to the 200 D0010 records
+   that cannot be removed, or conservative removal against the 575-record evaluation
+   source above 5 % of the pool → STOP (build a fresh instrument). See §5.2.
 5. **Calibration band** — any `mean_b` outside [0.90·b, b] → STOP.
 6. **Fill check** — the closest prefix found by §5.3's construction must land within ±2 %
    of T (it is bounded by half a label, so this is a check that calibration and engine
@@ -517,21 +563,32 @@ TargetSpecs differ")`, lines ~519–528). Required change:
   either spec still fails; (d) two runs that declare different evaluation specs cannot be
   compared — refused at the layer that would compare them.
 
-**P2 — the experiment binds its instrument** (first-class, so it is not re-implemented per
-study): an experiment-level object that pins, before any run is queued:
+**P2 — the experiment binds its instrument, as a first-class identity `X####`** (review
+correction 3). `A####` already means precisely *one ablation with possibly several
+`R####` runs*; an S7 study spans 16 ablations, so it needs an object **above** them.
+`X####` is that object, and the shape proposed here is:
 
-* the evaluation dataset manifest hash, protocol hash and evaluation TargetSpec hash;
-* per arm: dataset, recipe, training TargetSpec hash, prefix size and realized nodes;
-* seeds, the frozen selection-order hash, the pool/normalization identity, and the
-  preregistration document hash (this file plus `tools/s7/s7-preregistration.json`);
-* admissibility: every referenced run must belong to the experiment, its train spec must
-  equal its arm's declared spec, and all runs must share the instrument — verified at
-  queue time and again at analysis time, failing closed.
+| `X####` field | binds |
+|---|---|
+| `preregistration_hash` | this document plus `tools/s7/s7-preregistration.json`, hashed at freeze |
+| `arms[]` | per arm: `dataset_id`, `training_recipe_id`, `train_spec_hash`, `prefix_size`, `realized_nodes`, `record_ids_hash` |
+| `instrument` | `eval_dataset_id` + manifest hash, `eval_protocol_id` + protocol hash, `eval_spec_hash` |
+| `controls` | `widths`, `seeds`, `order_seed`, `order_hash`, `pool_source_id`, `normalization_id` |
+| `membership` | the `R####` ids belonging to the experiment (explicit list, not a query) |
+| `analysis` | the decision and reporting rules of §5.6, and the sealed final analysis once runs finish |
 
-Shape of the object (a new identity prefix, or an extended `A####` grouping) is a review
-decision. Its *required properties* are the eleven invariants above; anything less
-becomes script-level convention again, which is what S6 had and what P1/P2 exist to
-replace.
+Required properties: every referenced run must belong to the experiment; its train spec
+must equal its arm's declared spec; all runs must share the instrument; the membership
+list must be complete (a run may not be added after the analysis is sealed); verification
+happens at queue time and again at analysis time, failing closed.
+
+Implementation note: this is a schema addition under the lab's existing identity registry
+(`cvslab/schemas.py` `KINDS`), i.e. a new `X` prefix, its model, and a folder — followed by
+the lab's documented rule that schema changes require restarting running servers. It is an
+addition only: no existing `H/A/M/S/N/D/T/E/R/F/I` object changes meaning or layout.
+
+Anything less than the properties above becomes script-level convention again, which is
+what S6 had and what P1/P2 exist to replace.
 
 S7 cannot run without P1. P2 may land with the freeze step, but the invariant it enforces
 is preregistered here rather than left to a script.
@@ -624,7 +681,7 @@ them uses S7-F's answer as an input to its design.
 |---|---|---|
 | teacher | Stockfish 17.1, `go depth 20` | CVS analyze, fixed node budgets |
 | labels bought | 599,363 | 3,258 |
-| unique positions covered | 43,536 | 3,258 |
+| unique positions covered | 43,405 | 3,258 |
 | labels per unique position | 13.8 | 1.0 |
 | teacher time per unique position | 7.44 s | 19 ms (wide arm) / 325 ms (narrow arm) |
 | teacher time for the whole campaign | ≈90 single-thread hours | ≈30–35 min wall, of which labelling <3 min |
@@ -661,8 +718,10 @@ deeply" is paying for something invisible to this instrument.
 **Documented/measured (reusable as ground truth):** S4 run R0008 tier timings and node
 totals; label counts and means per budget; S6 arm parity, per-width effects and
 decision; D0010/E0004/T0004 identities and the S6 spec hash; Gen10 corpus row/unique
-counts, SF 17.1 `go depth 20`, 0.54 s/position, architecture and target formulas,
-missing provenance; the 43 % duplicate-row defect in `corpus-static-full`; engine
+counts (reproduced to the row by `tools/intake/gen10_corpus_inventory.py` and the four
+committed inventory artifacts, with the unique-position *definition* stated for each
+number), SF 17.1 `go depth 20`, 0.54 s/position, architecture and target formulas,
+missing provenance; the 1,779,343 duplicate rows (43.0 %) in `corpus-static-full`; engine
 funnel README tier timings.
 
 **Estimates (to be replaced by measurement during execution):** the new pool's yield per

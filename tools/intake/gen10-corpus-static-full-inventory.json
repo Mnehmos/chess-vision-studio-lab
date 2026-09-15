@@ -1,0 +1,103 @@
+{
+ "duplicateRowsByEpd": null,
+ "duplicateRowsByFen": 1779343,
+ "duplicateRowsByFenNoClocks": 1779343,
+ "epdRowsExamined": 0,
+ "epdSkippedDueToCap": false,
+ "fieldStats": {},
+ "files": 14,
+ "maxFenMultiplicity": 7,
+ "perFile": [
+  {
+   "file": "part-00.jsonl",
+   "rows": 612742,
+   "uniqueFen": 580988
+  },
+  {
+   "file": "part-01.jsonl",
+   "rows": 612742,
+   "uniqueFen": 580850
+  },
+  {
+   "file": "part-02.jsonl",
+   "rows": 612742,
+   "uniqueFen": 580921
+  },
+  {
+   "file": "part-03.jsonl",
+   "rows": 612741,
+   "uniqueFen": 581043
+  },
+  {
+   "file": "part-04.jsonl",
+   "rows": 169286,
+   "uniqueFen": 169260
+  },
+  {
+   "file": "part-05.jsonl",
+   "rows": 169286,
+   "uniqueFen": 169254
+  },
+  {
+   "file": "part-06.jsonl",
+   "rows": 169286,
+   "uniqueFen": 169251
+  },
+  {
+   "file": "part-07.jsonl",
+   "rows": 169286,
+   "uniqueFen": 169259
+  },
+  {
+   "file": "part-08.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169255
+  },
+  {
+   "file": "part-09.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169259
+  },
+  {
+   "file": "part-10.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169264
+  },
+  {
+   "file": "part-11.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169263
+  },
+  {
+   "file": "part-12.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169254
+  },
+  {
+   "file": "part-13.jsonl",
+   "rows": 169285,
+   "uniqueFen": 169257
+  }
+ ],
+ "rows": 4143821,
+ "shardFileHashes": {
+  "part-00.jsonl": "699e39610c741d80",
+  "part-01.jsonl": "b7da78f6fb847ba0",
+  "part-02.jsonl": "d4892edbfe362425",
+  "part-03.jsonl": "9495e06c5c989feb",
+  "part-04.jsonl": "62b70177c5c26574",
+  "part-05.jsonl": "5c5f27d972b38992",
+  "part-06.jsonl": "4d3430fd8c1227ec",
+  "part-07.jsonl": "c618d4cf51e0e1ef",
+  "part-08.jsonl": "2c758041b3c487d6",
+  "part-09.jsonl": "92ada1b3691ca124",
+  "part-10.jsonl": "43206c1a24968e04",
+  "part-11.jsonl": "b7471502c4b61495",
+  "part-12.jsonl": "7dbfaab1bf85901e",
+  "part-13.jsonl": "09a3e99b3924429f"
+ },
+ "source": "F:/Github/chess-vision-studio-rust-engine/training/gen10/corpus-static-full",
+ "uniqueEpd": null,
+ "uniqueFen": 2364478,
+ "uniqueFenNoClocks": 2364478
+}

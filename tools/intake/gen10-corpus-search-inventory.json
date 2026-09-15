@@ -1,0 +1,103 @@
+{
+ "duplicateRowsByEpd": null,
+ "duplicateRowsByFen": 11,
+ "duplicateRowsByFenNoClocks": 11,
+ "epdRowsExamined": 0,
+ "epdSkippedDueToCap": false,
+ "fieldStats": {},
+ "files": 14,
+ "maxFenMultiplicity": 2,
+ "perFile": [
+  {
+   "file": "part-00.jsonl",
+   "rows": 8099,
+   "uniqueFen": 8099
+  },
+  {
+   "file": "part-01.jsonl",
+   "rows": 8076,
+   "uniqueFen": 8076
+  },
+  {
+   "file": "part-02.jsonl",
+   "rows": 8120,
+   "uniqueFen": 8120
+  },
+  {
+   "file": "part-03.jsonl",
+   "rows": 8113,
+   "uniqueFen": 8113
+  },
+  {
+   "file": "part-04.jsonl",
+   "rows": 8050,
+   "uniqueFen": 8050
+  },
+  {
+   "file": "part-05.jsonl",
+   "rows": 8112,
+   "uniqueFen": 8112
+  },
+  {
+   "file": "part-06.jsonl",
+   "rows": 8103,
+   "uniqueFen": 8103
+  },
+  {
+   "file": "part-07.jsonl",
+   "rows": 8086,
+   "uniqueFen": 8086
+  },
+  {
+   "file": "part-08.jsonl",
+   "rows": 8069,
+   "uniqueFen": 8069
+  },
+  {
+   "file": "part-09.jsonl",
+   "rows": 8055,
+   "uniqueFen": 8055
+  },
+  {
+   "file": "part-10.jsonl",
+   "rows": 8097,
+   "uniqueFen": 8097
+  },
+  {
+   "file": "part-11.jsonl",
+   "rows": 8072,
+   "uniqueFen": 8072
+  },
+  {
+   "file": "part-12.jsonl",
+   "rows": 8070,
+   "uniqueFen": 8070
+  },
+  {
+   "file": "part-13.jsonl",
+   "rows": 8085,
+   "uniqueFen": 8085
+  }
+ ],
+ "rows": 113207,
+ "shardFileHashes": {
+  "part-00.jsonl": "701a4e83849c718f",
+  "part-01.jsonl": "ad965b9c7bf79d5a",
+  "part-02.jsonl": "089d386717efaf11",
+  "part-03.jsonl": "30688a26eb9c2832",
+  "part-04.jsonl": "ff2eb76cb2cd2839",
+  "part-05.jsonl": "a1d19263f5ba8e5b",
+  "part-06.jsonl": "1ea5488bfe922424",
+  "part-07.jsonl": "4fb98d4d65e96f81",
+  "part-08.jsonl": "1dcac9dd9aa55020",
+  "part-09.jsonl": "b1db81966c48b35c",
+  "part-10.jsonl": "e814157bfd7394d6",
+  "part-11.jsonl": "e03a3a6f3ad0c0b9",
+  "part-12.jsonl": "eb6038ba5e659df1",
+  "part-13.jsonl": "fb64bd6f4e74fd10"
+ },
+ "source": "F:/Github/chess-vision-studio-rust-engine/training/gen10/corpus",
+ "uniqueEpd": null,
+ "uniqueFen": 113196,
+ "uniqueFenNoClocks": 113196
+}

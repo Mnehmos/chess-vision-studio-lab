@@ -1,0 +1,132 @@
+{
+ "duplicateRowsByEpd": 555959,
+ "duplicateRowsByFen": 555827,
+ "duplicateRowsByFenNoClocks": 555958,
+ "epdRowsExamined": 599363,
+ "epdSkippedDueToCap": false,
+ "fieldStats": {
+  "features": {
+   "rows_nonempty": 572356,
+   "rows_with_empty_list": 27007,
+   "rows_with_len_0": 27007,
+   "rows_with_len_1": 0,
+   "rows_with_len_2": 0,
+   "rows_with_len_3": 0,
+   "rows_with_len_4": 0,
+   "rows_with_len_5": 0,
+   "rows_with_len_6": 0,
+   "rows_with_len_7": 0,
+   "rows_with_len_8": 0,
+   "rows_with_len_9": 0
+  },
+  "label_depth": {
+   "1": 159,
+   "10": 5,
+   "11": 3,
+   "12": 4,
+   "13": 2,
+   "20": 599175,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "7": 3,
+   "8": 7,
+   "9": 2
+  }
+ },
+ "files": 14,
+ "maxFenMultiplicity": 14,
+ "perFile": [
+  {
+   "file": "training-2dab8924-7d5-00001.jsonl",
+   "rows": 42740,
+   "uniqueFen": 42740
+  },
+  {
+   "file": "training-2dab8924-7d5-00002.jsonl",
+   "rows": 42662,
+   "uniqueFen": 42662
+  },
+  {
+   "file": "training-2dab8924-7d5-00003.jsonl",
+   "rows": 42902,
+   "uniqueFen": 42902
+  },
+  {
+   "file": "training-2dab8924-7d5-00004.jsonl",
+   "rows": 42786,
+   "uniqueFen": 42786
+  },
+  {
+   "file": "training-2dab8924-7d5-00005.jsonl",
+   "rows": 42850,
+   "uniqueFen": 42850
+  },
+  {
+   "file": "training-2dab8924-7d5-00006.jsonl",
+   "rows": 42796,
+   "uniqueFen": 42796
+  },
+  {
+   "file": "training-2dab8924-7d5-00007.jsonl",
+   "rows": 42793,
+   "uniqueFen": 42793
+  },
+  {
+   "file": "training-2dab8924-7d5-00008.jsonl",
+   "rows": 42953,
+   "uniqueFen": 42953
+  },
+  {
+   "file": "training-2dab8924-7d5-00009.jsonl",
+   "rows": 42823,
+   "uniqueFen": 42823
+  },
+  {
+   "file": "training-2dab8924-7d5-00010.jsonl",
+   "rows": 42824,
+   "uniqueFen": 42824
+  },
+  {
+   "file": "training-2dab8924-7d5-00011.jsonl",
+   "rows": 42733,
+   "uniqueFen": 42733
+  },
+  {
+   "file": "training-2dab8924-7d5-00012.jsonl",
+   "rows": 42872,
+   "uniqueFen": 42872
+  },
+  {
+   "file": "training-2dab8924-7d5-00013.jsonl",
+   "rows": 42809,
+   "uniqueFen": 42809
+  },
+  {
+   "file": "training-2dab8924-7d5-00014.jsonl",
+   "rows": 42820,
+   "uniqueFen": 42820
+  }
+ ],
+ "rows": 599363,
+ "shardFileHashes": {
+  "training-2dab8924-7d5-00001.jsonl": "a6fcf399c0056aed",
+  "training-2dab8924-7d5-00002.jsonl": "ee137eb7bf2b8184",
+  "training-2dab8924-7d5-00003.jsonl": "cd5c1bc7d7e5fe2e",
+  "training-2dab8924-7d5-00004.jsonl": "80cb0f7d0d10a21b",
+  "training-2dab8924-7d5-00005.jsonl": "fa7b25235ea8230e",
+  "training-2dab8924-7d5-00006.jsonl": "5afc8ddcfa7511af",
+  "training-2dab8924-7d5-00007.jsonl": "fc776551230356eb",
+  "training-2dab8924-7d5-00008.jsonl": "9a2ecbddce9069ed",
+  "training-2dab8924-7d5-00009.jsonl": "d5becd9ccd9192c0",
+  "training-2dab8924-7d5-00010.jsonl": "14012856f8a6a7e5",
+  "training-2dab8924-7d5-00011.jsonl": "7964bf072ef16bae",
+  "training-2dab8924-7d5-00012.jsonl": "68c967bb0b5be8f7",
+  "training-2dab8924-7d5-00013.jsonl": "05533b812a062266",
+  "training-2dab8924-7d5-00014.jsonl": "3dcf28ce6be747e7"
+ },
+ "source": "F:/Github/chess-vision-studio-rust-engine/training/gen10/corpus-d20/shards",
+ "uniqueEpd": 43404,
+ "uniqueFen": 43536,
+ "uniqueFenNoClocks": 43405
+}
