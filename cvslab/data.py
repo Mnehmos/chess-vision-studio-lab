@@ -526,14 +526,22 @@ def _label_set_ref(store: Store, path: Path) -> LabelSetRef:
     authorities: Counter = Counter()
     producers: Counter = Counter()
     registry = 1
+    policy_hashes: set[str] = set()
     for row in rows:
         families[row["family"]] += 1
         authorities[row["authority"]] += 1
         producers[row["producer"]] += 1
         registry = int(row.get("registry_version", 1))
+        if row.get("policy_hash"):
+            policy_hashes.add(str(row["policy_hash"]))
+    if len(policy_hashes) > 1:
+        raise LabError(f"{path.name} carries {len(policy_hashes)} distinct policy hashes "
+                       f"({', '.join(sorted(policy_hashes))}); one label set must belong to exactly "
+                       "one policy identity")
     return LabelSetRef(path=store.rel(path), file_hash=sha256_file(path), rows=len(rows),
                        families=dict(families), authorities=dict(authorities), producers=dict(producers),
-                       registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION)
+                       registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION,
+                       policy_hash=next(iter(policy_hashes), None))
 
 
 def _load_canonical(store: Store, normalization: Normalization) -> list[dict]:
@@ -588,7 +596,7 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
                        "pov": pov, "authority": authority, "producer": producer,
                        "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
                        "produced_at": stamped}
-        for key in ("budget", "confidence", "note", "components"):
+        for key in ("budget", "confidence", "note", "components", "policy_hash"):
             if key in row:
                 clean[key] = _scalarize(row[key])
         # Dedup identity is the whole observation (record + value + budget + components):

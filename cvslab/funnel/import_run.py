@@ -48,9 +48,18 @@ def _optional(directory: Path, name: str) -> list[dict]:
 
 
 def _row_outcome(row: dict):
-    """gameOutcome (or res) with falsy values preserved: 0.0 is a real loss, not missing."""
+    """gameOutcome (or res) with falsy values preserved: 0.0 is a real loss, not missing.
+
+    Legacy shape note: `positions.jsonl` carries ``gameOutcome`` as
+    ``{"whiteScore": float}`` (or null) — the scalar assumption was a real-run bug
+    caught during S3; scalar values are still accepted for other importers.
+    """
     outcome = row.get("gameOutcome")
-    return row.get("res") if outcome is None else outcome
+    if outcome is None:
+        outcome = row.get("res")
+    if isinstance(outcome, dict):
+        outcome = outcome.get("whiteScore")
+    return outcome
 
 
 def _row_game(row: dict) -> tuple[Optional[str], bool]:
@@ -215,8 +224,21 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     add_set("outcome", OUTCOME_AUTHORITY, "legacy.funnel.sample", outcome_rows)
 
     # triage -> priority (per-record evidence only; policy identity belongs to S3/#15)
+    from .policy import build_policy, store_policy
+
     policy_version = str(manifest.get("prioritizerVersion") or "unknown")
+    policy_digest = None
+    config_path = directory / "funnel-config.json"
+    if config_path.is_file():
+        from ..store import LabError as _LabError
+        try:
+            policy_digest = store_policy(store, build_policy(
+                json.loads(config_path.read_text(encoding="utf-8")), policy_version=policy_version))
+        except _LabError as exc:
+            policy_digest = None  # run predates or omits the triage config; reported, never guessed
+            policy_note = str(exc)
     priority_rows = []
+    policy_note = locals().get("policy_note")
     for record_id, row in keyed.items():
         t2 = triage.get(row["id"])
         if not t2:
@@ -225,7 +247,8 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
                            "trainEligible": t2.get("trainEligible"), "rank": t2.get("rank")},
                           sort_keys=True)
         priority_rows.append({"record_id": record_id, "value": float(t2["priority"]),
-                              "components": t2.get("components") or {}, "note": note})
+                              "components": t2.get("components") or {}, "note": note,
+                              "policy_hash": policy_digest})
     add_set("priority", f"triage.{policy_version}", "legacy.funnel.triage", priority_rows)
 
     counts = {
@@ -236,15 +259,18 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
                        "oracle_cp": len(oracle_rows), "outcome": len(outcome_rows),
                        "priority": len(priority_rows)},
         "authorities": {ref.split(":")[0] for ref in sets},
-        "policy_version": policy_version,
+        "policy_version": policy_version, "policy_hash": policy_digest,
+        **({"policy_note": policy_note} if policy_note else {}),
         "analyze_sha256": analyze_sha,
     }
 
     if link_funnel_run:
         from .. import intake
         try:
-            funnel_run = intake.import_funnel_run(store, directory, name=directory.name,
-                                                  position_pool=source.id)
+            funnel_run = intake.import_funnel_run(
+                store, directory, name=directory.name, position_pool=source.id,
+                triage_policy_version=policy_version if policy_digest else None,
+                triage_policy_hash=policy_digest)
             counts["funnel_run"] = funnel_run.id
         except Exception as exc:  # already imported (sealed) — report instead of silently skipping
             existing = next((r.id for r in store.list("R", verify=False, kind=intake.FunnelRun)

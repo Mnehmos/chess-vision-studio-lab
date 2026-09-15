@@ -418,7 +418,9 @@ def _floats(mapping: Optional[Mapping]) -> dict[str, float]:
 
 def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] = None,
                       research_state: Optional[str] = None, state_source: Optional[str] = None,
-                      position_pool: Optional[str] = None) -> FunnelRun:
+                      position_pool: Optional[str] = None,
+                      triage_policy_version: Optional[str] = None,
+                      triage_policy_hash: Optional[str] = None) -> FunnelRun:
     directory = Path(run_dir)
     for required in ("manifest.json", "report.json"):
         if not (directory / required).is_file():
@@ -523,6 +525,7 @@ def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] 
 
     run = FunnelRun(
         id=run_id, origin="funnel", position_pool=position_pool,
+        triage_policy_version=triage_policy_version, triage_policy_hash=triage_policy_hash,
         lineage_note="Labels were produced by the legacy engine identity (flagship nets). They are usable as data and "
                      "evidence, not as clean-lineage model provenance.",
         name=name or directory.name, run_dir=str(directory.resolve()),
@@ -545,11 +548,11 @@ def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] 
             deep_engine_seconds=float(a.get("deepEngineSec", 0.0)), informative=int(a.get("informative", 0)),
             informative_rate=float(a.get("informativeRate", 0.0)), move_change_rate=float(a.get("moveChangeRate", 0.0)),
             abs_shallow_deep_delta_cp=_floats(a.get("absShallowDeepDeltaCp")),
-        ) for arm, a in report.get("arms", {}).items() if isinstance(a, dict)],
+        ) for arm, a in (report.get("arms") or {}).items() if isinstance(a, dict)],
         oracle_arms=[FunnelOracleArm(
             name=arm, n=int(a.get("n", 0)), disagreement_rate=float(a.get("disagreementRate", 0.0)),
             move_agreement_rate=float(a.get("moveAgreementRate", 0.0)), abs_cp=_floats(a.get("cvsDeepVsSfAbsCp")),
-        ) for arm, a in report.get("oracleArms", {}).items() if isinstance(a, dict)],
+        ) for arm, a in (report.get("oracleArms") or {}).items() if isinstance(a, dict)],
         audit_miss=_floats(report.get("auditMissEstimate")),
         experiment_question=str(experiment.get("question", "")),
         informative_yield_ratio=experiment.get("informativeYieldRatio"),

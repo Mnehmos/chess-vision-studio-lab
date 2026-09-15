@@ -188,6 +188,7 @@ class LabelSetRef(LabModel):
     producers: dict[str, int]
     registry_version: int
     label_schema_version: int
+    policy_hash: Optional[str] = None
 
 
 class StackPolicy(str, Enum):
@@ -647,6 +648,8 @@ class FunnelRun(LabModel):
     lineage: Literal["LEGACY"] = "LEGACY"
     lineage_note: str
     position_pool: Optional[str] = None
+    triage_policy_version: Optional[str] = None
+    triage_policy_hash: Optional[str] = None
     name: str
     run_dir: str
     funnel_schema_version: int
