@@ -1,0 +1,203 @@
+{
+  "id": "s7-supervision-density-frontier",
+  "version": 1,
+  "status": "design — NOT frozen, NOT launched. Arm sizes and pool size are materialized by the freeze step before any label is bought.",
+  "supersedes": null,
+  "design_document": "docs/SUPERVISION_DENSITY_FRONTIER.md",
+
+  "question": "At a fixed teacher/search node budget, does supervision density (many rows x shallow labels) beat a few deep labels, measured on a common frozen instrument?",
+  "scope": "RAW-768 only; uniform selection; one teacher (CVS analyze); one pool; replication is issue #16",
+  "primary_endpoint": "test_loss",
+  "secondary_metrics": ["cp_mae", "sign_agreement"],
+
+  "pins": {
+    "engine_root": "F:\\Github\\chess-vision-studio-rust-engine",
+    "engine_args": ["--depth", "64", "--nnue", "target-cvs/matrix-raw.json", "--nnue-cal", "nets/eval-cal.json", "--helper-nnue", "target-cvs/matrix-residual.json"],
+    "analyze_sha256": "sha256:36e9b1592858939cf88233bf99d367e3ea9c43a044f342f69792d49a17d09838",
+    "net_hashes": {
+      "--nnue": "sha256:b23c75b8e25d7480038f270255b3625556ecbdb1d53964cd60719871ff47c4e1",
+      "--nnue-cal": "sha256:89e79a1b7aa8fc510c7c8925eed9d505373738cf5190b7be347fef9b15651fd6",
+      "--helper-nnue": "sha256:d2a98888ad83a356cc1aa1a5a74086fa9741247ccd676086f0db9d022693fcfc"
+    },
+    "trainer": "cvslab.nnue.raw_numpy",
+    "trainer_version": 1,
+    "K": 256.0,
+    "LAMBDA": 1.0,
+    "target_type": "cp",
+    "pov": "stm"
+  },
+
+  "reference_budget_nodes": 37285491,
+  "reference_budget_source": "S6 UNIFORM arm realized deep nodes (labstore/objects/datasets/D0009.json campaign.deep_nodes)",
+  "arm_parity_tolerance": 0.02,
+  "calibration_band": [0.9, 1.0],
+
+  "pool": {
+    "generator": "cvslab.pool.selfplay",
+    "generator_version": 1,
+    "seed": 20260916,
+    "openings": "built-in OPENING_LINES (12 lines; 12 opening names, disjoint from the instrument's held-out 10); openingSourceSha256 expected sha256:588f36887eaa3b04fbf2fb65ae022e1a02e33bc05ac867f97e9713c3eefdb5ed",
+    "games": "batches of 400 up to hard cap 2400; stop when unique records >= 12000",
+    "max_plies": 70,
+    "sample_every": 2,
+    "min_ply": 6,
+    "play_node_budget": 20000,
+    "diversification": {"plies": [8, 10, 12], "candidates": 3, "window_cp": 25, "node_budget": 2000},
+    "raw_rows_per_game_estimate": 32.9,
+    "unique_yield_estimate": "13.4/game at 70 games (measured, S5); expect 30-40% of raw rows at this size",
+    "adequacy_rule": "unique records >= 4 * n_arm_widest; else STOP",
+    "no_dedup_here": true
+  },
+
+  "leakage_control": {
+    "instrument": {"dataset": "D0010", "protocol": "E0004", "records": 200, "split": "test", "spec": "search_deep_cp @ nodeBudget 400000, value.targets.scoreCpStm, stm"},
+    "rule": "compute joint transposition components of new pool U D0010's 575 clean records (shared EPD record_id -> union of groups); remove colliding new-pool records from the candidate universe; STOP if >5% collide (then build a fresh instrument before any training)",
+    "expected": "zero collisions (the instrument was built from a disjoint opening partition and its 575 clean records are disjoint from all 12 components of the S5 pool)"
+  },
+
+  "calibration": {
+    "sample_size": 64,
+    "selection": "deterministic hash order over the frozen candidate universe, seed 20260916",
+    "budgets": [16000, 64000, 160000, 400000],
+    "read_only": ["nodes", "wall_ms"],
+    "forbidden": "reading scoreCpStm (or any target value) before arm construction",
+    "sizing_rule": "n_b = round(reference_budget_nodes / mean_measured_nodes_at_b)",
+    "materialization": "write the four sizes into this file's arms[].n and a materialized copy before buying any arm label",
+    "labels_reused_if_record_lands_in_an_arm": true
+  },
+
+  "selection": {
+    "order": "sort(candidate_universe, key=sha256(f'{seed}:{record_id}')) with seed 20260916",
+    "rule": "arms are disjoint prefix blocks of that order",
+    "arm_disjointness_assertion": "pairwise intersections == 0"
+  },
+
+  "arms": [
+    {"name": "A1", "block": [0, 94], "rows_estimate": 94, "node_budget": 400000,
+     "family": "search_deep_cp", "authority": "legacy.cvs.search.deep", "value_path": ["targets", "scoreCpStm"],
+     "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 12,
+     "nodes_estimate": 37186400, "role": "deepest / narrowest"},
+    {"name": "A2", "block": [94, 329], "rows_estimate": 235, "node_budget": 160000,
+     "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
+     "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
+     "nodes_estimate": 37224000, "role": "intermediate"},
+    {"name": "A3", "block": [329, 917], "rows_estimate": 588, "node_budget": 64000,
+     "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
+     "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
+     "nodes_estimate": 37255680, "role": "intermediate"},
+    {"name": "A4", "block": [917, 3258], "rows_estimate": 2341, "node_budget": 16000,
+     "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
+     "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
+     "nodes_estimate": 37286746, "role": "shallowest / widest"}
+  ],
+
+  "widths": [1, 4, 16, 32],
+  "expected_params": {"1": 771, "4": 3081, "16": 12321, "32": 24641},
+  "seeds": [0, 1, 2, 3, 4],
+  "capacity_decision": "keep the S6 ladder unchanged: the treatment is supervision, capacity must be held fixed, and changing the ladder after seeing S6's own outcomes would be selecting on that experiment's noise",
+  "recipe_params": {"EPOCHS": 40, "BATCH": 256, "LR": 0.003, "OPTIMIZER": "adam", "INIT_STD": 0.05, "LAMBDA": 1.0, "K": 256.0},
+  "recipe_note": "identical across arms except TARGET_SPEC; fixed epochs means wider arms receive more optimizer steps — declared asymmetry, a breadth loss is the stronger inference",
+  "initialization": "cold-start (no legacy warm start), seed-derived per run",
+  "training_layout": "all-selected-records-train (fractions (1,0,0)), S6 Amendment 1 convention",
+
+  "instrument": {
+    "reuse": "E0004 + D0010 unchanged iff leakage_control passes",
+    "shared_by_all_runs": true,
+    "assertion": "len({run.protocol_hash}) == 1 and len({run.eval_dataset_manifest_hash}) == 1 across all runs"
+  },
+
+  "analysis": {
+    "unit": "paired seed difference",
+    "method": "Student t, df=4, t=2.776 (same helper as S6: paired_effect)",
+    "primary_contrast": "d_H = mean over seeds of [test_loss(A4,H,seed) - test_loss(A1,H,seed)]",
+    "primary_sign_convention": "negative = wide-shallow better",
+    "secondary": ["A2-A1", "A3-A2", "A4-A3", "A2-A1 and A3-A1 vs A1", "cp_mae", "sign_agreement", "monotonicity of the four arm means per width", "width x density interaction blocked by seed"],
+    "required_reporting": "all cell means, all per-seed differences, all CIs, realized nodes per arm, full identity table; failed cells reported INVALID, never omitted",
+    "decision_rule": {
+      "BREADTH_WINS": "every width's primary-contrast CI upper bound < 0",
+      "DEPTH_WINS": "every width's primary-contrast CI lower bound > 0",
+      "INCONCLUSIVE": "otherwise"
+    }
+  },
+
+  "fail_closed": [
+    "engine identity drift (analyze sha256 or net hashes differ from pins) -> STOP",
+    "determinism gate: re-label 8 stored positions (4 at 16k, 4 at 400k) and require exact scoreCpStm reproduction -> STOP on mismatch",
+    "unique pool records < 4 * n_A4, or 2400-game cap reached -> STOP",
+    "instrument collisions > 5% of pool records -> STOP (fresh instrument required before training)",
+    "calibration mean outside [0.90*b, b] for any budget -> STOP",
+    "realized arm nodes outside +/-2% of reference budget -> that arm's cells INVALID",
+    "arm disjointness violated -> STOP",
+    "zero or multiple matching labels for any row under its spec -> freeze/training raises (existing behaviour)",
+    "any run with a protocol_hash or eval_dataset_manifest_hash different from the instrument -> INVALID",
+    "no tuning after the first arm label is bought (budgets, sizes, seed, widths, epochs, LR, batch, init)",
+    "no target-value peeking before arm construction; no training before the instrument identity is frozen",
+    "silent train/eval TargetSpec divergence remains a hard failure (see prerequisite P1)"
+  ],
+
+  "prerequisites": [
+    {
+      "id": "P1",
+      "title": "declared supervision divergence",
+      "where": "cvslab/service.py execute_run, target_spec_consistent block (lines ~519-528)",
+      "current_behaviour": "hard failure when recipe T spec hash != protocol E spec hash",
+      "required_behaviour": "stay fail-closed by default; allow divergence only when the ablation declares it explicitly at creation time (reason string part of the ablation identity and recorded in every run); record both spec hashes as a visible integrity check; keep strict per-row cardinality checks; campaign-level hard invariant that all runs pin one protocol hash",
+      "why": "S7 arms are trained at their own budget and evaluated on the common 400k instrument; the S6 check was written when both were 400k"
+    }
+  ],
+
+  "identities_expected": {
+    "S": "new raw pool snapshot (truthful engine identity, game ids preserved)",
+    "N": "canonical normalization (EPD identity, components, duplicates reported)",
+    "labels": ["facts (cvslab.facts, not consumed)", "one search label set per arm"],
+    "D": ["D_A1", "D_A2", "D_A3", "D_A4"],
+    "T": ["T_A1", "T_A2", "T_A3", "T_A4"],
+    "E": ["E0004 (reused instrument)"],
+    "A": "per arm: baseline H=16 + ablations H in {1,4,32} = 16 total",
+    "R": "16 ablations x 5 seeds = 80 runs",
+    "H": "one hypothesis",
+    "F": "one sealed finding"
+  },
+
+  "pilot": {
+    "id": "s7-p",
+    "label_cost": "zero new labels",
+    "arms": [
+      {"name": "P1", "rows": 94, "budget": 400000, "source": "D0009 + T0004 (S6 UNIFORM runs R0054-R0058, R0064-R0068, R0074-R0078, R0084-R0088)", "new_runs": 0},
+      {"name": "P2", "rows": 94, "budget": 16000, "source": "same 94 record identities as D0009, new D + T", "new_runs": 20},
+      {"name": "P3", "rows": 926, "budget": 16000, "source": "all train-eligible S5 pool records, new D + T", "new_runs": 20},
+      {"name": "P4", "rows": 926, "budget": 2000, "source": "exploratory; same rows as P3, 2k labels", "new_runs": 20}
+    ],
+    "contrasts": {
+      "P_depth": "test_loss(P2) - test_loss(P1) — causal for depth at fixed rows",
+      "P_rows": "test_loss(P3) - test_loss(P2) — causal for adding rows at fixed depth",
+      "P_econ": "test_loss(P3) - test_loss(P1) — NOT matched-compute; 2.8x cheaper teacher bill, 9.9x more rows"
+    },
+    "reading_rule": "all contrasts at all widths reported with CIs; P_econ CI upper < 0 at every width => broad-shallow beats narrow-deep at 40% of the compute; CI containing 0 => no detectable difference at 40% of the compute; CI lower > 0 at every width => depth is load-bearing",
+    "non_claims": ["not matched-compute (P_econ)", "P3 is the entire train-eligible pool, not a sample", "requires prerequisite P1", "pilot results never enter the frontier decision rule"]
+  },
+
+  "cost_estimates": {
+    "pool_generation_nodes": 1680000000,
+    "calibration_nodes": 41000000,
+    "arm_label_nodes": 149000000,
+    "total_teacher_nodes": 1870000000,
+    "teacher_engine_minutes": [30, 35],
+    "wall_clock_hours": [1, 2],
+    "measured_basis": {
+      "shallow_throughput_nodes_per_s": 836883,
+      "deep_throughput_nodes_per_s": 1216367,
+      "facts_ms_per_position": 6.54,
+      "sf_d20_s_per_position_gen10": 0.54
+    }
+  },
+
+  "baseline_measurements": {
+    "s4_run": {"id": "R0008", "positions": 938, "tier0_engine_s": 6.1361, "tier1_engine_s": 20.0886, "tier1_nodes": 16811774, "tier3_positions": 210, "tier3_engine_s": 68.2984, "tier3_nodes": 83076007, "total_engine_s": 94.5231, "total_nodes": 99887781},
+    "label_inventory": {"facts": 938, "motif": 938, "strategy": 938, "priority": 938, "outcome": 80, "search_shallow_cp_2k": 938, "search_shallow_cp_16k": 938, "search_deep_cp_400k_train": 210, "search_deep_cp_400k_instrument": 200, "oracle_cp": 3},
+    "realized_node_fractions": {"16k": 0.9955, "400k": 0.989},
+    "train_eligible": 926,
+    "holdout": 12,
+    "components": 12
+  }
+}
