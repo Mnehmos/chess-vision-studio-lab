@@ -234,10 +234,12 @@ def create_app(home: Optional[str | Path] = None, *, worker: bool = True) -> Fas
         return service.copy_label_sets(from_id, to_id)
 
     @app.get("/api/catalog")
-    def catalog(request: Request, normalization_id: str, offset: int = 0, limit: int = 50):
-        reserved = ("normalization_id", "offset", "limit")
+    def catalog(request: Request, normalization_id: str, offset: int = 0, limit: int = 50,
+                sort_by: Optional[str] = None):
+        reserved = ("normalization_id", "offset", "limit", "sort_by")
         filters = {key: value for key, value in request.query_params.items() if key not in reserved}
-        return service.catalog(normalization_id, filters=filters, offset=offset, limit=limit)
+        return service.catalog(normalization_id, filters=filters, offset=offset, limit=limit,
+                               sort_by=sort_by)
 
     @app.post("/api/stacks/preview")
     def stack_preview(body: dict):
@@ -256,6 +258,16 @@ def create_app(home: Optional[str | Path] = None, *, worker: bool = True) -> Fas
     @app.post("/api/datasets/{dataset_id}/rebuild", status_code=201)
     def rebuild(dataset_id: str, body: RebuildDatasetRequest):
         return service.rebuild_dataset(dataset_id, body.new_normalization_id)
+
+    @app.get("/api/map")
+    def map_view(projection: str = "data", generation: Optional[str] = None,
+                 state: Optional[str] = None, family: Optional[str] = None):
+        return service.map_view(projection, generation=generation, state=state, family=family)
+
+    @app.post("/api/labels/facts", status_code=201)
+    def label_facts(body: dict):
+        return service.label_facts(body["normalization_id"],
+                                   registry_version=int(body.get("registry_version", 1)))
 
     dist = LAB_REPO / "web" / "dist"
     if dist.is_dir():

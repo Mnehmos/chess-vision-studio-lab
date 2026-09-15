@@ -912,6 +912,31 @@ class CatalogResponse(LabModel):
     total_matching: int
 
 
+class MapNode(LabModel):
+    """One spatial object on the Lab Map; `detail` is display evidence, `link` the 2D page."""
+
+    id: str
+    kind: str
+    label: str
+    state: Optional[str] = None
+    link: str = ""
+    detail: dict[str, object] = {}
+
+
+class MapEdge(LabModel):
+    src: str
+    dst: str
+    kind: str
+
+
+class MapResponse(LabModel):
+    projection: str
+    projections_available: list[str]
+    nodes: list[MapNode]
+    edges: list[MapEdge]
+    filters_applied: dict[str, object]
+
+
 class ArmPreview(LabModel):
     name: str
     policy: str
@@ -1099,7 +1124,7 @@ MUTABLE_STATE_PREFIXES = frozenset({"H", "A"})
 
 OBJECT_MODELS = [cls for _, classes in KINDS.values() for cls in classes]
 VIEW_MODELS = [Switch, AblationPreview, MatrixResponse, ScalingResponse, SearchBacklog, Overview,
-               CatalogResponse, StackPreview, MigrationDiff]
+               CatalogResponse, StackPreview, MigrationDiff, MapResponse]
 REQUEST_MODELS = [HypothesisCreate, AblationRequest, RunQueueRequest, FindingRequest,
                   LabelsAppendRequest, StackFreezeRequest, MigrateRequest, RebuildDatasetRequest]
 

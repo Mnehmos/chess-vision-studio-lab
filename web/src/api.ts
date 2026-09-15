@@ -9,6 +9,7 @@ import type {
   Hypothesis,
   HypothesisCreate,
   LabelSetRef,
+  MapResponse,
   MatrixResponse,
   MigrationDiff,
   Normalization,
@@ -126,6 +127,14 @@ export const api = {
     request<Dataset>(`/api/datasets/${datasetId}/rebuild`, {
       method: "POST",
       body: JSON.stringify({ new_normalization_id: newNormalizationId }),
+    }),
+
+  mapView: (projection: string, generation?: string, state?: string, family?: string) =>
+    request<MapResponse>(`/api/map${query({ projection, generation, state, family })}`),
+  labelFacts: (normalizationId: string) =>
+    request<object>("/api/labels/facts", {
+      method: "POST",
+      body: JSON.stringify({ normalization_id: normalizationId }),
     }),
 };
 

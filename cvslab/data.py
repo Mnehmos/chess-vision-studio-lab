@@ -527,6 +527,17 @@ def _load_canonical(store: Store, normalization: Normalization) -> list[dict]:
     return records
 
 
+def _scalarize(value):
+    """Label payloads may be scalars, lists of scalars, or flat dicts of scalars."""
+    if isinstance(value, SCALAR):
+        return value
+    if isinstance(value, list):
+        return [str(v) if not isinstance(v, SCALAR) else v for v in value]
+    if isinstance(value, dict):
+        return {str(k): _scalarize(v) for k, v in value.items()}
+    return str(value)
+
+
 def register_labels(store: Store, normalization_id: str, *, family: str, producer: str, authority: str,
                     rows: Sequence[Mapping], pov: str = "white", registry_version: int = 1) -> LabelSetRef:
     """Append one label set as a new immutable file; existing records and labels are never modified."""
@@ -551,21 +562,15 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
         seen.add(record_id)
         if "value" not in row:
             raise LabError(f"label for {record_id} carries no value")
-        value = row["value"]
+        value = _scalarize(row["value"])
         clean: dict = {"record_id": record_id, "family": family,
-                       "value": value if isinstance(value, SCALAR) else str(value),
+                       "value": value,
                        "pov": pov, "authority": authority, "producer": producer,
                        "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
                        "produced_at": stamped}
         for key in ("budget", "confidence", "note"):
             if key in row:
-                extra = row[key]
-                if isinstance(extra, SCALAR):
-                    clean[key] = extra
-                elif isinstance(extra, dict):
-                    clean[key] = {str(k): v for k, v in extra.items() if isinstance(v, SCALAR)}
-                else:
-                    clean[key] = str(extra)
+                clean[key] = _scalarize(row[key])
         clean_rows.append(clean)
     sequence = len(label_set_paths(store, normalization_id)) + 1
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", producer)[:24] or "producer"
@@ -609,7 +614,8 @@ def copy_label_sets(store: Store, from_normalization_id: str, to_normalization_i
 # ---------------------------------------------------------------------------
 
 ARM_FILTER_FIELDS = ("source_id", "phase", "stm", "material", "result", "group", "ply_min", "ply_max",
-                     "eval_bucket", "label_family", "authority", "tier", "producer")
+                     "eval_bucket", "label_family", "authority", "tier", "producer", "motif", "strategy")
+CATALOG_SORT_KEYS = ("record_id", "ply", "phase", "material", "label_count")
 CATALOG_ONLY_FIELDS = ("dataset", "split")
 CATALOG_FILTER_FIELDS = ARM_FILTER_FIELDS + CATALOG_ONLY_FIELDS
 BALANCE_BUCKETS = ("phase", "stm", "material", "source_id", "eval_bucket")
@@ -628,6 +634,15 @@ def _label_matches(record: dict, key: str, wanted: str) -> bool:
     return False
 
 
+def _record_label_values(record: dict, family: str) -> list:
+    out = []
+    for label in record["labels"]:
+        if label["family"] == family:
+            value = label["value"]
+            out.extend(value if isinstance(value, list) else [value])
+    return out
+
+
 def _filter_matches(record: dict, flt: Mapping[str, ConfigValue]) -> bool:
     for key, value in flt.items():
         if key in ("label_family", "authority", "tier", "producer"):
@@ -635,6 +650,12 @@ def _filter_matches(record: dict, flt: Mapping[str, ConfigValue]) -> bool:
                 return False
         elif key == "eval_bucket":
             if _cp_bucket(record) != str(value):
+                return False
+        elif key == "motif":
+            if str(value).lower() not in {str(v).lower() for v in _record_label_values(record, "motif")}:
+                return False
+        elif key == "strategy":
+            if str(value).lower() not in {str(v).lower() for v in _record_label_values(record, "strategy")}:
                 return False
         elif key == "ply_min":
             if record["ply"] < int(value):
@@ -737,19 +758,58 @@ def stack_preview(store: Store, normalization_id: str, arms: Sequence[Mapping]) 
                         unique_records=len(rows), distributions=distributions)
 
 
+def _fact_bucket_any(record: dict, key: str) -> int:
+    for label in record["labels"]:
+        if label["family"] == "facts" and isinstance(label["value"], dict):
+            entry = label["value"].get(key)
+            if isinstance(entry, dict):
+                return int(entry.get("bucket", 0))
+    return 0
+
+
 def catalog(store: Store, normalization_id: str, *, filters: Optional[Mapping[str, ConfigValue]] = None,
-            offset: int = 0, limit: int = 50) -> "CatalogResponse":
-    """Filterable corpus catalog: facet counts plus one page of canonical rows, labels joined."""
+            offset: int = 0, limit: int = 50, sort_by: Optional[str] = None) -> "CatalogResponse":
+    """Filterable corpus catalog: facet counts plus one page of canonical rows, labels joined.
+
+    Sorting accepts ``record_id|ply|phase|material|label_count`` or ``fact:<KEY>``
+    (descending facts bucket, e.g. ``fact:HANGING_MATERIAL``); ``fact_key`` +
+    ``fact_min`` filter on a geometry fact bucket, ``motif``/``strategy`` filter
+    on the CVS motif/strategy label values.
+    """
     from .schemas import CatalogRecord, CatalogResponse
 
     norm: Normalization = store.get_as(normalization_id, Normalization)
     if sha256_file(store.abs(norm.path)) != norm.output_hash:
         raise TamperError(f"{norm.id}: canonical records no longer match the normalization output hash")
     flt = {k: v for k, v in (filters or {}).items() if v not in (None, "")}
-    unknown = sorted(set(flt) - set(CATALOG_FILTER_FIELDS))
+    unknown = sorted(set(flt) - set(CATALOG_FILTER_FIELDS)
+                     - {"fact_key", "fact_min", "fact_favors"})
     if unknown:
-        raise LabError(f"unknown catalog filter(s) {unknown}; allowed: {CATALOG_FILTER_FIELDS}")
+        raise LabError(f"unknown catalog filter(s) {unknown}; allowed: {sorted(CATALOG_FILTER_FIELDS) + ['fact_key', 'fact_min', 'fact_favors']}")
     records = _load_canonical(store, norm)
+
+    fact_key = str(flt.pop("fact_key", "") or "")
+    fact_min = int(flt.pop("fact_min", 0) or 0)
+    fact_favors = str(flt.pop("fact_favors", "") or "")
+    if fact_key and fact_key not in {key for key, _ in __import__("cvslab.facts", fromlist=["GEOMETRY_FAMILIES"]).GEOMETRY_FAMILIES}:
+        raise LabError(f"unknown geometry fact {fact_key!r}")
+
+    def fact_bucket(record: dict) -> int:
+        for label in record["labels"]:
+            if label["family"] == "facts" and isinstance(label["value"], dict):
+                entry = label["value"].get(fact_key)
+                if isinstance(entry, dict):
+                    return int(entry.get("bucket", 0))
+        return 0
+
+    if fact_key:
+        records = [r for r in records if fact_bucket(r) >= fact_min]
+    if fact_favors:
+        records = [r for r in records
+                   if any(label["family"] == "facts" and isinstance(label["value"], dict)
+                          and isinstance((entry := label["value"].get(fact_key or "")), dict)
+                          and entry.get("favors") == fact_favors
+                          for label in r["labels"])]
 
     memberships: dict[str, dict[str, list[str]]] = {}
     for dataset in store.list("D", verify=False, kind=Dataset):
@@ -769,6 +829,16 @@ def catalog(store: Store, normalization_id: str, *, filters: Optional[Mapping[st
         records = [r for r in records
                    if any(wanted in splits for splits in memberships.get(r["record_id"], {}).values())]
     matching = [r for r in records if _filter_matches(r, flt)]
+
+    if sort_by:
+        if sort_by.startswith("fact:"):
+            matching.sort(key=lambda r: _fact_bucket_any(r, sort_by.split(":", 1)[1]), reverse=True)
+        elif sort_by == "label_count":
+            matching.sort(key=lambda r: -len(r["labels"]))
+        elif sort_by in CATALOG_SORT_KEYS and sort_by != "record_id":
+            matching.sort(key=lambda r: str(r.get(sort_by)))
+        elif sort_by != "record_id":
+            raise LabError(f"sort_by must be one of {CATALOG_SORT_KEYS} or 'fact:<KEY>'")
 
     def facet(source_records: list[dict], key: str) -> dict[str, int]:
         counts: Counter = Counter()
@@ -794,6 +864,16 @@ def catalog(store: Store, normalization_id: str, *, filters: Optional[Mapping[st
               ("source_id", "phase", "stm", "material", "result", "dataset")}
     for key in ("eval_bucket", "label_family", "authority", "tier", "producer"):
         facets[key] = facet(matching, key)
+    motif_counts: Counter = Counter()
+    strategy_counts: Counter = Counter()
+    for record in matching:
+        # facet semantics: a record counts once per facet value it carries
+        motif_counts.update({str(v).lower() for v in _record_label_values(record, "motif")})
+        for value in _record_label_values(record, "strategy"):
+            if isinstance(value, dict):
+                strategy_counts.update(value.keys())
+    facets["motif"] = dict(motif_counts)
+    facets["strategy"] = dict(strategy_counts)
     label_count = sum(facets["label_family"].values())
 
     window = matching[max(0, offset): max(0, offset) + max(1, min(int(limit), 500))]

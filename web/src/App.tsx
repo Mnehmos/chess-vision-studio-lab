@@ -5,6 +5,7 @@ import Builder from "./screens/Builder";
 import Data from "./screens/Data";
 import FindingDetail from "./screens/FindingDetail";
 import Findings from "./screens/Findings";
+import LabMap from "./screens/LabMap";
 import Matrix from "./screens/Matrix";
 import OverviewScreen from "./screens/Overview";
 import RunDetail from "./screens/RunDetail";
@@ -38,6 +39,7 @@ function TopMeta() {
 
 const links = [
   { to: "/", label: "Overview" },
+  { to: "/map", label: "Lab Map" },
   { to: "/data", label: "Data" },
   { to: "/build", label: "Ablation builder" },
   { to: "/runs", label: "Runs" },
@@ -65,6 +67,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<OverviewScreen />} />
+          <Route path="/map" element={<LabMap />} />
           <Route path="/data" element={<Data />} />
           <Route path="/build" element={<Builder />} />
           <Route path="/runs" element={<Runs />} />

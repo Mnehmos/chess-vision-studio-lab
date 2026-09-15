@@ -22,7 +22,7 @@ from typing import Mapping, Optional, Sequence
 
 import numpy as np
 
-from . import data, families, intake, nnue
+from . import data, facts, families, intake, nnue
 from .hashing import canonical_json, hash_obj, sha256_file
 from .schemas import (
     KINDS,
@@ -187,8 +187,13 @@ class LabService:
         return data.copy_label_sets(self.store, from_normalization_id, to_normalization_id)
 
     def catalog(self, normalization_id: str, *, filters: Optional[Mapping[str, object]] = None,
-                offset: int = 0, limit: int = 50):
-        return data.catalog(self.store, normalization_id, filters=filters, offset=offset, limit=limit)
+                offset: int = 0, limit: int = 50, sort_by: Optional[str] = None):
+        return data.catalog(self.store, normalization_id, filters=filters, offset=offset, limit=limit,
+                            sort_by=sort_by)
+
+    def label_facts(self, normalization_id: str, **kwargs) -> dict:
+        """Attach deterministic CVS analysis facts (geometry, motifs, strategy) per record."""
+        return facts.label_facts(self.store, normalization_id, **kwargs)
 
     def stack_preview(self, normalization_id: str, arms: Sequence[Mapping[str, object]]):
         return data.stack_preview(self.store, normalization_id, arms)
@@ -866,6 +871,128 @@ class LabService:
             source_bytes=sum(s.bytes for s in sources), evaluations=len(evaluations), evidence=len(evidence),
             evidence_states={**{k: v for k, v in unstates.items()}, **{k: states[k] + unstates.get(k, 0) for k in states}},
             switch_legacy_states=dict(switch_states), findings=record.findings if record else [],
+        )
+
+    MAP_PROJECTIONS = ("data", "research", "promotion")
+
+    def map_view(self, projection: str = "data", *, generation: Optional[str] = None,
+                 state: Optional[str] = None, family: Optional[str] = None):
+        """Lab Map: nodes and provenance edges derived only from canonical lab objects.
+
+        Projections: `data` (sources -> normalizations + label producers -> datasets ->
+        models), `research` (hypotheses -> ablations -> runs -> models -> findings),
+        `promotion` (frozen baselines vs intervention ablations with finding decisions).
+        """
+        from .schemas import MapEdge, MapNode, MapResponse
+
+        projection = (projection or "data").lower()
+        if projection not in self.MAP_PROJECTIONS:
+            raise LabError(f"unknown projection {projection!r}; choose one of {self.MAP_PROJECTIONS}")
+
+        nodes: dict[str, MapNode] = {}
+        edges: dict[tuple[str, str, str], MapEdge] = {}
+
+        def add(node_id: str, kind: str, label: str, *, node_state: Optional[str] = None,
+                link: str = "", gen: Optional[str] = None, fam: Optional[str] = None, **detail) -> None:
+            if generation and gen != generation:
+                return
+            if family and fam and fam.lower() != family.lower():
+                return
+            if node_id in nodes:
+                return
+            nodes[node_id] = MapNode(id=node_id, kind=kind, label=label, state=node_state,
+                                     link=link, detail=detail)
+
+        def edge(src: str, dst: str, kind: str) -> None:
+            if src in nodes and dst in nodes and (src, dst, kind) not in edges:
+                edges[(src, dst, kind)] = MapEdge(src=src, dst=dst, kind=kind)
+
+        ablations = self.store.list("A", verify=False, kind=Ablation)
+        findings = self.list_findings()
+        runs = self.store.list("R", verify=False, kind=Run)
+        models = {m.id: m for m in self.store.list("M", verify=False, kind=ModelArtifact)}
+        ablation_by_id = {a.id: a for a in ablations}
+
+        if projection == "data":
+            for source in self.store.list("S", verify=False, kind=SourceSnapshot):
+                add(source.id, "source", f"{source.id} {source.name}", link=f"/object/{source.id}",
+                    rows=f"{source.row_count:,}", importer=source.importer)
+            for norm in self.store.list("N", verify=False):
+                add(norm.id, "normalization", f"{norm.id} {norm.name}", link=f"/object/{norm.id}",
+                    records=f"{norm.record_count:,}", duplicates=norm.duplicate_count)
+                for source_id in norm.source_ids:
+                    edge(source_id, norm.id, "standardized")
+                for ref in data.label_set_refs(self.store, norm.id):
+                    for authority, rows in ref.authorities.items():
+                        producer_id = f"labels:{norm.id}:{authority}"
+                        add(producer_id, "labels", f"label set {authority}", link="/data",
+                            rows=f"{rows} rows", families=", ".join(ref.families))
+                        edge(producer_id, norm.id, "annotated")
+            for dataset in self.store.list("D", verify=False, kind=Dataset):
+                add(dataset.id, "dataset", f"{dataset.id} {dataset.name}",
+                    link=f"/object/{dataset.id}", records=f"{dataset.counts['records']:,}",
+                    stack="+".join(arm.name for arm in dataset.stack) or "flat")
+                edge(dataset.normalization_id, dataset.id, "frozen")
+            runs_by_dataset: dict[str, set[str]] = {}
+            for run in runs:
+                if run.model_id:
+                    runs_by_dataset.setdefault(run.dataset_id, set()).add(run.model_id)
+            for dataset_id, model_ids in runs_by_dataset.items():
+                for model_id in model_ids:
+                    model = models[model_id]
+                    ablation = ablation_by_id.get(model.ablation_id)
+                    add(model_id, "model", f"{model_id} {model.arch}", link=f"/object/{model_id}",
+                        gen=ablation.generation if ablation else None,
+                        fam=ablation.family if ablation else None,
+                        parameters=f"{model.param_count:,}", run=model.run_id)
+                    edge(dataset_id, model_id, "trained_from")
+        else:
+            hypotheses = {h.id: h for h in self.store.list("H")}
+            show: set[str] = set()
+            if projection == "promotion":
+                for finding in findings:
+                    show.update((finding.control.ablation_id, finding.intervention.ablation_id, finding.id))
+            for ablation in ablations:
+                if projection == "promotion" and ablation.id not in show and not ablation.is_baseline:
+                    continue
+                kind = "baseline" if ablation.is_baseline else "ablation"
+                add(ablation.id, kind, ablation.display_label, node_state=ablation.state.value,
+                    link=f"/object/{ablation.id}", gen=ablation.generation, fam=ablation.family,
+                    parameters=f"{ablation.param_count:,}",
+                    runs=str(sum(1 for r in runs if r.ablation_id == ablation.id)))
+                if projection == "research" and ablation.hypothesis_id in hypotheses:
+                    hypothesis = hypotheses[ablation.hypothesis_id]
+                    add(hypothesis.id, "hypothesis", f"{hypothesis.id} {hypothesis.title}",
+                        node_state=hypothesis.state.value, link=f"/object/{hypothesis.id}",
+                        gen=hypothesis.generation, fam=hypothesis.family)
+                    edge(hypothesis.id, ablation.id, "tested_by")
+                if projection == "research":
+                    for run in (r for r in runs if r.ablation_id == ablation.id):
+                        add(run.id, "run", f"{run.id} seed {run.seed}", node_state=run.status.value,
+                            link=f"/runs/{run.id}", gen=ablation.generation, fam=ablation.family)
+                        edge(ablation.id, run.id, "executed")
+                        model = models.get(run.model_id) if run.model_id else None
+                        if model:
+                            add(run.model_id, "model", f"{run.model_id} {model.arch}",
+                                link=f"/object/{run.model_id}", gen=ablation.generation,
+                                fam=ablation.family, parameters=f"{model.param_count:,}")
+                            edge(run.id, run.model_id, "produced")
+            for finding in findings:
+                for role, ablation_id in (("control", finding.control.ablation_id),
+                                          ("intervention", finding.intervention.ablation_id)):
+                    ablation = ablation_by_id.get(ablation_id)
+                    add(finding.id, "finding", f"{finding.id} {finding.hypothesis_title}",
+                        node_state=finding.result.value, link=f"/findings/{finding.id}",
+                        effect=f"{finding.effect.difference:+.4g}" if finding.effect else "n/a",
+                        fam=ablation.family if ablation else None)
+                    edge(finding.id, ablation_id,
+                         "compares_against" if role == "control" else "decides")
+
+        return MapResponse(
+            projection=projection, projections_available=list(self.MAP_PROJECTIONS),
+            nodes=list(nodes.values()), edges=list(edges.values()),
+            filters_applied={k: v for k, v in (("generation", generation), ("state", state),
+                                               ("family", family)) if v},
         )
 
     def search_backlog(self) -> SearchBacklog:

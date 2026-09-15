@@ -15,7 +15,17 @@ import { Empty, ErrorBox, Loading, Section, fmtInt, formatValue } from "../ui";
 type Tab = "catalog" | "stack" | "lineage";
 
 const FILTER_FIELDS = ["phase", "stm", "source_id", "material", "eval_bucket", "result",
-  "label_family", "authority", "tier", "producer", "dataset", "split", "ply_min", "ply_max"] as const;
+  "label_family", "authority", "tier", "producer", "motif", "strategy", "dataset", "split",
+  "ply_min", "ply_max"] as const;
+
+// Mirror of cvslab.facts GEOMETRY_FAMILIES keys (registry v1 — stable contract).
+const FACT_KEYS = [
+  "KING_DANGER", "KING_ZONE_PRESSURE", "KING_OPEN_FILE", "KING_SHIELD", "KING_CENTRAL_EXPOSURE",
+  "ENEMY_QUEEN_NEAR_KING", "OPEN_CENTER_KING", "KING_ESCAPE_DEFICIT", "HANGING_MATERIAL",
+  "MOBILITY_KNIGHT", "MOBILITY_BISHOP", "MOBILITY_ROOK", "MOBILITY_QUEEN", "PASSED_PAWN",
+  "CONNECTED_PASSED_PAWN", "ROOK_OPEN_FILE", "ROOK_SEMI_OPEN_FILE", "ROOK_SEVENTH",
+  "DOUBLED_PAWN", "ISOLATED_PAWN", "BISHOP_PAIR",
+];
 
 function Facet({ label, counts, onPick }: { label: string; counts: Record<string, number>; onPick?: (value: string) => void }) {
   const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
@@ -42,7 +52,11 @@ function Facet({ label, counts, onPick }: { label: string; counts: Record<string
 function CatalogTab({ normalizations }: { normalizations: Normalization[] }) {
   const [normalizationId, setNormalizationId] = useState("");
   const [filters, setFilters] = useState<Record<string, string>>({});
+  const [factKey, setFactKey] = useState("");
+  const [factMin, setFactMin] = useState("1");
+  const [factFavors, setFactFavors] = useState("");
   const [offset, setOffset] = useState(0);
+  const [sortBy, setSortBy] = useState("");
   const limit = 25;
   const [data, setData] = useState<CatalogResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +68,15 @@ function CatalogTab({ normalizations }: { normalizations: Normalization[] }) {
   useEffect(() => {
     if (!normalizationId) return;
     const params: Record<string, string | number | undefined> = { normalization_id: normalizationId, offset, limit };
+    if (sortBy) params.sort_by = sortBy;
     for (const [key, value] of Object.entries(filters)) if (value) params[key] = value;
+    if (factKey) {
+      params.fact_key = factKey;
+      params.fact_min = factMin || "1";
+      if (factFavors) params.fact_favors = factFavors;
+    }
     api.catalog(params).then(setData).catch((exc: unknown) => setError(exc instanceof Error ? exc.message : String(exc)));
-  }, [normalizationId, filters, offset]);
+  }, [normalizationId, filters, offset, sortBy, factKey, factMin, factFavors]);
 
   const setFilter = (key: string, value: string) => {
     setFilters((previous) => ({ ...previous, [key]: value }));
@@ -66,6 +86,45 @@ function CatalogTab({ normalizations }: { normalizations: Normalization[] }) {
   return (
     <>
       <div className="filters">
+        <label>
+          Sort by
+          <select value={sortBy} onChange={(event) => { setSortBy(event.target.value); setOffset(0); }}>
+            <option value="">record id</option>
+            <option value="fact:HANGING_MATERIAL">fact: hanging material ↓</option>
+            <option value="fact:KING_DANGER">fact: king danger ↓</option>
+            <option value="fact:PASSED_PAWN">fact: passed pawns ↓</option>
+            <option value="fact:MOBILITY_KNIGHT">fact: knight mobility ↓</option>
+            <option value="label_count">label count ↓</option>
+            <option value="ply">ply</option>
+          </select>
+        </label>
+        <label>
+          CVS fact ≥ bucket
+          <select value={factKey} onChange={(event) => { setFactKey(event.target.value); setOffset(0); }}>
+            <option value="">any</option>
+            {FACT_KEYS.map((key) => (
+              <option key={key} value={key}>{key.toLowerCase().replace(/_/g, " ")}</option>
+            ))}
+          </select>
+        </label>
+        {factKey && (
+          <>
+            <label>
+              Min bucket
+              <select value={factMin} onChange={(event) => { setFactMin(event.target.value); setOffset(0); }}>
+                {["1", "2", "3"].map((bucket) => <option key={bucket}>{bucket}</option>)}
+              </select>
+            </label>
+            <label>
+              Favors
+              <select value={factFavors} onChange={(event) => { setFactFavors(event.target.value); setOffset(0); }}>
+                <option value="">either side</option>
+                <option value="white">white</option>
+                <option value="black">black</option>
+              </select>
+            </label>
+          </>
+        )}
         <label>
           Normalization
           <select value={normalizationId} onChange={(event) => { setNormalizationId(event.target.value); setOffset(0); }}>
@@ -104,6 +163,8 @@ function CatalogTab({ normalizations }: { normalizations: Normalization[] }) {
             <Facet label="source" counts={data.facets.source_id ?? {}} onPick={(value) => setFilter("source_id", value)} />
             <Facet label="eval_bucket" counts={data.facets.eval_bucket ?? {}} onPick={(value) => setFilter("eval_bucket", value)} />
             <Facet label="dataset" counts={data.facets.dataset ?? {}} onPick={(value) => setFilter("dataset", value)} />
+            <Facet label="motif (CVS tactics)" counts={data.facets.motif ?? {}} onPick={(value) => setFilter("motif", value)} />
+            <Facet label="strategy tags" counts={data.facets.strategy ?? {}} onPick={(value) => setFilter("strategy", value)} />
           </div>
           {data.page.length === 0 ? <Empty>No records match these filters.</Empty> : (
             <div className="panel" style={{ padding: 0, overflowX: "auto" }}>
