@@ -191,16 +191,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
                    help="model-configuration switch (representation/capacity), repeatable")
     p.add_argument("--notes", default="")
+    p.add_argument("--divergence", default="", metavar="REASON",
+                   help="declare that this arm intentionally trains against the recipe's TargetSpec and is "
+                        "measured against the protocol's (part of the ablation identity; empty = refused)")
 
     p = command("preview", "preview an ablation: diff, exact parameter count, warnings — writes nothing")
     p.add_argument("--baseline", required=True)
     p.add_argument("--set", action="append", default=[], metavar="KEY=VALUE")
+    p.add_argument("--divergence", default="", metavar="REASON")
 
     p = command("ablation", "create an ablation against a baseline")
     p.add_argument("--baseline", required=True)
     p.add_argument("--set", action="append", default=[], metavar="KEY=VALUE")
     p.add_argument("--hypothesis", default=None)
     p.add_argument("--notes", default="")
+    p.add_argument("--divergence", default="", metavar="REASON",
+                   help="declare that this intervention intentionally trains against the recipe's TargetSpec and "
+                        "is measured against the protocol's (part of the ablation identity; empty = refused)")
 
     # -- runs -----------------------------------------------------------------
     p = command("queue", "queue run(s) of an ablation for given seeds")
@@ -392,12 +399,15 @@ def _dispatch(args) -> int:
     elif cmd == "baseline":
         _emit(service.register_baseline(name=args.name, dataset_id=args.dataset,
                                         training_recipe_id=args.recipe, eval_protocol_id=args.protocol,
-                                        model_config=_key_values(args.set), notes=args.notes))
+                                        model_config=_key_values(args.set), notes=args.notes,
+                                        supervision_divergence=args.divergence))
     elif cmd == "preview":
-        _emit(service.preview_ablation(baseline_id=args.baseline, overrides=_key_values(args.set)))
+        _emit(service.preview_ablation(baseline_id=args.baseline, overrides=_key_values(args.set),
+                                       supervision_divergence=args.divergence))
     elif cmd == "ablation":
         _emit(service.create_ablation(baseline_id=args.baseline, overrides=_key_values(args.set),
-                                      hypothesis_id=args.hypothesis, notes=args.notes))
+                                      hypothesis_id=args.hypothesis, notes=args.notes,
+                                      supervision_divergence=args.divergence))
 
     elif cmd == "queue":
         runs = service.queue_runs(args.ablation, args.seeds)

@@ -376,6 +376,9 @@ class Ablation(LabModel):
     training_recipe_id: str
     eval_protocol_id: str
     notes: str = ""
+    # declared at creation and part of `identity_hash`: this ablation intentionally trains
+    # against one TargetSpec and is measured against another. Empty = divergence refused.
+    supervision_divergence: str = ""
     state: EvidenceState = EvidenceState.PROPOSED
     state_history: list[StateChange] = []
     created_at: str
@@ -430,6 +433,11 @@ class Run(LabModel):
     # future reader assumes dataset_id is also the evaluation corpus
     eval_dataset_id: Optional[str] = None
     eval_dataset_manifest_hash: Optional[str] = None
+    # what taught the model and what judged it, independently and on the run itself:
+    # a reader of R#### must not have to reconstruct this from a recipe and a protocol
+    train_target_spec_hash: Optional[str] = None
+    eval_target_spec_hash: Optional[str] = None
+    supervision_divergence: str = ""
     queued_at: str
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
@@ -810,6 +818,7 @@ class AblationPreview(LabModel):
     parameter_shapes: dict[str, list[int]]
     display_label: str
     identity_hash: str
+    supervision_divergence: str = ""
     warnings: list[str]
     duplicate_of: Optional[str]
     can_create: bool
@@ -1061,6 +1070,7 @@ class AblationRequest(LabModel):
     overrides: dict[str, ConfigValue] = {}
     hypothesis_id: Optional[str] = None
     notes: str = ""
+    supervision_divergence: str = ""
 
 
 class RunQueueRequest(LabModel):

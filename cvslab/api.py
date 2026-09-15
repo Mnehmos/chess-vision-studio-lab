@@ -152,12 +152,14 @@ def create_app(home: Optional[str | Path] = None, *, worker: bool = True) -> Fas
 
     @app.post("/api/ablations/preview")
     def preview_ablation(body: AblationRequest):
-        return service.preview_ablation(baseline_id=body.baseline_id, overrides=body.overrides)
+        return service.preview_ablation(baseline_id=body.baseline_id, overrides=body.overrides,
+                                        supervision_divergence=body.supervision_divergence)
 
     @app.post("/api/ablations", status_code=201)
     def create_ablation(body: AblationRequest):
         return service.create_ablation(baseline_id=body.baseline_id, overrides=body.overrides,
-                                       hypothesis_id=body.hypothesis_id, notes=body.notes)
+                                       hypothesis_id=body.hypothesis_id, notes=body.notes,
+                                       supervision_divergence=body.supervision_divergence)
 
     # -- runs ----------------------------------------------------------------
 

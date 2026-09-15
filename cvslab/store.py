@@ -23,7 +23,7 @@ import stat
 import threading
 from functools import lru_cache
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import Annotated, Mapping, Optional, Union
 
 from pydantic import Field, TypeAdapter
 
@@ -72,6 +72,11 @@ RUN_IDENTITY_FIELDS = (
     "recipe_hash",
     "eval_protocol_id",
     "protocol_hash",
+    # supervision identities and the divergence declaration are fixed at queue time like
+    # every other identity field: execution may never rewrite what taught or judged the model
+    "train_target_spec_hash",
+    "eval_target_spec_hash",
+    "supervision_divergence",
     "queued_at",
 )
 
@@ -83,8 +88,14 @@ def parse_id(obj_id: str) -> tuple[str, int]:
     return match.group(1), int(match.group(2))
 
 
+def payload_hash(payload: Mapping[str, object]) -> str:
+    """Hash of a RECORDED payload: the JSON as written, minus the hash field itself."""
+    return hash_obj({key: value for key, value in payload.items() if key != "record_hash"})
+
+
 def compute_record_hash(obj: LabModel) -> str:
-    return hash_obj(obj.model_dump(mode="json", exclude={"record_hash"}))
+    """Hash of the object as it will be recorded."""
+    return payload_hash(obj.model_dump(mode="json"))
 
 
 @lru_cache(maxsize=None)
@@ -155,9 +166,10 @@ class Store:
         path = self.object_path(obj_id)
         if not path.exists():
             raise NotFound(f"{obj_id} not found")
-        obj = model_adapter(obj_id[0]).validate_json(path.read_bytes())
+        raw = path.read_bytes()
+        obj = model_adapter(obj_id[0]).validate_json(raw)
         if verify:
-            self.verify(obj)
+            self._verify_recorded(obj_id, json.loads(raw))
         return obj
 
     def get_as(self, obj_id: str, cls: type):
@@ -168,9 +180,25 @@ class Store:
         return obj
 
     def verify(self, obj: LabModel) -> None:
+        """Verify sealed evidence against the payload AS RECORDED.
+
+        The seal covers what was written, not the object as the current code models it, so
+        a later schema addition can never turn historical evidence into apparent tampering
+        (and tampering with anything actually recorded is still detected).
+        """
+        path = self.object_path(obj.id)
+        if path.exists():
+            self._verify_recorded(obj.id, json.loads(path.read_bytes()))
+            return
+        # not yet persisted (an object under construction): verify the in-memory dump
         sealed = getattr(obj, "record_hash", None)
         if sealed is not None and compute_record_hash(obj) != sealed:
-            raise TamperError(f"{obj.id}: record hash mismatch — sealed evidence was modified on disk")
+            raise TamperError(f"{obj.id}: record hash mismatch — object does not match its seal")
+
+    def _verify_recorded(self, obj_id: str, payload: Mapping[str, object]) -> None:
+        sealed = payload.get("record_hash")
+        if sealed is not None and payload_hash(payload) != sealed:
+            raise TamperError(f"{obj_id}: record hash mismatch — sealed evidence was modified on disk")
 
     def list(self, prefix: str, *, verify: bool = True, kind: Optional[type] = None) -> list:
         folder = self.root / "objects" / KINDS[prefix][0]

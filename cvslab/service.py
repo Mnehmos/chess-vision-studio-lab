@@ -340,13 +340,25 @@ class LabService:
         return dataset, recipe, protocol
 
     @staticmethod
-    def _identity_hash(family, generation, config, dataset, recipe, protocol) -> str:
-        return hash_obj({"family": family, "generation": generation, "effective_config": config,
-                         "dataset_manifest_hash": dataset.manifest_hash, "recipe_hash": recipe.recipe_hash,
-                         "protocol_hash": protocol.protocol_hash})
+    def _identity_hash(family, generation, config, dataset, recipe, protocol,
+                       supervision_divergence: str = "") -> str:
+        """Identity of one intervention.
+
+        A declared supervision divergence is part of that identity: the contract "this arm
+        trains against spec A and is measured against spec B" must exist before the run
+        does, and cannot be added once results are visible. An UNDECLARED ablation hashes
+        exactly as it did before the declaration existed, so every historical A#### keeps
+        the identity it was created with.
+        """
+        payload = {"family": family, "generation": generation, "effective_config": config,
+                   "dataset_manifest_hash": dataset.manifest_hash, "recipe_hash": recipe.recipe_hash,
+                   "protocol_hash": protocol.protocol_hash}
+        if supervision_divergence:
+            payload["supervision_divergence"] = supervision_divergence
+        return hash_obj(payload)
 
     def _new_ablation(self, *, family, generation, baseline_name, is_baseline, control_id, hypothesis_id, config,
-                      diff, dataset, recipe, protocol, notes) -> Ablation:
+                      diff, dataset, recipe, protocol, notes, supervision_divergence: str = "") -> Ablation:
         ablation_id = self.store.next_id("A")
         shapes = families.parameter_shapes(family, config)
         n_params = families.count_parameters(shapes)
@@ -355,11 +367,13 @@ class LabService:
             id=ablation_id, family=family, generation=generation, baseline_name=baseline_name,
             is_baseline=is_baseline, control_id=control_id, hypothesis_id=hypothesis_id,
             overrides={d.key: d.value for d in diff}, effective_config=config, config_hash=hash_obj(config),
-            identity_hash=self._identity_hash(family, generation, config, dataset, recipe, protocol), diff=diff,
+            identity_hash=self._identity_hash(family, generation, config, dataset, recipe, protocol,
+                                              supervision_divergence), diff=diff,
             param_count=n_params, parameter_shapes=shapes,
             display_label=families.display_label(ablation_id, family, generation, n_params, baseline_name,
                                                  [(d.key, d.value) for d in diff]),
             dataset_id=dataset.id, training_recipe_id=recipe.id, eval_protocol_id=protocol.id, notes=notes,
+            supervision_divergence=supervision_divergence,
             state=EvidenceState.PROPOSED, state_history=[StateChange(state=EvidenceState.PROPOSED, at=now,
                                                                      reason="created")],
             created_at=now,
@@ -367,7 +381,8 @@ class LabService:
 
     def register_baseline(self, *, name: str, dataset_id: str, training_recipe_id: str, eval_protocol_id: str,
                           model_config: Optional[Mapping[str, object]] = None, family: str = DEFAULT_FAMILY,
-                          generation: Optional[str] = None, notes: str = "") -> Ablation:
+                          generation: Optional[str] = None, notes: str = "",
+                          supervision_divergence: str = "") -> Ablation:
         name = name.strip().upper()
         if not re.fullmatch(r"[A-Z][A-Z0-9_]*", name):
             raise LabError("baseline names are upper-case identifiers such as RAW or HYBRID")
@@ -385,9 +400,11 @@ class LabService:
         config = families.merge_config(family, {**recipe.params, **model_config}, {})
         return self._new_ablation(family=family, generation=generation, baseline_name=name, is_baseline=True,
                                   control_id=None, hypothesis_id=None, config=config, diff=[], dataset=dataset,
-                                  recipe=recipe, protocol=protocol, notes=notes)
+                                  recipe=recipe, protocol=protocol, notes=notes,
+                                  supervision_divergence=supervision_divergence)
 
-    def preview_ablation(self, baseline_id: str, overrides: Mapping[str, object]) -> AblationPreview:
+    def preview_ablation(self, baseline_id: str, overrides: Mapping[str, object], *,
+                         supervision_divergence: str = "") -> AblationPreview:
         base = self.store.get(baseline_id)
         if not isinstance(base, Ablation) or not base.is_baseline:
             raise LabError(f"{baseline_id} is not a frozen baseline; ablations are defined against a registered control")
@@ -408,7 +425,8 @@ class LabService:
             warnings.append(f"Changes span independent axes ({', '.join(axes)}); their effects cannot be attributed separately.")
         dataset, recipe, protocol = self._frozen_inputs(base.dataset_id, base.training_recipe_id, base.eval_protocol_id,
                                                         base.family, base.generation)
-        identity = self._identity_hash(base.family, base.generation, config, dataset, recipe, protocol)
+        identity = self._identity_hash(base.family, base.generation, config, dataset, recipe, protocol,
+                                       supervision_divergence)
         duplicate = next((a.id for a in self.store.list("A") if a.identity_hash == identity), None)
         if duplicate and diff:
             warnings.append(f"This exact configuration already exists as {duplicate}; queue a new run of it instead.")
@@ -420,12 +438,20 @@ class LabService:
             parameter_shapes=shapes,
             display_label=families.display_label(self.store.peek_id("A"), base.family, base.generation, n_params,
                                                  base.baseline_name, [(d.key, d.value) for d in diff]),
+            supervision_divergence=supervision_divergence,
             identity_hash=identity, warnings=warnings, duplicate_of=duplicate, can_create=bool(diff) and duplicate is None,
         )
 
     def create_ablation(self, *, baseline_id: str, overrides: Mapping[str, object], hypothesis_id: Optional[str] = None,
-                        notes: str = "") -> Ablation:
-        preview = self.preview_ablation(baseline_id, overrides)
+                        notes: str = "", supervision_divergence: str = "") -> Ablation:
+        """Create one intervention.
+
+        `supervision_divergence` declares, before any run exists, that this intervention
+        intentionally trains against the recipe's TargetSpec and is measured against the
+        protocol's. The declaration is stored on the A#### and folded into its identity
+        hash, so it can neither be added after results are visible nor silently dropped.
+        """
+        preview = self.preview_ablation(baseline_id, overrides, supervision_divergence=supervision_divergence)
         if not preview.can_create:
             raise LabError(" ".join(preview.warnings))
         base: Ablation = self.store.get(baseline_id)
@@ -438,7 +464,7 @@ class LabService:
         return self._new_ablation(family=base.family, generation=base.generation, baseline_name=base.baseline_name,
                                   is_baseline=False, control_id=base.id, hypothesis_id=hypothesis_id,
                                   config=preview.effective_config, diff=preview.diff, dataset=dataset, recipe=recipe,
-                                  protocol=protocol, notes=notes)
+                                  protocol=protocol, notes=notes, supervision_divergence=supervision_divergence)
 
     # ------------------------------------------------------------------ runs
 
@@ -446,6 +472,8 @@ class LabService:
         ablation: Ablation = self.store.get(ablation_id)
         dataset, recipe, protocol = self._frozen_inputs(ablation.dataset_id, ablation.training_recipe_id,
                                                         ablation.eval_protocol_id, ablation.family, ablation.generation)
+        train_spec = recipe_target_spec(recipe)
+        eval_spec = protocol_target_spec(protocol)
         runs = []
         for seed in seeds:
             runs.append(self.store.create(Run(
@@ -456,6 +484,9 @@ class LabService:
                 dataset_manifest_hash=dataset.manifest_hash, training_recipe_id=recipe.id,
                 recipe_hash=recipe.recipe_hash, eval_protocol_id=protocol.id, protocol_hash=protocol.protocol_hash,
                 eval_dataset_id=protocol.dataset_id, eval_dataset_manifest_hash=protocol.dataset_manifest_hash,
+                train_target_spec_hash=(train_spec.spec_hash() if train_spec is not None else None),
+                eval_target_spec_hash=(eval_spec.spec_hash() if eval_spec is not None else None),
+                supervision_divergence=ablation.supervision_divergence,
                 queued_at=utc_now(),
             )))
         self._wake.set()
@@ -518,13 +549,47 @@ class LabService:
                                      run.eval_dataset_id == protocol.dataset_id,
                                      f"run pins evaluation corpus {run.eval_dataset_id}; protocol binds "
                                      f"{protocol.dataset_id}"))
+            # Supervision identity: the recipe pins what TEACHES the model, the protocol
+            # pins what JUDGES it. Both are recorded on the run, and a divergence is
+            # permitted only when this ablation declared it at creation time (the
+            # declaration is part of the ablation identity hash). The default stays
+            # fail-closed: an undeclared divergence is refused exactly as before.
+            train_hash = train_spec.spec_hash() if train_spec is not None else None
+            eval_hash = eval_spec.spec_hash() if eval_spec is not None else None
+            declared = (ablation.supervision_divergence or "").strip()
             if train_spec is not None or eval_spec is not None:
-                consistent = (train_spec is not None and eval_spec is not None
-                              and train_spec.spec_hash() == eval_spec.spec_hash())
-                checks.append(make_check("target_spec_consistent", consistent,
-                                         f"T spec {train_spec.spec_hash()[:19] if train_spec else None}… / "
-                                         f"E spec {eval_spec.spec_hash()[:19] if eval_spec else None}…"))
-                if not consistent:
+                # The run fields are EVIDENCE; the frozen T#### and E#### objects are AUTHORITY.
+                # Execution proves they agree before training starts, so a sealed run can never
+                # display a supervision identity the recipe or protocol does not pin.
+                def _short(value):
+                    return value[:19] + "…" if value else "none"
+                recorded_ok = (run.train_target_spec_hash == train_hash
+                               and run.eval_target_spec_hash == eval_hash)
+                checks.append(make_check(
+                    "supervision_authority", recorded_ok,
+                    f"run records train {_short(run.train_target_spec_hash)} / eval "
+                    f"{_short(run.eval_target_spec_hash)}; {recipe.id} pins {_short(train_hash)} / "
+                    f"{protocol.id} pins {_short(eval_hash)}"))
+                if not recorded_ok:
+                    raise _PreflightFailed(
+                        "queued supervision identity does not match the frozen recipe/protocol: "
+                        "the T#### and E#### objects are the authority")
+                if train_hash is None or eval_hash is None:
+                    checks.append(make_check(
+                        "supervision_declared", False,
+                        f"training TargetSpec {'present' if train_spec else 'MISSING'}; "
+                        f"evaluation TargetSpec {'present' if eval_spec else 'MISSING'}"))
+                    raise _PreflightFailed("both the training recipe and the evaluation protocol must pin a "
+                                           "TargetSpec, or neither may")
+                checks.append(make_check(
+                    "supervision_divergence", bool(declared) or train_hash == eval_hash,
+                    f"train spec {train_hash[:19]}… eval spec {eval_hash[:19]}… — "
+                    + ("identical" if train_hash == eval_hash
+                       else (f"declared divergence: {declared}" if declared
+                             else "divergence NOT declared by the ablation; create it with "
+                                  "supervision_divergence='<reason>' to train and measure "
+                                  "against different supervision"))))
+                if train_hash != eval_hash and not declared:
                     raise _PreflightFailed("training and evaluation TargetSpecs differ")
             train_split, dropped_train = nnue.encode_records(data.load_split(self.store, dataset, "train"),
                                                              target_spec=train_spec)
@@ -658,6 +723,71 @@ class LabService:
 
     # ------------------------------------------------------------------ findings
 
+    def evaluation_spec_hash(self, run: Run) -> str:
+        """The evaluation TargetSpec that judged this run, read from the protocol it pins.
+
+        The protocol is the authority: a run records `eval_target_spec_hash` as evidence for
+        the reader, but what actually judged the model is the frozen protocol's spec.
+        """
+        protocol: EvaluationProtocol = self.store.get_as(run.eval_protocol_id, EvaluationProtocol)
+        spec = protocol_target_spec(protocol)
+        return spec.spec_hash() if spec is not None else ""
+
+    def instrument_identity(self, run: Run) -> tuple:
+        """The EXAM a run sat: (eval protocol id, protocol hash, eval dataset id, eval dataset
+        manifest hash, evaluation TargetSpec hash).
+
+        Built from the evaluation side ONLY. A run's training dataset is the treatment in a
+        supervision experiment — two S7 arms necessarily train on different D#### — so the
+        training manifest must never enter the instrument identity, or legitimate arms would
+        look incomparable. Historical runs that predate the split-dataset convention evaluated
+        on their own dataset; for them the protocol's own binding is the evaluation side.
+        """
+        protocol: EvaluationProtocol = self.store.get_as(run.eval_protocol_id, EvaluationProtocol)
+        return (run.eval_protocol_id, run.protocol_hash,
+                run.eval_dataset_id or protocol.dataset_id,
+                run.eval_dataset_manifest_hash or protocol.dataset_manifest_hash,
+                self.evaluation_spec_hash(run))
+
+    @staticmethod
+    def _exam_differences(exams: list[tuple]) -> list[str]:
+        """Human-readable reasons two exam identities differ, in the reviewer's terms."""
+        reasons: list[str] = []
+        protocols = {(exam[0], exam[1]) for exam in exams}
+        datasets = {(exam[2], exam[3]) for exam in exams}
+        specs = {exam[4] for exam in exams}
+        if len(protocols) > 1:
+            reasons.append(f"{len(protocols)} distinct evaluation protocols")
+        if len(datasets) > 1:
+            reasons.append(f"{len(datasets)} distinct evaluation datasets")
+        if len(specs) > 1:
+            reasons.append("evaluation TargetSpecs "
+                           + ", ".join(sorted(h[:19] + "…" for h in specs)))
+        return reasons
+
+    def assert_runs_comparable(self, run_ids: Sequence[str]) -> str:
+        """Every run in one comparison must share one evaluation instrument.
+
+        Two runs measured against different exams are not the same measurement, however
+        similar their metric names look: a 16k-node evaluation and a 400k-node evaluation
+        may both be a number called test_loss. Returns the shared evaluation TargetSpec
+        hash, or raises naming which part of the exam differs.
+
+        Different training datasets are EXPECTED here — that is the treatment. This is the
+        invariant S7 turns into an experiment identity (X####): one shared evaluation
+        protocol, evaluation dataset and evaluation TargetSpec per experiment, while each
+        treatment arm pins its own training TargetSpec.
+        """
+        runs = [self.store.get_as(run_id, Run) for run_id in run_ids]
+        if len(runs) < 2:
+            raise LabError("a comparison needs at least two runs")
+        exams = [self.instrument_identity(run) for run in runs]
+        reasons = self._exam_differences(exams)
+        if reasons:
+            raise LabError("runs were not measured on one shared evaluation instrument ("
+                           + "; ".join(reasons) + ") and are not comparable")
+        return exams[0][4]
+
     def draft_finding(self, *, hypothesis_id: str, control_ablation_id: str, intervention_ablation_id: str,
                       interpretation: Optional[str] = None, next_experiment: Optional[str] = None,
                       non_claims: Optional[list[str]] = None) -> Finding:
@@ -695,9 +825,21 @@ class LabService:
                                      f"{len(completed[arm.id])} completed run(s); invalid runs excluded: "
                                      f"{', '.join(invalid[arm.id]) or 'none'}; tampered: {', '.join(tampered) or 'none'}"))
         used = completed[control.id] + completed[intervention.id]
-        instruments = {(r.eval_protocol_id, r.protocol_hash, r.dataset_manifest_hash) for r in used}
-        checks.append(make_check("same_instrument", len(instruments) <= 1,
-                                 "all runs share one evaluation protocol and one dataset manifest"))
+        # one definition of "the exam", shared with assert_runs_comparable: evaluation side
+        # only, so different training datasets never make legitimate arms look incomparable
+        exams = [self.instrument_identity(run) for run in used]
+        exam_differences = self._exam_differences(exams)
+        checks.append(make_check(
+            "same_instrument", not any("protocol" in r or "dataset" in r for r in exam_differences),
+            "all runs share one evaluation protocol and one evaluation dataset"
+            if not exam_differences else "; ".join(exam_differences)))
+        eval_specs = {exam[4] for exam in exams}
+        checks.append(make_check(
+            "same_evaluation_target_spec", len(eval_specs) <= 1,
+            "two runs measured against different evaluation TargetSpecs are not the same measurement: "
+            + (f"all {len(used)} compared runs share {next(iter(eval_specs))[:19]}…" if len(eval_specs) <= 1
+               else f"found {len(eval_specs)} distinct evaluation specs: "
+                    + ", ".join(sorted(h[:19] + "…" for h in eval_specs)))))
 
         values: dict[str, np.ndarray] = {}
         reference_ids, artifacts_ok, aligned = None, True, True
