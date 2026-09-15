@@ -526,14 +526,17 @@ def _label_set_ref(store: Store, path: Path) -> LabelSetRef:
     authorities: Counter = Counter()
     producers: Counter = Counter()
     registry = 1
+    policy = None
     for row in rows:
         families[row["family"]] += 1
         authorities[row["authority"]] += 1
         producers[row["producer"]] += 1
         registry = int(row.get("registry_version", 1))
+        policy = policy or row.get("policy_hash")
     return LabelSetRef(path=store.rel(path), file_hash=sha256_file(path), rows=len(rows),
                        families=dict(families), authorities=dict(authorities), producers=dict(producers),
-                       registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION)
+                       registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION,
+                       policy_hash=policy)
 
 
 def _load_canonical(store: Store, normalization: Normalization) -> list[dict]:
@@ -588,7 +591,7 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
                        "pov": pov, "authority": authority, "producer": producer,
                        "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
                        "produced_at": stamped}
-        for key in ("budget", "confidence", "note", "components"):
+        for key in ("budget", "confidence", "note", "components", "policy_hash"):
             if key in row:
                 clean[key] = _scalarize(row[key])
         # Dedup identity is the whole observation (record + value + budget + components):

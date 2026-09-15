@@ -31,6 +31,8 @@ def _tier0_record(position_id: str, slug: str, family: str) -> dict:
     return {
         "id": position_id, "schemaVersion": 1, "stage": "tier0", "status": "ok",
         "deterministic_geometry": {
+            "sideToMove": "white", "legalMoves": 20, "legalCaptures": 0, "legalChecks": 0,
+            "inCheck": False, "nonPawnMaterial": 24,
             "pieces": {"stm": 16, "opp": 16}, "attacked": {"stm": 0, "opp": 0},
             "loose": {"stm": 0, "opp": 0}, "pawns": {"doubled": {"stm": 0, "opp": 0}},
             "kingSafety": {"stm": {"inCheck": False, "attackers": 0, "pressuredSquares": 0, "escapeSquares": 1}},
@@ -50,7 +52,18 @@ def _tier0_record(position_id: str, slug: str, family: str) -> dict:
 def make_run_dir(tmp_path: Path) -> Path:
     run = tmp_path / "synthetic-run"
     run.mkdir(parents=True)
-    config = {"funnelConfigVersion": 1, "prioritizerVersion": "priority-v1"}
+    config = {"funnelConfigVersion": 1, "prioritizerVersion": "priority-v1", "seed": 111,
+              "tiers": {"tier2": {
+                  "deepFraction": 0.10, "auditFraction": 0.02, "holdoutFraction": 0.01,
+                  "holdoutSeed": 20260914,
+                  "weights": {"scoreInstability": 3.0, "bestMoveChange": 2.0, "trajectoryUnstable": 1.5,
+                              "pvDisagreement": 0.5, "tacticalDensity": 1.0, "rarity": 1.5,
+                              "outcomeDisagreement": 1.0, "selectivityEdge": 0.5, "forcedness": 0.25},
+                  "caps": {"scoreDeltaCp": 150, "tacticalItems": 10, "seePruneSkips": 4,
+                           "forcedLegalMoves": 3, "outcomeMarginCp": 100, "outcomeScaleCp": 400},
+                  "coverage": {"targetShare": 0.02, "minTarget": 5, "priorCountsPath": None}},
+                  "tier4": {"enabled": True, "priorityFraction": 0.02, "uniformFraction": 0.02,
+                            "auditFraction": 0.01}}}
     (run / "funnel-config.json").write_text(json.dumps(config), encoding="utf-8")
     config_sha = hashlib.sha256((run / "funnel-config.json").read_bytes()).hexdigest()
     (run / "manifest.json").write_text(json.dumps({

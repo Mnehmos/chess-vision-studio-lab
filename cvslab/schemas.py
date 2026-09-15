@@ -188,6 +188,7 @@ class LabelSetRef(LabModel):
     producers: dict[str, int]
     registry_version: int
     label_schema_version: int
+    policy_hash: Optional[str] = None
 
 
 class StackPolicy(str, Enum):

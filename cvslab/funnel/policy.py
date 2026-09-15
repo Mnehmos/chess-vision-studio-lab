@@ -1,0 +1,91 @@
+"""Content-addressed triage policy (S3, #15).
+
+A policy is a canonical JSON document holding every value that materially affects
+triage; `policy_hash = sha256(canonical_json(policy))`. Policies live immutably at
+`policies/<hex>.json` and are referenced everywhere by (policy_version, policy_hash).
+No new object prefix is introduced, and `T####` remains exclusively TrainingRecipe.
+
+Build from a legacy funnel config's `tiers.tier2` + `tiers.tier4` + seed, which is
+exactly what the frozen priority-v1 implementation consumed.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Optional
+
+from ..hashing import canonical_json, read_jsonl
+from ..store import LabError, Store
+
+POLICY_DIR = "policies"
+
+
+def build_policy(config: dict, *, policy_version: Optional[str] = None) -> dict:
+    """Extract a canonical policy document from a funnel config (tier2 + tier4 + seed)."""
+    if "tiers" not in config or "tier2" not in config.get("tiers", {}):
+        raise LabError("funnel config has no tiers.tier2 section; cannot extract a triage policy")
+    tier2 = config["tiers"]["tier2"]
+    tier4 = config["tiers"].get("tier4", {})
+    coverage = tier2.get("coverage", {})
+    return {
+        "policy_version": policy_version or config.get("prioritizerVersion") or "priority-v1",
+        "seed": int(config["seed"]),
+        "selection": {
+            "deep_fraction": float(tier2["deepFraction"]),
+            "audit_fraction": float(tier2["auditFraction"]),
+            "holdout_fraction": float(tier2["holdoutFraction"]),
+            "holdout_seed": int(tier2["holdoutSeed"]),
+        },
+        "weights": {name: float(value) for name, value in sorted(tier2["weights"].items())},
+        "caps": {name: float(value) for name, value in sorted(tier2["caps"].items())},
+        "coverage_prior": {
+            "target_share": float(coverage.get("targetShare", 0.02)),
+            "min_target": int(coverage.get("minTarget", 5)),
+            "prior_counts": coverage.get("priorCountsPath"),
+        },
+        "stockfish": {
+            "enabled": bool(tier4.get("enabled", True)),
+            "priority_fraction": float(tier4.get("priorityFraction", 0.0)),
+            "uniform_fraction": float(tier4.get("uniformFraction", 0.0)),
+            "audit_fraction": float(tier4.get("auditFraction", 0.0)),
+        },
+    }
+
+
+def policy_hash(policy: dict) -> str:
+    """sha256 over canonical JSON — the identity referenced by manifests and labels."""
+    import hashlib
+    return "sha256:" + hashlib.sha256(canonical_json(policy)).hexdigest()
+
+
+def policy_path(store: Store, digest: str) -> Path:
+    hex_digest = digest.split(":", 1)[1]
+    return store.abs(f"{POLICY_DIR}/{hex_digest}.json")
+
+
+def store_policy(store: Store, policy: dict) -> str:
+    """Write the policy immutably (idempotent) and return its hash."""
+    digest = policy_hash(policy)
+    path = policy_path(store, digest)
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(canonical_json(policy) + b"\n")
+        store.make_readonly(path)
+    return digest
+
+
+def load_policy(store: Store, digest: str) -> dict:
+    import json
+    path = policy_path(store, digest)
+    if not path.is_file():
+        raise LabError(f"policy {digest} not found at {path}")
+    import hashlib
+    payload = path.read_bytes()
+    actual = "sha256:" + hashlib.sha256(payload.rstrip(b"\n")).hexdigest()
+    if actual != digest:
+        raise LabError(f"policy {digest} fails hash verification (stored content hashes to {actual})")
+    return json.loads(payload)
+
+
+def policies_dir(store: Store) -> list[Path]:
+    folder = store.abs(POLICY_DIR)
+    return sorted(folder.glob("*.json")) if folder.is_dir() else []
