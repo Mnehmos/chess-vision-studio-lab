@@ -81,9 +81,14 @@ def test_label_registry_fail_closed(lab, corpus):
                             rows=[{"record_id": "pos_does_not_exist", "value": 1}])
     lab.register_labels(lab.norm_id, family="eval_cp", producer="p", authority="a",
                         rows=[{"record_id": rid, "value": 1}])
-    with pytest.raises(LabError, match="two labels"):
+    # identical rows in one set are accidents and are refused
+    with pytest.raises(LabError, match="duplicate label"):
         lab.register_labels(lab.norm_id, family="eval_cp", producer="p", authority="a",
-                            rows=[{"record_id": rid, "value": 1}, {"record_id": rid, "value": 2}])
+                            rows=[{"record_id": rid, "value": 1}, {"record_id": rid, "value": 1}])
+    # distinct values on one record are legitimate (e.g. one row per node budget) and coexist
+    ref = lab.register_labels(lab.norm_id, family="eval_cp", producer="p", authority="a",
+                              rows=[{"record_id": rid, "value": 1}, {"record_id": rid, "value": 2}])
+    assert ref.rows == 2
 
 
 def test_catalog_filters_and_facets(lab, corpus):

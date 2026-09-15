@@ -262,7 +262,7 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
         settings[key] = value
     settings["phase_rule"] = (f"non-pawn material >= {settings['phase_opening_min_material']} opening, "
                               f">= {settings['phase_middlegame_min_material']} middlegame, else endgame")
-    seen: set[str] = set()
+    seen: set[tuple[str, str]] = set()  # (record_id, value-hash): budgets may add rows, accidents may not
     records, duplicates, rejected = [], 0, 0
     for src in sources:
         rows = read_jsonl(store.abs(src.path))
@@ -550,25 +550,27 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
     if not rows:
         raise LabError("a label set needs at least one row")
     known = {record["record_id"] for record in read_jsonl(store.abs(norm.path))}
-    seen: set[str] = set()
+    seen: set[tuple[str, str]] = set()  # (record_id, value-hash): budgets may add rows, accidents may not
     stamped = utc_now()
     clean_rows: list[dict] = []
     for row in rows:
         record_id = str(row.get("record_id", ""))
         if record_id not in known:
             raise LabError(f"label row references unknown record {record_id!r} in {norm.id}")
-        if record_id in seen:
-            raise LabError(f"two labels for {record_id} in one set; register separate sets per producer/pass")
-        seen.add(record_id)
         if "value" not in row:
             raise LabError(f"label for {record_id} carries no value")
         value = _scalarize(row["value"])
+        dedup_key = (record_id, hash_obj(value))
+        if dedup_key in seen:
+            raise LabError(f"duplicate label for {record_id} with an identical value in one set; "
+                           "per-budget rows must differ, and separate authorities go in separate sets")
+        seen.add(dedup_key)
         clean: dict = {"record_id": record_id, "family": family,
                        "value": value,
                        "pov": pov, "authority": authority, "producer": producer,
                        "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
                        "produced_at": stamped}
-        for key in ("budget", "confidence", "note"):
+        for key in ("budget", "confidence", "note", "components"):
             if key in row:
                 clean[key] = _scalarize(row[key])
         clean_rows.append(clean)

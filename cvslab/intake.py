@@ -417,7 +417,8 @@ def _floats(mapping: Optional[Mapping]) -> dict[str, float]:
 
 
 def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] = None,
-                      research_state: Optional[str] = None, state_source: Optional[str] = None) -> FunnelRun:
+                      research_state: Optional[str] = None, state_source: Optional[str] = None,
+                      position_pool: Optional[str] = None) -> FunnelRun:
     directory = Path(run_dir)
     for required in ("manifest.json", "report.json"):
         if not (directory / required).is_file():
@@ -521,7 +522,7 @@ def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] 
     tooling = manifest.get("toolingGit", {})
 
     run = FunnelRun(
-        id=run_id, origin="funnel",
+        id=run_id, origin="funnel", position_pool=position_pool,
         lineage_note="Labels were produced by the legacy engine identity (flagship nets). They are usable as data and "
                      "evidence, not as clean-lineage model provenance.",
         name=name or directory.name, run_dir=str(directory.resolve()),
@@ -529,7 +530,7 @@ def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] 
         prioritizer_version=str(manifest.get("prioritizerVersion")), config_sha256=str(manifest.get("configSha256")),
         source_created_at=str(manifest.get("createdAt")), tooling_commit=tooling.get("commit"), tooling_dirty=tooling.get("dirty"),
         engine_binary_sha256=engine.get("binarySha256"), engine_artifacts=engine_artifacts, engine_artifact_model_ids=linked,
-        engine_options={k: v for k, v in engine.get("identity", {}).get("options", {}).items() if isinstance(v, SCALAR)},
+        engine_options={k: v for k, v in (engine.get("identity") or {}).get("options", {}).items() if isinstance(v, SCALAR)},
         stockfish_sha256=manifest.get("stockfish", {}).get("binarySha256"), taxonomy_version=taxonomy.get("schemaVersion"),
         taxonomy_sha256=taxonomy.get("sha256"), facts_registry_version=report.get("factsRegistryVersion"),
         provenance_classes=provenance_classes,
@@ -544,11 +545,11 @@ def import_funnel_run(store: Store, run_dir: str | Path, *, name: Optional[str] 
             deep_engine_seconds=float(a.get("deepEngineSec", 0.0)), informative=int(a.get("informative", 0)),
             informative_rate=float(a.get("informativeRate", 0.0)), move_change_rate=float(a.get("moveChangeRate", 0.0)),
             abs_shallow_deep_delta_cp=_floats(a.get("absShallowDeepDeltaCp")),
-        ) for arm, a in report.get("arms", {}).items()],
+        ) for arm, a in report.get("arms", {}).items() if isinstance(a, dict)],
         oracle_arms=[FunnelOracleArm(
             name=arm, n=int(a.get("n", 0)), disagreement_rate=float(a.get("disagreementRate", 0.0)),
             move_agreement_rate=float(a.get("moveAgreementRate", 0.0)), abs_cp=_floats(a.get("cvsDeepVsSfAbsCp")),
-        ) for arm, a in report.get("oracleArms", {}).items()],
+        ) for arm, a in report.get("oracleArms", {}).items() if isinstance(a, dict)],
         audit_miss=_floats(report.get("auditMissEstimate")),
         experiment_question=str(experiment.get("question", "")),
         informative_yield_ratio=experiment.get("informativeYieldRatio"),
