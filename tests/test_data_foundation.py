@@ -82,7 +82,7 @@ def test_label_registry_fail_closed(lab, corpus):
     lab.register_labels(lab.norm_id, family="eval_cp", producer="p", authority="a",
                         rows=[{"record_id": rid, "value": 1}])
     # identical rows in one set are accidents and are refused
-    with pytest.raises(LabError, match="duplicate label"):
+    with pytest.raises(LabError, match="duplicate observation"):
         lab.register_labels(lab.norm_id, family="eval_cp", producer="p", authority="a",
                             rows=[{"record_id": rid, "value": 1}, {"record_id": rid, "value": 1}])
     # distinct values on one record are legitimate (e.g. one row per node budget) and coexist

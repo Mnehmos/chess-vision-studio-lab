@@ -262,7 +262,7 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
         settings[key] = value
     settings["phase_rule"] = (f"non-pawn material >= {settings['phase_opening_min_material']} opening, "
                               f">= {settings['phase_middlegame_min_material']} middlegame, else endgame")
-    seen: set[tuple[str, str]] = set()  # (record_id, value-hash): budgets may add rows, accidents may not
+    seen: set[str] = set()  # canonical record identities (EPD), keep-first dedup
     records, duplicates, rejected = [], 0, 0
     for src in sources:
         rows = read_jsonl(store.abs(src.path))
@@ -560,11 +560,6 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
         if "value" not in row:
             raise LabError(f"label for {record_id} carries no value")
         value = _scalarize(row["value"])
-        dedup_key = (record_id, hash_obj(value))
-        if dedup_key in seen:
-            raise LabError(f"duplicate label for {record_id} with an identical value in one set; "
-                           "per-budget rows must differ, and separate authorities go in separate sets")
-        seen.add(dedup_key)
         clean: dict = {"record_id": record_id, "family": family,
                        "value": value,
                        "pov": pov, "authority": authority, "producer": producer,
@@ -573,6 +568,13 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
         for key in ("budget", "confidence", "note", "components"):
             if key in row:
                 clean[key] = _scalarize(row[key])
+        # Dedup identity is the whole observation (record + value + budget + components):
+        # two searches at different node budgets may legitimately return identical values.
+        dedup_key = (record_id, hash_obj({key: clean.get(key) for key in ("value", "budget", "components")}))
+        if dedup_key in seen:
+            raise LabError(f"duplicate observation for {record_id} in one set (identical value and budget); "
+                           "separate authorities go in separate sets")
+        seen.add(dedup_key)
         clean_rows.append(clean)
     sequence = len(label_set_paths(store, normalization_id)) + 1
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", producer)[:24] or "producer"

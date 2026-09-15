@@ -49,7 +49,7 @@ def _tier0_record(position_id: str, slug: str, family: str) -> dict:
 
 def make_run_dir(tmp_path: Path) -> Path:
     run = tmp_path / "synthetic-run"
-    run.mkdir()
+    run.mkdir(parents=True)
     config = {"funnelConfigVersion": 1, "prioritizerVersion": "priority-v1"}
     (run / "funnel-config.json").write_text(json.dumps(config), encoding="utf-8")
     config_sha = hashlib.sha256((run / "funnel-config.json").read_bytes()).hexdigest()
@@ -183,3 +183,68 @@ def test_missing_positions_refused(lab, tmp_path):
     empty.mkdir()
     with pytest.raises(LabError, match="positions.jsonl"):
         import_funnel_run_evidence(lab.store, empty)
+
+
+def test_same_value_different_budget_labels_coexist(lab, tmp_path):
+    """Two searches at different node budgets may legitimately return identical values."""
+    run = make_run_dir(tmp_path)
+    identical = {"scoreCpStm": 20, "mate": None, "bestMove": "a2a3", "pv": ["a2a3"],
+                 "nodes": 2000, "depth": 5, "trajectory": [[5, "a2a3", 20]],
+                 "stabilization": {"status": "stable"}, "termination": "nodes",
+                 "resultSource": "completed", "qNodes": 10,
+                 "avgCutoffMoveIndex": 1.0, "avgLegalMoves": 20.0}
+    _write_jsonl(run / "tier1.jsonl", [
+        {"id": "pos0", "stage": "tier1", "schemaVersion": 1, "search_derived": {
+            "profile": {"nodeBudgets": [2000, 16000], "isolation": "cold"},
+            "budgets": [{**identical, "nodeBudget": 2000}, {**identical, "nodeBudget": 16000}]}}
+    ])
+    counts = import_funnel_run_evidence(lab.store, run, name="identical-budgets", link_funnel_run=False)
+    assert counts["label_rows"]["search_shallow_cp"] == 2  # identical values, distinct budgets
+    records = _load_canonical(lab.store, lab.store.get(counts["normalization"]))
+    shallow = [label for record in records for label in record["labels"]
+               if label["family"] == "search_shallow_cp"]
+    assert {label["budget"]["nodeBudget"] for label in shallow} == {2000, 16000}
+
+
+def test_game_grouping_preserved_or_fail_safe(lab, tmp_path):
+    """Explicit game ids pass through; a run without game identity yields per-position
+    groups (leakage-safe) and says so in the pool snapshot."""
+    from cvslab.data import read_jsonl
+    run = make_run_dir(tmp_path)
+
+    # (a) explicit game ids are preserved into record groups
+    _write_jsonl(run / "positions.jsonl", [
+        {"id": "pos0", "fen": FENS[0], "gameOutcome": None, "game": "game-42", "source": {}},
+        {"id": "pos1", "fen": FENS[1], "gameOutcome": None, "game": "game-42", "source": {}},
+        {"id": "pos2", "fen": FENS[2], "gameOutcome": None, "game": "game-43", "source": {}},
+    ])
+    counts = import_funnel_run_evidence(lab.store, run, name="explicit-games", link_funnel_run=False)
+    records = read_jsonl(lab.store.abs(lab.store.get(counts["normalization"]).path))
+    groups = {record["group"] for record in records}
+    assert groups == {f"{counts['source']}:game-42", f"{counts['source']}:game-43"}
+    snapshot = lab.store.get(counts["source"])
+    assert snapshot.generator["game_grouping"] == "explicit"
+
+    # (b) no game identity anywhere: every position is its own group, and the snapshot says so
+    run2 = make_run_dir(tmp_path / "second")
+    counts2 = import_funnel_run_evidence(lab.store, run2, name="no-games", link_funnel_run=False)
+    records2 = read_jsonl(lab.store.abs(lab.store.get(counts2["normalization"]).path))
+    groups2 = [record["group"] for record in records2]
+    assert len(groups2) == len(set(groups2)) == len(records2)  # no two positions claim one game
+    assert "no game identity" in lab.store.get(counts2["source"]).generator["game_grouping"]
+
+
+def test_falsy_outcome_is_preserved(lab, tmp_path):
+    """0.0 is a real loss, not a missing value."""
+    run = make_run_dir(tmp_path)
+    _write_jsonl(run / "positions.jsonl", [
+        {"id": "pos0", "fen": FENS[0], "gameOutcome": 0.0, "source": {}},
+        {"id": "pos1", "fen": FENS[1], "gameOutcome": 0.5, "source": {}},
+        {"id": "pos2", "fen": FENS[2], "gameOutcome": 1.0, "source": {}},
+    ])
+    counts = import_funnel_run_evidence(lab.store, run, name="falsy", link_funnel_run=False)
+    assert counts["label_rows"]["outcome"] == 3
+    records = _load_canonical(lab.store, lab.store.get(counts["normalization"]))
+    values = sorted(label["value"] for record in records for label in record["labels"]
+                    if label["family"] == "outcome")
+    assert values == [0.0, 0.5, 1.0]

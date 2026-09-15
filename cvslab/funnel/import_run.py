@@ -45,6 +45,24 @@ def _optional(directory: Path, name: str) -> list[dict]:
     return _read_jsonl(path) if path.is_file() else []
 
 
+def _row_outcome(row: dict):
+    """gameOutcome (or res) with falsy values preserved: 0.0 is a real loss, not missing."""
+    outcome = row.get("gameOutcome")
+    return row.get("res") if outcome is None else outcome
+
+
+def _row_game(row: dict) -> tuple[str, bool]:
+    """(group identity, was explicit). When the run carries no game identity — the legacy
+    sample stage stores only {file, line} and hash-ranks positions, so no sequence
+    heuristic is trustworthy — each position becomes its own group: leakage-safe by
+    construction (nothing that might share a game can be split apart), and the pool
+    snapshot records that game grouping was unavailable for later re-joining."""
+    explicit = row.get("game") or (row.get("source") or {}).get("game")
+    if explicit:
+        return str(explicit), True
+    return f"pos:{row['id']}", False
+
+
 def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optional[str] = None,
                                license: str = "legacy engine research corpus",
                                link_funnel_run: bool = True) -> dict:
@@ -68,8 +86,11 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     registry_version = int(next((r.get("factsRegistryVersion") or 0 for r in tier0.values()), 0) or 0)
 
     # -- L0: candidate pool ------------------------------------------------------
-    pool_rows = [{"fen": row["fen"], "res": row.get("gameOutcome") or row.get("res"),
-                  "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))} for row in positions]
+    grouped = [_row_game(row) for row in positions]
+    game_grouping = "explicit" if all(explicit for _game, explicit in grouped) else         "per-position (source run carries no game identity; resolve from original shards before trusting split balance)"
+    pool_rows = [{"fen": row["fen"], "res": _row_outcome(row), "game": game,
+                  "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))}
+                 for row, (game, _explicit) in zip(positions, grouped)]
     source_id = store.next_id("S")
     rel = f"sources/{source_id}/positions.jsonl"
     content_hash = write_jsonl(store.abs(rel), pool_rows)
@@ -81,7 +102,8 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
         generator={"name": "legacy-funnel-run", "run_dir": str(directory.resolve()),
                    "configSha256": str(manifest.get("configSha256") or ""),
                    "prioritizerVersion": str(manifest.get("prioritizerVersion") or ""),
-                   "analyzeSha256": analyze_sha, "positions": len(pool_rows)},
+                   "analyzeSha256": analyze_sha, "positions": len(pool_rows),
+                   "game_grouping": game_grouping},
         license=license, importer=IMPORTER, importer_version=IMPORTER_VERSION, path=rel,
         content_hash=content_hash, row_count=len(pool_rows),
         game_count=len(set(infer_games(pool_rows))), label_authorities=[OUTCOME_AUTHORITY],
@@ -178,9 +200,9 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     add_set("oracle_cp", "external.stockfish", sf_sha or "stockfish", oracle_rows, pov="stm")
 
     # outcome (own authority, white POV)
-    outcome_rows = [{"record_id": record_id, "value": float(row["gameOutcome"]),
+    outcome_rows = [{"record_id": record_id, "value": float(_row_outcome(row)),
                      "note": "funnel gameOutcome"} for record_id, row in keyed.items()
-                    if row.get("gameOutcome") is not None]
+                    if _row_outcome(row) is not None]
     add_set("outcome", OUTCOME_AUTHORITY, "legacy.funnel.sample", outcome_rows)
 
     # triage -> priority (per-record evidence only; policy identity belongs to S3/#15)
