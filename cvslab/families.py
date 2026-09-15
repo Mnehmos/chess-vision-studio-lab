@@ -9,6 +9,10 @@ from .store import LabError
 
 INPUT_DIMS = {"RAW": 768}
 
+# Config keys that are not experimental switches but must still travel with a
+# configuration and be covered by its hash (e.g. the frozen supervision spec).
+RESERVED_CONFIG_KEYS = frozenset({"TARGET_SPEC"})
+
 NNUE_SWITCHES: list[Switch] = [
     Switch(
         key="INPUT", label="Input representation", kind="enum", default="RAW", choices=["RAW"], axis="representation",
@@ -89,7 +93,7 @@ def coerce(sw: Switch, value: object) -> ConfigValue:
 
 def check_registered(family: str, keys: Iterable[str]) -> None:
     registry = switch_map(family)
-    unknown = sorted(k for k in keys if k not in registry)
+    unknown = sorted(k for k in keys if k not in registry and k not in RESERVED_CONFIG_KEYS)
     if unknown:
         raise LabError(f"unregistered switch(es) for {family}: {', '.join(unknown)}; register a switch before using it")
 
@@ -98,6 +102,10 @@ def merge_config(family: str, base: Mapping[str, object], overrides: Mapping[str
     """Full effective configuration: every registered switch, hidden defaults made explicit."""
     check_registered(family, [*base, *overrides])
     merged: dict[str, ConfigValue] = {}
+    for key in RESERVED_CONFIG_KEYS:  # metadata travels with the config and is hashed
+        raw = overrides.get(key, base.get(key))
+        if raw is not None:
+            merged[key] = raw
     for sw in switches(family):
         raw = overrides[sw.key] if sw.key in overrides else base.get(sw.key, sw.default)
         merged[sw.key] = coerce(sw, raw)

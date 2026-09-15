@@ -32,6 +32,17 @@ class TargetSpec:
     k: float = 256.0
     lam: float = 1.0
 
+    def __post_init__(self) -> None:
+        if self.target_type != "cp":
+            raise LabError(f"unsupported target_type {self.target_type!r}; only 'cp' is defined "
+                           "(a probability label must not be consumed as centipawns)")
+        if self.pov not in ("stm", "white"):
+            raise LabError(f"unsupported pov {self.pov!r}; use 'stm' or 'white'")
+        if not self.k > 0:
+            raise LabError(f"K must be positive, got {self.k}")
+        if not 0.0 <= self.lam <= 1.0:
+            raise LabError(f"LAMBDA must be in [0, 1], got {self.lam}")
+
     def canonical(self) -> dict:
         return {
             "version": TARGET_SPEC_VERSION, "family": self.family, "authority": self.authority,
@@ -61,6 +72,8 @@ def matching_labels(record: dict, spec: TargetSpec) -> list[dict]:
             continue
         if label.get("authority") != spec.authority or label.get("producer") != spec.producer:
             continue
+        if (label.get("pov") or "white") != spec.pov:
+            continue  # POV is part of the spec: a white-POV label must not satisfy an stm spec
         budget = label.get("budget") or {}
         if any(budget.get(key) != value for key, value in spec.budget.items()):
             continue

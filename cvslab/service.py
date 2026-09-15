@@ -95,8 +95,22 @@ DEFAULT_NON_CLAIMS = [
 ]
 
 
+def recipe_target_spec(recipe: TrainingRecipe):
+    """The frozen TRAINING TargetSpec a recipe pins (canonical JSON in its params)."""
+    from .targets import TargetSpec
+    raw = recipe.params.get("TARGET_SPEC")
+    if not raw:
+        return None
+    payload = json.loads(str(raw))
+    return TargetSpec(family=payload["family"], authority=payload["authority"],
+                      producer=payload["producer"], budget=payload.get("budget") or {},
+                      value_path=tuple(payload.get("value_path") or ["value"]),
+                      pov=payload.get("pov", "stm"), target_type=payload.get("target_type", "cp"),
+                      k=float(payload.get("k", 256.0)), lam=float(payload.get("lam", 1.0)))
+
+
 def protocol_target_spec(protocol: EvaluationProtocol):
-    """The frozen TargetSpec a protocol pins (stored as canonical JSON in its params)."""
+    """The frozen EVALUATION TargetSpec a protocol pins (stored as canonical JSON in its params)."""
     from .targets import TargetSpec
     raw = protocol.params.get("TARGET_SPEC")
     if not raw:
@@ -239,7 +253,7 @@ class LabService:
 
     def create_training_recipe(self, *, name: str, params: Optional[Mapping[str, object]] = None,
                                family: str = DEFAULT_FAMILY, generation: Optional[str] = None,
-                               description: str = "") -> TrainingRecipe:
+                               description: str = "", target_spec=None) -> TrainingRecipe:
         registry = families.switch_map(family)
         params = dict(params or {})
         families.check_registered(family, params)
@@ -248,6 +262,13 @@ class LabService:
             raise LabError(f"{', '.join(not_recipe)} belong to the model configuration, not the training recipe")
         coerced = {sw.key: families.coerce(sw, params.get(sw.key, sw.default))
                    for sw in families.switches(family) if sw.axis in RECIPE_AXES}
+        if target_spec is not None:
+            # the recipe's K/LAMBDA must be the spec's: hashing one transformation while
+            # executing another is exactly the ambiguity the spec exists to remove
+            if abs(float(coerced["K"]) - target_spec.k) > 1e-9 or abs(float(coerced["LAMBDA"]) - target_spec.lam) > 1e-9:
+                raise LabError(f"recipe K/LAMBDA ({coerced['K']}/{coerced['LAMBDA']}) do not match the "
+                               f"TargetSpec ({target_spec.k}/{target_spec.lam})")
+            coerced["TARGET_SPEC"] = json.dumps(target_spec.canonical(), sort_keys=True)
         recipe = TrainingRecipe(id=self.store.next_id("T"), name=name, family=family,
                                 generation=self._generation(generation), trainer=TRAINER_ID,
                                 trainer_version=TRAINER_VERSION, params=coerced, description=description,
@@ -263,6 +284,10 @@ class LabService:
         dataset: Dataset = self.store.get_as(dataset_id, Dataset)
         if split not in {s.name for s in dataset.splits}:
             raise LabError(f"{dataset_id} has no split {split!r}")
+        if target_spec is not None and (
+                abs(float(k) - target_spec.k) > 1e-9 or abs(float(lam) - target_spec.lam) > 1e-9):
+            raise LabError(f"protocol K/LAMBDA ({k}/{lam}) do not match the TargetSpec "
+                           f"({target_spec.k}/{target_spec.lam})")
         if bootstrap_samples < 100:
             raise LabError("bootstrap_samples must be at least 100")
         protocol = EvaluationProtocol(
@@ -485,17 +510,28 @@ class LabService:
                 raise _PreflightFailed("pre-flight integrity checks failed; training was not started")
 
             cfg = run.effective_config
-            spec = protocol_target_spec(protocol)  # frozen in the protocol's own hash
-            if spec is not None:
-                checks.append(make_check("target_spec_pinned", True,
-                                         f"supervision {spec.family} / {'.'.join(spec.value_path)} / "
-                                         f"{spec.spec_hash()[:19]}…"))
+            # training supervision is pinned by T####; evaluation supervision by E####;
+            # the two hashes must agree or the run cannot claim they measure the same thing
+            train_spec = recipe_target_spec(recipe)
+            eval_spec = protocol_target_spec(protocol)
+            checks.append(make_check("eval_dataset_identity",
+                                     run.eval_dataset_id == protocol.dataset_id,
+                                     f"run pins evaluation corpus {run.eval_dataset_id}; protocol binds "
+                                     f"{protocol.dataset_id}"))
+            if train_spec is not None or eval_spec is not None:
+                consistent = (train_spec is not None and eval_spec is not None
+                              and train_spec.spec_hash() == eval_spec.spec_hash())
+                checks.append(make_check("target_spec_consistent", consistent,
+                                         f"T spec {train_spec.spec_hash()[:19] if train_spec else None}… / "
+                                         f"E spec {eval_spec.spec_hash()[:19] if eval_spec else None}…"))
+                if not consistent:
+                    raise _PreflightFailed("training and evaluation TargetSpecs differ")
             train_split, dropped_train = nnue.encode_records(data.load_split(self.store, dataset, "train"),
-                                                             target_spec=spec)
+                                                             target_spec=train_spec)
             val_split, dropped_val = nnue.encode_records(data.load_split(self.store, dataset, "val"),
-                                                         target_spec=spec)
+                                                         target_spec=train_spec)
             eval_split, dropped_eval = nnue.encode_records(
-                data.load_split(self.store, eval_dataset, protocol.split), target_spec=spec)
+                data.load_split(self.store, eval_dataset, protocol.split), target_spec=eval_spec)
             compute.accepted_examples = len(train_split) + len(val_split) + len(eval_split)
             compute.discarded_examples = dropped_train + dropped_val + dropped_eval
             if not len(train_split) or not len(eval_split):
@@ -536,7 +572,11 @@ class LabService:
                 mean, low, high, n = nnue.bootstrap_mean(per_position[metric.name], protocol.bootstrap_samples,
                                                          protocol.bootstrap_seed)
                 if mean is None:
-                    checks.append(make_check(f"metric_{metric.name}", False, "no finite per-position values"))
+                    # the primary metric must be measurable; a conditional metric with no
+                    # applicable positions is "not applicable", recorded as a warning
+                    checks.append(make_check(f"metric_{metric.name}", False,
+                                             "no finite per-position values",
+                                             warn=metric.name != "test_loss"))
                     continue
                 run.metrics.append(MetricValue(name=metric.name, value=mean, ci_low=low, ci_high=high, n=n,
                                                kind="measured", split=protocol.split))
