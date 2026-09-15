@@ -1,0 +1,16 @@
+{
+  "amendment": 1,
+  "design_change": {
+    "arm_datasets": "exact recorded 94/94 members frozen as (1,0,0); every selected row trains; no trimming, re-selection, replacement or post-hoc balancing",
+    "evaluation": "components assigned to test by the frozen global split AND containing zero record ids from the union of PRIORITY and UNIFORM membership; frozen as D_EVAL (0,0,1); one E_COMMON for every run",
+    "invariant": "components(D_EVAL) \u2229 components(D_PRIORITY \u222a D_UNIFORM) == \u2205 (not merely record-id disjoint)",
+    "universe_split_role": "the global component split now defines the evaluation exclusion/instrument policy; it no longer dictates the physical split layout of the arm D files"
+  },
+  "discovery": "the trainer needs no validation split for optimization or early stopping (fixed-epoch training; empty validation is tolerated and yields val_loss = NaN)",
+  "identities_kept_visible": {
+    "selection_split_policy_hash": "frozen global component assignment used to identify evaluation components",
+    "training_layout": "all-selected-records-train with fractions [1,0,0]"
+  },
+  "reason": "fail-closed overlap discovery: the global test-component population intersected arm membership (selection is independent of the split assignment), so the common evaluation could not be built as originally planned",
+  "recorded_before": "any corrected training outcome was observed"
+}

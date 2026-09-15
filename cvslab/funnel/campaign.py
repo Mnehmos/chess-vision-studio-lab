@@ -415,7 +415,8 @@ def verify_arm_protocols(protocols_by_arm: dict) -> str:
 
 def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe,
                         deep_engine_seconds: Optional[dict[str, float]] = None,
-                        name_prefix: str = "s6") -> dict:
+                        name_prefix: str = "s6", target_spec=None,
+                        training_fractions: Optional[tuple[float, float, float]] = None) -> dict:
     """Freeze the PRIORITY and UNIFORM D#### arms from the RECORDED memberships.
 
     Membership comes exclusively from ``universe.arms`` (the recorded
@@ -437,20 +438,26 @@ def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe
         dataset = freeze_dataset(
             store, universe.normalization_id, name=f"{name_prefix}-{arm.lower()}-arm",
             record_ids=record_ids, required_labels=["search_deep_cp"],
-            split_seed=universe.split_seed, fractions=universe.fractions,
+            target_spec=target_spec,
+            split_seed=universe.split_seed,
+            fractions=training_fractions or universe.fractions,
             campaign={
                 "arm": arm,
                 "membership_source": "selection.deep" if arm == "PRIORITY" else "selection.uniform",
                 "source_id": universe.source_id, "normalization_id": universe.normalization_id,
                 "funnel_run_id": universe.funnel_run_id,
                 "policy_version": universe.policy_version, "policy_hash": universe.policy_hash,
-                "split_policy_hash": identity["split_policy_hash"],
+                "selection_split_policy_hash": identity["split_policy_hash"],
+                "training_layout": ("all-selected-records-train"
+                                    if (training_fractions or universe.fractions) == (1.0, 0.0, 0.0)
+                                    else "global-component-split"),
                 "candidate_universe_hash": universe.candidate_universe_hash(),
                 "universe_hash": universe.universe_hash(),
                 "recipe_id": recipe.id, "recipe_hash": recipe.recipe_hash,
                 "deep_nodes": parity["deep_nodes"][arm],
                 "deep_engine_seconds": (deep_engine_seconds or {}).get(arm),
-                "compute_parity_tolerance": plan.compute_parity_tolerance})
+                "compute_parity_tolerance": plan.compute_parity_tolerance,
+                **({"target_spec_hash": target_spec.spec_hash()} if target_spec is not None else {})})
         if dataset.counts["records"] != len(record_ids):
             raise LabError(f"{arm}: frozen {dataset.counts['records']} rows for {len(record_ids)} selected ids; "
                            "missing deep labels must fail closed")
