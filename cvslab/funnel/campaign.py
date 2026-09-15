@@ -437,6 +437,7 @@ def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe
         dataset = freeze_dataset(
             store, universe.normalization_id, name=f"{name_prefix}-{arm.lower()}-arm",
             record_ids=record_ids, required_labels=["search_deep_cp"],
+            split_seed=universe.split_seed, fractions=universe.fractions,
             campaign={
                 "arm": arm,
                 "membership_source": "selection.deep" if arm == "PRIORITY" else "selection.uniform",
@@ -453,6 +454,18 @@ def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe
         if dataset.counts["records"] != len(record_ids):
             raise LabError(f"{arm}: frozen {dataset.counts['records']} rows for {len(record_ids)} selected ids; "
                            "missing deep labels must fail closed")
+        # the frozen D files must realise the Universe's split policy exactly: recompute the
+        # record->split mapping from the actual split files and compare with the identity
+        from ..data import read_jsonl as _read_jsonl
+        realised = {}
+        for manifest in dataset.splits:
+            for row in _read_jsonl(store.abs(manifest.path)):
+                realised[row["record_id"]] = manifest.name
+        from ..hashing import hash_obj as _hash_obj
+        if _hash_obj(sorted(realised.items())) != identity["per_arm_record_split_hashes"][arm]:
+            raise LabError(f"{arm}: frozen dataset splits do not match the Universe split policy "
+                           f"(seed {universe.split_seed}, fractions {list(universe.fractions)}); "
+                           "the manifest would claim one split policy while the files follow another")
         datasets[arm] = dataset
         report_rows[arm] = {"dataset_id": dataset.id, "rows": dataset.counts["records"],
                             "manifest_hash": dataset.manifest_hash, "deep_nodes": parity["deep_nodes"][arm],

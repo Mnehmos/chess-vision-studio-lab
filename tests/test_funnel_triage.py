@@ -154,7 +154,7 @@ def test_label_set_with_mixed_policy_hashes_fails(lab, tmp_path):
     rows = read_jsonl(path)
     rows[1]["policy_hash"] = "sha256:" + "9" * 64
     import os, stat
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     write_jsonl(path, rows)
     with pytest.raises(LabError, match="distinct policy hashes"):
         __import__("cvslab.data", fromlist=["label_set_refs"]).label_set_refs(lab.store, counts["normalization"])

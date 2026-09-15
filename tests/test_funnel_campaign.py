@@ -266,55 +266,62 @@ def test_expand_propagates_real_identities_and_requires_per_arm_protocols():
 
 
 def test_freeze_arm_pair_records_full_provenance_and_excludes_non_members(lab):
+    """Three distinct canonical records: one recorded PRIORITY, one recorded UNIFORM, and
+    one deep-labeled but in NEITHER arm. A deep label must never create arm membership."""
+    import chess
+    from cvslab.data import _load_canonical
     from cvslab.funnel.campaign import freeze_arm_datasets
-    from cvslab.hashing import write_jsonl
+    from cvslab.hashing import sha256_file, write_jsonl
     from cvslab.schemas import SourceSnapshot, utc_now
 
-    # a small canonical corpus with explicit game grouping
-    import chess
+    lines = {"gA": "e2e4 e7e5 g1f3 b8c6 f1c4 f8c5", "gB": "d2d4 d7d5 c2c4 e7e6 b1c3 g8f6",
+             "gC": "c2c4 e7e5 b1c3 b8c6 g2g3 g8f6", "gD": "g1f3 d7d5 g2g3 c7c5 f1g2 b8c6",
+             "gE": "e2e4 c7c5 g1f3 d7d6 d2d4 c5d4", "gF": "d2d4 g8f6 c2c4 g7g6 b1c3 f8g7"}
     rows = []
-    for game in range(4):
+    for game, moves in lines.items():
         board = chess.Board()
-        for ply, move in enumerate(("e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "f8c5"), start=1):
+        for move in moves.split():
             board.push_uci(move)
-        rows.append({"fen": board.fen(), "game": f"g{game}", "ply": 6, "res": 1.0})
+        rows.append({"fen": board.fen(), "game": game, "ply": 6, "res": 1.0})
+    rows.append({**rows[0], "game": "gA2", "fen": rows[0]["fen"]})  # duplicate position, distinct game
     source_id = lab.store.next_id("S")
     rel = f"sources/{source_id}/positions.jsonl"
     write_jsonl(lab.store.abs(rel), rows)
     lab.store.make_readonly(lab.store.abs(rel))
-    from cvslab.hashing import sha256_file
     lab.store.create(SourceSnapshot(id=source_id, name="corpus", locality="local", source_origin="test",
                                     generator={"name": "t"}, license="t", importer="t", importer_version=1,
                                     path=rel, content_hash=sha256_file(lab.store.abs(rel)), row_count=len(rows),
-                                    game_count=4, label_authorities=[], compute={}, created_at=utc_now()))
+                                    game_count=7, label_authorities=[], compute={}, created_at=utc_now()))
     normalization = lab.normalize([source_id], name="n")
-    records = [json.loads(line) for line in
-               lab.store.abs(normalization.path).read_text(encoding="utf-8").splitlines()]
-    # only ONE record survives (all four games transpose to the same position) -> use two distinct positions
-    assert len(records) == 1
-    record_id = records[0]["record_id"]
-    # the arms must be row-matched and deep-labeled; duplicate the corpus to get two distinct positions
-    from cvslab.data import _load_canonical
-    subset = _load_canonical(lab.store, lab.store.get(normalization.id))
-    # the arms are frozen from deep-labeled evidence: register the Tier-3 labels the
-    # real S4 run would have produced (this fixture corpus has none of its own)
+
+    # deep labels for EVERY candidate, including the one that is in neither arm
+    canonical = _load_canonical(lab.store, lab.store.get(normalization.id))
+    group_of = {record["record_id"]: record["group"] for record in canonical}
+    all_ids = sorted(group_of)
+    assert len(all_ids) >= 3
     lab.register_labels(normalization.id, family="search_deep_cp", producer="legacy.cvs.search.deep",
                         authority="legacy.cvs.search.deep", pov="stm",
-                        rows=[{"record_id": record["record_id"],
-                               "value": {"targets": {}, "deep": {}, "shallowToDeep": {}},
-                               "budget": {"nodeBudget": 400000}} for record in subset])
+                        rows=[{"record_id": record_id, "value": {"targets": {}, "deep": {}, "shallowToDeep": {}},
+                               "budget": {"nodeBudget": 400000}} for record_id in all_ids])
+    priority_id, uniform_id, nonmember_id = all_ids[0], all_ids[1], all_ids[2]
+
     universe = freeze_universe(
         source_id=source_id, normalization_id=normalization.id, funnel_run_id="R0001",
         policy_version="priority-v1", policy_hash="sha256:" + "a" * 64,
-        candidates=[{"record_id": r["record_id"], "group": r["group"], "train_eligible": True} for r in subset],
-        deep_nodes={r["record_id"]: 400_000 for r in subset},
-        selections={"deep": [record_id], "uniform": [record_id]}, split_seed=0)
+        candidates=[{"record_id": record_id, "group": group_of[record_id], "train_eligible": True}
+                    for record_id in all_ids],  # the corpus's real groups, not invented labels
+        deep_nodes={record_id: 400_000 for record_id in all_ids},
+        selections={"deep": [priority_id], "uniform": [uniform_id]},
+        split_seed=7, fractions=(0.7, 0.15, 0.15))  # deliberately nondefault split definition
+
     recipe = lab.create_training_recipe(name="s6-recipe", params={"EPOCHS": 2})
     report = freeze_arm_datasets(lab.store, universe, CampaignPlan(), recipe=recipe,
                                  deep_engine_seconds={"PRIORITY": 12.5, "UNIFORM": 12.4})
     for key in ("source_id", "normalization_id", "funnel_run_id", "policy_hash", "split_policy_hash",
                 "candidate_universe_hash", "universe_hash", "recipe_id", "recipe_hash", "parity"):
         assert key in report
+
+    frozen_rows = {}
     for arm in ("PRIORITY", "UNIFORM"):
         entry = report["arms"][arm]
         assert entry["rows"] == 1 and entry["manifest_hash"].startswith("sha256:")
@@ -323,4 +330,12 @@ def test_freeze_arm_pair_records_full_provenance_and_excludes_non_members(lab):
         assert dataset.campaign["membership_source"] in ("selection.deep", "selection.uniform")
         assert dataset.campaign["deep_nodes"] == 400_000
         assert dataset.campaign["universe_hash"] == universe.universe_hash()
+        assert dataset.split_policy["seed"] == 7  # the Universe split definition, not freeze defaults
+        arm_ids = {row["record_id"] for manifest in dataset.splits
+                   for row in __import__("cvslab.data", fromlist=["read_jsonl"]).read_jsonl(
+                       lab.store.abs(manifest.path))}
+        assert arm_ids == {priority_id if arm == "PRIORITY" else uniform_id}
+        assert nonmember_id not in arm_ids  # a deep label outside an arm never joins it
+        frozen_rows[arm] = arm_ids
+    assert priority_id not in frozen_rows["UNIFORM"] and uniform_id not in frozen_rows["PRIORITY"]
     assert report["parity"]["relative_gap"] == 0.0

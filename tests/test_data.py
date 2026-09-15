@@ -45,7 +45,7 @@ def test_tampered_dataset_fails_verification(lab, tmp_path):
     norm = data.normalize(lab.store, [source.id], name="n")
     dataset = data.freeze_dataset(lab.store, norm.id, name="d")
     path = lab.store.abs(dataset.splits[0].path)
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     path.write_bytes(path.read_bytes() + b'{"record_id":"pos_forged"}\n')
     checks = {c.name: c for c in data.verify_dataset(lab.store, dataset)}
     assert checks["dataset_files"].status == "fail"
@@ -54,7 +54,7 @@ def test_tampered_dataset_fails_verification(lab, tmp_path):
 def test_normalize_rejects_tampered_source(lab):
     source = data.create_fixture_source(lab.store, n_games=6, seed=1)
     path = lab.store.abs(source.path)
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     path.write_bytes(path.read_bytes() + b'{"fen":"bad"}\n')
     from cvslab.store import TamperError
     try:

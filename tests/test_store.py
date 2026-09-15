@@ -53,7 +53,7 @@ def test_completed_run_is_sealed_and_tamper_evident(lab):
         lab.store.update_run(run.model_copy(deep=True))
 
     path = lab.store.object_path("R0001")
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     payload = path.read_bytes().replace(b'"seed": 0', b'"seed": 7')
     path.write_bytes(payload)
     with pytest.raises(TamperError):
