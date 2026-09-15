@@ -120,3 +120,16 @@ def test_map_projections_are_read_only_canonical_views(lab):
     assert lab.map_view("research", generation="G99").nodes == []
     with pytest.raises(LabError, match="unknown projection"):
         lab.map_view("galaxy")
+
+
+def test_strategy_tag_filter_expressions(lab, labelled_corpus):
+    presence = lab.catalog(lab.norm_id, filters={"strategy": "center_control"}, limit=1)
+    assert presence.total_matching == labelled_corpus["records"]  # every record carries the tag
+
+    low = lab.catalog(lab.norm_id, filters={"strategy": "material_balance_cp<=0"}, limit=1)
+    high = lab.catalog(lab.norm_id, filters={"strategy": "material_balance_cp>0"}, limit=1)
+    total = lab.catalog(lab.norm_id, limit=1).total_matching
+    assert low.total_matching + high.total_matching == total  # numeric comparison partitions the corpus
+
+    exact = lab.catalog(lab.norm_id, filters={"strategy": "development:0"}, limit=1)
+    assert exact.total_matching > 0

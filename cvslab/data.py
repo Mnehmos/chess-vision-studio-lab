@@ -643,6 +643,45 @@ def _record_label_values(record: dict, family: str) -> list:
     return out
 
 
+def _strategy_tag_matches(record: dict, wanted: str) -> bool:
+    """`strategy=<tag>` matches tag presence; `tag:value` (or >=/<=/>/</!=) compares its value."""
+    for operator in ("!=", ">=", "<=", ">", "<", ":"):
+        if operator in wanted:
+            tag, raw = wanted.split(operator, 1)
+            break
+    else:
+        tag, operator, raw = wanted, "", None
+    for value in _record_label_values(record, "strategy"):
+        if not isinstance(value, dict):
+            continue
+        for key, entry in value.items():
+            if str(key).lower() != tag.lower():
+                continue
+            if not operator:
+                return True
+            if operator == ":":
+                if str(entry).lower() == raw.lower():
+                    return True
+                continue
+            try:
+                left, right = float(entry), float(raw)
+            except (TypeError, ValueError):
+                left, right = str(entry), raw
+            if operator == ">" and left > right:
+                return True
+            if operator == "<" and left < right:
+                return True
+            if operator == ">=" and left >= right:
+                return True
+            if operator == "<=" and left <= right:
+                return True
+            if operator == "!=" and left != right:
+                return True
+            if operator == "==" or (operator not in (">", "<", ">=", "<=", "!=") and left == right):
+                return True
+    return False
+
+
 def _filter_matches(record: dict, flt: Mapping[str, ConfigValue]) -> bool:
     for key, value in flt.items():
         if key in ("label_family", "authority", "tier", "producer"):
@@ -655,7 +694,7 @@ def _filter_matches(record: dict, flt: Mapping[str, ConfigValue]) -> bool:
             if str(value).lower() not in {str(v).lower() for v in _record_label_values(record, "motif")}:
                 return False
         elif key == "strategy":
-            if str(value).lower() not in {str(v).lower() for v in _record_label_values(record, "strategy")}:
+            if not _strategy_tag_matches(record, str(value)):
                 return False
         elif key == "ply_min":
             if record["ply"] < int(value):
