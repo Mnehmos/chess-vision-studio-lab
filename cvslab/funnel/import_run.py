@@ -2,8 +2,10 @@
 
 Mapping (docs/TRAINING_DATA_RESEARCH_PLAN.md §7):
 
-* candidate pool                -> immutable `S####` snapshot (funnel ids + source refs preserved;
-  game grouping inferred from FEN move counters by the normalizer, so later splits stay leakage-safe);
+* candidate pool                -> immutable `S####` snapshot (funnel ids + source refs preserved);
+  game grouping is preserved when the run has it, otherwise marked unknown (`game_unknown`)
+  with source_ref retained for recovery — unsafe splits are refused at freeze time, never
+  papered over with a heuristic;
 * canonical positions           -> `N####` with EPD identity and exact-EPD dedup;
 * tier0 deterministic_geometry  -> `facts` labels (authority legacy.cvs.tier0.facts);
 * tier0 tactics/taxonomy        -> `motif` labels (slugs/opportunities/hazards; used for coverage parity);
@@ -100,7 +102,6 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     rel = f"sources/{source_id}/positions.jsonl"
     content_hash = write_jsonl(store.abs(rel), pool_rows)
     store.make_readonly(store.abs(rel))
-    from ..data import infer_games
     source = store.create(SourceSnapshot(
         id=source_id, name=name or f"funnel-pool {directory.name}", source_origin=str(directory.resolve()),
         locality="local",
@@ -111,7 +112,10 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
                    "game_grouping": game_grouping},
         license=license, importer=IMPORTER, importer_version=IMPORTER_VERSION, path=rel,
         content_hash=content_hash, row_count=len(pool_rows),
-        game_count=len(set(infer_games(pool_rows))), label_authorities=[OUTCOME_AUTHORITY],
+        # Distinct *known* games only: unknown-grouping rows are not counted as games,
+        # so the snapshot never contradicts its own game_grouping metadata.
+        game_count=len({game for game, explicit in grouped if explicit}),
+        label_authorities=[OUTCOME_AUTHORITY],
         compute={}, created_at=utc_now()))
 
     # -- L1: canonical records ---------------------------------------------------
