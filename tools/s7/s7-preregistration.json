@@ -1,0 +1,491 @@
+{
+  "id": "s7-supervision-density-frontier",
+  "version": 3,
+  "status": "design \u2014 NOT frozen, NOT launched. Prefix sizes and realized node totals are materialized by the freeze step before any training starts and before any target value is read.",
+  "design_document": "docs/SUPERVISION_DENSITY_FRONTIER.md",
+  "question": "At a fixed teacher/search node budget, does supervision density (many rows x shallow labels) beat a few deep labels, measured on a common frozen instrument \u2014 and where does the curve turn?",
+  "framing": "Gen10 repeatedly purchased expensive oracle values over a relatively narrow set of distinct positions (7.44 s of Stockfish per unique position, 13.8 purchases each). The lab hypothesis under test: purchase broad cheap search coverage, attach deterministic structure everywhere, and selectively increase supervision quality only where evidence says it pays.",
+  "scope": "RAW-768 only; uniform selection over one frozen order; one teacher (CVS analyze); one pool; replication is issue #16",
+  "primary_endpoint": "test_loss",
+  "secondary_metrics": [
+    "cp_mae",
+    "sign_agreement"
+  ],
+  "pins": {
+    "engine_root": "F:\\Github\\chess-vision-studio-rust-engine",
+    "engine_args": [
+      "--depth",
+      "64",
+      "--nnue",
+      "target-cvs/matrix-raw.json",
+      "--nnue-cal",
+      "nets/eval-cal.json",
+      "--helper-nnue",
+      "target-cvs/matrix-residual.json"
+    ],
+    "analyze_sha256": "sha256:36e9b1592858939cf88233bf99d367e3ea9c43a044f342f69792d49a17d09838",
+    "net_hashes": {
+      "--nnue": "sha256:b23c75b8e25d7480038f270255b3625556ecbdb1d53964cd60719871ff47c4e1",
+      "--nnue-cal": "sha256:89e79a1b7aa8fc510c7c8925eed9d505373738cf5190b7be347fef9b15651fd6",
+      "--helper-nnue": "sha256:d2a98888ad83a356cc1aa1a5a74086fa9741247ccd676086f0db9d022693fcfc"
+    },
+    "trainer": "cvslab.nnue.raw_numpy",
+    "trainer_version": 1,
+    "K": 256.0,
+    "LAMBDA": 1.0,
+    "target_type": "cp",
+    "pov": "stm"
+  },
+  "reference_budget_nodes": 37285491,
+  "reference_budget_source": "S6 UNIFORM arm realized deep nodes (labstore/objects/datasets/D0009.json campaign.deep_nodes)",
+  "fill_parity_check_tolerance": 0.02,
+  "calibration_band": [
+    0.9,
+    1.0
+  ],
+  "pool": {
+    "generator": "cvslab.pool.selfplay",
+    "generator_version": 1,
+    "seed": 20260916,
+    "openings": "built-in OPENING_LINES (12 lines, disjoint from the instrument's held-out 10); openingSourceSha256 expected sha256:588f36887eaa3b04fbf2fb65ae022e1a02e33bc05ac867f97e9713c3eefdb5ed",
+    "games": "batches of 400 up to hard cap 2400; stop when unique records >= 12000",
+    "max_plies": 70,
+    "sample_every": 2,
+    "min_ply": 6,
+    "play_node_budget": 20000,
+    "diversification": {
+      "plies": [
+        8,
+        10,
+        12
+      ],
+      "candidates": 3,
+      "window_cp": 25,
+      "node_budget": 2000
+    },
+    "unique_yield_estimate": "13.4/game at 70 games (measured, S5); expect 30-40% of raw rows at this size",
+    "adequacy_rule": "unique records >= 4 * n_A4 (estimate 9364); else STOP",
+    "no_dedup_here": true
+  },
+  "leakage_control": {
+    "join_target": "the FULL evaluation-source population N0010 (S0009 -> N0010): all 575 records, NOT only the 200 selected by D0010",
+    "why": "an unselected evaluation-source record can be the transitive bridge between a training position and a selected instrument record; a join that ignores it proves the wrong thing",
+    "instrument": {
+      "dataset": "D0010",
+      "protocol": "E0004",
+      "records": 200,
+      "split": "test",
+      "spec": "search_deep_cp @ nodeBudget 400000, value.targets.scoreCpStm, stm"
+    },
+    "rule": [
+      "build joint transposition components of new pool U all 575 N0010 records: shared EPD record_id -> union of the two groups; recompute roots (same union rule as tools/s6/s6_round3.py lines 119-155, which unions over all evaluation records and only then filters the selection)",
+      "instrument_components = joint roots of the 200 D0010 records",
+      "required invariant: instrument_adjacent_with_200 == 0; if violated, remove the offending pool records from the candidate universe; if the 200 cannot be made disconnected (a kept pool record shares a joint component with one of the 200) -> STOP",
+      "conservative exclusion applied at the same time: also remove pool records whose joint root contains ANY of the 575 evaluation-source records (the 575 is the instrument's reusable source population for future studies such as S8); report removed_vs_575_population",
+      "if the conservative removal exceeds 5% of the pool -> STOP and build a fresh instrument before any training",
+      "removal rule is deterministic and never inspects a label value; the candidate universe is then frozen and hashed"
+    ],
+    "expected": "zero collisions (the 575 clean records were proven disjoint from all 12 components of the S5 pool with a union taken over all 575, and the instrument was built from a disjoint opening partition)",
+    "pilot_inherits": "yes \u2014 round3's clean set was computed over all 575 records, so the pilot needs no new leakage work"
+  },
+  "calibration": {
+    "sample_size": 64,
+    "selection": "deterministic hash order over the frozen candidate universe, seed 20260916",
+    "budgets": [
+      16000,
+      64000,
+      160000,
+      400000
+    ],
+    "read_only": [
+      "nodes",
+      "wall_ms"
+    ],
+    "forbidden": "reading scoreCpStm (or any target value) before the arms are constructed, and before any training",
+    "sanity_band": "every mean_b in [0.90*b, b]; outside -> STOP",
+    "role": "prediction only; the expected sizes n_b ~= round(T / mean_b) are reported but have no authority over arm construction",
+    "labels_reused_if_record_lands_in_an_arm": true
+  },
+  "order": {
+    "rule": "order = sort(candidate_universe, key=sha256(f'{seed}:{record_id}')) with seed 20260916; frozen once",
+    "arms_are_prefixes": true
+  },
+  "budget_fill": {
+    "role": "CONSTRUCTION \u2014 this defines the arm sizes; it replaces any post-hoc admissibility test",
+    "procedure": "for each arm, walk the frozen order from index 0 and buy labels at that arm's budget, accumulating realized nodes C_k; include record k+1 iff |C_(k+1) - T| <= |C_k - T|, else stop and exclude it",
+    "inputs": [
+      "frozen hash order",
+      "realized node counts from the pinned engine"
+    ],
+    "forbidden_inputs": [
+      "any target value (scoreCpStm, mate, expectedScore)",
+      "any test_loss, metric or evaluation result",
+      "any manual discretion"
+    ],
+    "probe_label": "the label whose purchase triggered the stop decision is paid for, recorded as a paid label, and excluded from the arm",
+    "parity_bound": "by construction the prefix is the closest to T among all prefixes, so parity error <= half a label: <=0.54% of T for A1 and tighter for A2-A4",
+    "materialization": "realized prefix sizes, realized node totals and the sealed record list are written into this file and a copy of the preregistration before any training and before any target value is read",
+    "nesting": {
+      "status": "expected and asserted, NOT automatic",
+      "reason": "closest-prefix filling is deterministic, but n_A1 <= n_A2 <= n_A3 <= n_A4 depends on realized node use being monotone in the budget per record \u2014 an empirical property of the engine's termination rules, not a theorem of the procedure",
+      "hard_rule": "the freeze step asserts the prefix relation A1 subset A2 subset A3 subset A4; violation -> STOP",
+      "diagnostic": "because the arms are nested, every record in A1 carries labels at all four budgets; per-record node monotonicity and label movement are measured on the shared prefix and reported alongside the frozen prefixes",
+      "authority": "the freeze-time assertion guards the construction; the diagnostic is reported, not decisive"
+    }
+  },
+  "arms": [
+    {
+      "name": "A1",
+      "prefix": "order[0:n1]",
+      "rows_estimate": 94,
+      "node_budget": 400000,
+      "family": "search_deep_cp",
+      "authority": "legacy.cvs.search.deep",
+      "value_path": [
+        "targets",
+        "scoreCpStm"
+      ],
+      "pov": "stm",
+      "target_type": "cp",
+      "k": 256.0,
+      "lam": 1.0,
+      "pv_plies": 12,
+      "nodes_estimate": 37186400,
+      "role": "deepest / narrowest"
+    },
+    {
+      "name": "A2",
+      "prefix": "order[0:n2]",
+      "rows_estimate": 235,
+      "node_budget": 160000,
+      "family": "search_shallow_cp",
+      "authority": "legacy.cvs.search.shallow",
+      "value_path": [
+        "scoreCpStm"
+      ],
+      "pov": "stm",
+      "target_type": "cp",
+      "k": 256.0,
+      "lam": 1.0,
+      "pv_plies": 8,
+      "nodes_estimate": 37224000,
+      "role": "intermediate"
+    },
+    {
+      "name": "A3",
+      "prefix": "order[0:n3]",
+      "rows_estimate": 588,
+      "node_budget": 64000,
+      "family": "search_shallow_cp",
+      "authority": "legacy.cvs.search.shallow",
+      "value_path": [
+        "scoreCpStm"
+      ],
+      "pov": "stm",
+      "target_type": "cp",
+      "k": 256.0,
+      "lam": 1.0,
+      "pv_plies": 8,
+      "nodes_estimate": 37255680,
+      "role": "intermediate"
+    },
+    {
+      "name": "A4",
+      "prefix": "order[0:n4]",
+      "rows_estimate": 2341,
+      "node_budget": 16000,
+      "family": "search_shallow_cp",
+      "authority": "legacy.cvs.search.shallow",
+      "value_path": [
+        "scoreCpStm"
+      ],
+      "pov": "stm",
+      "target_type": "cp",
+      "k": 256.0,
+      "lam": 1.0,
+      "pv_plies": 8,
+      "nodes_estimate": 37286746,
+      "role": "shallowest / widest"
+    }
+  ],
+  "widths": [
+    1,
+    4,
+    16,
+    32
+  ],
+  "expected_params": {
+    "1": 771,
+    "4": 3081,
+    "16": 12321,
+    "32": 24641
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "capacity_decision": "keep the S6 ladder unchanged: the treatment is supervision, capacity must be held fixed, and changing the ladder after seeing S6's own outcomes would be selecting on that experiment's noise",
+  "recipe_params": {
+    "EPOCHS": 40,
+    "BATCH": 256,
+    "LR": 0.003,
+    "OPTIMIZER": "adam",
+    "INIT_STD": 0.05,
+    "LAMBDA": 1.0,
+    "K": 256.0
+  },
+  "recipe_note": "identical across arms except TARGET_SPEC; fixed epochs means wider arms receive more optimizer steps \u2014 declared asymmetry, a breadth loss is the stronger inference",
+  "initialization": "cold-start (no legacy warm start), seed-derived per run",
+  "training_layout": "all-selected-records-train (fractions (1,0,0)), S6 Amendment 1 convention",
+  "instrument": {
+    "reuse": "E0004 + D0010 unchanged iff leakage_control passes",
+    "shared_by_all_runs": true,
+    "invariant": "all runs in the experiment pin the same evaluation protocol hash and the same evaluation TargetSpec hash; each arm pins its own training TargetSpec; train_spec == eval_spec is NOT required and NOT expected"
+  },
+  "analysis": {
+    "unit": "paired seed difference",
+    "method": "Student t, df=4, t=2.776 (same helper as S6: paired_effect)",
+    "primary_contrast": "d_H = mean over seeds of [test_loss(A4,H,seed) - test_loss(A1,H,seed)]",
+    "primary_sign_convention": "negative = wide-shallow better",
+    "decision_rule": {
+      "BREADTH_WINS": "every width's primary-contrast CI upper bound < 0",
+      "DEPTH_WINS": "every width's primary-contrast CI lower bound > 0",
+      "INCONCLUSIVE": "otherwise"
+    },
+    "adjacent_contrasts": {
+      "role": "preregistered secondary; reported for every width whether or not the primary contrast is decisive",
+      "contrasts": [
+        "A2-A1",
+        "A3-A2",
+        "A4-A3"
+      ],
+      "why": "the result we want is where the curve turns (e.g. a 64k sweet spot with 16k degrading = A3-A2 < 0 and A4-A3 > 0), which the endpoint contrast alone would miss"
+    },
+    "efficient_regime": {
+      "role": "descriptive and preregistered; selects S8's budget, decides no hypothesis",
+      "rule": "per width, the arm with the lowest mean test_loss; ties broken toward the shallower budget; report the set of widths agreeing on the same arm"
+    },
+    "other_secondary": [
+      "A2-A1 and A3-A1 vs A1",
+      "cp_mae",
+      "sign_agreement",
+      "monotonicity of the four arm means per width",
+      "width x density interaction blocked by seed"
+    ],
+    "required_reporting": "all cell means, all per-seed differences, CIs for the primary and all three adjacent contrasts, realized node totals per arm, full identity table; failed cells reported INVALID, never omitted",
+    "scope_statement": "this pool, this teacher, these four budgets, RAW-768",
+    "design_summary": "same frozen position order; roughly equal teacher-node spend per arm; four label depths; RAW-768 only; H1/H4/H16/H32 unchanged; five paired seeds; one common 400k evaluation instrument; A4-A1 is the primary breadth-vs-depth question; adjacent contrasts expose where the curve turns"
+  },
+  "fail_closed": [
+    "engine leakage: any pool record instrument-adjacent to the 200 D0010 records that cannot be removed, or conservative removal against the 575-record N0010 source above 5% of the pool -> STOP (fresh instrument)",
+    "engine identity drift (analyze sha256 or net hashes differ from pins) -> STOP",
+    "determinism gate: re-label 8 stored positions (4 at 16k, 4 at 400k) and require exact scoreCpStm reproduction -> STOP on mismatch",
+    "unique pool records < 4 * n_A4, or 2400-game cap reached -> STOP",
+    "calibration mean outside [0.90*b, b] for any budget -> STOP",
+    "fill parity check: the closest prefix found by the construction must land within +/-2% of T (bounded by half a label, so this checks the construction, not the arms) -> STOP if outside",
+    "nesting violated (A1 subset A2 subset A3 subset A4 as prefixes) -> STOP",
+    "zero or multiple matching labels for any row under its spec -> freeze/training raises (existing behaviour)",
+    "any run with a protocol_hash or eval_dataset_manifest_hash different from the experiment instrument -> INVALID",
+    "no tuning after the first arm label is bought (budgets, prefixes, seed, widths, epochs, LR, batch, init)",
+    "no target-value peeking before arm construction; no training before the instrument identity is frozen and the filled prefixes are sealed",
+    "silent train/eval TargetSpec divergence remains a hard failure (see P1)"
+  ],
+  "prerequisites": [
+    {
+      "id": "P1",
+      "title": "minimal train/eval TargetSpec separation (first-class capability, not an S7 hack)",
+      "where": "cvslab/service.py execute_run, target_spec_consistent block (lines ~519-528)",
+      "current_behaviour": "hard failure when recipe T spec hash != protocol E spec hash",
+      "required_behaviour": [
+        "divergence is still a hard failure by default",
+        "permitted only through an explicit declaration made at ablation-creation time, part of the ablation identity hash and copied into every run record, so it cannot be added after the fact",
+        "when declared, both spec hashes (train, eval) are recorded as visible integrity checks on the run",
+        "strict per-row cardinality checks unchanged",
+        "the invariant enforced is: one experiment shares one evaluation protocol and one evaluation TargetSpec, while each treatment arm pins its own training TargetSpec"
+      ],
+      "tests": [
+        "undeclared divergence still refuses",
+        "declared divergence runs to completion and records both spec hashes",
+        "a row with zero or two matching labels under either spec still fails",
+        "two runs declaring different evaluation specs cannot be compared (refused at the comparison layer)"
+      ],
+      "why": "S7 arms are trained at their own budget and evaluated on the common 400k instrument; the S6 check was written when both were 400k"
+    },
+    {
+      "id": "P2",
+      "title": "experiment identity X#### \u2014 one object above the ablations",
+      "rationale": "A#### already means exactly one ablation with possibly several R#### runs; an S7 study spans 16 ablations, so it needs an object above them",
+      "binds": {
+        "preregistration_hash": "docs/SUPERVISION_DENSITY_FRONTIER.md + tools/s7/s7-preregistration.json, hashed at freeze",
+        "arms": "per arm: dataset_id, training_recipe_id, train_spec_hash, prefix_size, realized_nodes, record_ids_hash",
+        "instrument": "eval_dataset_id + manifest hash, eval_protocol_id + protocol hash, eval_spec_hash",
+        "controls": "widths, seeds, order_seed, order_hash, pool_source_id, normalization_id",
+        "membership": "explicit R#### id list (not a query)",
+        "analysis": "decision and reporting rules of analysis, plus the sealed final analysis once runs finish"
+      },
+      "required_properties": [
+        "every referenced run belongs to the experiment",
+        "each run's train spec equals its arm's declared spec",
+        "all runs share the instrument",
+        "membership is complete: a run may not be added after the analysis is sealed",
+        "verified at queue time and again at analysis time, failing closed"
+      ],
+      "implementation": "schema addition under cvslab/schemas.py KINDS: new X prefix, model and folder; the lab's documented rule that schema changes require restarting running servers applies; addition only \u2014 no existing H/A/M/S/N/D/T/E/R/F/I object changes meaning or layout"
+    }
+  ],
+  "identities_expected": {
+    "S": "new raw pool snapshot (truthful engine identity, game ids preserved)",
+    "N": "canonical normalization (EPD identity, components, duplicates reported)",
+    "labels": [
+      "facts (cvslab.facts, not consumed)",
+      "one search label set per arm"
+    ],
+    "D": [
+      "D_A1",
+      "D_A2",
+      "D_A3",
+      "D_A4"
+    ],
+    "T": [
+      "T_A1",
+      "T_A2",
+      "T_A3",
+      "T_A4"
+    ],
+    "E": [
+      "E0004 (reused instrument)"
+    ],
+    "A": "per arm: baseline H=16 + ablations H in {1,4,32} = 16 total, all members of the X####",
+    "R": "16 ablations x 5 seeds = 80 runs",
+    "H": "one hypothesis",
+    "F": "one sealed finding",
+    "X": "the experiment object binding preregistration, four arms, common instrument, seeds, run membership and analysis (P2)"
+  },
+  "pilot": {
+    "id": "s7-p",
+    "label_cost": "zero new labels",
+    "arms": [
+      {
+        "name": "P1",
+        "rows": 94,
+        "budget": 400000,
+        "source": "D0009 + T0004 (S6 UNIFORM runs R0054-R0058, R0064-R0068, R0074-R0078, R0084-R0088)",
+        "new_runs": 0
+      },
+      {
+        "name": "P2",
+        "rows": 94,
+        "budget": 16000,
+        "source": "same 94 record identities as D0009, new D + T",
+        "new_runs": 20
+      },
+      {
+        "name": "P3",
+        "rows": 926,
+        "budget": 16000,
+        "source": "all train-eligible S5 pool records, new D + T",
+        "new_runs": 20
+      },
+      {
+        "name": "P4",
+        "rows": 926,
+        "budget": 2000,
+        "source": "exploratory; same rows as P3, 2k labels",
+        "new_runs": 20
+      }
+    ],
+    "nesting_note": "P1's 94 rows are a subset of P3's 926 by construction, matching the frontier's nested design; P_depth is causal for depth at fixed rows, P_rows is causal for adding rows at fixed depth",
+    "contrasts": {
+      "P_depth": "test_loss(P2) - test_loss(P1) \u2014 causal for depth at fixed rows",
+      "P_rows": "test_loss(P3) - test_loss(P2) \u2014 causal for adding rows at fixed depth",
+      "P_econ": "test_loss(P3) - test_loss(P1) \u2014 NOT matched-compute; 2.8x cheaper teacher bill, 9.9x more rows"
+    },
+    "reading_rule": "all contrasts at all widths reported with CIs; P_econ CI upper < 0 at every width => broad-shallow beats narrow-deep at 40% of the compute; CI containing 0 => no detectable difference at 40% of the compute; CI lower > 0 at every width => depth is load-bearing",
+    "non_claims": [
+      "not matched-compute (P_econ)",
+      "P3 is the entire train-eligible pool, not a sample",
+      "requires prerequisite P1",
+      "pilot results never enter the frontier decision rule"
+    ]
+  },
+  "cost_estimates": {
+    "pool_generation_nodes": 1680000000,
+    "calibration_nodes": 41000000,
+    "arm_label_nodes": 149900000,
+    "total_teacher_nodes": 1871000000,
+    "teacher_engine_minutes": [
+      30,
+      35
+    ],
+    "wall_clock_hours": [
+      1,
+      2
+    ],
+    "measured_basis": {
+      "shallow_throughput_nodes_per_s": 836883,
+      "deep_throughput_nodes_per_s": 1216367,
+      "facts_ms_per_position": 6.54,
+      "sf_d20_s_per_position_gen10": 0.54
+    }
+  },
+  "baseline_measurements": {
+    "s4_run": {
+      "id": "R0008",
+      "positions": 938,
+      "tier0_engine_s": 6.1361,
+      "tier1_engine_s": 20.0886,
+      "tier1_nodes": 16811774,
+      "tier3_positions": 210,
+      "tier3_engine_s": 68.2984,
+      "tier3_nodes": 83076007,
+      "total_engine_s": 94.5231,
+      "total_nodes": 99887781
+    },
+    "label_inventory": {
+      "facts": 938,
+      "motif": 938,
+      "strategy": 938,
+      "priority": 938,
+      "outcome": 80,
+      "search_shallow_cp_2k": 938,
+      "search_shallow_cp_16k": 938,
+      "search_deep_cp_400k_train": 210,
+      "search_deep_cp_400k_instrument": 200,
+      "oracle_cp": 3
+    },
+    "realized_node_fractions": {
+      "16k": 0.9955,
+      "400k": 0.989
+    },
+    "train_eligible": 926,
+    "holdout": 12,
+    "components": 12
+  },
+  "gen10_reconciliation": {
+    "issue": "the first draft of the design document quoted 43,536 unique positions for corpus-d20 while the engine's committed documentation says 43,405",
+    "resolution": "both are correct under different definitions; the artifact now carries all three",
+    "definitions": {
+      "uniqueFen": 43536,
+      "uniqueFenNoClocks": 43405,
+      "uniqueEpd_python_chess": 43404
+    },
+    "documented_number_reproduced": "43,405 = unique raw FEN with move clocks stripped, reproduced exactly by tools/intake/gen10_corpus_inventory.py",
+    "artifacts": [
+      "tools/intake/gen10_corpus_inventory.py",
+      "tools/intake/gen10-corpus-d20-inventory.json",
+      "tools/intake/gen10-corpus-static-full-inventory.json",
+      "tools/intake/gen10-corpus-static-inventory.json",
+      "tools/intake/gen10-corpus-search-inventory.json"
+    ],
+    "also_reproduced": {
+      "corpus-static-full": {
+        "rows": 4143821,
+        "uniqueFen": 2364478,
+        "duplicateRows": 1779343
+      }
+    }
+  }
+}
