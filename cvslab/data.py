@@ -262,11 +262,17 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
         settings[key] = value
     settings["phase_rule"] = (f"non-pawn material >= {settings['phase_opening_min_material']} opening, "
                               f">= {settings['phase_middlegame_min_material']} middlegame, else endgame")
-    seen: set[str] = set()
+    seen: set[str] = set()  # canonical record identities (EPD), keep-first dedup
     records, duplicates, rejected = [], 0, 0
     for src in sources:
         rows = read_jsonl(store.abs(src.path))
-        for row_index, (row, game) in enumerate(zip(rows, infer_games(rows))):
+        inferred = infer_games(rows)
+        for row_index, (row, inferred_game) in enumerate(zip(rows, inferred)):
+            # Grouping is a claim about provenance: only explicit game identity or the
+            # row-level game_unknown marker are trusted; a heuristic is never upgraded
+            # into an identity.
+            game_unknown = bool(row.get("game_unknown"))
+            game = "UNKNOWN" if game_unknown else inferred_game
             try:
                 board = chess.Board(row["fen"])
                 if not board.is_valid():
@@ -286,14 +292,17 @@ def normalize(store: Store, source_ids: Sequence[str], *, name: str, dedup: str 
                 labels.append({"family": "eval_cp", "value": row["cp"], "pov": "white",
                                "authority": row.get("label_authority") or src.label_authorities[0],
                                "producer": src.id, "label_schema_version": 1})
-            records.append({
+            record = {
                 "record_id": record_id, "group": f"{src.id}:{game}", "source_id": src.id, "source_row": row_index,
                 "ply": row.get("ply", _ply_from_fen(row["fen"])), "fen": board.fen(), "epd": epd,
                 "stm": "w" if board.turn == chess.WHITE else "b",
                 "phase": game_phase(board, int(settings["phase_opening_min_material"]),
                                     int(settings["phase_middlegame_min_material"])),
                 "material": material_signature(board), "labels": labels, "result": row.get("res"),
-            })
+            }
+            if game_unknown:
+                record["group_unknown"] = True
+            records.append(record)
     normalization_id = store.next_id("N")
     rel = f"canonical/{normalization_id}/records.jsonl"
     output_hash = write_jsonl(store.abs(rel), records)
@@ -338,7 +347,8 @@ def dataset_manifest_hash(dataset: Dataset) -> str:
 def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection: Optional[Mapping[str, str]] = None,
                    split_seed: int = 0, fractions: Sequence[float] = (0.8, 0.1, 0.1),
                    required_labels: Sequence[str] = ("eval_cp",), parent_id: Optional[str] = None,
-                   arms: Optional[Sequence[Mapping]] = None) -> Dataset:
+                   arms: Optional[Sequence[Mapping]] = None,
+                   unknown_grouping: str = "refuse") -> Dataset:
     """Freeze a live view into an immutable D####.
 
     Two equivalent forms: a flat `selection` over record fields, or an explicit `stack` of
@@ -351,6 +361,8 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
         raise LabError(f"cannot select on {bad}; selectable fields: {SELECTABLE_FIELDS}")
     if len(fractions) != 3 or min(fractions) < 0 or abs(sum(fractions) - 1.0) > 1e-9:
         raise LabError("split fractions must be three non-negative numbers summing to 1")
+    if unknown_grouping not in ("refuse", "shared"):
+        raise LabError("unknown_grouping must be 'refuse' or 'shared'")
     meter = _Meter()
     norm: Normalization = store.get(normalization_id)
     if sha256_file(store.abs(norm.path)) != norm.output_hash:
@@ -392,6 +404,16 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
             kept.append(record)
     if not kept:
         raise LabError("selection retains no records; nothing to freeze")
+    unknown = [record for record in kept if record.get("group_unknown")]
+    if unknown and unknown_grouping == "refuse":
+        raise LabError(
+            f"{len(unknown)} position(s) have unknown game grouping; a leakage-safe split cannot be "
+            "trusted while same-game positions may be grouped apart. Repair the grouping (re-join "
+            "source_ref to the original sources) or freeze with unknown_grouping='shared' to place "
+            "every unknown-grouping position in one common group (safe, but unusable for balanced splits).")
+    if unknown:
+        for record in unknown:
+            record["group"] = "UNKNOWN-GROUP"  # one shared group: cannot straddle splits
 
     dataset_id = store.next_id("D")
     by_split: dict[str, list[dict]] = {s: [] for s in SPLIT_NAMES}
@@ -419,6 +441,7 @@ def freeze_dataset(store: Store, normalization_id: str, *, name: str, selection:
         sampling_policy=sampling_policy,
         dedup_policy=norm.dedup_policy,
         split_policy={"method": "group-hash", "group_key": "source game", "seed": split_seed,
+                      "unknown_grouping": unknown_grouping, "unknown_group_positions": len(unknown),
                       "train": float(fractions[0]), "val": float(fractions[1]), "test": float(fractions[2])},
         splits=manifests,
         stack=arm_list,
@@ -550,16 +573,13 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
     if not rows:
         raise LabError("a label set needs at least one row")
     known = {record["record_id"] for record in read_jsonl(store.abs(norm.path))}
-    seen: set[str] = set()
+    seen: set[tuple[str, str]] = set()  # (record_id, value-hash): budgets may add rows, accidents may not
     stamped = utc_now()
     clean_rows: list[dict] = []
     for row in rows:
         record_id = str(row.get("record_id", ""))
         if record_id not in known:
             raise LabError(f"label row references unknown record {record_id!r} in {norm.id}")
-        if record_id in seen:
-            raise LabError(f"two labels for {record_id} in one set; register separate sets per producer/pass")
-        seen.add(record_id)
         if "value" not in row:
             raise LabError(f"label for {record_id} carries no value")
         value = _scalarize(row["value"])
@@ -568,9 +588,16 @@ def register_labels(store: Store, normalization_id: str, *, family: str, produce
                        "pov": pov, "authority": authority, "producer": producer,
                        "registry_version": int(registry_version), "label_schema_version": LABEL_SCHEMA_VERSION,
                        "produced_at": stamped}
-        for key in ("budget", "confidence", "note"):
+        for key in ("budget", "confidence", "note", "components"):
             if key in row:
                 clean[key] = _scalarize(row[key])
+        # Dedup identity is the whole observation (record + value + budget + components):
+        # two searches at different node budgets may legitimately return identical values.
+        dedup_key = (record_id, hash_obj({key: clean.get(key) for key in ("value", "budget", "components")}))
+        if dedup_key in seen:
+            raise LabError(f"duplicate observation for {record_id} in one set (identical value and budget); "
+                           "separate authorities go in separate sets")
+        seen.add(dedup_key)
         clean_rows.append(clean)
     sequence = len(label_set_paths(store, normalization_id)) + 1
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", producer)[:24] or "producer"

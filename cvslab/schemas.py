@@ -646,6 +646,7 @@ class FunnelRun(LabModel):
     origin: Literal["funnel"]
     lineage: Literal["LEGACY"] = "LEGACY"
     lineage_note: str
+    position_pool: Optional[str] = None
     name: str
     run_dir: str
     funnel_schema_version: int
