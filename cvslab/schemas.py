@@ -379,9 +379,69 @@ class Ablation(LabModel):
     # declared at creation and part of `identity_hash`: this ablation intentionally trains
     # against one TargetSpec and is measured against another. Empty = divergence refused.
     supervision_divergence: str = ""
+    # the X#### this ablation belongs to; bound into `identity_hash` so an intervention
+    # cannot be silently repointed at another experiment
+    experiment_id: Optional[str] = None
     state: EvidenceState = EvidenceState.PROPOSED
     state_history: list[StateChange] = []
     created_at: str
+
+
+class ExperimentArm(LabModel):
+    """One cell of an X#### design: a fixed supervision depth at a fixed total compute scale."""
+
+    arm_id: str
+    scale: str                      # "2x" | "5x" | "10x" | "20x"
+    scale_nodes: int                # the total teacher budget T_s this arm was filled to
+    node_budget: int                # the per-label supervision depth
+    prefix_size: int                # realized rows = length of the frozen order's prefix
+    realized_nodes: int             # measured teacher nodes actually consumed
+    dataset_id: str
+    dataset_manifest_hash: str
+    training_recipe_id: str
+    recipe_hash: str
+    train_target_spec_hash: str
+    record_ids_hash: str
+    ablations: list[str] = []
+
+
+class Experiment(LabModel):
+    """X#### — one preregistered study bound to the exact identities it runs on.
+
+    A study is mutable (status FROZEN) while runs are being produced and seals when the
+    result is recorded; after that it is immutable like every other piece of evidence.
+    """
+
+    id: str = _id("X")
+    schema_version: int = SCHEMA_VERSION
+    name: str
+    family: str
+    generation: str
+    preregistration_hash: str
+    reference_unit_nodes: int
+    scales: dict[str, int]
+    node_budgets: list[int]
+    source_id: str
+    normalization_id: str
+    candidate_universe_hash: str
+    order_seed: int
+    order_hash: str
+    arms: list[ExperimentArm]
+    eval_dataset_id: str
+    eval_dataset_manifest_hash: str
+    eval_protocol_id: str
+    eval_protocol_hash: str
+    eval_target_spec_hash: str
+    widths: list[int]
+    seeds: list[int]
+    expected_run_count: int
+    analysis: dict[str, object]
+    notes: str = ""
+    status: str = "FROZEN"                 # FROZEN -> SEALED
+    result: dict[str, object] = {}
+    state_history: list[StateChange] = []
+    created_at: str
+    record_hash: Optional[str] = None
 
 
 class ModelArtifact(LabModel):
@@ -438,6 +498,7 @@ class Run(LabModel):
     train_target_spec_hash: Optional[str] = None
     eval_target_spec_hash: Optional[str] = None
     supervision_divergence: str = ""
+    experiment_id: Optional[str] = None
     queued_at: str
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
@@ -1135,6 +1196,7 @@ KINDS: dict[str, tuple[str, tuple[type[LabModel], ...]]] = {
     "E": ("evaluation_protocols", (EvaluationProtocol, LegacyEvaluation)),
     "R": ("runs", (Run, LegacyEvidence, FunnelRun)),
     "F": ("findings", (Finding,)),
+    "X": ("experiments", (Experiment,)),
     "I": ("intakes", (IntakeRecord,)),
 }
 

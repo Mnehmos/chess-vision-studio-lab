@@ -1,0 +1,158 @@
+{
+ "already_complete_and_verified": [
+  "cvslab/funnel/pool.py: per-game RNG mode (generatorVersion 2) with deterministic parallel batching, byte-identical to a serial run (smoke-verified against the engine: 2 batches == 1 serial call)",
+  "tools/s7/s7_pool_worker.py + tools/s7/s7_scale_pool.py: resumable parallel batch driver with incremental uniqueness tracking, contiguity checks and serial-equivalence verification",
+  "X#### experiment identity: schema, store sealing rules, create_experiment with per-arm contract verification, queue-time and execution-time contract checks, assert_experiment_runs, seal_experiment (167 tests pass)"
+ ],
+ "blocked_until": "the study's candidate-population decision is made; nothing downstream (calibration, 16 prefixes, labels, training) can be honestly frozen before it",
+ "cause": "the teacher is deterministic (cold fixed-node search), so play is a pure function of the start position except at the three diversification plies; the number of distinct game trajectories is therefore bounded by the declared opening source (12 lines) times the branching at plies 8/10/12, and the pool saturates at roughly 1.2k unique positions",
+ "consequence": "the 20x/16k arm alone needs ~46,600 rows; the pool saturates three orders of magnitude short of that. No amount of additional generation reaches 60,000 with this opening source.",
+ "id": "s7s-pool-blocker",
+ "measured": {
+  "disjoint_range_overlap": {
+   "games_0_99_unique_fens": 1041,
+   "games_800_899_unique_fens": 1042,
+   "note": "two game ranges 800 games apart produce almost the same positions",
+   "shared_fens": 921
+  },
+  "games_generated": 1600,
+  "generator": "cvslab.pool.selfplay, per-game RNG mode (generatorVersion 2), seed 20260920, 12 built-in opening lines, max_plies 70, sample_every 2, min_ply 6, play 20k nodes/move, diversification at plies (8,10,12) x 3 candidates within 25cp, diversification 2k nodes",
+  "raw_rows": 52703,
+  "round_1": {
+   "games": [
+    0,
+    800
+   ],
+   "raw_rows": 26347,
+   "unique_after": 1176
+  },
+  "round_2": {
+   "games": [
+    800,
+    1600
+   ],
+   "raw_rows": 26356,
+   "unique_added": 0
+  },
+  "single_batch_yield": [
+   {
+    "games": 20,
+    "unique": 552,
+    "unique_per_game": 27.6
+   },
+   {
+    "games": 100,
+    "unique": 1030,
+    "unique_per_game": 10.3
+   },
+   {
+    "games": 800,
+    "unique": 1176,
+    "unique_per_game": 1.47
+   },
+   {
+    "games": 1600,
+    "unique": 1176,
+    "unique_per_game": 0.74
+   }
+  ],
+  "unique_candidates": 1176
+ },
+ "options": [
+  {
+   "change": "diversify play: sample among near-equal moves at every ply (or every N plies) instead of only plies 8/10/12 \u2014 a new generator contract (version 3)",
+   "cost": "generator change + verification, then ~20-40 min of parallel generation",
+   "id": "A",
+   "scientific_effect": "the pool becomes stochastic-play positions rather than deterministic-play positions; the S5/S6 pools' play contract is not preserved",
+   "yield_estimate": "tens of thousands of unique positions; unverified"
+  },
+  {
+   "change": "start games from the engine's committed opening suite instead of the 12 hand-declared lines: benchmarks/suites/openings-inv1-20260910.epd, 4,910 positions, sha256 a477672523185ddc521e746de38b66bd253cade43488d640d43a0ec5175725dd",
+   "cost": "an opening-source loader + validation (~1 h), then ~20-30 min of parallel generation",
+   "id": "B",
+   "note": "the opening source is already a declared, hashed field of the pool config (openingSourceSha256), so this is a change of the declared source, not of the generator's semantics",
+   "scientific_effect": "the generator contract is unchanged (deterministic cold play from a frozen, hashed start-position set); the start positions become Lichess-derived opening/middlegame positions (provenance file: harvested 2,300 positions from the app's lichess-dataset.jsonl, sha256 03410519..., filtered to fullmove 4-16, halfmove clock <= 6, material diff <= 2 pawns, >= 2 non-pawns per side, phases opening/middlegame), so the pool's distribution differs from the S5/S6 pools",
+   "yield_estimate": "~4,900 start positions x ~33 sampled plies per game, mostly disjoint continuations: on the order of 100k+ raw rows and comfortably more than 60,000 unique candidates from one game per start position"
+  },
+  {
+   "change": "take the candidate population from an existing corpus (e.g. the legacy gen9/gen10 shards or corpus-d20's ~43.4k unique positions) instead of generating one",
+   "cost": "corpus selection + provenance + leakage join (the same machinery), no generation compute",
+   "id": "C",
+   "scientific_effect": "the pool is no longer fresh self-play; it is a legacy corpus with its own filters and provenance, which changes what the study's rows represent",
+   "yield_estimate": "immediate, but corpus-d20 alone is below 46.6k + the 1.15x margin; corpus-static-full holds ~2.36M unique positions"
+  }
+ ],
+ "recommendation": "B",
+ "recommendation_reason": "it is the smallest change that reaches 60,000 candidates while keeping the frozen generator contract intact: only the declared opening source changes, and that source is a committed, hashed, provenance-documented engine artifact whose hash already travels in the pool manifest",
+ "requirement": "tools/s7/s7-scaling-preregistration.json (to be materialised) and the review brief: generate in frozen batches until there are at least 60,000 leakage-clean unique candidates, and at least 1.15x the calibration-predicted size of the largest 20x/16k arm (~46,600 rows)",
+ "review_corrections": {
+  "generator_contract": {
+   "mode": "start_source='epd-file' (generatorVersion 3)",
+   "recorded_in_identity": [
+    "start_source",
+    "openingSourceSha256 (= the suite hash)",
+    "epd_path",
+    "epd_sha256",
+    "epd_limit"
+   ],
+   "unchanged": "search/play behavior; v1 stream and v2 per-game modes are untouched for S5/S6 reproducibility",
+   "why": "PoolConfig.opening_lines is {name,moves} and _play_game always started from chess.Board(); an arbitrary EPD is a different input type and must be declared as such"
+  },
+  "hash_disagreement_resolved_not_chosen": {
+   "evidence": {
+    "corroboration": "the engine repo's .gitattributes documents the same CRLF hazard for its fixtures",
+    "git_blob_sha256": "4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3",
+    "reconstruction": "sha256 of LF-normalized content + trailing newline reproduces 4d96e552\u2026 exactly",
+    "working_copy_sha256": "a477672523185ddc521e746de38b66bd253cade43488d640d43a0ec5175725dd"
+   },
+   "finding": "the provenance's sha256 and the working-copy file bytes disagree, and both are right under their own serialization: the committed git blob is LF and hashes to 4d96e552\u2026, while this Windows checkout (core.autocrlf=true, no eol=lf rule covering benchmarks/suites/*.epd) is CRLF and hashes to a4776725\u2026",
+   "resolution": "the generator pins the LF-normalized content hash (4d96e552\u2026) and verifies it at load, so the pin does not depend on how any checkout stores line endings"
+  },
+  "provenance_corrected": {
+   "control_book": {
+    "path": "F:\tools\\openings.epd",
+    "positions": 12
+   },
+   "file": "chess-vision-studio-rust-engine/benchmarks/suites/openings-inv1-20260910.provenance.json",
+   "filters": {
+    "fullmove": [
+     4,
+     20
+    ],
+    "maxHalfmoveClock": 6,
+    "maxMaterialDiffPawns": 3.0,
+    "minNonPawnsPerSide": 2,
+    "minNonPawnsTotal": 6,
+    "phases": [
+     "opening",
+     "middlegame"
+    ]
+   },
+   "harvest_sampled": 5804,
+   "harvest_source_sha256": "c7bba9e3eee42e578b2436d5b3626db049689c23f7e2b1e5bf422fe31b59b652",
+   "note": "the blocker first paired the 20260910 book with the 20260909 provenance file; the committed artifact below is the correct one",
+   "positions": 4910,
+   "provenance_declared_sha256": "4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3",
+   "seed": 20260911
+  }
+ },
+ "status": "RESOLVED \u2014 decision B accepted by review; the source-population blocker is closed by the EPD start-position mode (generator v3), and B's yield is measured (see s7-scaling-epd-probe.json)",
+ "yield_probe": {
+  "adequacy": "60,000 >= 1.15 x the estimated largest 20x/16k prefix (~46,600 rows predicted from the S4 16k mean of 15,927.7 nodes; to be re-checked against calibration before freezing)",
+  "extrapolation": {
+   "games_for_60000_unique": 1944,
+   "headroom": "4,910 starts x ~31 unique per game ~= 150k unique available from one game per start",
+   "wall_clock_estimate": "~7 minutes at 8 workers (measured 88 s for 400 games)"
+  },
+  "games": 400,
+  "marginal_yield": {
+   "first_batch_new_unique": 1492,
+   "last_batch_new_unique": 1553,
+   "verdict": "flat \u2014 no saturation, because every game starts at a distinct frozen position"
+  },
+  "rows": 12627,
+  "source": "tools/s7/s7_epd_probe.py -> tools/s7/s7-scaling-epd-probe.json",
+  "unique": 12348,
+  "unique_per_game": 30.87
+ }
+}

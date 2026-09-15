@@ -1,0 +1,70 @@
+{
+ "batches": [
+  {
+   "cumulative_unique": 1492,
+   "games": 50,
+   "new_unique": 1492,
+   "rows": 1545,
+   "unique_in_batch": 1492
+  },
+  {
+   "cumulative_unique": 3039,
+   "games": 50,
+   "new_unique": 1547,
+   "rows": 1590,
+   "unique_in_batch": 1547
+  },
+  {
+   "cumulative_unique": 4547,
+   "games": 50,
+   "new_unique": 1508,
+   "rows": 1545,
+   "unique_in_batch": 1508
+  },
+  {
+   "cumulative_unique": 6141,
+   "games": 50,
+   "new_unique": 1594,
+   "rows": 1622,
+   "unique_in_batch": 1597
+  },
+  {
+   "cumulative_unique": 7599,
+   "games": 50,
+   "new_unique": 1458,
+   "rows": 1490,
+   "unique_in_batch": 1458
+  },
+  {
+   "cumulative_unique": 9168,
+   "games": 50,
+   "new_unique": 1569,
+   "rows": 1593,
+   "unique_in_batch": 1572
+  },
+  {
+   "cumulative_unique": 10795,
+   "games": 50,
+   "new_unique": 1627,
+   "rows": 1657,
+   "unique_in_batch": 1629
+  },
+  {
+   "cumulative_unique": 12348,
+   "games": 50,
+   "new_unique": 1553,
+   "rows": 1585,
+   "unique_in_batch": 1555
+  }
+ ],
+ "epd_path": "F:\\Github\\chess-vision-studio-rust-engine\\benchmarks\\suites\\openings-inv1-20260910.epd",
+ "epd_sha256": "sha256:4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3",
+ "games": 400,
+ "generator_version": 3,
+ "note": "bounded pre-freeze probe; distinct EPD starts, per-game RNG, play unchanged",
+ "rows": 12627,
+ "seed": 20260920,
+ "start_source": "epd-file",
+ "unique": 12348,
+ "unique_per_game": 30.87
+}

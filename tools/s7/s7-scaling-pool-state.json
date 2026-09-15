@@ -1,0 +1,136 @@
+{
+ "batches": [
+  {
+   "count": 100,
+   "gamesSha256": "sha256:19804bdc39001055389a6f955fc1695431bcf923ff8f6cb02dd79340e2803355",
+   "positionsSha256": "sha256:64059064681e144f7d7a236b9773c24c60ca77ac0fa2336c5b843b88bb2bd3cb",
+   "rows": 3295,
+   "seconds": 209.52,
+   "start": 0
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:42d9dccb48da09ca61f733aab6545bbda2eab885bffeeeddcc5b469389977c6d",
+   "positionsSha256": "sha256:65a091e4aea71b9531bd68756b564112aacf94fc9f7e2eb2d81916c33c356478",
+   "rows": 3296,
+   "seconds": 207.79,
+   "start": 100
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:4e49ac48b250c7d758720e1a29c04ac7e02cb11ee472b8d1a50959de16eec5e7",
+   "positionsSha256": "sha256:a79c049d0d41de1c87fb717752a1fef392a9ad9d2759d45f47765cfb7e2d1a1f",
+   "rows": 3294,
+   "seconds": 206.97,
+   "start": 200
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:d1e4fc4403ff8cb00ec061c8ceaa742e01b1dcd64b6ba3d4e32cffda9d8c2230",
+   "positionsSha256": "sha256:b7137f08a9caeb1e5957d99ef6b9927f44c87a7859c5b9b67486345e5fdea018",
+   "rows": 3290,
+   "seconds": 207.4,
+   "start": 300
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:287a0014a13b904f4d9c57de59b7fd01e37dbf0594a72f94683e637a2d5cb810",
+   "positionsSha256": "sha256:6876eaf62f8b6f9845618b0fbc60297c86a5cd1356ef54db280ef071e6c5e492",
+   "rows": 3295,
+   "seconds": 208.22,
+   "start": 400
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:98258ea3dd3ee00a407a07d8243fb7de5bad187c737c58b86241f330673a228f",
+   "positionsSha256": "sha256:f45d8c17f9f0974d06ca2d983a02a872d099cc9385f43f22b2518ee37e815003",
+   "rows": 3292,
+   "seconds": 205.07,
+   "start": 500
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:f1e53ea82511f08fa0d125cb22f0b5d2d0e76799af0d202af900feee88ddd282",
+   "positionsSha256": "sha256:249c885462ab51822776f03ab20fe59d03c9aa383ae4d2aa7e2515643b3659c9",
+   "rows": 3290,
+   "seconds": 208.53,
+   "start": 600
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:715eba2a417bf6138a2332c51c7ed6a0628a462a64d90e5a05fdba6b2a64c834",
+   "positionsSha256": "sha256:a775790a80d75063151180b34768ddb0ace6f2bfc27e2d0f3b07ce349924d513",
+   "rows": 3295,
+   "seconds": 207.49,
+   "start": 700
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:6baf1b781f686e81f4a52bc30932b6252910062dd35a9fe572124b982fccec71",
+   "positionsSha256": "sha256:b2ec3aaea0b61fe01fc5e3625eb533b7bc02f1eac2d31320280fef068f84004c",
+   "rows": 3292,
+   "seconds": 209.72,
+   "start": 800
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:ae257bc69e848a3b461ba35191ad8d116df3587e4804d4d8b52c857fe2ae015e",
+   "positionsSha256": "sha256:4858384ddd4cd7c2e02e85d10ef7ed63712fc49965daeca52618091d944ec8fb",
+   "rows": 3296,
+   "seconds": 209.42,
+   "start": 900
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:4ffedd076903b6cbc882f804eaac38f3c7728b1a3a83553a09e16e2f4e823580",
+   "positionsSha256": "sha256:3a5b3c7e94d3a14fad4f1674a49ea4825e3d462e98f5f31f7b99123eecd5da44",
+   "rows": 3298,
+   "seconds": 208.96,
+   "start": 1000
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:14969c9239623c84ced083f382f7e14490372ae54bc67690e006f3618e8ec83c",
+   "positionsSha256": "sha256:97db8f08ad15a539f405c695645af2b3c626314fe8c32f2260e3acf3498b8dd9",
+   "rows": 3294,
+   "seconds": 206.93,
+   "start": 1100
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:ee367df47923eb4be50e8a8cb76e48278dcf66e7a68d40bea2fd3d84c739953b",
+   "positionsSha256": "sha256:5b11bac389b47f821447be9db902c8608fae8ba868726d1599e06095e8e6cd3f",
+   "rows": 3291,
+   "seconds": 208.87,
+   "start": 1200
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:380fad3771e7afc47cd8d7398b8c8f2bfd144af07a2cadce2dbd418831b77cdb",
+   "positionsSha256": "sha256:834bfb3fbd9d160d88b1c797a4d22d23e17a3e039e8dac0867545b37d573426b",
+   "rows": 3294,
+   "seconds": 207.13,
+   "start": 1300
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:b214dca100554fdb40dbfb14a7ed0030d2e8ded51351fa2d6827fa45f623888b",
+   "positionsSha256": "sha256:b6af1b28138953e7d6923fc261808151066721f11a87d170da3821ff035ca5c0",
+   "rows": 3298,
+   "seconds": 209.8,
+   "start": 1400
+  },
+  {
+   "count": 100,
+   "gamesSha256": "sha256:6d7bfe90e0b4677eb844242bb9ae26fb306ae6fc29c44189a996ffba2c143b6a",
+   "positionsSha256": "sha256:0a25a0ba2231e08bba45288da53d8b1ac938909fa10cc731b3bb93c2996b0e8a",
+   "rows": 3293,
+   "seconds": 208.71,
+   "start": 1500
+  }
+ ],
+ "rawRows": 52703,
+ "seed": 20260920,
+ "uniqueCandidates": 1176,
+ "uniqueFileBatches": 16
+}

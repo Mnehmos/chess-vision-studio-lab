@@ -341,7 +341,7 @@ class LabService:
 
     @staticmethod
     def _identity_hash(family, generation, config, dataset, recipe, protocol,
-                       supervision_divergence: str = "") -> str:
+                       supervision_divergence: str = "", experiment_id: Optional[str] = None) -> str:
         """Identity of one intervention.
 
         A declared supervision divergence is part of that identity: the contract "this arm
@@ -355,10 +355,13 @@ class LabService:
                    "protocol_hash": protocol.protocol_hash}
         if supervision_divergence:
             payload["supervision_divergence"] = supervision_divergence
+        if experiment_id:
+            payload["experiment_id"] = experiment_id
         return hash_obj(payload)
 
     def _new_ablation(self, *, family, generation, baseline_name, is_baseline, control_id, hypothesis_id, config,
-                      diff, dataset, recipe, protocol, notes, supervision_divergence: str = "") -> Ablation:
+                      diff, dataset, recipe, protocol, notes, supervision_divergence: str = "",
+                      experiment_id: Optional[str] = None) -> Ablation:
         ablation_id = self.store.next_id("A")
         shapes = families.parameter_shapes(family, config)
         n_params = families.count_parameters(shapes)
@@ -368,12 +371,12 @@ class LabService:
             is_baseline=is_baseline, control_id=control_id, hypothesis_id=hypothesis_id,
             overrides={d.key: d.value for d in diff}, effective_config=config, config_hash=hash_obj(config),
             identity_hash=self._identity_hash(family, generation, config, dataset, recipe, protocol,
-                                              supervision_divergence), diff=diff,
+                                              supervision_divergence, experiment_id), diff=diff,
             param_count=n_params, parameter_shapes=shapes,
             display_label=families.display_label(ablation_id, family, generation, n_params, baseline_name,
                                                  [(d.key, d.value) for d in diff]),
             dataset_id=dataset.id, training_recipe_id=recipe.id, eval_protocol_id=protocol.id, notes=notes,
-            supervision_divergence=supervision_divergence,
+            supervision_divergence=supervision_divergence, experiment_id=experiment_id,
             state=EvidenceState.PROPOSED, state_history=[StateChange(state=EvidenceState.PROPOSED, at=now,
                                                                      reason="created")],
             created_at=now,
@@ -382,7 +385,8 @@ class LabService:
     def register_baseline(self, *, name: str, dataset_id: str, training_recipe_id: str, eval_protocol_id: str,
                           model_config: Optional[Mapping[str, object]] = None, family: str = DEFAULT_FAMILY,
                           generation: Optional[str] = None, notes: str = "",
-                          supervision_divergence: str = "") -> Ablation:
+                          supervision_divergence: str = "",
+                          experiment_id: Optional[str] = None) -> Ablation:
         name = name.strip().upper()
         if not re.fullmatch(r"[A-Z][A-Z0-9_]*", name):
             raise LabError("baseline names are upper-case identifiers such as RAW or HYBRID")
@@ -401,7 +405,8 @@ class LabService:
         return self._new_ablation(family=family, generation=generation, baseline_name=name, is_baseline=True,
                                   control_id=None, hypothesis_id=None, config=config, diff=[], dataset=dataset,
                                   recipe=recipe, protocol=protocol, notes=notes,
-                                  supervision_divergence=supervision_divergence)
+                                  supervision_divergence=supervision_divergence,
+                                  experiment_id=experiment_id)
 
     def preview_ablation(self, baseline_id: str, overrides: Mapping[str, object], *,
                          supervision_divergence: str = "") -> AblationPreview:
@@ -443,7 +448,8 @@ class LabService:
         )
 
     def create_ablation(self, *, baseline_id: str, overrides: Mapping[str, object], hypothesis_id: Optional[str] = None,
-                        notes: str = "", supervision_divergence: str = "") -> Ablation:
+                        notes: str = "", supervision_divergence: str = "",
+                        experiment_id: Optional[str] = None) -> Ablation:
         """Create one intervention.
 
         `supervision_divergence` declares, before any run exists, that this intervention
@@ -464,7 +470,8 @@ class LabService:
         return self._new_ablation(family=base.family, generation=base.generation, baseline_name=base.baseline_name,
                                   is_baseline=False, control_id=base.id, hypothesis_id=hypothesis_id,
                                   config=preview.effective_config, diff=preview.diff, dataset=dataset, recipe=recipe,
-                                  protocol=protocol, notes=notes, supervision_divergence=supervision_divergence)
+                                  protocol=protocol, notes=notes, supervision_divergence=supervision_divergence,
+                                  experiment_id=experiment_id or base.experiment_id)
 
     # ------------------------------------------------------------------ runs
 
@@ -474,6 +481,24 @@ class LabService:
                                                         ablation.eval_protocol_id, ablation.family, ablation.generation)
         train_spec = recipe_target_spec(recipe)
         eval_spec = protocol_target_spec(protocol)
+        experiment = None
+        arm = None
+        if ablation.experiment_id:
+            experiment = self.store.get(ablation.experiment_id)
+            if experiment.status == "SEALED":
+                raise LabError(f"{experiment.id} is SEALED; it accepts no further runs")
+            arm = self.arm_of(experiment, ablation.id)
+            if arm is None:
+                raise LabError(f"{ablation.id} is not an arm of {experiment.id}; a run cannot join an "
+                               "experiment it was not frozen into")
+            problems = self.verify_experiment_arm(arm, dataset, recipe)
+            if problems:
+                raise LabError(f"{ablation.id}: " + "; ".join(problems))
+            allowed = {int(value) for value in experiment.seeds}
+            outside = [int(seed) for seed in seeds if int(seed) not in allowed]
+            if outside:
+                raise LabError(f"seeds {outside} are outside {experiment.id}'s frozen seed list "
+                               f"{sorted(allowed)}; an experiment's cells are its design")
         runs = []
         for seed in seeds:
             runs.append(self.store.create(Run(
@@ -487,6 +512,7 @@ class LabService:
                 train_target_spec_hash=(train_spec.spec_hash() if train_spec is not None else None),
                 eval_target_spec_hash=(eval_spec.spec_hash() if eval_spec is not None else None),
                 supervision_divergence=ablation.supervision_divergence,
+                experiment_id=ablation.experiment_id,
                 queued_at=utc_now(),
             )))
         self._wake.set()
@@ -537,6 +563,10 @@ class LabService:
                            families.param_count(ablation.family, run.effective_config) == run.param_count,
                            f"shape-derived parameter count {run.param_count}"),
             ]
+            contract_checks, contract_problems = self.experiment_contract(run)
+            checks.extend(contract_checks)
+            if contract_problems:
+                raise _PreflightFailed("experiment contract violated: " + "; ".join(contract_problems))
             if _failed(checks):
                 raise _PreflightFailed("pre-flight integrity checks failed; training was not started")
 
@@ -722,6 +752,295 @@ class LabService:
             self._worker.join(timeout=30)
 
     # ------------------------------------------------------------------ findings
+
+    # ------------------------------------------------------------ experiments (X####)
+
+    @staticmethod
+    def _arm_index(experiment) -> dict:
+        return {arm.arm_id: arm for arm in experiment.arms}
+
+    def arm_of(self, experiment, ablation_id: str):
+        for arm in experiment.arms:
+            if ablation_id in arm.ablations:
+                return arm
+        return None
+
+    def verify_experiment_arm(self, arm, dataset, recipe) -> list[str]:
+        """The arm contract: the dataset, recipe and training supervision it was frozen with."""
+        problems: list[str] = []
+        spec = recipe_target_spec(recipe)
+        spec_hash = spec.spec_hash() if spec is not None else None
+        if dataset.id != arm.dataset_id or dataset.manifest_hash != arm.dataset_manifest_hash:
+            problems.append(f"dataset {dataset.id}/{dataset.manifest_hash[:19]}… is not the arm's "
+                            f"{arm.dataset_id}/{arm.dataset_manifest_hash[:19]}…")
+        if recipe.id != arm.training_recipe_id or recipe_hash(recipe) != arm.recipe_hash:
+            problems.append(f"recipe {recipe.id} does not reproduce the arm's frozen recipe hash")
+        if (spec_hash or "") != arm.train_target_spec_hash:
+            problems.append(f"recipe training spec {spec_hash} is not the arm's {arm.train_target_spec_hash}")
+        split = next((candidate for candidate in dataset.splits if candidate.name == "train"), None)
+        if split is None:
+            problems.append(f"{dataset.id} has no train split; an experiment arm is all-train")
+        else:
+            if split.count != arm.prefix_size:
+                problems.append(f"arm declares prefix_size {arm.prefix_size} but {dataset.id}'s train "
+                                f"split holds {split.count} rows")
+            if split.record_ids_hash != arm.record_ids_hash:
+                problems.append(f"arm declares record_ids_hash {arm.record_ids_hash[:19]}… but {dataset.id}'s "
+                                f"train split records {split.record_ids_hash[:19]}…")
+        return problems
+
+    def verify_experiment_run(self, run: Run, experiment, arm) -> list[str]:
+        """Everything a run must match to belong to this experiment, checked from the run record."""
+        problems: list[str] = []
+        if run.experiment_id != experiment.id:
+            problems.append(f"run belongs to {run.experiment_id}, not {experiment.id}")
+        if run.ablation_id not in arm.ablations:
+            problems.append(f"ablation {run.ablation_id} is not listed in arm {arm.arm_id}")
+        for field, expected in (("dataset_id", arm.dataset_id),
+                                ("dataset_manifest_hash", arm.dataset_manifest_hash),
+                                ("training_recipe_id", arm.training_recipe_id),
+                                ("recipe_hash", arm.recipe_hash),
+                                ("train_target_spec_hash", arm.train_target_spec_hash)):
+            actual = getattr(run, field)
+            if (actual or "") != expected:
+                problems.append(f"{field} {actual} is not the arm's {expected}")
+        if run.eval_protocol_id != experiment.eval_protocol_id:
+            problems.append(f"evaluation protocol {run.eval_protocol_id} is not the study's "
+                            f"{experiment.eval_protocol_id}")
+        if (run.eval_dataset_id or "") != experiment.eval_dataset_id:
+            problems.append(f"evaluation dataset {run.eval_dataset_id} is not the study's "
+                            f"{experiment.eval_dataset_id}")
+        if (run.eval_target_spec_hash or "") != experiment.eval_target_spec_hash:
+            problems.append(f"evaluation supervision {run.eval_target_spec_hash} is not the study's "
+                            f"{experiment.eval_target_spec_hash}")
+        return problems
+
+    def create_experiment(self, *, name: str, preregistration_hash: str, reference_unit_nodes: int,
+                          scales: Mapping[str, int], node_budgets: Sequence[int], arms: Sequence[Mapping],
+                          eval_protocol_id: str, widths: Sequence[int], seeds: Sequence[int],
+                          source_id: str, normalization_id: str, candidate_universe_hash: str,
+                          order_seed: int, order_hash: str, analysis: Mapping[str, object],
+                          family: str = DEFAULT_FAMILY, generation: Optional[str] = None,
+                          notes: str = "", experiment_id: Optional[str] = None) -> "Experiment":
+        """Freeze one study. Every arm is verified against its frozen D####/T#### BEFORE the X
+        exists, and the exam is taken from the protocol rather than trusted from the caller."""
+        from .schemas import Experiment, ExperimentArm
+
+        generation = self._generation(generation)
+        protocol: EvaluationProtocol = self.store.get_as(eval_protocol_id, EvaluationProtocol)
+        eval_spec = protocol_target_spec(protocol)
+        if eval_spec is None:
+            raise LabError(f"{protocol.id} pins no TargetSpec; an experiment needs a frozen exam")
+
+        declared_scales = {str(key) for key in scales}
+        declared_budgets = {int(budget) for budget in node_budgets}
+        declared_widths = {int(width) for width in widths}
+        cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
+        if len(cells) != len(list(arms)):
+            raise LabError("the design names the same (scale, node budget) cell more than once")
+        lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
+        missing_cells = sorted(lattice - cells)
+        undeclared_cells = sorted(cells - lattice)
+        if missing_cells or undeclared_cells:
+            raise LabError(f"the design must be exactly the declared lattice: missing {missing_cells}, "
+                           f"not declared {undeclared_cells}")
+
+        frozen_arms: list[ExperimentArm] = []
+        seen: set[str] = set()
+        for arm in arms:
+            arm_id = str(arm["arm_id"])
+            if arm_id in seen:
+                raise LabError(f"duplicate arm_id {arm_id!r}")
+            seen.add(arm_id)
+            dataset: Dataset = self.store.get_as(str(arm["dataset_id"]), Dataset)
+            recipe: TrainingRecipe = self.store.get_as(str(arm["training_recipe_id"]), TrainingRecipe)
+            # the arm's identity is DECLARED by the caller and then verified against the frozen
+            # objects; it is never silently normalized from them, or a wrong declaration would
+            # be healed instead of refused
+            missing = [key for key in ("dataset_manifest_hash", "recipe_hash", "train_target_spec_hash",
+                                       "record_ids_hash") if not arm.get(key)]
+            if missing:
+                raise LabError(f"arm {arm_id} must declare {', '.join(missing)}; the arm identity is "
+                               "verified against the frozen objects, not inferred from them")
+            entry = ExperimentArm(
+                arm_id=arm_id, scale=str(arm["scale"]), scale_nodes=int(arm["scale_nodes"]),
+                node_budget=int(arm["node_budget"]), prefix_size=int(arm["prefix_size"]),
+                realized_nodes=int(arm["realized_nodes"]), dataset_id=str(arm["dataset_id"]),
+                dataset_manifest_hash=str(arm["dataset_manifest_hash"]),
+                training_recipe_id=str(arm["training_recipe_id"]), recipe_hash=str(arm["recipe_hash"]),
+                train_target_spec_hash=str(arm["train_target_spec_hash"]),
+                record_ids_hash=str(arm["record_ids_hash"]),
+                ablations=[str(a) for a in arm.get("ablations") or []])
+            problems = self.verify_experiment_arm(entry, dataset, recipe)
+            if problems:
+                raise LabError(f"arm {arm_id} does not match its frozen identities: " + "; ".join(problems))
+            arm_widths: dict = {}
+            for ablation_id in entry.ablations:
+                ablation: Ablation = self.store.get_as(ablation_id, Ablation)
+                if (ablation.family, ablation.generation) != (family, generation):
+                    raise LabError(f"{ablation_id} belongs to {ablation.family}-{ablation.generation}")
+                if (ablation.dataset_id, ablation.training_recipe_id, ablation.eval_protocol_id) != \
+                        (dataset.id, recipe.id, protocol.id):
+                    raise LabError(f"{ablation_id} is not defined on this arm's dataset/recipe/protocol")
+                if "H" not in ablation.effective_config:
+                    raise LabError(f"{ablation_id} carries no H; an arm must cover the declared widths")
+                arm_widths.setdefault(int(ablation.effective_config["H"]), []).append(ablation_id)
+            covered = set(arm_widths)
+            if covered != declared_widths:
+                raise LabError(f"arm {arm_id} covers widths {sorted(covered)} but the design declares "
+                               f"{sorted(declared_widths)}")
+            duplicated = {width: ids for width, ids in arm_widths.items() if len(ids) > 1}
+            if duplicated:
+                raise LabError(f"arm {arm_id} lists more than one ablation for width(s) "
+                               f"{sorted(duplicated)}: {duplicated}")
+            frozen_arms.append(entry)
+
+        # The X<->A binding must be REAL: take the id before creation so ablations can carry it,
+        # then require every listed ablation to carry it back and every carrying ablation to be
+        # listed. A run's membership therefore rests on a verified back-reference, not a promise.
+        xid = experiment_id or self.store.next_id("X")
+        listed = {ablation_id for arm in frozen_arms for ablation_id in arm.ablations}
+        for arm in frozen_arms:
+            for ablation_id in arm.ablations:
+                ablation: Ablation = self.store.get_as(ablation_id, Ablation)
+                if ablation.experiment_id != xid:
+                    raise LabError(f"{ablation_id} carries experiment_id={ablation.experiment_id!r}, "
+                                   f"not {xid!r}: it is not bound to this experiment")
+        for ablation in self.store.list("A", verify=True, kind=Ablation):
+            if ablation.experiment_id == xid and ablation.id not in listed:
+                raise LabError(f"{ablation.id} claims {xid} but no arm lists it; refusing an "
+                               "experiment with unlisted members")
+
+        run_count = sum(len(arm.ablations) for arm in frozen_arms) * len(list(seeds))
+        experiment = Experiment(
+            id=xid, name=name, family=family, generation=generation,
+            preregistration_hash=preregistration_hash, reference_unit_nodes=int(reference_unit_nodes),
+            scales={str(k): int(v) for k, v in scales.items()}, node_budgets=[int(b) for b in node_budgets],
+            source_id=source_id, normalization_id=normalization_id,
+            candidate_universe_hash=candidate_universe_hash, order_seed=int(order_seed),
+            order_hash=order_hash, arms=frozen_arms, eval_dataset_id=protocol.dataset_id,
+            eval_dataset_manifest_hash=protocol.dataset_manifest_hash, eval_protocol_id=protocol.id,
+            eval_protocol_hash=protocol.protocol_hash, eval_target_spec_hash=eval_spec.spec_hash(),
+            widths=[int(w) for w in widths], seeds=[int(x) for x in seeds],
+            expected_run_count=run_count, analysis=dict(analysis), notes=notes,
+            status="FROZEN", created_at=utc_now())
+        return self.store.create(experiment)
+
+    def experiment_contract(self, run: Run) -> tuple:
+        """(checks, problems) for a run's membership in its experiment, or ([], []) if none."""
+        if not run.experiment_id:
+            return [], []
+        checks: list[IntegrityCheck] = []
+        experiment = self.store.get(run.experiment_id)
+        arm = self.arm_of(experiment, run.ablation_id)
+        if arm is None:
+            return [], [f"ablation {run.ablation_id} is not an arm of {experiment.id}"]
+        problems = self.verify_experiment_run(run, experiment, arm)
+        checks.append(make_check(
+            "experiment_contract", not problems,
+            f"{experiment.id} arm {arm.arm_id} ({arm.scale}, {arm.node_budget} nodes, {arm.prefix_size} rows)"
+            if not problems else "; ".join(problems)))
+        return checks, problems
+
+    def expected_membership(self, experiment) -> dict:
+        """The Cartesian product the study declared: every (ablations x seeds) cell.
+
+        Derived from the FROZEN design, not from whatever runs happen to exist, so a partial
+        study cannot masquerade as a complete one.
+        """
+        keys: dict = {}
+        for arm in experiment.arms:
+            if not arm.ablations:
+                raise LabError(f"arm {arm.arm_id} lists no ablations; expected membership cannot "
+                               "be derived from this design")
+            for ablation_id in arm.ablations:
+                for seed in experiment.seeds:
+                    key = (ablation_id, int(seed))
+                    if key in keys:
+                        raise LabError(f"cell {key} is claimed by two arms "
+                                       f"({keys[key]['arm_id']} and {arm.arm_id})")
+                    keys[key] = {"arm_id": arm.arm_id, "seed": int(seed), "scale": arm.scale,
+                                 "node_budget": arm.node_budget}
+        return keys
+
+    def membership_report(self, experiment) -> dict:
+        """Exactly one terminal run per expected cell, no duplicates, no extras."""
+        expected = self.expected_membership(experiment)
+        runs = [r for r in self.store.list("R", verify=True, kind=Run)
+                if r.experiment_id == experiment.id]
+        by_key: dict = {}
+        for run in runs:
+            by_key.setdefault((run.ablation_id, run.seed), []).append(run)
+        missing = sorted(key for key in expected if key not in by_key)
+        duplicates = {f"{key[0]}:{key[1]}": [r.id for r in value]
+                      for key, value in by_key.items() if len(value) > 1}
+        extra = sorted(key for key in by_key if key not in expected)
+        nonterminal = sorted(run.id for run in runs if run.status not in TERMINAL_RUN_STATUSES)
+        completed = sorted(key for key, value in by_key.items()
+                           if len(value) == 1 and value[0].status == RunStatus.COMPLETED)
+        invalid = sorted(key for key, value in by_key.items()
+                         if len(value) == 1 and value[0].status == RunStatus.INVALID)
+        return {"experiment": experiment.id, "expected_cells": len(expected), "runs_found": len(runs),
+                "completed_cells": len(completed), "invalid_cells": len(invalid),
+                "missing": [[key[0], key[1]] for key in missing], "duplicates": duplicates,
+                "extra": [[key[0], key[1]] for key in extra], "nonterminal": nonterminal}
+
+    def assert_experiment_complete(self, experiment) -> dict:
+        """Fail closed unless the frozen matrix exists exactly once and is fully terminal."""
+        report = self.membership_report(experiment)
+        problems = []
+        if report["missing"]:
+            problems.append(f"{len(report['missing'])} expected cells have no run "
+                            f"(first: {report['missing'][0]})")
+        if report["duplicates"]:
+            problems.append(f"{len(report['duplicates'])} cells have more than one run "
+                            f"({list(report['duplicates'])[0]})")
+        if report["extra"]:
+            problems.append(f"{len(report['extra'])} runs are not in the design "
+                            f"(first: {report['extra'][0]})")
+        if report["nonterminal"]:
+            problems.append(f"{len(report['nonterminal'])} runs are not terminal "
+                            f"(first: {report['nonterminal'][0]})")
+        if problems:
+            raise LabError(f"{experiment.id} membership is not the frozen design: " + "; ".join(problems))
+        return report
+
+    def assert_experiment_runs(self, run_ids: Sequence[str]) -> str:
+        """Analysis-time gate: one experiment, complete membership, every contract intact."""
+        runs = [self.store.get_as(run_id, Run) for run_id in run_ids]
+        if not runs:
+            raise LabError("no runs to check")
+        experiments = {run.experiment_id for run in runs}
+        if len(experiments) != 1 or None in experiments:
+            raise LabError(f"runs span {sorted(str(e) for e in experiments)}; a comparison must stay "
+                           "inside one experiment")
+        experiment = self.store.get(next(iter(experiments)))
+        expected = self.expected_membership(experiment)
+        for run in runs:
+            arm = self.arm_of(experiment, run.ablation_id)
+            if arm is None:
+                raise LabError(f"{run.id}: ablation {run.ablation_id} is not an arm of {experiment.id}")
+            if (run.ablation_id, run.seed) not in expected:
+                raise LabError(f"{run.id}: cell ({run.ablation_id}, {run.seed}) is not in the design")
+            problems = self.verify_experiment_run(run, experiment, arm)
+            if problems:
+                raise LabError(f"{run.id}: " + "; ".join(problems))
+        # a comparison inside a study is only meaningful when the whole frozen matrix exists
+        self.assert_experiment_complete(experiment)
+        self.assert_runs_comparable([run.id for run in runs])
+        return experiment.id
+
+    def seal_experiment(self, experiment_id: str, result: Mapping[str, object]) -> "Experiment":
+        from .schemas import Experiment
+
+        experiment: Experiment = self.store.get_as(experiment_id, Experiment)
+        membership = self.assert_experiment_complete(experiment)   # no sealing a partial study
+        experiment.status = "SEALED"
+        experiment.result = {**dict(result), "membership": membership,
+                             "expected_run_count": experiment.expected_run_count}
+        experiment.state_history = list(experiment.state_history) + [
+            StateChange(state=EvidenceState.PROPOSED, at=utc_now(), reason="result sealed")]
+        return self.store.update_experiment(experiment)
 
     def evaluation_spec_hash(self, run: Run) -> str:
         """The evaluation TargetSpec that judged this run, read from the protocol it pins.
