@@ -163,12 +163,18 @@ def main() -> int:
 
     candidates = [{"record_id": record_id, "group": group_of[record_id], "train_eligible": True}
                   for record_id in sorted(group_of) if eligible.get(record_id, False)]
+    raw_counts = {arm: len(ids) for arm, ids in selection.items()}
+    if raw_counts["deep"] != raw_counts["uniform"]:
+        raise RuntimeError(f"recorded arms are not row-matched at the source: {raw_counts}; "
+                           "a recorded mismatch must abort, never be repaired by truncation")
     existing_candidates = {row["record_id"] for row in candidates}
     selection = {arm: [rid for rid in ids if rid in existing_candidates]
                  for arm, ids in selection.items()}
-    if len(selection["deep"]) != len(selection["uniform"]):
-        trimmed = min(len(selection["deep"]), len(selection["uniform"]))
-        selection["deep"], selection["uniform"] = selection["deep"][:trimmed], selection["uniform"][:trimmed]
+    joined_counts = {arm: len(ids) for arm, ids in selection.items()}
+    if joined_counts["deep"] != joined_counts["uniform"]:
+        raise RuntimeError(f"arms are not row-matched after the game-aware join: "
+                           f"raw {raw_counts} -> joined {joined_counts}; aborting instead of trimming")
+    log("arm_counts", {"raw": raw_counts, "joined": joined_counts})
     universe = freeze_universe(source_id=cached("pool")["source"], normalization_id=normalization_id,
                                funnel_run_id=funnel_run_id, policy_version="priority-v1",
                                policy_hash=policy_hash, candidates=candidates, deep_nodes=deep_nodes,
