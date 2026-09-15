@@ -39,7 +39,7 @@ EXPECTED_PARAMS = {1: 771, 4: 3081, 16: 12321, 32: 24641}
 # part of the campaign identity because changing it changes admissibility
 COMPUTE_PARITY_TOLERANCE = 0.02
 
-TARGET_SEMANTICS = "eval_cp sigmoid target, LAMBDA=1.0, K=256 (RAW-768 family)"
+TARGET_SEMANTICS = ("frozen TargetSpec supervision — the completed S6 campaign used search_deep_cp targets (value.targets.scoreCpStm, stm POV, 400k-node budget) with sigmoid(cp/K), K=256, LAMBDA=1; the governing identity is the TargetSpec hash pinned in T#### and E####")
 COLD_START_POLICY = "cold-start; no legacy warm start"
 
 PREREGISTRATION = {

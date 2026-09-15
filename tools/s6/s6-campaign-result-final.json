@@ -228,5 +228,287 @@
   },
   "method": "width x strategy = difference of paired effects between widths, blocked by seed"
  },
- "decision": "INCONCLUSIVE"
+ "decision": "INCONCLUSIVE",
+ "cell_bindings": {
+  "H01-PRIORITY-s0": {
+   "run_id": "R0049",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s1": {
+   "run_id": "R0050",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s2": {
+   "run_id": "R0051",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s3": {
+   "run_id": "R0052",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s4": {
+   "run_id": "R0053",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s0": {
+   "run_id": "R0054",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s1": {
+   "run_id": "R0055",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s2": {
+   "run_id": "R0056",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s3": {
+   "run_id": "R0057",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s4": {
+   "run_id": "R0058",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s0": {
+   "run_id": "R0059",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s1": {
+   "run_id": "R0060",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s2": {
+   "run_id": "R0061",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s3": {
+   "run_id": "R0062",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s4": {
+   "run_id": "R0063",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s0": {
+   "run_id": "R0064",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s1": {
+   "run_id": "R0065",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s2": {
+   "run_id": "R0066",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s3": {
+   "run_id": "R0067",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s4": {
+   "run_id": "R0068",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s0": {
+   "run_id": "R0069",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s1": {
+   "run_id": "R0070",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s2": {
+   "run_id": "R0071",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s3": {
+   "run_id": "R0072",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s4": {
+   "run_id": "R0073",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s0": {
+   "run_id": "R0074",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s1": {
+   "run_id": "R0075",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s2": {
+   "run_id": "R0076",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s3": {
+   "run_id": "R0077",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s4": {
+   "run_id": "R0078",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s0": {
+   "run_id": "R0079",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s1": {
+   "run_id": "R0080",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s2": {
+   "run_id": "R0081",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s3": {
+   "run_id": "R0082",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s4": {
+   "run_id": "R0083",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s0": {
+   "run_id": "R0084",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s1": {
+   "run_id": "R0085",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s2": {
+   "run_id": "R0086",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s3": {
+   "run_id": "R0087",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s4": {
+   "run_id": "R0088",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  }
+ }
 }

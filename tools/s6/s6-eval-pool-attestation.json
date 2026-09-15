@@ -1,0 +1,177 @@
+{
+ "chain": {
+  "rawPoolPositionsSha256": "sha256:154903993196ebefe86e87a1dd66ec6cbfa5ed64b84227cd075a5ff31e9f46e8",
+  "rawPoolRowCount": 1248,
+  "regenerationEqualsRecordedRawPool": true,
+  "snapshotFileSha256": "sha256:db08cb6983c99341908c14653ba9890aa5699f74da905be1f649dff49c111c44",
+  "snapshotGames": 40,
+  "snapshotIsExactProjectionOfRawPool": true,
+  "snapshotProjectionSha256": "sha256:db08cb6983c99341908c14653ba9890aa5699f74da905be1f649dff49c111c44",
+  "snapshotRecordedContentHash": "sha256:db08cb6983c99341908c14653ba9890aa5699f74da905be1f649dff49c111c44",
+  "snapshotRows": 1248
+ },
+ "config": {
+  "diversification_candidates": 3,
+  "diversification_node_budget": 2000,
+  "diversification_plies": [
+   8,
+   10,
+   12
+  ],
+  "diversification_window_cp": 25,
+  "games": 40,
+  "generator": "cvslab.pool.selfplay",
+  "generator_version": 1,
+  "max_plies": 70,
+  "min_ply": 6,
+  "openingSourceSha256": "sha256:c54cc539f3989d2e8ea2ef1ffeef5b9051158a818b839ea76c23fafc2c4350f2",
+  "play_node_budget": 20000,
+  "sample_every": 2,
+  "seed": 777001
+ },
+ "configSha256": "sha256:0b2fbb7ad2dcd82b3129d9e5ef61b16223f9feff2a4cae97f11e3677ac848ab4",
+ "defect": "the S#### generator block recorded placeholder provenance (engineCommit='pinned', netHashes='{}', engineMissingFiles='[]')",
+ "engine": {
+  "args": [
+   "--depth",
+   "64",
+   "--nnue",
+   "target-cvs/matrix-raw.json",
+   "--nnue-cal",
+   "nets/eval-cal.json",
+   "--helper-nnue",
+   "target-cvs/matrix-residual.json"
+  ],
+  "binary": "target/release/analyze.exe",
+  "binarySha256": "sha256:36e9b1592858939cf88233bf99d367e3ea9c43a044f342f69792d49a17d09838",
+  "commit": "91df20b888efb906e3b168207ae3bbda06ee5b00",
+  "engineRoot": "F:\\Github\\chess-vision-studio-rust-engine",
+  "missingFiles": [],
+  "netHashes": {
+   "--helper-nnue": "sha256:d2a98888ad83a356cc1aa1a5a74086fa9741247ccd676086f0db9d022693fcfc",
+   "--nnue": "sha256:b23c75b8e25d7480038f270255b3625556ecbdb1d53964cd60719871ff47c4e1",
+   "--nnue-cal": "sha256:89e79a1b7aa8fc510c7c8925eed9d505373738cf5190b7be347fef9b15651fd6"
+  }
+ },
+ "heldOutOpeningHash": "b99347f6f332b664c193f5eae982947945955537f38f0aad5a1065bdc83ef490",
+ "heldOutOpenings": [
+  {
+   "moves": [
+    "f2f4",
+    "d7d5",
+    "g1f3",
+    "g8f6",
+    "e2e3",
+    "e7e6"
+   ],
+   "name": "eval-bird"
+  },
+  {
+   "moves": [
+    "b2b3",
+    "e7e5",
+    "c1b2",
+    "b8c6",
+    "e2e3",
+    "g8f6"
+   ],
+   "name": "eval-nimzo-larsen"
+  },
+  {
+   "moves": [
+    "e2e4",
+    "d7d6",
+    "d2d3",
+    "g8f6",
+    "g1f3",
+    "g7g6"
+   ],
+   "name": "eval-kia"
+  },
+  {
+   "moves": [
+    "d2d4",
+    "g8f6",
+    "c1g5",
+    "e7e6",
+    "e2e4",
+    "h7h6"
+   ],
+   "name": "eval-trompowsky"
+  },
+  {
+   "moves": [
+    "d2d4",
+    "f7f5",
+    "g2g3",
+    "g8f6",
+    "f1g2",
+    "e7e6"
+   ],
+   "name": "eval-dutch"
+  },
+  {
+   "moves": [
+    "e2e4",
+    "d7d5",
+    "e4d5",
+    "d8d5",
+    "b1c3",
+    "d5a5"
+   ],
+   "name": "eval-scandinavian"
+  },
+  {
+   "moves": [
+    "e2e4",
+    "g8f6",
+    "e4e5",
+    "f6d5",
+    "d2d4",
+    "d7d6"
+   ],
+   "name": "eval-alekhine"
+  },
+  {
+   "moves": [
+    "e2e4",
+    "g7g6",
+    "d2d4",
+    "f8g7",
+    "b1c3",
+    "d7d6"
+   ],
+   "name": "eval-modern"
+  },
+  {
+   "moves": [
+    "e2e4",
+    "e7e5",
+    "g1f3",
+    "g8f6",
+    "f3e5",
+    "d7d6"
+   ],
+   "name": "eval-petroff"
+  },
+  {
+   "moves": [
+    "d2d4",
+    "c7c5",
+    "d4d5",
+    "e7e6",
+    "c2c4",
+    "f8d6"
+   ],
+   "name": "eval-benoni"
+  }
+ ],
+ "notes": [
+  "configSha256 and openingSourceSha256 in the attestation equal the values already recorded in S0009.",
+  "the attested manifest's own manifestSha256 differs from S0009's recorded manifestSha256 only because the engine identity block is now truthful.",
+  "S0009 remains unchanged and immutable; this attestation, not a rewrite, carries the corrected provenance."
+ ],
+ "openingSourceSha256": "sha256:c54cc539f3989d2e8ea2ef1ffeef5b9051158a818b839ea76c23fafc2c4350f2",
+ "repair": "byte-identical provenance attestation: the raw pool was re-derived deterministically from the recorded generator configuration with the real teacher identity, and the consumed snapshot was verified to be the exact projection of that pool. No campaign result was recomputed.",
+ "subject": "S0009 (s6-eval-pool-0) \u2014 independent evaluation source for the S6 campaign (normalization N0010, 200 of 575 clean candidates, seed 777001)"
+}
