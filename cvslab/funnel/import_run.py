@@ -47,7 +47,7 @@ def _optional(directory: Path, name: str) -> list[dict]:
     return _read_jsonl(path) if path.is_file() else []
 
 
-def _row_outcome(row: dict):
+def row_outcome(row: dict):
     """gameOutcome (or res) with falsy values preserved: 0.0 is a real loss, not missing.
 
     Legacy shape note: `positions.jsonl` carries ``gameOutcome`` as
@@ -91,8 +91,13 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     if not positions:
         raise LabError(f"{directory} has no positions.jsonl rows")
 
-    analyze_sha = str((manifest.get("engine") or {}).get("binarySha256") or "")
-    sf_sha = str((manifest.get("stockfish") or {}).get("binarySha256") or "")
+    # Modern (lab-shaped) manifest names first, legacy names as fallback: provenance must
+    # never be silently lost just because a run was produced by the S4 orchestrator.
+    engine_block = manifest.get("engine") or {}
+    analyze_sha = str(engine_block.get("analyzeSha256") or engine_block.get("binarySha256") or "")
+    oracle_block = manifest.get("oracle") or {}
+    sf_sha = str(oracle_block.get("providerHash")
+                 or (manifest.get("stockfish") or {}).get("binarySha256") or "")
     registry_version = int(next((r.get("factsRegistryVersion") or 0 for r in tier0.values()), 0) or 0)
 
     # -- L0: candidate pool ------------------------------------------------------
@@ -100,7 +105,7 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     game_grouping = "explicit" if all(explicit for _game, explicit in grouped) else         "unknown (run carries no game identity; source_ref retained for recovery; "         "leakage-safe freezing refused until grouping is repaired or shared-group mode is chosen)"
     pool_rows = []
     for row, (game, explicit) in zip(positions, grouped):
-        pool_row = {"fen": row["fen"], "res": _row_outcome(row),
+        pool_row = {"fen": row["fen"], "res": row_outcome(row),
                     "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))}
         if explicit:
             pool_row["game"] = game
@@ -218,25 +223,43 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     add_set("oracle_cp", "external.stockfish", sf_sha or "stockfish", oracle_rows, pov="stm")
 
     # outcome (own authority, white POV)
-    outcome_rows = [{"record_id": record_id, "value": float(_row_outcome(row)),
+    outcome_rows = [{"record_id": record_id, "value": float(row_outcome(row)),
                      "note": "funnel gameOutcome"} for record_id, row in keyed.items()
-                    if _row_outcome(row) is not None]
+                    if row_outcome(row) is not None]
     add_set("outcome", OUTCOME_AUTHORITY, "legacy.funnel.sample", outcome_rows)
 
     # triage -> priority (per-record evidence only; policy identity belongs to S3/#15)
-    from .policy import build_policy, store_policy
+    from .policy import prepare_policy, store_policy
 
-    policy_version = str(manifest.get("prioritizerVersion") or "unknown")
+    policy_version = str(manifest.get("prioritizerVersion") or manifest.get("policyVersion") or "unknown")
     policy_digest = None
     config_path = directory / "funnel-config.json"
     if config_path.is_file():
         from ..store import LabError as _LabError
         try:
-            policy_digest = store_policy(store, build_policy(
-                json.loads(config_path.read_text(encoding="utf-8")), policy_version=policy_version))
-        except _LabError as exc:
-            policy_digest = None  # run predates or omits the triage config; reported, never guessed
-            policy_note = str(exc)
+            _policy, policy_digest = prepare_policy(
+                json.loads(config_path.read_text(encoding="utf-8")),
+                artifact_root=str(directory), store=store)
+        except (_LabError, ValueError, OSError) as exc:
+            # missing/corrupt config or prior: reconstructed = nothing. A run WITHOUT a pinned
+            # hash keeps the soft note (older runs may predate triage config); a pinned run
+            # fails closed below.
+            policy_digest = None
+            policy_note = f"policy reconstruction failed: {exc}"
+        pinned_hash = manifest.get("policyHash")
+        if pinned_hash and policy_digest is None:
+            # A pinned run whose decision rule cannot be reconstructed at all (missing or
+            # corrupt config/prior) must fail closed, not fall back to unlabelled provenance.
+            raise LabError(
+                f"run manifest pins policyHash {pinned_hash} but its policy could not be reconstructed "
+                f"from the run directory ({policy_note}); refusing to import evidence whose decision "
+                "rule is unreproducible")
+        if policy_digest is not None and pinned_hash and policy_digest != pinned_hash:
+            # loud, not soft: importing evidence whose decision rule cannot be reproduced
+            # from its own pinned policy would break the provenance chain
+            raise LabError(
+                f"policy hash mismatch: run manifest pins {pinned_hash} but the run's config "
+                f"rebuilds to {policy_digest}; refusing to import this evidence")
     priority_rows = []
     policy_note = locals().get("policy_note")
     for record_id, row in keyed.items():

@@ -44,7 +44,10 @@ def build_policy(config: dict, *, policy_version: Optional[str] = None,
                        "coverage prior can be content-addressed instead of merely referenced by path")
     prior_identity = None
     if prior_path:
-        prior_identity = {"source_path": str(prior_path), "counts_hash": prior_counts_hash(prior_counts)}
+        # Content identity only: the policy must be reconstructible from the run directory
+        # alone, so a location (which differs between the original file and the run-local
+        # copy) is never part of the scientific identity.
+        prior_identity = {"counts_hash": prior_counts_hash(prior_counts)}
     return {
         "policy_version": policy_version or config.get("prioritizerVersion") or "priority-v1",
         "seed": int(config["seed"]),
@@ -108,3 +111,43 @@ def load_policy(store: Store, digest: str) -> dict:
 def policies_dir(store: Store) -> list[Path]:
     folder = store.abs(POLICY_DIR)
     return sorted(folder.glob("*.json")) if folder.is_dir() else []
+
+
+def resolve_prior_counts(config: dict, *, artifact_root=None) -> tuple[dict, str]:
+    """Resolve a configured coverage prior **explicitly**: (counts, resolved_path).
+
+    Relative paths resolve against the artifact root (for a run directory, that puts
+    the run-local copy first). Missing or malformed files raise LabError.
+    """
+    import json
+    from pathlib import Path as _Path
+
+    tier2 = config.get("tiers", {}).get("tier2", {})
+    prior_path = (tier2.get("coverage") or {}).get("priorCountsPath")
+    if not prior_path:
+        raise LabError("no coverage prior configured")
+    resolved = _Path(prior_path)
+    if not resolved.is_absolute() and artifact_root:
+        resolved = _Path(artifact_root) / prior_path
+    if not resolved.is_file():
+        raise LabError(f"coverage prior not found: {resolved} (configured as {prior_path})")
+    try:
+        counts = json.loads(resolved.read_text(encoding="utf-8"))["counts"]
+    except (KeyError, ValueError) as exc:
+        raise LabError(f"coverage prior {resolved} is malformed: {exc}") from None
+    return counts, str(resolved)
+
+
+def prepare_policy(config: dict, *, artifact_root=None, store=None):
+    """Build the run's policy, resolving a configured coverage prior **explicitly**.
+
+    A non-null ``priorCountsPath`` is read (relative to the artifact root when not
+    absolute); its content hash becomes part of the policy identity. Returns
+    (policy, stored_policy_hash_if_store_given).
+    """
+    tier2 = config.get("tiers", {}).get("tier2", {})
+    prior_path = (tier2.get("coverage") or {}).get("priorCountsPath")
+    prior_counts = resolve_prior_counts(config, artifact_root=artifact_root)[0] if prior_path else None
+    policy = build_policy(config, prior_counts=prior_counts)
+    digest = store_policy(store, policy) if store is not None else None
+    return policy, digest

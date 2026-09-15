@@ -216,6 +216,14 @@ class AnalyzeFactsProvider:
     def producer_hash(self) -> str:
         return self.transport.analyze_sha256  # full
 
+    @property
+    def taxonomy_sha256(self) -> str:
+        return self.transport.taxonomy_sha256  # full; Tier-0 semantics depend on it
+
+    @property
+    def taxonomy_schema_version(self):
+        return self.transport.taxonomy.get("schemaVersion")
+
     def label(self, position: Position, *, options: Optional[dict] = None) -> LabelBatch:
         """Search-free: the lexicographically first legal move is passed because the
         position-level ``before`` block does not depend on the played move (same
