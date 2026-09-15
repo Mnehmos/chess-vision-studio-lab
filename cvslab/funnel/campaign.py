@@ -84,11 +84,20 @@ class CampaignPlan:
     target_semantics: str = TARGET_SEMANTICS
     compute_parity_tolerance: float = COMPUTE_PARITY_TOLERANCE
 
-    def controls_hash(self, split_policy_hash: str) -> str:
-        """Identity of every control a cell must share with its paired cells."""
+    def controls_hash(self, split_policy_hash: str, *, recipe_id: Optional[str] = None,
+                      recipe_hash: Optional[str] = None,
+                      eval_semantics_hash: Optional[str] = None) -> str:
+        """Identity of every control a cell must share with its paired cells.
+
+        Pass the real lab identities when they exist: `recipe_id`/`recipe_hash` from the
+        frozen T#### and `eval_semantics_hash` = the E#### protocol's semantics with the
+        dataset binding removed (arms necessarily bind different D####). Without them the
+        planner-level dictionary is used, which is weaker and only valid pre-freeze.
+        """
         return hash_obj({
-            "recipe_params": dict(sorted(self.recipe_params.items())),
-            "eval_suite": self.eval_suite,
+            "recipe": {"id": recipe_id, "hash": recipe_hash,
+                       "params": dict(sorted(self.recipe_params.items()))},
+            "eval": {"semantics_hash": eval_semantics_hash, "suite": self.eval_suite},
             "split_policy_hash": split_policy_hash,
             "target_semantics": self.target_semantics,
             "init_policy": self.init_policy,
@@ -207,9 +216,12 @@ def freeze_universe(*, source_id: str, normalization_id: str, funnel_run_id: str
         record_id, component = record["record_id"], record.get("group") or ""
         if not component or component.endswith(":UNKNOWN"):
             raise LabError(f"{record_id}: candidate has unknown grouping; splits would be unsafe")
+        if not bool(record.get("train_eligible", True)):
+            raise LabError(f"{record_id}: candidate universe must contain only train-eligible records; "
+                           "holdouts cannot enter the candidate-universe hash")
         candidate_ids.append(record_id)
         components[record_id] = component
-        eligibility[record_id] = bool(record.get("train_eligible", True))
+        eligibility[record_id] = True
     if len(candidate_ids) != len(set(candidate_ids)):
         raise LabError("candidate universe contains duplicate record identities")
     candidate_set = set(candidate_ids)
@@ -245,10 +257,12 @@ def freeze_universe(*, source_id: str, normalization_id: str, funnel_run_id: str
                     split_by_component=split_by_component)
 
 
-def compute_parity(universe: Universe, *, tolerance: Optional[float] = None) -> dict:
-    """Measured deep-label compute of the RECORDED arms, under a pre-registered tolerance."""
-    if tolerance is None:
-        tolerance = COMPUTE_PARITY_TOLERANCE
+def compute_parity(universe: Universe, *, tolerance: float) -> dict:
+    """Measured deep-label compute of the RECORDED arms under the plan's declared tolerance.
+
+    `tolerance` is mandatory so a campaign cannot declare one tolerance in its hashed
+    identity and accidentally execute another; pass `plan.compute_parity_tolerance`.
+    """
     totals = {arm: sum(universe.deep_nodes_by_id[record_id] for record_id in ids)
               for arm, ids in universe.arms.items()}
     priority, uniform = totals["PRIORITY"], totals["UNIFORM"]
@@ -279,13 +293,20 @@ def split_identity(universe: Universe) -> dict:
 _T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228}
 
 
-def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int, float]) -> dict:
-    """Per-width primary estimate: paired seed-level differences (same seeds both arms)."""
+def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int, float],
+                  *, seeds: tuple[int, ...] = DEFAULT_SEEDS) -> dict:
+    """Per-width primary estimate: paired differences over the PREREGISTERED seed set.
+
+    Seeds are not intersected silently: a missing seed means a failed cell, which must
+    be reported INVALID rather than shrinking the analysis.
+    """
     import math
 
-    shared = sorted(set(priority_by_seed) & set(uniform_by_seed))
-    if len(shared) < 2:
-        raise LabError("paired effect needs at least two shared seeds")
+    missing = [seed for seed in seeds if seed not in priority_by_seed or seed not in uniform_by_seed]
+    if missing:
+        raise LabError(f"paired effect requires every preregistered seed; missing {missing} "
+                       "(report those cells INVALID instead of dropping them)")
+    shared = sorted(seeds)
     differences = [priority_by_seed[seed] - uniform_by_seed[seed] for seed in shared]
     n = len(differences)
     mean = sum(differences) / n
@@ -298,7 +319,13 @@ def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int,
 
 
 def interaction_effects(effects_by_width: dict[int, dict]) -> dict:
-    """Width x strategy: differences of paired effects between widths, blocked by seed."""
+    """Width x strategy interaction, genuinely blocked by seed.
+
+    Each seed contributes its own contrast d_H_high(seed) - d_H_low(seed), taken from the
+    seed-level paired differences; uncertainty is computed over those contrasts.
+    """
+    import math
+
     widths = sorted(effects_by_width)
     if len(widths) < 2:
         raise LabError("interaction needs at least two widths")
@@ -306,21 +333,56 @@ def interaction_effects(effects_by_width: dict[int, dict]) -> dict:
     for index in range(1, len(widths)):
         low, high = widths[index - 1], widths[index]
         low_effect, high_effect = effects_by_width[low], effects_by_width[high]
-        shared = sorted(set(low_effect["seeds"]) & set(high_effect["seeds"]))
-        per_seed = {seed: high_effect["width_estimate"] - low_effect["width_estimate"] for seed in shared}
+        if low_effect["seeds"] != high_effect["seeds"]:
+            raise LabError(f"H{low} and H{high} were not evaluated on the same seed set")
+        low_by_seed = dict(zip(low_effect["seeds"], low_effect["differences"]))
+        high_by_seed = dict(zip(high_effect["seeds"], high_effect["differences"]))
+        per_seed = {seed: high_by_seed[seed] - low_by_seed[seed] for seed in low_effect["seeds"]}
+        contrasts = [per_seed[seed] for seed in low_effect["seeds"]]
+        n = len(contrasts)
+        mean = sum(contrasts) / n
+        variance = sum((value - mean) ** 2 for value in contrasts) / (n - 1) if n > 1 else 0.0
+        standard_error = math.sqrt(variance / n) if n > 1 else 0.0
+        critical = _T95.get(n - 1, 1.96)
         pairs[f"H{low}->H{high}"] = {
-            "delta": high_effect["width_estimate"] - low_effect["width_estimate"],
-            "per_seed": per_seed, "n": len(shared),
+            "delta": mean, "ci_low": mean - critical * standard_error,
+            "ci_high": mean + critical * standard_error,
+            "per_seed": per_seed, "n": n,
         }
     return {"pairs": pairs, "method": PREREGISTRATION["interaction"]}
 
 
-def decide(effects_by_width: dict[int, dict]) -> str:
-    """The pre-registered decision rule; a win at one width is not sufficient."""
-    if not effects_by_width:
-        raise LabError("no width effects to decide on")
-    if all(effect["ci_high"] < 0 for effect in effects_by_width.values()):
+def decide(effects_by_width: dict[int, dict], *, required_widths: tuple[int, ...] = WIDTHS) -> str:
+    """The pre-registered decision rule over the FULL width set.
+
+    A win at one width is not sufficient, and missing widths are not silently
+    ignored: incomplete evidence is refused so the caller must mark those cells
+    INVALID explicitly instead of letting them disappear.
+    """
+    missing = [width for width in required_widths if width not in effects_by_width]
+    if missing:
+        raise LabError(f"decision requires every preregistered width; missing {missing} "
+                       "(failed cells must be reported INVALID, not omitted)")
+    if all(effects_by_width[width]["ci_high"] < 0 for width in required_widths):
         return "SUPPORTED"
-    if all(effect["ci_low"] > 0 for effect in effects_by_width.values()):
+    if all(effects_by_width[width]["ci_low"] > 0 for width in required_widths):
         return "REJECTED"
     return "INCONCLUSIVE"
+
+
+def eval_semantics_hash(protocol) -> str:
+    """Evaluation semantics of an E#### protocol, excluding the dataset binding.
+
+    Two arms must bind different D#### manifests, so the protocols cannot be literally the
+    same E####; this hash proves split, metrics, params, bootstrap configuration and
+    protocol version are identical apart from that binding.
+    """
+    from ..schemas import EvaluationProtocol
+    if not isinstance(protocol, EvaluationProtocol):
+        raise LabError(f"expected an EvaluationProtocol, got {type(protocol).__name__}")
+    return hash_obj({
+        "split": protocol.split, "metrics": [m.model_dump(mode="json") for m in protocol.metrics],
+        "params": dict(sorted(protocol.params.items())),
+        "bootstrap_samples": protocol.bootstrap_samples, "bootstrap_seed": protocol.bootstrap_seed,
+        "protocol_version": protocol.protocol_version, "non_claims": list(protocol.non_claims),
+    })

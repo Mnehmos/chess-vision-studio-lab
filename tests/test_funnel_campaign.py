@@ -120,9 +120,11 @@ def test_universe_refuses_changed_population_and_missing_evidence():
                         candidates=candidates, deep_nodes=deep_nodes,
                         selections={"deep": sorted(deep_nodes)[:6], "uniform": sorted(deep_nodes)[6:8]},
                         split_seed=0)
-    with pytest.raises(LabError, match="non-train-eligible"):
-        ineligible = [dict(record, train_eligible=False) if record["record_id"] == selections["deep"][0]
-                      else record for record in candidates]
+    # ANY ineligible candidate is refused (not only selected ones): holdouts must never
+    # enter the candidate-universe hash
+    ineligible = [dict(record, train_eligible=False) if record["record_id"] == candidates[-1]["record_id"]
+                  else record for record in candidates]
+    with pytest.raises(LabError, match="train-eligible records"):
         freeze_universe(source_id="S0001", normalization_id="N0001", funnel_run_id="R0001",
                         policy_version="priority-v1", policy_hash=POLICY_HASH,
                         candidates=ineligible, deep_nodes=deep_nodes, selections=selections, split_seed=0)
@@ -179,13 +181,67 @@ def test_paired_effect_and_interaction_are_deterministic():
                4: paired_effect({s: 0.010 for s in range(5)}, {s: 0.012 for s in range(5)})}
     interaction = interaction_effects(effects)
     assert interaction["pairs"]["H1->H4"]["delta"] == pytest.approx(-0.001)
-    assert decide(effects) == "SUPPORTED"
+    full = {width: effects[1] for width in (1, 4, 16, 32)}
+    assert decide(full) == "SUPPORTED"  # the full preregistered width set
 
-    assert decide({1: {"ci_high": 0.001, "ci_low": -0.001, "width_estimate": 0.0, "seeds": [0]}}) == "INCONCLUSIVE"
-    assert decide({1: {"ci_low": 0.001, "ci_high": 0.002, "width_estimate": 0.0015, "seeds": [0]}}) == "REJECTED"
+    indecisive = {"ci_high": 0.001, "ci_low": -0.001, "width_estimate": 0.0, "seeds": [0], "differences": [0.0]}
+    assert decide({1: indecisive}, required_widths=(1,)) == "INCONCLUSIVE"
+    losing = {"ci_low": 0.001, "ci_high": 0.002, "width_estimate": 0.0015, "seeds": [0], "differences": [0.0015]}
+    assert decide({1: losing}, required_widths=(1,)) == "REJECTED"
 
 
 def test_preregistration_is_declared():
     assert set(PREREGISTRATION) >= {"primary_estimate", "uncertainty", "interaction", "decision", "scope"}
     assert "every width" in PREREGISTRATION["decision"]
     assert "not sufficient" in PREREGISTRATION["decision"]
+
+
+def test_decide_requires_the_full_preregistered_width_set():
+    effects = {width: {"ci_high": -0.001, "ci_low": -0.002, "width_estimate": -0.0015, "seeds": list(range(5)),
+                       "differences": [-0.0015] * 5} for width in (1, 4, 16, 32)}
+    assert decide(effects) == "SUPPORTED"
+    with pytest.raises(LabError, match="missing \[4, 16, 32\]"):
+        decide({1: effects[1]})  # a win at H=1 alone is not evidence
+
+
+def test_paired_effect_requires_every_preregistered_seed():
+    complete = {seed: 0.01 for seed in range(5)}
+    assert paired_effect(complete, {seed: 0.011 for seed in range(5)})["n"] == 5
+    with pytest.raises(LabError, match="missing \[4\]"):
+        paired_effect({seed: 0.01 for seed in range(4)}, {seed: 0.011 for seed in range(4)})
+
+
+def test_interaction_uses_real_seed_level_contrasts():
+    # H1: priority better by a constant; H4: the advantage shrinks per seed
+    priority_h1 = {seed: 0.010 for seed in range(5)}
+    uniform_h1 = {seed: 0.012 for seed in range(5)}          # d_H1 = -0.002 every seed
+    priority_h4 = {seed: 0.010 for seed in range(5)}
+    uniform_h4 = {seed: 0.011 + seed * 0.0001 for seed in range(5)}  # d_H4 varies by seed
+    effects = {1: paired_effect(priority_h1, uniform_h1), 4: paired_effect(priority_h4, uniform_h4)}
+    interaction = interaction_effects(effects)
+    per_seed = interaction["pairs"]["H1->H4"]["per_seed"]
+    expected = {seed: effects[4]["differences"][seed] - effects[1]["differences"][seed] for seed in range(5)}
+    assert per_seed == expected
+    assert len(set(per_seed.values())) > 1  # genuinely seed-level, not one aggregate contrast
+
+
+def test_compute_parity_requires_an_explicit_tolerance():
+    import inspect
+    signature = inspect.signature(compute_parity)
+    assert signature.parameters["tolerance"].default is inspect.Parameter.empty
+    with pytest.raises(TypeError):
+        compute_parity(make_universe())  # type: ignore[call-arg]
+
+
+def test_eval_semantics_hash_excludes_dataset_binding(lab, tmp_path):
+    from cvslab.funnel.campaign import eval_semantics_hash
+    source = lab.create_fixture_source(n_games=6, seed=1)
+    normalization = lab.normalize([source.id], name="n")
+    dataset_a = lab.freeze_dataset(normalization.id, name="a")
+    dataset_b = lab.freeze_dataset(normalization.id, name="b")
+    protocol_a = lab.create_eval_protocol(name="ea", dataset_id=dataset_a.id)
+    protocol_b = lab.create_eval_protocol(name="eb", dataset_id=dataset_b.id)
+    assert eval_semantics_hash(protocol_a) == eval_semantics_hash(protocol_b)  # same semantics
+    assert protocol_a.id != protocol_b.id and protocol_a.dataset_id != protocol_b.dataset_id
+    differing = lab.create_eval_protocol(name="ec", dataset_id=dataset_a.id, bootstrap_seed=7)
+    assert eval_semantics_hash(differing) != eval_semantics_hash(protocol_a)
