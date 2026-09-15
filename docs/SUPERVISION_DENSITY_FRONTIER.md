@@ -762,31 +762,55 @@ Paired seed differences (five seeds, t-CI df=4, t=2.776), negative favours the f
 | H16 | +0.000195 [−0.000747, +0.001137] | +0.000634 [−0.002386, +0.003653] | +0.000829 [−0.001927, +0.003585] |
 | H32 | **−0.001014 [−0.001918, −0.000111]** | −0.000586 [−0.002082, +0.000911] | **−0.001600 [−0.002743, −0.000456]** |
 
-Pooled `test_loss` is ≈0.043 for every arm, so the largest single-width effect is ≈15 % of
-the level and the typical effect is ≈1–2 %.
+Realized teacher cost of each arm, summed from the observations themselves (not nominal
+rows × budget — `tools/s7/s7_pilot_economics.py`, cross-checked against the deep-node total
+R0008 recorded, which it reproduces exactly):
+
+| arm | rows | budget | realized nodes | vs P1 | engine seconds |
+|---|---:|---:|---:|---:|---:|
+| P1 (reused S6 UNIFORM) | 94 | 400k | 37,285,491 | 1.00 | 30.75 |
+| P2 | 94 | 16k | 1,504,000 | 0.040 | — (shares the tier1 scan with the 2k search) |
+| P3 | 926 | 16k | 14,748,202 | **0.396** | — (same shared scan) |
+| P4 (exploratory) | 926 | 2k | 1,847,572 | 0.050 | — (same shared scan) |
+
+So the "~40 % of the compute" headline is confirmed by realized nodes (39.6 %), not
+assumed from configuration.
+
+Effect sizes relative to the ≈0.043 level: the largest single-width effect is `P_rows` at H4
+= +0.006657, i.e. **15.4 % of the level**; other resolving contrasts are −2.4 % (`P_depth`
+H32), +14.2 % (`P_econ` H4) and −3.7 % (`P_econ` H32); the unresolved ones span 0.4 %–9.5 %,
+and the two H1 contrasts near 9 % have intervals far wider than their estimates.
 
 **Reading (preregistered, per §4.3).**
 
-* `P_econ` = **NO_DETECTABLE_DIFFERENCE_AT_40_PERCENT_COMPUTE**: at 40 % of the teacher
-  compute and 9.9× the rows, the broad-shallow arm is not distinguishable from the
-  narrow-deep arm — but the two widths that do resolve point in *opposite* directions
-  (H4 favours narrow-deep at +0.0061, H32 favours broad-shallow at −0.0016), so the honest
-  statement is "cheaper was not worse", not "cheaper was better".
-* `P_depth`: no difference at H1/H4/H16; at H32 the **shallower 16k labels are better**.
-  400k supervision bought nothing measurable over 16k on these 94 rows.
-* `P_rows`: no difference at H1/H16/H32; at H4 the **larger set is worse** — and it is the
-  arm that received ~10× the optimizer steps (926 rows/256 batch × 40 epochs vs 94 rows) at
-  fixed epochs, which is the asymmetry declared in §6. Breadth did not win.
+* `P_econ` = **UNRESOLVED_AT_40_PERCENT_COMPUTE**: there was **no consistent all-width
+  advantage or disadvantage** at ~40 % of the teacher compute. H4 significantly favours
+  narrow-deep (+0.006130 [+0.001817, +0.010443]) and H32 significantly favours
+  broad-shallow (−0.001600 [−0.002743, −0.000456]); the two remaining widths are
+  unresolved. This is **not** a non-inferiority result: it does not show that the cheaper
+  regime is equally good, only that neither regime won at every width.
+* `P_depth`: **400k never showed an advantage over 16k.** Three widths are unresolved; at
+  H32 the shallower 16k labels are significantly *better* (−0.001014 [−0.001918,
+  −0.000111]). There is a measurable effect at H32 — in the opposite direction to the
+  hypothesis that deeper supervision teaches better.
+* `P_rows`: **no consistent row-count effect.** Three widths are unresolved; at H4 the
+  larger set is significantly *worse* (+0.006657 [+0.002564, +0.010749]) — and that is the
+  arm which received ~10× the optimizer steps (926 rows / 256 batch × 40 epochs vs 94 rows)
+  at fixed epochs, the asymmetry declared in §6. Breadth did not win.
 * Exploratory 2k arm (no decision authority): indistinguishable from 16k at three widths;
   at H16 the 2k arm leans better [−0.001128, +0.000132].
 
 **Teaching statement.** *We held the chess positions fixed and changed teacher depth; then
-held teacher depth fixed and changed the number of positions. Both changes moved
-`test_loss` by at most ~0.7 % relative on a 0.043 level, in contradictory directions across
-widths. This pilot cannot separate label precision from dataset breadth — it shows that at
-this scale neither is the binding constraint, which is why the matched-compute frontier
-(§5) is the experiment that decides it, and why the 40 %-cheaper regime is worth running
-there rather than assumed to be worse.*
+held teacher depth fixed and changed the number of positions. Depth never showed an
+advantage: 400k supervision beat 16k at no width, and at H32 the shallow labels were
+significantly better. Breadth did not show an advantage either: at H1, H16 and H32 the
+926-row arm was unresolved, and at H4 it was significantly worse despite ~10× the optimizer
+steps. The economically interesting arm — 926 rows of 16k labels, 39.6 % of the realized
+teacher nodes — had no consistent all-width advantage or disadvantage, which is a
+statement about inconsistency, not about equivalence. This pilot can therefore separate
+neither label precision nor dataset breadth from noise at this scale, which is exactly why
+the matched-compute frontier (§5) is the experiment that decides, and why running the
+cheaper regime inside that frontier is worth measuring rather than assuming.*
 
 **Non-claims.** Not matched compute. The 94-row arms are nested inside the 926-row arm by
 construction. Different widths disagree, so no width-pooled claim is made. Scope: this

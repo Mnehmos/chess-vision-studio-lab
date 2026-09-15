@@ -13,8 +13,10 @@
      -0.0014859708296680874,
      0.001212689488696496
     ],
+    "mean_level_of_both_arms": 0.042935,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.0036,
     "seeds": [
      0,
      1,
@@ -36,8 +38,10 @@
      -0.0004412499763379388,
      0.0002458458402192498
     ],
+    "mean_level_of_both_arms": 0.042935,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": 0.0045,
     "seeds": [
      0,
      1,
@@ -59,8 +63,10 @@
      -0.0020379103993338338,
      -0.000439337049028328
     ],
+    "mean_level_of_both_arms": 0.042935,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.0236,
     "seeds": [
      0,
      1,
@@ -82,8 +88,10 @@
      -0.0018433114429722217,
      0.0004208324416118195
     ],
+    "mean_level_of_both_arms": 0.042935,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.0123,
     "seeds": [
      0,
      1,
@@ -107,8 +115,10 @@
      0.0005271892501553105,
      0.005947725590177144
     ],
+    "mean_level_of_both_arms": 0.043278,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.095,
     "seeds": [
      0,
      1,
@@ -130,8 +140,10 @@
      0.0021676162301436513,
      -0.0016998399914864362
     ],
+    "mean_level_of_both_arms": 0.043278,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": 0.0192,
     "seeds": [
      0,
      1,
@@ -153,8 +165,10 @@
      -0.0008721665914272134,
      -0.0019363797588035428
     ],
+    "mean_level_of_both_arms": 0.043278,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.037,
     "seeds": [
      0,
      1,
@@ -176,8 +190,10 @@
      0.006327990205043002,
      0.011733678277045655
     ],
+    "mean_level_of_both_arms": 0.043278,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": 0.1416,
     "seeds": [
      0,
      1,
@@ -201,8 +217,10 @@
      0.002013160079823398,
      0.004735036101480648
     ],
+    "mean_level_of_both_arms": 0.043091,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.0918,
     "seeds": [
      0,
      1,
@@ -224,8 +242,10 @@
      0.00260886620648159,
      -0.001945685831705686
     ],
+    "mean_level_of_both_arms": 0.043091,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": 0.0147,
     "seeds": [
      0,
      1,
@@ -247,8 +267,10 @@
      0.0011657438079066204,
      -0.0014970427097752148
     ],
+    "mean_level_of_both_arms": 0.043091,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": -0.0136,
     "seeds": [
      0,
      1,
@@ -270,8 +292,10 @@
      0.008171301648015224,
      0.011312845835433835
     ],
+    "mean_level_of_both_arms": 0.043091,
     "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
     "n": 5,
+    "relative_to_level": 0.1545,
     "seeds": [
      0,
      1,
@@ -283,7 +307,7 @@
    }
   }
  },
- "economics": {
+ "economics_nominal": {
   "P1": {
    "budget": 400000,
    "relative_to_P1": 1.0,
@@ -307,6 +331,43 @@
    "relative_to_P1": 0.0493,
    "rows": 926,
    "teacher_nodes_estimate": 1852000
+  }
+ },
+ "economics_realized": {
+  "P1": {
+   "engine_seconds": 30.748,
+   "node_budget": 400000,
+   "realized_nodes": 37285491,
+   "relative_to_P1_realized": 1.0,
+   "rows": 94,
+   "source": "tier3 cost over the 94 uniform records"
+  },
+  "P2": {
+   "engine_seconds": null,
+   "node_budget": 16000,
+   "realized_nodes": 1504000,
+   "relative_to_P1_realized": 0.0403,
+   "rows": 94,
+   "source": "tier1 16k budget over the 94 uniform records",
+   "tier1_scan_seconds_combined_2k_and_16k": 2.036
+  },
+  "P3": {
+   "engine_seconds": null,
+   "node_budget": 16000,
+   "realized_nodes": 14748202,
+   "relative_to_P1_realized": 0.3955,
+   "rows": 926,
+   "source": "tier1 16k budget over the 926 train-eligible records",
+   "tier1_scan_seconds_combined_2k_and_16k": 19.832
+  },
+  "P4": {
+   "engine_seconds": null,
+   "node_budget": 2000,
+   "realized_nodes": 1847572,
+   "relative_to_P1_realized": 0.0496,
+   "rows": 926,
+   "source": "tier1 2k budget over the 926 train-eligible records",
+   "tier1_scan_seconds_combined_2k_and_16k": 19.832
   }
  },
  "exploratory": {
@@ -500,22 +561,20 @@
   }
  },
  "inventory_candidate_universe_hash": "sha256:67e781a0b5f4922c213b27518f42495a0aa28e1d1a1588df7726fa122ffe91dc",
+ "largest_effect": {
+  "absolute": 0.006657,
+  "contrast": "P_rows",
+  "relative_to_level": 0.1545,
+  "width": "4"
+ },
  "new_labels_bought": 0,
  "primary_endpoint": "test_loss on E0004/D0010",
  "reading": {
-  "P_depth_by_width": {
-   "1": "no difference",
-   "16": "no difference",
-   "32": "shallower 16k better",
-   "4": "no difference"
-  },
-  "P_econ": "NO_DETECTABLE_DIFFERENCE_AT_40_PERCENT_COMPUTE",
-  "P_rows_by_width": {
-   "1": "no difference",
-   "16": "no difference",
-   "32": "no difference",
-   "4": "fewer rows better"
-  }
+  "P_depth": "400k never showed an advantage over 16k: three widths unresolved, H32 significantly favoured the shallower 16k labels (-0.001014 [-0.001918, -0.000111])",
+  "P_econ": "UNRESOLVED_AT_40_PERCENT_COMPUTE",
+  "P_econ_qualifier": "no consistent all-width advantage or disadvantage at ~40 % of the teacher compute; H4 significantly favours narrow-deep (+0.006130) and H32 significantly favours broad-shallow (-0.001600). This is NOT a non-inferiority claim, and it is not a claim that the cheaper regime is equally good.",
+  "P_rows": "no consistent row-count effect: three widths unresolved, H4 significantly favoured the smaller 94-row set (+0.006657 [+0.002564, +0.010749])",
+  "magnitudes": "pooled test_loss is ~0.043 per arm; the largest single-width effect is P_rows at H4 = 0.006657, i.e. 15.4 % of that level; the other resolving contrasts are 2.4 %-14.2 % in absolute value, and the unresolved ones span 0.4 %-9.5 % with intervals wider than their estimates"
  },
  "reused_cells": [
   "R0054",

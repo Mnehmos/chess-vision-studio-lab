@@ -215,24 +215,36 @@ def analyze() -> int:
     for name, (a, b) in exploratory.items():
         report["exploratory"][name] = {str(width): {"a": a, "b": b, **effect(a, b, width)} for width in WIDTHS}
 
+    # The preregistered decision needs the TWO DECISIVE branches to hold at EVERY width; if
+    # they do not, the global result is unresolved — which is not the same as equivalence.
+    # Never word an unresolved result as "no difference" or "not worse".
     econ = report["contrasts"]["P_econ"]
     if all(econ[str(w)]["ci_high"] < 0 for w in WIDTHS):
-        reading = "BROAD_SHALLOW_BEATS_NARROW_DEEP_AT_40_PERCENT_COMPUTE"
+        reading = "BROAD_SHALLOW_WINS_AT_EVERY_WIDTH_AT_40_PERCENT_COMPUTE"
     elif all(econ[str(w)]["ci_low"] > 0 for w in WIDTHS):
-        reading = "DEPTH_IS_LOAD_BEARING_EVEN_AGAINST_9_9X_ROWS"
+        reading = "NARROW_DEEP_WINS_AT_EVERY_WIDTH_AT_40_PERCENT_COMPUTE"
     else:
-        reading = "NO_DETECTABLE_DIFFERENCE_AT_40_PERCENT_COMPUTE"
+        reading = "UNRESOLVED_AT_40_PERCENT_COMPUTE"
     depth = report["contrasts"]["P_depth"]
     rows = report["contrasts"]["P_rows"]
+
+    def label(cell, *, negative, positive):
+        if cell["ci_high"] < 0:
+            return negative
+        if cell["ci_low"] > 0:
+            return positive
+        return "unresolved"
+
     report["reading"] = {
         "P_econ": reading,
+        "P_econ_qualifier": ("no consistent all-width advantage or disadvantage at ~40 % of the teacher "
+                             "compute; this is NOT a non-inferiority claim"),
         # P_depth = (16k) - (400k): a NEGATIVE difference means the shallower labels did better
-        "P_depth_by_width": {str(w): ("shallower 16k better" if depth[str(w)]["ci_high"] < 0 else
-                                      "deeper 400k better" if depth[str(w)]["ci_low"] > 0 else "no difference")
-                             for w in WIDTHS},
-        "P_rows_by_width": {str(w): ("more rows better" if rows[str(w)]["ci_high"] < 0 else
-                                     "fewer rows better" if rows[str(w)]["ci_low"] > 0 else "no difference")
-                            for w in WIDTHS},
+        "P_depth_by_width": {str(w): label(depth[str(w)], negative="shallower 16k better",
+                                           positive="deeper 400k better") for w in WIDTHS},
+        "P_rows_by_width": {str(w): label(rows[str(w)], negative="fewer rows better",
+                                          positive="more rows better") for w in WIDTHS},
+        "note": "realized node totals and the sealed reading are written by tools/s7/s7_pilot_economics.py",
     }
 
     labels = {"P1": {"rows": 94, "budget": 400000}, "P2": {"rows": 94, "budget": 16000},
