@@ -47,7 +47,7 @@ def _optional(directory: Path, name: str) -> list[dict]:
     return _read_jsonl(path) if path.is_file() else []
 
 
-def _row_outcome(row: dict):
+def row_outcome(row: dict):
     """gameOutcome (or res) with falsy values preserved: 0.0 is a real loss, not missing.
 
     Legacy shape note: `positions.jsonl` carries ``gameOutcome`` as
@@ -100,7 +100,7 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     game_grouping = "explicit" if all(explicit for _game, explicit in grouped) else         "unknown (run carries no game identity; source_ref retained for recovery; "         "leakage-safe freezing refused until grouping is repaired or shared-group mode is chosen)"
     pool_rows = []
     for row, (game, explicit) in zip(positions, grouped):
-        pool_row = {"fen": row["fen"], "res": _row_outcome(row),
+        pool_row = {"fen": row["fen"], "res": row_outcome(row),
                     "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))}
         if explicit:
             pool_row["game"] = game
@@ -218,9 +218,9 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     add_set("oracle_cp", "external.stockfish", sf_sha or "stockfish", oracle_rows, pov="stm")
 
     # outcome (own authority, white POV)
-    outcome_rows = [{"record_id": record_id, "value": float(_row_outcome(row)),
+    outcome_rows = [{"record_id": record_id, "value": float(row_outcome(row)),
                      "note": "funnel gameOutcome"} for record_id, row in keyed.items()
-                    if _row_outcome(row) is not None]
+                    if row_outcome(row) is not None]
     add_set("outcome", OUTCOME_AUTHORITY, "legacy.funnel.sample", outcome_rows)
 
     # triage -> priority (per-record evidence only; policy identity belongs to S3/#15)

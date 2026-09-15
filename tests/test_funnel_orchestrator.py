@@ -38,6 +38,8 @@ class StubFacts:
 
     provenance_class = "deterministic_geometry"
     producer_hash = "stubfacts" * 8
+    taxonomy_sha256 = "taxonomy" * 8
+    taxonomy_schema_version = 2
 
     def label(self, position: Position, *, options=None) -> LabelBatch:
         geometry, _first_move = board_geometry(position.fen)
@@ -76,10 +78,25 @@ class StubSearch:
                                                                   "qNodes": 0})
 
 
+class StubOracle:
+    provenance_class = "external_oracle"
+    producer_hash = "stuboracle" * 6
+
+    def __init__(self):
+        self.calls: list[tuple[int, int]] = []
+
+    def evaluate(self, position: Position, *, depth: int, movetime_ms: int):
+        from cvslab.funnel.protocols import OracleLabel
+        self.calls.append((depth, movetime_ms))
+        return OracleLabel(score_cp_stm=11, mate=None, best_move="e2e4", pv=("e2e4",),
+                           reached_depth=depth, nodes=1000, wall_ms=2.0)
+
+
 def make_pool(tmp_path: Path, count: int = 12) -> Path:
     """Three distinct opening lines cycling across games (so positions differ), plus one
     deliberate identity-duplicate to prove the pool stage dedups by position identity."""
     import chess
+    tmp_path.mkdir(parents=True, exist_ok=True)
     lines = [("e2e4", "e7e5", "g1f3", "b8c6", "f1b5", "a7a6"),
              ("d2d4", "d7d5", "c2c4", "e7e6", "b1c3", "g8f6"),
              ("c2c4", "e7e5", "b1c3", "g8f6", "g2g3", "d7d5")]
@@ -151,7 +168,89 @@ def test_cost_accounting_totals_match_stage_sums(tmp_path):
     stages = manifest["stages"]
     assert manifest["compute"]["engineSeconds"] == round(sum(s["engine_seconds"] for s in stages.values()), 4)
     assert manifest["compute"]["nodes"] == sum(s.get("nodes", 0) for s in stages.values())
-    assert stages["tier1"]["nodes"] > 0 and stages["tier3"]["processed"] > 0
+    assert stages["tier1"]["nodes"] > 0 and stages["tier3"]["processedThisInvocation"] > 0
+
+    # totals equal the sums over the stage FILES (not just this invocation)
+    import json as _json
+    tier1_rows = [_json.loads(line) for line in (tmp_path / "run" / "tier1.jsonl").read_text().splitlines()]
+    assert stages["tier1"]["nodes"] == sum(row["cost"]["nodes"] for row in tier1_rows)
+    assert stages["tier1"]["engine_seconds"] == round(sum(row["cost"]["wallMs"] for row in tier1_rows) / 1000.0, 4)
+
+
+def test_resume_manifest_reports_full_corpus_compute(tmp_path):
+    """A resumed run must not underreport: totals come from the files, so a run split
+    across two invocations reports exactly what a single clean invocation reports."""
+    clean = make_orchestrator(tmp_path / "clean")
+    clean_manifest = clean.run()
+
+    split = make_orchestrator(tmp_path / "split")
+    split.run()
+    tier1_lines = (tmp_path / "split" / "run" / "tier1.jsonl").read_text().splitlines()
+    (tmp_path / "split" / "run" / "tier1.jsonl").write_text("\n".join(tier1_lines[:-3]) + "\n", encoding="utf-8")
+    (tmp_path / "split" / "run" / "tier3.jsonl").unlink()
+    resumed = make_orchestrator(tmp_path / "split")
+    resumed_manifest = resumed.run()
+
+    # node totals are exact (budget-derived); wall times are measured, so they only agree closely
+    assert resumed_manifest["compute"]["nodes"] == clean_manifest["compute"]["nodes"]
+    clean_seconds = clean_manifest["compute"]["engineSeconds"]
+    resumed_seconds = resumed_manifest["compute"]["engineSeconds"]
+    assert abs(resumed_seconds - clean_seconds) <= max(0.002, clean_seconds * 0.05)
+    assert resumed_manifest["stages"]["tier3"]["positions"] == clean_manifest["stages"]["tier3"]["positions"]
+    # the resumed invocation redid only the missing rows, yet the manifest reports the full corpus:
+    assert resumed_manifest["stages"]["tier1"]["processedThisInvocation"] == 3
+    assert resumed_manifest["stages"]["tier1"]["positions"] == clean_manifest["stages"]["tier1"]["positions"]
+
+
+def test_resume_refuses_changed_identity(tmp_path):
+    orchestrator = make_orchestrator(tmp_path)
+    orchestrator.run()
+
+    # change the policy -> the pinned identity no longer matches
+    changed = build_policy(json.loads(json.dumps(CONFIG)))
+    changed["weights"]["rarity"] = 1.25
+    tampered = make_orchestrator(tmp_path, policy=changed)
+    with pytest.raises(LabError, match="run identity differs"):
+        tampered.run()
+
+    # a directory with stage files but no pinned identity is refused, not adopted
+    (tmp_path / "run" / "run-identity.json").unlink()
+    fresh = make_orchestrator(tmp_path)
+    with pytest.raises(LabError, match="no .*run-identity"):
+        fresh.run()
+
+
+def test_manifest_pins_taxonomy_oracle_and_tier4_config(tmp_path):
+    config = json.loads(json.dumps(CONFIG))
+    config["tiers"]["tier4"] = {"enabled": True, "depth": 21, "movetimeMs": 1500,
+                                "priorityFraction": 0.1, "uniformFraction": 0.1, "auditFraction": 0.1}
+    config["source"] = {"positionsFiles": [str(make_pool(tmp_path))], "positions": 0}
+    oracle = StubOracle()
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config),
+                                      facts_provider=StubFacts(), search_provider=StubSearch(),
+                                      oracle_provider=oracle)
+    manifest = orchestrator.run()
+    assert manifest["engine"]["taxonomySha256"] == StubFacts.taxonomy_sha256
+    assert manifest["engine"]["taxonomySchemaVersion"] == 2
+    assert manifest["oracle"]["providerHash"] == StubOracle.producer_hash
+    assert manifest["oracle"]["depth"] == 21 and manifest["oracle"]["movetimeMs"] == 1500
+    assert manifest["config"]["tier4_depth"] == 21 and manifest["config"]["tier4_movetime_ms"] == 1500
+    assert oracle.calls and all(call == (21, 1500) for call in oracle.calls)
+
+
+def test_pool_preserves_falsy_outcome(tmp_path):
+    import json as _json
+    pool = tmp_path / "pool.jsonl"
+    pool.write_text(_json.dumps({"id": "l1", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                                 "gameOutcome": {"whiteScore": 0.0}}) + "\n", encoding="utf-8")
+    config = _json.loads(_json.dumps(CONFIG))
+    config["source"] = {"positionsFiles": [str(pool)], "positions": 0}
+    orchestrator = FunnelOrchestrator(FunnelRunConfig.from_dict(config), tmp_path / "run",
+                                      policy=build_policy(config),
+                                      facts_provider=StubFacts(), search_provider=StubSearch())
+    positions = orchestrator.stage_pool()
+    assert positions[0]["gameOutcome"] == 0.0  # a real loss is not "missing"
 
 
 def test_manifest_detects_tampering(tmp_path):

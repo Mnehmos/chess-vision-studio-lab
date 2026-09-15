@@ -29,10 +29,12 @@ from typing import Iterable, Optional
 from ..hashing import canonical_json, hash_obj, sha256_file
 from ..store import LabError
 from .policy import build_policy, policy_hash, store_policy
+from .import_run import row_outcome
 from .triage import clamp_cp, common_prefix, coverage_counts, priority_components, score_priority, select, white_pov
 
 FUNNEL_SCHEMA_VERSION = 1
 CREATOR = "cvslab.funnel.orchestrator"
+IDENTITY_FILE = "run-identity.json"
 
 
 def position_identity(fen: str) -> str:
@@ -84,6 +86,8 @@ class FunnelRunConfig:
     tier3_node_budget: int = 400_000
     tier3_pv_plies: int = 12
     tier4_enabled: bool = True
+    tier4_depth: int = 18
+    tier4_movetime_ms: int = 3000
     report_informative_delta_cp: int = 60
     workers: int = 1
     artifact_root: Optional[str] = None
@@ -104,6 +108,8 @@ class FunnelRunConfig:
             tier3_node_budget=int(tiers.get("tier3", {}).get("nodeBudget", 400_000)),
             tier3_pv_plies=int(tiers.get("tier3", {}).get("pvPlies", 12)),
             tier4_enabled=bool(tier4.get("enabled", True)),
+            tier4_depth=int(tier4.get("depth", 18)),
+            tier4_movetime_ms=int(tier4.get("movetimeMs", 3000)),
             report_informative_delta_cp=int((config.get("report") or {}).get("informativeDeltaCp", 60)),
             workers=int(config.get("workers", 1)),
             artifact_root=artifact_root,
@@ -116,6 +122,8 @@ class FunnelRunConfig:
             "tier1_budgets": self.tier1_budgets, "tier1_pv_plies": self.tier1_pv_plies,
             "tier3_node_budget": self.tier3_node_budget, "tier3_pv_plies": self.tier3_pv_plies,
             "tier4_enabled": self.tier4_enabled,
+            "tier4_depth": self.tier4_depth,
+            "tier4_movetime_ms": self.tier4_movetime_ms,
             "report_informative_delta_cp": self.report_informative_delta_cp,
         }
 
@@ -164,7 +172,7 @@ class FunnelOrchestrator:
                 continue
             seen.add(position_id)
             unique.append({"id": position_id, "fen": row["fen"],
-                           "gameOutcome": row.get("gameOutcome") or row.get("res"),
+                           "gameOutcome": row_outcome(row),  # 0.0 preserved; dict shape normalized
                            "source": row.get("source"),
                            **({"sourceId": row["id"]} if row.get("id") and row.get("id") != position_id else {})})
             if self.config.positions and len(unique) >= self.config.positions:
@@ -318,8 +326,9 @@ class FunnelOrchestrator:
                 if self.oracle_provider is None:
                     continue
                 tick = time.perf_counter()
-                label = self.oracle_provider.evaluate(Position(fen=positions[row["id"]]["fen"]), depth=18,
-                                                      movetime_ms=3000)
+                label = self.oracle_provider.evaluate(Position(fen=positions[row["id"]]["fen"]),
+                                                      depth=self.config.tier4_depth,
+                                                      movetime_ms=self.config.tier4_movetime_ms)
                 record = {"id": row["id"], "stage": "tier4", "schemaVersion": FUNNEL_SCHEMA_VERSION,
                           "scoreCp": label.score_cp_stm, "mate": label.mate, "bestMove": label.best_move,
                           "pv": list(label.pv), "depth": label.reached_depth, "nodes": label.nodes,
@@ -365,7 +374,8 @@ class FunnelOrchestrator:
                 "moveChangeRate": round(move_change / len(labeled), 4) if labeled else 0.0,
                 "absShallowDeepDeltaCp": {"mean": round(delta_sum / len(labeled), 3)} if labeled else {},
             }
-        total_engine = round(sum(entry["engine_seconds"] for entry in self.costs.values()), 3)
+        file_costs = self._stage_costs_from_files()
+        total_engine = round(sum(entry["engine_seconds"] for entry in file_costs.values()), 3)
         report = {
             "funnelSchemaVersion": FUNNEL_SCHEMA_VERSION,
             "prioritizerVersion": self.policy["policy_version"],
@@ -373,9 +383,9 @@ class FunnelOrchestrator:
             "tiers": {stage: {"positions": entry.get("positions", 0),
                               "engineSec": entry["engine_seconds"],
                               "nodes": entry.get("nodes", 0),
-                              "msPerPosition": round(entry["engine_seconds"] * 1000 / entry["processed"], 3)
-                              if entry.get("processed") else 0.0}
-                      for stage, entry in self.costs.items()},
+                              "msPerPosition": round(entry["engine_seconds"] * 1000 / entry["positions"], 3)
+                              if entry.get("positions") else 0.0}
+                      for stage, entry in file_costs.items()},
             "totalEngineSec": total_engine,
             "arms": arms,
             "oracleArms": {},
@@ -395,6 +405,7 @@ class FunnelOrchestrator:
     def write_manifest(self, *, facts_provider_hash: str = "", oracle_provider_hash: str = "") -> dict:
         prior = self.policy["coverage_prior"].get("prior_counts")
         positions_path = self.path("positions.jsonl")
+        file_costs = self._stage_costs_from_files()  # full-corpus costs, resume-safe
         manifest = {
             "funnelSchemaVersion": FUNNEL_SCHEMA_VERSION,
             "creator": CREATOR,
@@ -406,15 +417,22 @@ class FunnelOrchestrator:
             "policyHash": policy_hash(self.policy),
             "coveragePrior": ({"source_path": prior["source_path"], "counts_hash": prior["counts_hash"]}
                               if prior else None),
+            "identity": self._identity(),
             "engine": {"analyzeSha256": facts_provider_hash or None,
-                       "searchProviderHash": getattr(self.search_provider, "producer_hash", None)},
+                       "searchProviderHash": getattr(self.search_provider, "producer_hash", None),
+                       "taxonomySha256": getattr(self.facts_provider, "taxonomy_sha256", None),
+                       "taxonomySchemaVersion": getattr(self.facts_provider, "taxonomy_schema_version", None)},
             "oracle": {"providerHash": oracle_provider_hash or None,
-                       "enabled": bool(self.config.tier4_enabled and self.oracle_provider)},
+                       "enabled": bool(self.config.tier4_enabled and self.oracle_provider),
+                       "depth": self.config.tier4_depth, "movetimeMs": self.config.tier4_movetime_ms},
             "positionsSource": {"path": str(positions_path),
                                 "sha256": sha256_file(positions_path) if positions_path.is_file() else None},
-            "stages": {stage: dict(entry) for stage, entry in self.costs.items()},
-            "compute": {"engineSeconds": round(sum(e["engine_seconds"] for e in self.costs.values()), 4),
-                        "nodes": sum(e.get("nodes", 0) for e in self.costs.values())},
+            "stages": {stage: {**entry,
+                               "processedThisInvocation": self.costs.get(stage, {}).get("processed", 0),
+                               "wallSecondsThisInvocation": self.costs.get(stage, {}).get("wall_seconds", 0.0)}
+                       for stage, entry in file_costs.items()},
+            "compute": {"engineSeconds": round(sum(e["engine_seconds"] for e in file_costs.values()), 4),
+                        "nodes": sum(e.get("nodes", 0) for e in file_costs.values())},
             "note": "Evidence, not a dataset: import with cvslab.funnel.import_run; "
                     "training inputs are produced only by cvslab.data.freeze_dataset.",
         }
@@ -422,15 +440,92 @@ class FunnelOrchestrator:
         self.path("manifest.json").write_text(json.dumps(manifest, indent=1, sort_keys=True), encoding="utf-8")
         return manifest
 
+    # -- run identity ----------------------------------------------------------
+
+    def _identity(self) -> dict:
+        """Everything that decides what evidence this directory may contain."""
+        source_files = []
+        for file_name in self.config.pool_files:
+            path = Path(file_name)
+            if not path.is_absolute() and self.config.artifact_root:
+                path = Path(self.config.artifact_root) / file_name
+            source_files.append({"path": str(path), "sha256": sha256_file(path) if path.is_file() else None})
+        return {
+            "creator": CREATOR,
+            "seed": self.config.seed,
+            "configSha256": hash_obj(self.config.canonical()),
+            "policyHash": policy_hash(self.policy),
+            "factsProviderHash": getattr(self.facts_provider, "producer_hash", None),
+            "searchProviderHash": getattr(self.search_provider, "producer_hash", None),
+            "searchFamily": getattr(self.search_provider, "family", None),
+            "oracle": {"providerHash": getattr(self.oracle_provider, "producer_hash", None),
+                       "enabled": bool(self.config.tier4_enabled and self.oracle_provider is not None),
+                       "depth": self.config.tier4_depth, "movetimeMs": self.config.tier4_movetime_ms},
+            "taxonomySha256": getattr(self.facts_provider, "taxonomy_sha256", None),
+            "taxonomySchemaVersion": getattr(self.facts_provider, "taxonomy_schema_version", None),
+            "tier1Budgets": self.config.tier1_budgets,
+            "tier3NodeBudget": self.config.tier3_node_budget,
+            "sourceFiles": source_files,
+        }
+
+    def _init_or_verify_identity(self) -> None:
+        """Pin the run identity before any stage runs; fail closed on resume mismatches.
+
+        Changing the policy, a provider binary, the taxonomy, the config, the seed, the
+        oracle settings or the source files makes resuming unsafe: old and new evidence
+        would mix under one manifest. A directory holding stage files but no pinned
+        identity is a foreign/older run and is refused rather than adopted.
+        """
+        identity_path = self.path(IDENTITY_FILE)
+        current = self._identity()
+        if identity_path.is_file():
+            pinned = json.loads(identity_path.read_text(encoding="utf-8")).get("identity") or {}
+            differences = sorted(key for key in set(pinned) | set(current) if pinned.get(key) != current.get(key))
+            if differences:
+                raise LabError(
+                    "run identity differs from the pinned identity for this directory; refusing to mix "
+                    f"evidence (fields: {', '.join(differences)}). Start a fresh run directory or restore "
+                    "the pinned configuration.")
+            return
+        stage_files = [name for name in ("tier0.jsonl", "tier1.jsonl", "triage.jsonl",
+                                         "tier3.jsonl", "tier4.jsonl")
+                       if self.path(name).is_file() and self.path(name).stat().st_size > 0]
+        if stage_files:
+            raise LabError(f"{self.run_dir} already holds stage files ({', '.join(stage_files)}) but no "
+                           f"{IDENTITY_FILE}; refusing to adopt a foreign run directory (fail closed)")
+        identity_path.write_text(json.dumps({"identity": current}, indent=1, sort_keys=True), encoding="utf-8")
+
+    # -- cost accounting -------------------------------------------------------
+
+    def _stage_costs_from_files(self) -> dict[str, dict]:
+        """Costs derived from the stage files themselves, so a resumed run reports the
+        compute that produced the FULL corpus, not just this invocation's share."""
+        positions = len(_read_jsonl(self.path("positions.jsonl")))
+        costs: dict[str, dict] = {}
+        for stage, file_name in (("tier0", "tier0.jsonl"), ("tier1", "tier1.jsonl"),
+                                 ("tier3", "tier3.jsonl"), ("tier4", "tier4.jsonl")):
+            rows = _read_jsonl(self.path(file_name))
+            costs[stage] = {
+                "positions": positions if stage == "tier0" else len(rows),
+                "engine_seconds": round(sum(float((row.get("cost") or {}).get("wallMs", 0.0) or 0.0)
+                                            for row in rows) / 1000.0, 4),
+                "nodes": sum(int((row.get("cost") or {}).get("nodes", 0) or 0) for row in rows),
+            }
+        costs["triage"] = {"positions": len(_read_jsonl(self.path("triage.jsonl"))),
+                           "engine_seconds": 0.0, "nodes": 0}
+        return costs
+
     # -- driver ----------------------------------------------------------------
 
     def run(self) -> dict:
+        self._init_or_verify_identity()
         stages = [("tier0", self.stage_tier0), ("tier1", self.stage_tier1), ("triage", self.stage_triage),
                   ("tier3", self.stage_tier3), ("tier4", self.stage_tier4)]
         for name, stage in stages:
             stage()
         self.write_report()
-        return self.write_manifest(facts_provider_hash=getattr(self.facts_provider, "producer_hash", ""))
+        return self.write_manifest(facts_provider_hash=getattr(self.facts_provider, "producer_hash", ""),
+                                   oracle_provider_hash=getattr(self.oracle_provider, "producer_hash", ""))
 
 
 def verify_manifest(run_dir: str | Path) -> tuple[bool, str]:
