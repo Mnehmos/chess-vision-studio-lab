@@ -1,0 +1,16 @@
+{
+  "amendment": 2,
+  "claim_scope_change": "S6 now asks: given the same 94-example training budget from the fixed S5 candidate pool, does priority-v1 selection generalize better than uniform selection on a separate, identically supervised, component-disjoint evaluation population?",
+  "design": {
+    "eval_source": "fresh S5 pool under a frozen seed with a HELD-OUT opening partition (openings the training pool never played); separate S#### ids are not assumed to imply independence",
+    "freeze": "D_EVAL (0,0,1) + one E_COMMON; source/normalization/dataset/protocol hashes pinned into the campaign identity",
+    "if_insufficient": "fail closed and enlarge the pool without examining any target values",
+    "joint_component_check": "union-find over canonical record identities across the training corpus and the evaluation source; every evaluation candidate whose joint component contains any PRIORITY or UNIFORM training member is rejected",
+    "labels": "exactly the required 400k-node search_deep_cp labels, bought with the same pinned analyze binary/net identity as the training TargetSpec",
+    "pre_smoke_assertion": "record ids AND joint provenance components disjoint from the union of the arms",
+    "selection": "200 records by deterministic hash order: lowest sha256(eval_selection_seed, record_id)"
+  },
+  "discovered_before": "any corrected training result existed",
+  "reason": "the corrected campaign's corpus cannot supply a leakage-safe internal evaluation slice: the 938-record S5 pool collapses to 12 transposition components (largest 145 records) and the 182 unique selected arm records touch all 12, so no component-disjoint evaluation population exists inside the pool",
+  "title": "independent evaluation population"
+}

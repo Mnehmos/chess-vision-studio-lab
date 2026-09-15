@@ -469,7 +469,15 @@ def freeze_arm_datasets(store, universe: Universe, plan: CampaignPlan, *, recipe
             for row in _read_jsonl(store.abs(manifest.path)):
                 realised[row["record_id"]] = manifest.name
         from ..hashing import hash_obj as _hash_obj
-        if _hash_obj(sorted(realised.items())) != identity["per_arm_record_split_hashes"][arm]:
+        layout = ("all-selected-records-train"
+                  if (training_fractions or universe.fractions) == (1.0, 0.0, 0.0)
+                  else "global-component-split")
+        if layout == "all-selected-records-train":
+            # amended design: the arm is a TREATMENT — every selected record trains, and the
+            # global component split's role is the evaluation exclusion policy, not the arm layout
+            if set(realised) != set(record_ids) or any(split != "train" for split in realised.values()):
+                raise LabError(f"{arm}: all-train layout violated; realised {sorted(set(realised.values()))}")
+        elif _hash_obj(sorted(realised.items())) != identity["per_arm_record_split_hashes"][arm]:
             raise LabError(f"{arm}: frozen dataset splits do not match the Universe split policy "
                            f"(seed {universe.split_seed}, fractions {list(universe.fractions)}); "
                            "the manifest would claim one split policy while the files follow another")
