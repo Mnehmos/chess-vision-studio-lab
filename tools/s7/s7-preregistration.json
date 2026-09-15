@@ -1,12 +1,12 @@
 {
   "id": "s7-supervision-density-frontier",
-  "version": 1,
-  "status": "design — NOT frozen, NOT launched. Arm sizes and pool size are materialized by the freeze step before any label is bought.",
-  "supersedes": null,
+  "version": 2,
+  "status": "design — NOT frozen, NOT launched. Prefix sizes and realized node totals are materialized by the freeze step before any training starts and before any target value is read.",
   "design_document": "docs/SUPERVISION_DENSITY_FRONTIER.md",
 
-  "question": "At a fixed teacher/search node budget, does supervision density (many rows x shallow labels) beat a few deep labels, measured on a common frozen instrument?",
-  "scope": "RAW-768 only; uniform selection; one teacher (CVS analyze); one pool; replication is issue #16",
+  "question": "At a fixed teacher/search node budget, does supervision density (many rows x shallow labels) beat a few deep labels, measured on a common frozen instrument — and where does the curve turn?",
+  "framing": "Gen10 repeatedly purchased expensive oracle values over a relatively narrow set of distinct positions (7.44 s of Stockfish per unique position, 13.8 purchases each). The lab hypothesis under test: purchase broad cheap search coverage, attach deterministic structure everywhere, and selectively increase supervision quality only where evidence says it pays.",
+  "scope": "RAW-768 only; uniform selection over one frozen order; one teacher (CVS analyze); one pool; replication is issue #16",
   "primary_endpoint": "test_loss",
   "secondary_metrics": ["cp_mae", "sign_agreement"],
 
@@ -29,23 +29,22 @@
 
   "reference_budget_nodes": 37285491,
   "reference_budget_source": "S6 UNIFORM arm realized deep nodes (labstore/objects/datasets/D0009.json campaign.deep_nodes)",
-  "arm_parity_tolerance": 0.02,
+  "fill_parity_check_tolerance": 0.02,
   "calibration_band": [0.9, 1.0],
 
   "pool": {
     "generator": "cvslab.pool.selfplay",
     "generator_version": 1,
     "seed": 20260916,
-    "openings": "built-in OPENING_LINES (12 lines; 12 opening names, disjoint from the instrument's held-out 10); openingSourceSha256 expected sha256:588f36887eaa3b04fbf2fb65ae022e1a02e33bc05ac867f97e9713c3eefdb5ed",
+    "openings": "built-in OPENING_LINES (12 lines, disjoint from the instrument's held-out 10); openingSourceSha256 expected sha256:588f36887eaa3b04fbf2fb65ae022e1a02e33bc05ac867f97e9713c3eefdb5ed",
     "games": "batches of 400 up to hard cap 2400; stop when unique records >= 12000",
     "max_plies": 70,
     "sample_every": 2,
     "min_ply": 6,
     "play_node_budget": 20000,
     "diversification": {"plies": [8, 10, 12], "candidates": 3, "window_cp": 25, "node_budget": 2000},
-    "raw_rows_per_game_estimate": 32.9,
     "unique_yield_estimate": "13.4/game at 70 games (measured, S5); expect 30-40% of raw rows at this size",
-    "adequacy_rule": "unique records >= 4 * n_arm_widest; else STOP",
+    "adequacy_rule": "unique records >= 4 * n_A4 (estimate 9364); else STOP",
     "no_dedup_here": true
   },
 
@@ -60,32 +59,44 @@
     "selection": "deterministic hash order over the frozen candidate universe, seed 20260916",
     "budgets": [16000, 64000, 160000, 400000],
     "read_only": ["nodes", "wall_ms"],
-    "forbidden": "reading scoreCpStm (or any target value) before arm construction",
-    "sizing_rule": "n_b = round(reference_budget_nodes / mean_measured_nodes_at_b)",
-    "materialization": "write the four sizes into this file's arms[].n and a materialized copy before buying any arm label",
+    "forbidden": "reading scoreCpStm (or any target value) before the arms are constructed, and before any training",
+    "sanity_band": "every mean_b in [0.90*b, b]; outside -> STOP",
+    "role": "prediction only; the expected sizes n_b ~= round(T / mean_b) are reported but have no authority over arm construction",
     "labels_reused_if_record_lands_in_an_arm": true
   },
 
-  "selection": {
-    "order": "sort(candidate_universe, key=sha256(f'{seed}:{record_id}')) with seed 20260916",
-    "rule": "arms are disjoint prefix blocks of that order",
-    "arm_disjointness_assertion": "pairwise intersections == 0"
+  "order": {
+    "rule": "order = sort(candidate_universe, key=sha256(f'{seed}:{record_id}')) with seed 20260916; frozen once",
+    "arms_are_prefixes": true
+  },
+
+  "budget_fill": {
+    "role": "CONSTRUCTION — this defines the arm sizes; it replaces any post-hoc admissibility test",
+    "procedure": "for each arm, walk the frozen order from index 0 and buy labels at that arm's budget, accumulating realized nodes C_k; include record k+1 iff |C_(k+1) - T| <= |C_k - T|, else stop and exclude it",
+    "inputs": ["frozen hash order", "realized node counts from the pinned engine"],
+    "forbidden_inputs": ["any target value (scoreCpStm, mate, expectedScore)",
+                         "any test_loss, metric or evaluation result",
+                         "any manual discretion"],
+    "probe_label": "the label whose purchase triggered the stop decision is paid for, recorded as a paid label, and excluded from the arm",
+    "parity_bound": "by construction the prefix is the closest to T among all prefixes, so parity error <= half a label: <=0.54% of T for A1 and tighter for A2-A4",
+    "nesting_guarantee": "a deeper budget consumes T in fewer records, so n_A1 <= n_A2 <= n_A3 <= n_A4 and A1 subset A2 subset A3 subset A4; asserted at freeze",
+    "materialization": "realized prefix sizes, realized node totals and the sealed record list are written into this file and a copy of the preregistration before any training and before any target value is read"
   },
 
   "arms": [
-    {"name": "A1", "block": [0, 94], "rows_estimate": 94, "node_budget": 400000,
+    {"name": "A1", "prefix": "order[0:n1]", "rows_estimate": 94, "node_budget": 400000,
      "family": "search_deep_cp", "authority": "legacy.cvs.search.deep", "value_path": ["targets", "scoreCpStm"],
      "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 12,
      "nodes_estimate": 37186400, "role": "deepest / narrowest"},
-    {"name": "A2", "block": [94, 329], "rows_estimate": 235, "node_budget": 160000,
+    {"name": "A2", "prefix": "order[0:n2]", "rows_estimate": 235, "node_budget": 160000,
      "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
      "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
      "nodes_estimate": 37224000, "role": "intermediate"},
-    {"name": "A3", "block": [329, 917], "rows_estimate": 588, "node_budget": 64000,
+    {"name": "A3", "prefix": "order[0:n3]", "rows_estimate": 588, "node_budget": 64000,
      "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
      "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
      "nodes_estimate": 37255680, "role": "intermediate"},
-    {"name": "A4", "block": [917, 3258], "rows_estimate": 2341, "node_budget": 16000,
+    {"name": "A4", "prefix": "order[0:n4]", "rows_estimate": 2341, "node_budget": 16000,
      "family": "search_shallow_cp", "authority": "legacy.cvs.search.shallow", "value_path": ["scoreCpStm"],
      "pov": "stm", "target_type": "cp", "k": 256.0, "lam": 1.0, "pv_plies": 8,
      "nodes_estimate": 37286746, "role": "shallowest / widest"}
@@ -103,7 +114,7 @@
   "instrument": {
     "reuse": "E0004 + D0010 unchanged iff leakage_control passes",
     "shared_by_all_runs": true,
-    "assertion": "len({run.protocol_hash}) == 1 and len({run.eval_dataset_manifest_hash}) == 1 across all runs"
+    "invariant": "all runs in the experiment pin the same evaluation protocol hash and the same evaluation TargetSpec hash; each arm pins its own training TargetSpec; train_spec == eval_spec is NOT required and NOT expected"
   },
 
   "analysis": {
@@ -111,13 +122,23 @@
     "method": "Student t, df=4, t=2.776 (same helper as S6: paired_effect)",
     "primary_contrast": "d_H = mean over seeds of [test_loss(A4,H,seed) - test_loss(A1,H,seed)]",
     "primary_sign_convention": "negative = wide-shallow better",
-    "secondary": ["A2-A1", "A3-A2", "A4-A3", "A2-A1 and A3-A1 vs A1", "cp_mae", "sign_agreement", "monotonicity of the four arm means per width", "width x density interaction blocked by seed"],
-    "required_reporting": "all cell means, all per-seed differences, all CIs, realized nodes per arm, full identity table; failed cells reported INVALID, never omitted",
     "decision_rule": {
       "BREADTH_WINS": "every width's primary-contrast CI upper bound < 0",
       "DEPTH_WINS": "every width's primary-contrast CI lower bound > 0",
       "INCONCLUSIVE": "otherwise"
-    }
+    },
+    "adjacent_contrasts": {
+      "role": "preregistered secondary; reported for every width whether or not the primary contrast is decisive",
+      "contrasts": ["A2-A1", "A3-A2", "A4-A3"],
+      "why": "the result we want is where the curve turns (e.g. a 64k sweet spot with 16k degrading = A3-A2 < 0 and A4-A3 > 0), which the endpoint contrast alone would miss"
+    },
+    "efficient_regime": {
+      "role": "descriptive and preregistered; selects S8's budget, decides no hypothesis",
+      "rule": "per width, the arm with the lowest mean test_loss; ties broken toward the shallower budget; report the set of widths agreeing on the same arm"
+    },
+    "other_secondary": ["A2-A1 and A3-A1 vs A1", "cp_mae", "sign_agreement", "monotonicity of the four arm means per width", "width x density interaction blocked by seed"],
+    "required_reporting": "all cell means, all per-seed differences, CIs for the primary and all three adjacent contrasts, realized node totals per arm, full identity table; failed cells reported INVALID, never omitted",
+    "scope_statement": "this pool, this teacher, these four budgets, RAW-768"
   },
 
   "fail_closed": [
@@ -126,23 +147,47 @@
     "unique pool records < 4 * n_A4, or 2400-game cap reached -> STOP",
     "instrument collisions > 5% of pool records -> STOP (fresh instrument required before training)",
     "calibration mean outside [0.90*b, b] for any budget -> STOP",
-    "realized arm nodes outside +/-2% of reference budget -> that arm's cells INVALID",
-    "arm disjointness violated -> STOP",
+    "fill parity check: the closest prefix found by the construction must land within +/-2% of T (bounded by half a label, so this checks the construction, not the arms) -> STOP if outside",
+    "nesting violated (A1 subset A2 subset A3 subset A4 as prefixes) -> STOP",
     "zero or multiple matching labels for any row under its spec -> freeze/training raises (existing behaviour)",
-    "any run with a protocol_hash or eval_dataset_manifest_hash different from the instrument -> INVALID",
-    "no tuning after the first arm label is bought (budgets, sizes, seed, widths, epochs, LR, batch, init)",
-    "no target-value peeking before arm construction; no training before the instrument identity is frozen",
-    "silent train/eval TargetSpec divergence remains a hard failure (see prerequisite P1)"
+    "any run with a protocol_hash or eval_dataset_manifest_hash different from the experiment instrument -> INVALID",
+    "no tuning after the first arm label is bought (budgets, prefixes, seed, widths, epochs, LR, batch, init)",
+    "no target-value peeking before arm construction; no training before the instrument identity is frozen and the filled prefixes are sealed",
+    "silent train/eval TargetSpec divergence remains a hard failure (see P1)"
   ],
 
   "prerequisites": [
     {
       "id": "P1",
-      "title": "declared supervision divergence",
+      "title": "minimal train/eval TargetSpec separation (first-class capability, not an S7 hack)",
       "where": "cvslab/service.py execute_run, target_spec_consistent block (lines ~519-528)",
       "current_behaviour": "hard failure when recipe T spec hash != protocol E spec hash",
-      "required_behaviour": "stay fail-closed by default; allow divergence only when the ablation declares it explicitly at creation time (reason string part of the ablation identity and recorded in every run); record both spec hashes as a visible integrity check; keep strict per-row cardinality checks; campaign-level hard invariant that all runs pin one protocol hash",
+      "required_behaviour": [
+        "divergence is still a hard failure by default",
+        "permitted only through an explicit declaration made at ablation-creation time, part of the ablation identity hash and copied into every run record, so it cannot be added after the fact",
+        "when declared, both spec hashes (train, eval) are recorded as visible integrity checks on the run",
+        "strict per-row cardinality checks unchanged",
+        "the invariant enforced is: one experiment shares one evaluation protocol and one evaluation TargetSpec, while each treatment arm pins its own training TargetSpec"
+      ],
+      "tests": [
+        "undeclared divergence still refuses",
+        "declared divergence runs to completion and records both spec hashes",
+        "a row with zero or two matching labels under either spec still fails",
+        "two runs declaring different evaluation specs cannot be compared (refused at the comparison layer)"
+      ],
       "why": "S7 arms are trained at their own budget and evaluated on the common 400k instrument; the S6 check was written when both were 400k"
+    },
+    {
+      "id": "P2",
+      "title": "the experiment binds its instrument",
+      "required_properties": [
+        "pins the evaluation dataset manifest hash, protocol hash and evaluation TargetSpec hash before any run is queued",
+        "pins per arm: dataset, recipe, training TargetSpec hash, prefix size, realized nodes",
+        "pins seeds, the frozen selection-order hash, the pool/normalization identity, and the preregistration document hash",
+        "every referenced run must belong to the experiment, its train spec must equal its arm's declared spec, and all runs must share the instrument",
+        "verified at queue time and again at analysis time, failing closed"
+      ],
+      "note": "object shape (new identity prefix or an extended A#### grouping) is a review decision; the required properties are the invariants, and anything less becomes script-level convention again"
     }
   ],
 
@@ -168,6 +213,7 @@
       {"name": "P3", "rows": 926, "budget": 16000, "source": "all train-eligible S5 pool records, new D + T", "new_runs": 20},
       {"name": "P4", "rows": 926, "budget": 2000, "source": "exploratory; same rows as P3, 2k labels", "new_runs": 20}
     ],
+    "nesting_note": "P1's 94 rows are a subset of P3's 926 by construction, matching the frontier's nested design; P_depth is causal for depth at fixed rows, P_rows is causal for adding rows at fixed depth",
     "contrasts": {
       "P_depth": "test_loss(P2) - test_loss(P1) — causal for depth at fixed rows",
       "P_rows": "test_loss(P3) - test_loss(P2) — causal for adding rows at fixed depth",
@@ -180,8 +226,8 @@
   "cost_estimates": {
     "pool_generation_nodes": 1680000000,
     "calibration_nodes": 41000000,
-    "arm_label_nodes": 149000000,
-    "total_teacher_nodes": 1870000000,
+    "arm_label_nodes": 149900000,
+    "total_teacher_nodes": 1871000000,
     "teacher_engine_minutes": [30, 35],
     "wall_clock_hours": [1, 2],
     "measured_basis": {

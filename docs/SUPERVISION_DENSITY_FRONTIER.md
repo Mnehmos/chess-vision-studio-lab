@@ -102,12 +102,16 @@ selection policy identity, and — in `corpus-static-full` — 43 % of the corpu
 duplicate rows, silently re-labelled (the loader does not dedup; the append-on-resume
 path re-labelled FENs already on disk).
 
-**The architectural difference is not the teacher.** It is that Gen10 bought one
-expensive label for ~14 rows per unique position and kept only search-derived numbers,
-while the funnel buys a *ladder* of labels per position, spends its expensive labels on
-a subset, and keeps a deterministic semantic description of every position for free.
-S6 tested the *selection* half of that claim and got a negative result. The *density*
-half is untested.
+**The architectural difference is not the teacher.** It is what each pipeline chose to
+buy. Gen10 **repeatedly purchased expensive oracle values over a relatively narrow set of
+distinct positions** (7.44 s of Stockfish per unique position, 13.8 purchases each). The
+lab's hypothesis is the opposite trade: **purchase broad, cheap search coverage; attach
+deterministic structure to every position for free; increase supervision quality only
+where evidence says it pays.** S6 tested the "only where it pays" half — *where* to spend
+deep labels — and found no generalization advantage. S7 tests the first half — *how much
+depth to buy at all* — which has never been measured. The teacher differs too (CVS fixed
+node budgets here, Stockfish depth 20 there), but that is a separate axis; the frontier
+holds its teacher fixed and varies only how the same budget is spent.
 
 ### 1.3 Cost per unique position, both regimes
 
@@ -269,25 +273,31 @@ Reuses 20 completed S6 cells (P1) that used the identical instrument.
 ### 5.1 Design
 
 One new frozen training pool. One deterministic uniform selection order. Four arms that
-partition it into disjoint blocks, each buying *the same total number of teacher nodes*
+take nested prefixes of it, each buying *the same total number of teacher nodes*
 at a different node budget. One instrument, four capacities, five paired seeds.
 RAW-768 only.
 
 ```
+  ONE frozen hash order over the candidate universe
+
   T = 37,285,491 teacher nodes  (measured; = S6 UNIFORM arm realized deep nodes [M])
   │
-  ├─ A1  400k/row ×   94 rows   = 37.19M nodes   (deepest, narrowest)
-  ├─ A2  160k/row ×  235 rows   = 37.22M
-  ├─ A3   64k/row ×  588 rows   = 37.26M
-  └─ A4   16k/row × 2341 rows   = 37.29M   (shallowest, widest)
+  ├─ A1  400k/row ×   94 rows   = 37.19M nodes   deepest, narrowest      = order[0:94]
+  ├─ A2  160k/row ×  235 rows   = 37.22M         ⊃ A1                    = order[0:235]
+  ├─ A3   64k/row ×  588 rows   = 37.26M         ⊃ A2                    = order[0:588]
+  └─ A4   16k/row × 2341 rows   = 37.29M         ⊃ A3  shallowest/widest = order[0:2341]
                                    ────────
                                    149.1M nodes total ≈ 2.5–3 min of engine time [E]
 ```
 
-Arm sizes above are **estimates**; the authoritative rule (§5.3) recomputes them from a
-calibration measured on the new pool, materialized into
-`tools/s7/s7-preregistration.json` **before** any arm label is bought or any training
-starts.
+**The arms are nested prefixes of one order, not disjoint blocks** (review amendment 1).
+Every arm starts at the same head of the same frozen order; the wider arms *contain* the
+narrower arm's positions, each supervised at its own fidelity. A1 vs A4 is therefore not
+"94 deep labels vs 2,341 shallow labels over two independently drawn position sets" but
+"the same positions, supervised at different fidelity, plus additional rows". The
+sampling-noise term drops out of the contrast; what remains is the treatment: label
+depth per row, and how many rows a fixed teacher budget buys. The prefix sizes shown are
+estimates; §5.3's construction determines the realized prefixes.
 
 ### 5.2 Pool construction (new S/N identities)
 
@@ -322,7 +332,11 @@ Reuse is expected to succeed: the instrument's 575 clean records were proven dis
 from **all 12 components** of the S5 pool, and it was built from a disjoint opening
 partition. The check is still mandatory because the new pool is new.
 
-### 5.3 Calibration and the arm-sizing rule
+### 5.3 Calibration and the executable budget-fill
+
+Calibration predicts; the fill constructs. Neither step ever reads a target value.
+
+**Calibration (prediction only).**
 
 1. Draw **64** calibration records by deterministic hash order from the candidate
    universe (seed `20260916`).
@@ -330,30 +344,54 @@ partition. The check is still mandatory because the new pool is new.
    the pinned analyze identity. **Read only `nodes` and wall time. Never read
    `scoreCpStm`.**
 3. `mean_b` = mean realized nodes per label at budget *b* over the 64 records.
-4. `n_b = round(T / mean_b)`; the four sizes are materialized into the preregistration
-   file, then **frozen**.
-5. Calibration labels are ordinary labels of their budget; if a calibration record later
+4. Preregistered sanity band: every `mean_b` must lie in **[0.90·b, b]**. Outside →
+   **STOP** (engine drift or an unhonoured node budget).
+5. Expected size `n_b ≈ round(T / mean_b)` is *reported* but has **no authority**; it only
+   tells the operator how many games pool generation must yield (§5.2).
+6. Calibration labels are ordinary labels of their budget; if a calibration record later
    falls in an arm, its label is reused (identical semantics; re-buying is refused by the
    duplicate guard anyway).
-6. Preregistered sanity band: every `mean_b` must lie in **[0.90·b, b]**. Outside →
-   **STOP** (engine drift or an unhonoured node budget).
+
+**Budget-fill (construction — this is what defines the arms).** For each arm, walk the
+frozen order from index 0 and buy labels at that arm's budget, accumulating realized
+nodes. Let `C_k` be the cumulative realized nodes after the first *k* records. Include
+record *k+1* if and only if `|C_{k+1} − T| ≤ |C_k − T|`; otherwise stop and exclude it.
+The probe label whose purchase made the stop decision is paid for, recorded as a paid
+label, and excluded from the arm.
+
+This is the whole equal-compute mechanism (review amendment 2):
+
+* it is deterministic given the frozen order and the pinned engine — no discretion, no
+  post-hoc acceptance/rejection;
+* it uses only hash order and realized node counts, never a target value;
+* by construction the resulting prefix is the one closest to `T` among all prefixes, so
+  the parity error is bounded by half a label: **≤ 0.54 % of T for A1** (one 400k label
+  against 37.3M nodes) and tighter for A2–A4. The ±2 % window in §5.7 is therefore a
+  *check that the construction behaved*, not an expectation the arms have to satisfy;
+* nesting is automatic: a deeper budget consumes `T` in fewer records, so
+  `n_A1 ≤ n_A2 ≤ n_A3 ≤ n_A4` and A1 ⊂ A2 ⊂ A3 ⊂ A4. The freeze step asserts the prefix
+  relation explicitly.
+
+The realized prefix sizes and realized node totals are materialized into
+`tools/s7/s7-preregistration.json` and a copy of the record list is sealed **before any
+training starts and before any target value is read**.
 
 ### 5.4 Arms — exact definitions
 
 Selection: one deterministic order over the candidate universe,
-`order = sort(universe, key=sha256(f"{20260916}:{record_id}"))`. The arms are disjoint
-prefix blocks of that order:
+`order = sort(universe, key=sha256(f"{20260916}:{record_id}"))`, frozen once. Every arm
+is a **prefix** of that order, filled by §5.3's budget rule:
 
-| arm | block | budget | family | authority | value_path | pov | type | K | λ |
+| arm | prefix | budget | family | authority | value_path | pov | type | K | λ |
 |---|---|---|---|---|---|---|---|---|---|
-| **A1** | `order[0:94]` | 400,000 | `search_deep_cp` | `legacy.cvs.search.deep` | `targets.scoreCpStm` | stm | cp | 256 | 1.0 |
-| **A2** | `order[94:329]` | 160,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
-| **A3** | `order[329:917]` | 64,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
-| **A4** | `order[917:3258]` | 16,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
+| **A1** | `order[0:n1]` | 400,000 | `search_deep_cp` | `legacy.cvs.search.deep` | `targets.scoreCpStm` | stm | cp | 256 | 1.0 |
+| **A2** | `order[0:n2]` | 160,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
+| **A3** | `order[0:n3]` | 64,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
+| **A4** | `order[0:n4]` | 16,000 | `search_shallow_cp` | `legacy.cvs.search.shallow` | `scoreCpStm` | stm | cp | 256 | 1.0 |
 
-(Block boundaries are shown with the estimated sizes; the materialized sizes are the
-authoritative ones.) All four specs share producer = the pinned analyze sha256
-`36e9b159…`, `target_type=cp`, `K=256`, `LAMBDA=1`.
+with `n1 ≤ n2 ≤ n3 ≤ n4` (estimated 94 / 235 / 588 / 2,341) and the set relation
+`A1 ⊂ A2 ⊂ A3 ⊂ A4` asserted at freeze. The same record therefore appears in several arms
+with different labels — that is the design, not a defect: its label *is* the treatment.
 
 Budget, not family name, is the identity: a 160k label is not interchangeable with a 16k
 label, and the spec hash proves which observation a run consumed. The 400k family keeps
@@ -374,7 +412,7 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
 | **N####** | canonical normalization (EPD identity, components, duplicates reported) |
 | facts label set | `cvslab.facts.label_facts` on every record — **not consumed by S7 training**; this is the first deposit of the "geometry everywhere" layer |
 | 4 × search label sets | one per arm, as in §5.4 |
-| **D_A1..D_A4** | `freeze_dataset(N, record_ids=<arm block>, required_labels=[family], target_spec=<spec_b>, fractions=(1,0,0), campaign={...})` — all-train layout, S6 Amendment 1 convention |
+| **D_A1..D_A4** | `freeze_dataset(N, record_ids=<arm prefix>, required_labels=[family], target_spec=<spec_b>, fractions=(1,0,0), campaign={...})` — all-train layout, S6 Amendment 1 convention |
 | **T_A1..T_A4** | four recipes: identical params (`EPOCHS 40, BATCH 256, LR 0.003, OPTIMIZER adam, INIT_STD 0.05, K 256, LAMBDA 1.0`), each pinning its own `TARGET_SPEC` |
 | **E0004** | reused instrument (D0010, split test, 200 records, 400k spec) — reused iff §5.2 proves disjointness |
 | **A####** | 16 ablations: per arm, one baseline (H=16) + three H∈{1,4,32} ablations, each recording the supervision-divergence declaration (§5.8) |
@@ -388,20 +426,32 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
 * **Unit:** paired seed difference; 5 seeds {0,1,2,3,4}; 95 % CI via Student t, df=4,
   t=2.776 — the same method and the same helper (`paired_effect`) as S6.
 * **Primary contrast:** `d_H = mean_seed [ test_loss(A4,H,seed) − test_loss(A1,H,seed) ]`
-  per width H ∈ {1,4,16,32}. Negative = wide-shallow better.
-* **Decision rule (intersection–union over widths, as S6):**
+  per width H ∈ {1,4,16,32}. Negative = wide-shallow better. This keeps the endpoint
+  question intact: *does a fixed teacher budget buy more as breadth than as depth?*
+* **Primary decision rule (intersection–union over widths, as S6):**
   * `BREADTH_WINS` iff every width's CI upper bound < 0;
   * `DEPTH_WINS` iff every width's CI lower bound > 0;
   * otherwise `INCONCLUSIVE`.
   A single-width win is *reported but not decisive* — exactly the treatment S6's H16
   result received.
-* **Secondary, no decision authority:** adjacent contrasts (A2−A1, A3−A2, A4−A3);
-  intermediate arms vs A1; `cp_mae` and `sign_agreement`; monotonicity of the four arm
-  means per width; width × density interaction (paired seed-level contrasts, as
-  `interaction_effects` did for S6).
-* **Required reporting:** all 16 cell means, all per-seed differences, every CI, the
-  realized node totals per arm, and the full identity table. No metric substitution
-  after the fact; no seed dropped; a failed cell is `INVALID`, never omitted.
+* **Frontier shape — preregistered secondary contrasts** (review amendment 3):
+  `A2−A1`, `A3−A2`, `A4−A3`, each per width, paired by seed, same CI method. These are
+  reported for every width whether or not the primary contrast is decisive, because
+  "wide beats deep" is not the result we want — the result we want is **where the curve
+  turns**. A 64k sweet spot with 16k degrading would show up as `A3−A2 < 0` and
+  `A4−A3 > 0`, and the primary contrast alone would miss it.
+* **Efficient regime (descriptive, preregistered):** per width, the arm with the lowest
+  mean `test_loss`; ties broken toward the shallower budget (cheaper teacher work wins
+  ties). The set of widths agreeing on the same arm is reported as the frontier's
+  efficient point. This is descriptive — it selects S8's budget, it does not decide a
+  hypothesis.
+* **Other secondary, no decision authority:** intermediate arms vs A1 (`A2−A1`, `A3−A1`);
+  `cp_mae` and `sign_agreement`; monotonicity of the four arm means per width; width ×
+  density interaction (paired seed-level contrasts, as `interaction_effects` did for S6).
+* **Required reporting:** all 16 cell means, all per-seed differences, every CI for the
+  primary *and* all three adjacent contrasts, realized node totals per arm, and the full
+  identity table. No metric substitution after the fact; no seed dropped; a failed cell
+  is `INVALID`, never omitted.
 * **Scope statement to be sealed with the finding:** "this pool, this teacher, these
   four budgets, RAW-768."
 
@@ -417,10 +467,12 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
 4. **Instrument collisions** — > 5 % of pool records collide with the instrument's 200
    records → STOP (build a fresh instrument).
 5. **Calibration band** — any `mean_b` outside [0.90·b, b] → STOP.
-6. **Arm parity** — any arm's realized nodes outside ±2 % of T → those cells INVALID
-   (report; never silently resize).
-7. **Disjointness** — pairwise arm intersections must be exactly 0 (guaranteed by block
-   construction; asserted anyway).
+6. **Fill check** — the closest prefix found by §5.3's construction must land within ±2 %
+   of T (it is bounded by half a label, so this is a check that calibration and engine
+   behaved, not a constraint the arms must satisfy). Outside → STOP.
+7. **Nesting** — `A1 ⊆ A2 ⊆ A3 ⊆ A4` as prefixes of the frozen order, asserted at freeze;
+   violation → STOP. (Disjointness is *not* required and is not expected: nested arms
+   deliberately share positions.)
 8. **Strict cardinality** — any dataset row with zero or more than one matching label
    under its spec → freeze/training raises (existing behaviour, deliberately retained).
 9. **Instrument identity across runs** — all 80 runs must share one `protocol_hash` and
@@ -433,27 +485,56 @@ label. Then verify `|realized_nodes(arm) − T| / T ≤ 0.02` **for every arm** 
 12. **Declared divergence only** — train/eval spec divergence is allowed *only* through
     the explicit, hashed declaration of §5.8; silent divergence remains a hard failure.
 
-### 5.8 Required code change (prerequisite P1)
+### 5.8 Required capability: supervised arms, one instrument (prerequisites P1, P2)
 
-`cvslab/service.py` currently hard-fails when the training TargetSpec and the evaluation
-TargetSpec differ (`target_spec_consistent` → `_PreflightFailed("training and evaluation
-TargetSpecs differ")`, lines 519–528). That check was written for S6, where both were
-400k; **the density frontier cannot run under it**, because arms are trained on their own
-budget and measured on the common 400k instrument.
+The scientific distinction S7 needs is general, not S7-specific:
 
-Required behaviour, minimal and fail-closed by default:
+* the treatment is **training-label fidelity** — each arm pins its own training
+  TargetSpec;
+* the measurement instrument is **held constant** — every run in the experiment pins the
+  same frozen evaluation TargetSpec and the same protocol hash.
 
-* divergence stays a **hard failure** unless the ablation declares it explicitly at
-  creation time (e.g. `create_ablation(..., allow_supervision_divergence="<reason>")`),
-  with the reason string stored in the A####/R#### record and included in the ablation
-  identity hash, so it cannot be added after the fact;
-* when declared, record both spec hashes in the run's integrity checks (`warn=True`,
-  visible in every run record) and keep the strict per-row cardinality checks unchanged —
-  those are what actually caught the S6 `eval_cp` failure;
-* add, at the campaign level, the hard invariant that a declared-divergence campaign's
-  runs all pin **one** protocol hash (condition 9 above).
+The invariant is therefore *not* `train_spec == eval_spec`. It is:
 
-This is the only code change S7 requires. Everything else reuses shipped machinery.
+> every run in an experiment shares one evaluation protocol and one evaluation
+> TargetSpec, while each treatment arm explicitly pins its own training TargetSpec.
+
+**P1 — minimal train/eval separation** (the prerequisite the user wants reviewed first):
+
+`cvslab/service.py` currently hard-fails when the recipe's TargetSpec hash differs from
+the protocol's (`target_spec_consistent` → `_PreflightFailed("training and evaluation
+TargetSpecs differ")`, lines ~519–528). Required change:
+
+* divergence stays a **hard failure by default**;
+* it is permitted only through an explicit declaration made at ablation-creation time, so
+  it cannot be added after the fact — the declaration is part of the ablation identity
+  hash and is copied into every run record;
+* when declared, both spec hashes (`train`, `eval`) are recorded as visible integrity
+  checks in the run, and the strict per-row cardinality checks are untouched — those are
+  what actually caught the S6 `eval_cp` failure;
+* tests: (a) undeclared divergence still refuses; (b) declared divergence runs to
+  completion and records both hashes; (c) a row with zero or two matching labels under
+  either spec still fails; (d) two runs that declare different evaluation specs cannot be
+  compared — refused at the layer that would compare them.
+
+**P2 — the experiment binds its instrument** (first-class, so it is not re-implemented per
+study): an experiment-level object that pins, before any run is queued:
+
+* the evaluation dataset manifest hash, protocol hash and evaluation TargetSpec hash;
+* per arm: dataset, recipe, training TargetSpec hash, prefix size and realized nodes;
+* seeds, the frozen selection-order hash, the pool/normalization identity, and the
+  preregistration document hash (this file plus `tools/s7/s7-preregistration.json`);
+* admissibility: every referenced run must belong to the experiment, its train spec must
+  equal its arm's declared spec, and all runs must share the instrument — verified at
+  queue time and again at analysis time, failing closed.
+
+Shape of the object (a new identity prefix, or an extended `A####` grouping) is a review
+decision. Its *required properties* are the eleven invariants above; anything less
+becomes script-level convention again, which is what S6 had and what P1/P2 exist to
+replace.
+
+S7 cannot run without P1. P2 may land with the freeze step, but the invariant it enforces
+is preregistered here rather than left to a script.
 
 ### 5.9 Cost
 
@@ -462,7 +543,7 @@ This is the only code change S7 requires. Everything else reuses shipped machine
 | pool generation (≈1,200 games × 70 plies × 20k nodes) | ≈1.68 G **[E]** | ≈25–30 min **[E]** | 30–60 min **[E]** |
 | tier0/facts on ≈12,000 records (lab-native) | 0 | — | ≈1–3 min **[E]** |
 | calibration (64 × 640k nodes) | 41 M **[E]** | ≈40 s **[E]** | <1 min |
-| arm labels (4 × T) | 149.1 M | ≈2.5–3 min **[E]** | <5 min |
+| arm labels (4 × T, plus 4 probe labels ≈ 0.8 M) | 149.9 M | ≈2.5–3 min **[E]** | <5 min |
 | determinism gate (8 positions) | 1.7 M | ≈2 s | — |
 | training (80 runs, ≤3,258 rows, 40 epochs) | 0 | 0 | ≈10–30 min **[E]** |
 | evaluation (80 runs × 200 records) | 0 | 0 | <1 min |
@@ -488,6 +569,11 @@ engine time, of which the labelling itself is under 3 minutes.
 * Not a statement about Stockfish/oracle labels — the teacher is the CVS analyze binary
   at four budgets.
 * Not a statement about other pools or other teachers; replication stays issue #16.
+* The arms are **nested**, so they share positions by construction. The contrast is
+  therefore "the same positions supervised at a different fidelity, plus more rows at the
+  shallow end" — not "two independent samples that happened to differ". The treatment is
+  label fidelity and row count; the *position set* is held as constant as a budget-constrained
+  design allows, which is what review amendment 1 asked for.
 * The wider arms receive proportionally more optimizer steps at fixed epochs. A
   breadth win therefore does not cleanly separate "more data" from "more updates"; a
   breadth *loss* is the stronger inference because it happened despite both. This
@@ -502,10 +588,12 @@ engine time, of which the labelling itself is under 3 minutes.
   S6  selection: priority-top vs uniform, equal depth     → INCONCLUSIVE (done)
   ├─ S7-P  screen: depth-at-fixed-rows, rows-at-fixed-depth, economics (existing labels)
   ├─ S7-F  density frontier: 400k×94 vs 160k×235 vs 64k×588 vs 16k×2341 at T  ← this doc
-  ├─ S8    economically efficient labelling regime: pick the depth the frontier's
-  │        curve says to buy; run the funnel at that budget on a NEW pool; verify the
-  │        curve repeats with fresh games (this is where "efficient regime" becomes a
-  │        standing recommendation rather than one pool's result)
+  ├─ S8    economically efficient labelling regime: take the frontier's **efficient
+  │        point** (the cheapest arm whose mean is not beaten — §5.6), run the funnel at
+  │        that depth on a NEW pool, and verify the curve repeats with fresh games and a
+  │        fresh instrument. This is where "efficient regime" becomes a standing
+  │        recommendation rather than one pool's result; if the curve does not repeat,
+  │        the frontier's finding is scoped back to its original pool.
   ├─ S9    GEO white-box: train on the deterministic facts layer that S7 already
   │        attaches to every record (no search teacher at all); the facts are free at
   │        the margin, so the question is what they are *worth* as input
@@ -542,18 +630,29 @@ them uses S7-F's answer as an input to its design.
 | teacher time for the whole campaign | ≈90 single-thread hours | ≈30–35 min wall, of which labelling <3 min |
 | semantics retained | cp, res, cp_play, label_depth/nodes, sf_best, raw feature ids | cp at 4 distinct, hashed budgets + facts/motif/strategy for every record |
 | provenance | 22/23 models lack training commit + dataset hash; one corpus was 43 % duplicate rows | every label carries family/authority/producer/budget/registry; every dataset and protocol is hash-pinned |
-| selection policy identity | none recorded | none needed (uniform) — but the *pool*, *order seed* and *arm blocks* are all frozen |
+| selection policy identity | none recorded | none needed (uniform) — but the *pool*, *order seed* and the *filled prefixes* are all frozen |
+
+**The framing** (review amendment 4): this is not "CVS 400k vs Stockfish d20". It is —
+Gen10: *repeatedly purchase expensive oracle values over a relatively narrow set of
+distinct positions.* Lab hypothesis: *purchase broad cheap search coverage, attach
+deterministic structure everywhere, and selectively increase supervision quality only
+where evidence says it pays.* S7-F measures the price/performance curve of the second
+half of that sentence.
 
 **Answer to the thesis question, stated as the thing S7-F can actually falsify:** the
 winning economics for a *static evaluator on this instrument* are
 "broad representative rows at the cheapest depth that still carries signal" if and only
-if `BREADTH_WINS`. If `DEPTH_WINS`, the economics stay "few deep labels", the funnel's
-value collapses to its facts layer and its oracle sample, and the platform's effort
-should move to S9 (what the free geometry is worth) rather than to wider shallow
-corpora. If `INCONCLUSIVE`, the honest conclusion is that between these four regimes at
-this scale the teacher budget is not the binding constraint — which would itself be a
-major result, because it would say the field's default of "label everything deeply" is
-paying for something invisible to this instrument.
+if the frontier's curve does not rise again on the shallow side — i.e. `BREADTH_WINS`
+*and* the efficient point sits at or near the shallow end. If `DEPTH_WINS`, the economics
+stay "few deep labels", the funnel's value collapses to its facts layer and its oracle
+sample, and the platform's effort should move to S9 (what the free geometry is worth)
+rather than to wider shallow corpora. The interesting third case is a **non-monotone
+curve** (e.g. 64k beats both ends): then neither slogan is right, the platform buys at
+the turning point, and the frontier's adjacent contrasts — not its primary endpoint —
+are the result that matters. If `INCONCLUSIVE`, the honest conclusion is that between
+these four regimes at this scale the teacher budget is not the binding constraint, which
+would itself be a major result: it would say the field's default of "label everything
+deeply" is paying for something invisible to this instrument.
 
 ---
 
