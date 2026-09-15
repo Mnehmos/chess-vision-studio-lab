@@ -51,16 +51,15 @@ def _row_outcome(row: dict):
     return row.get("res") if outcome is None else outcome
 
 
-def _row_game(row: dict) -> tuple[str, bool]:
-    """(group identity, was explicit). When the run carries no game identity — the legacy
-    sample stage stores only {file, line} and hash-ranks positions, so no sequence
-    heuristic is trustworthy — each position becomes its own group: leakage-safe by
-    construction (nothing that might share a game can be split apart), and the pool
-    snapshot records that game grouping was unavailable for later re-joining."""
+def _row_game(row: dict) -> tuple[Optional[str], bool]:
+    """(explicit game identity or None, was explicit). The legacy sample stage stores only
+    {file, line} and hash-ranks positions, so game identity often does not exist in a run.
+    We never manufacture it: missing identity is marked unknown (`game_unknown`), the
+    source_ref is retained for later recovery, and dataset freezing refuses leakage-safe
+    splits over unknown-grouping positions unless the caller explicitly opts into a single
+    shared group (safe, at the cost of balanced splits)."""
     explicit = row.get("game") or (row.get("source") or {}).get("game")
-    if explicit:
-        return str(explicit), True
-    return f"pos:{row['id']}", False
+    return (str(explicit), True) if explicit else (None, False)
 
 
 def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optional[str] = None,
@@ -87,10 +86,16 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
 
     # -- L0: candidate pool ------------------------------------------------------
     grouped = [_row_game(row) for row in positions]
-    game_grouping = "explicit" if all(explicit for _game, explicit in grouped) else         "per-position (source run carries no game identity; resolve from original shards before trusting split balance)"
-    pool_rows = [{"fen": row["fen"], "res": _row_outcome(row), "game": game,
-                  "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))}
-                 for row, (game, _explicit) in zip(positions, grouped)]
+    game_grouping = "explicit" if all(explicit for _game, explicit in grouped) else         "unknown (run carries no game identity; source_ref retained for recovery; "         "leakage-safe freezing refused until grouping is repaired or shared-group mode is chosen)"
+    pool_rows = []
+    for row, (game, explicit) in zip(positions, grouped):
+        pool_row = {"fen": row["fen"], "res": _row_outcome(row),
+                    "funnel_id": row["id"], "source_ref": json.dumps(row.get("source"))}
+        if explicit:
+            pool_row["game"] = game
+        else:
+            pool_row["game_unknown"] = True
+        pool_rows.append(pool_row)
     source_id = store.next_id("S")
     rel = f"sources/{source_id}/positions.jsonl"
     content_hash = write_jsonl(store.abs(rel), pool_rows)

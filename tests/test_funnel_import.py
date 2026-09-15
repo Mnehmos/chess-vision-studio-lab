@@ -206,9 +206,9 @@ def test_same_value_different_budget_labels_coexist(lab, tmp_path):
     assert {label["budget"]["nodeBudget"] for label in shallow} == {2000, 16000}
 
 
-def test_game_grouping_preserved_or_fail_safe(lab, tmp_path):
-    """Explicit game ids pass through; a run without game identity yields per-position
-    groups (leakage-safe) and says so in the pool snapshot."""
+def test_game_grouping_preserved_or_marked_unknown(lab, tmp_path):
+    """Explicit game ids pass through; a run without game identity is marked unknown —
+    never manufactured into a safe-looking grouping."""
     from cvslab.data import read_jsonl
     run = make_run_dir(tmp_path)
 
@@ -222,16 +222,43 @@ def test_game_grouping_preserved_or_fail_safe(lab, tmp_path):
     records = read_jsonl(lab.store.abs(lab.store.get(counts["normalization"]).path))
     groups = {record["group"] for record in records}
     assert groups == {f"{counts['source']}:game-42", f"{counts['source']}:game-43"}
-    snapshot = lab.store.get(counts["source"])
-    assert snapshot.generator["game_grouping"] == "explicit"
+    assert not any(record.get("group_unknown") for record in records)
+    assert lab.store.get(counts["source"]).generator["game_grouping"] == "explicit"
 
-    # (b) no game identity anywhere: every position is its own group, and the snapshot says so
+    # (b) no game identity anywhere: marked unknown, source_ref retained, snapshot says so
     run2 = make_run_dir(tmp_path / "second")
     counts2 = import_funnel_run_evidence(lab.store, run2, name="no-games", link_funnel_run=False)
     records2 = read_jsonl(lab.store.abs(lab.store.get(counts2["normalization"]).path))
-    groups2 = [record["group"] for record in records2]
-    assert len(groups2) == len(set(groups2)) == len(records2)  # no two positions claim one game
-    assert "no game identity" in lab.store.get(counts2["source"]).generator["game_grouping"]
+    assert all(record.get("group_unknown") for record in records2)
+    assert {record["group"] for record in records2} == {f"{counts2['source']}:UNKNOWN"}
+    assert "unknown" in lab.store.get(counts2["source"]).generator["game_grouping"]
+    # source_ref is retained in the pool snapshot for later recovery
+    pool_rows = read_jsonl(lab.store.abs(lab.store.get(counts2["source"]).path))
+    assert all(row.get("source_ref") for row in pool_rows)
+    assert counts2["source"]  # pool snapshot identity for the re-join
+
+
+def test_unsafe_splitting_is_refused_until_grouping_repaired(lab, tmp_path):
+    """Fail closed: ordinary leakage-safe freezing must refuse unknown game grouping;
+    the explicit shared-group opt-in is safe but recorded as such."""
+    run = make_run_dir(tmp_path)
+    counts = import_funnel_run_evidence(lab.store, run, name="unknown-groups", link_funnel_run=False)
+
+    with pytest.raises(LabError, match="unknown game grouping"):
+        lab.freeze_dataset(counts["normalization"], name="would-leak", required_labels=["facts"])
+
+    shared = lab.freeze_dataset(counts["normalization"], name="shared-group",
+                                required_labels=["facts"], unknown_grouping="shared")
+    assert shared.split_policy["unknown_grouping"] == "shared"
+    assert shared.split_policy["unknown_group_positions"] == 4
+    split_rows = [row for manifest in shared.splits
+                  for row in __import__("cvslab.data", fromlist=["read_jsonl"]).read_jsonl(
+                      lab.store.abs(manifest.path))]
+    assert {row["group"] for row in split_rows} == {"UNKNOWN-GROUP"}  # cannot straddle splits
+
+    with pytest.raises(LabError, match="refuse"):
+        lab.freeze_dataset(counts["normalization"], name="bad-mode",
+                           required_labels=["facts"], unknown_grouping="maybe")
 
 
 def test_falsy_outcome_is_preserved(lab, tmp_path):
