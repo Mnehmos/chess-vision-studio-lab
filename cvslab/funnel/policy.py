@@ -19,13 +19,32 @@ from ..store import LabError, Store
 POLICY_DIR = "policies"
 
 
-def build_policy(config: dict, *, policy_version: Optional[str] = None) -> dict:
-    """Extract a canonical policy document from a funnel config (tier2 + tier4 + seed)."""
+def prior_counts_hash(counts: dict) -> str:
+    """Content identity for a coverage prior: hash of the canonical counts mapping."""
+    import hashlib
+    return "sha256:" + hashlib.sha256(canonical_json({k: int(v) for k, v in sorted(counts.items())})).hexdigest()
+
+
+def build_policy(config: dict, *, policy_version: Optional[str] = None,
+                 prior_counts: Optional[dict] = None) -> dict:
+    """Extract a canonical policy document from a funnel config (tier2 + tier4 + seed).
+
+    A non-null ``priorCountsPath`` must come with its content (``prior_counts``):
+    the coverage prior is part of the scientific identity, so it is
+    content-addressed — never just a path that could point at different bytes later.
+    """
     if "tiers" not in config or "tier2" not in config.get("tiers", {}):
         raise LabError("funnel config has no tiers.tier2 section; cannot extract a triage policy")
     tier2 = config["tiers"]["tier2"]
     tier4 = config["tiers"].get("tier4", {})
     coverage = tier2.get("coverage", {})
+    prior_path = coverage.get("priorCountsPath")
+    if prior_path and prior_counts is None:
+        raise LabError("config sets tiers.tier2.coverage.priorCountsPath; pass its counts so the "
+                       "coverage prior can be content-addressed instead of merely referenced by path")
+    prior_identity = None
+    if prior_path:
+        prior_identity = {"source_path": str(prior_path), "counts_hash": prior_counts_hash(prior_counts)}
     return {
         "policy_version": policy_version or config.get("prioritizerVersion") or "priority-v1",
         "seed": int(config["seed"]),
@@ -40,7 +59,7 @@ def build_policy(config: dict, *, policy_version: Optional[str] = None) -> dict:
         "coverage_prior": {
             "target_share": float(coverage.get("targetShare", 0.02)),
             "min_target": int(coverage.get("minTarget", 5)),
-            "prior_counts": coverage.get("priorCountsPath"),
+            "prior_counts": prior_identity,
         },
         "stockfish": {
             "enabled": bool(tier4.get("enabled", True)),

@@ -267,8 +267,10 @@ def import_funnel_run_evidence(store: Store, run_dir: str | Path, *, name: Optio
     if link_funnel_run:
         from .. import intake
         try:
-            funnel_run = intake.import_funnel_run(store, directory, name=directory.name,
-                                                  position_pool=source.id)
+            funnel_run = intake.import_funnel_run(
+                store, directory, name=directory.name, position_pool=source.id,
+                triage_policy_version=policy_version if policy_digest else None,
+                triage_policy_hash=policy_digest)
             counts["funnel_run"] = funnel_run.id
         except Exception as exc:  # already imported (sealed) — report instead of silently skipping
             existing = next((r.id for r in store.list("R", verify=False, kind=intake.FunnelRun)

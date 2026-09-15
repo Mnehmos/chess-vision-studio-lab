@@ -526,17 +526,22 @@ def _label_set_ref(store: Store, path: Path) -> LabelSetRef:
     authorities: Counter = Counter()
     producers: Counter = Counter()
     registry = 1
-    policy = None
+    policy_hashes: set[str] = set()
     for row in rows:
         families[row["family"]] += 1
         authorities[row["authority"]] += 1
         producers[row["producer"]] += 1
         registry = int(row.get("registry_version", 1))
-        policy = policy or row.get("policy_hash")
+        if row.get("policy_hash"):
+            policy_hashes.add(str(row["policy_hash"]))
+    if len(policy_hashes) > 1:
+        raise LabError(f"{path.name} carries {len(policy_hashes)} distinct policy hashes "
+                       f"({', '.join(sorted(policy_hashes))}); one label set must belong to exactly "
+                       "one policy identity")
     return LabelSetRef(path=store.rel(path), file_hash=sha256_file(path), rows=len(rows),
                        families=dict(families), authorities=dict(authorities), producers=dict(producers),
                        registry_version=registry, label_schema_version=LABEL_SCHEMA_VERSION,
-                       policy_hash=policy)
+                       policy_hash=next(iter(policy_hashes), None))
 
 
 def _load_canonical(store: Store, normalization: Normalization) -> list[dict]:

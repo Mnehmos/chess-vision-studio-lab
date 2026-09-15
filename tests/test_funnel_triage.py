@@ -116,3 +116,45 @@ def test_priority_labels_carry_policy_hash(lab, tmp_path):
     refs = label_set_refs(lab.store, counts["normalization"])
     priority_ref = next(ref for ref in refs if "priority" in ref.families)
     assert priority_ref.policy_hash == counts["policy_hash"]
+
+
+def test_funnel_run_retains_policy_identity_immutably(lab, tmp_path):
+    """The R#### object itself must carry (policy_version, policy_hash)."""
+    run = make_run_dir(tmp_path)
+    counts = import_funnel_run_evidence(lab.store, run, name="policy-on-run")
+    funnel_run = lab.store.get(counts["funnel_run"])
+    assert funnel_run.triage_policy_version == "priority-v1"
+    assert funnel_run.triage_policy_hash == counts["policy_hash"]
+    assert funnel_run.position_pool == counts["source"]
+
+
+def test_coverage_prior_is_content_addressed(lab, tmp_path):
+    """A non-null prior is part of the scientific identity: path alone is refused."""
+    config = json.loads(json.dumps(CONFIG))
+    config["tiers"]["tier2"]["coverage"]["priorCountsPath"] = "prior-coverage.json"
+    with pytest.raises(LabError, match="content-addressed"):
+        build_policy(config)
+    counts_a = {"__positions__": 10, "fork": 3}
+    counts_b = {"__positions__": 10, "fork": 4}
+    policy_a = build_policy(config, prior_counts=counts_a)
+    policy_b = build_policy(config, prior_counts=counts_b)
+    assert policy_a["coverage_prior"]["prior_counts"]["counts_hash"].startswith("sha256:")
+    assert policy_hash(policy_a) != policy_hash(policy_b)  # different priors, different policy identity
+    assert build_policy(config, prior_counts=dict(counts_a))["coverage_prior"] == policy_a["coverage_prior"]
+
+
+def test_label_set_with_mixed_policy_hashes_fails(lab, tmp_path):
+    """One label set belongs to exactly one policy identity — never 'take the first'."""
+    run = make_run_dir(tmp_path)
+    counts = import_funnel_run_evidence(lab.store, run, name="mixed-hash", link_funnel_run=False)
+    from cvslab.data import read_jsonl
+    from cvslab.hashing import write_jsonl
+    refs = __import__("cvslab.data", fromlist=["label_set_refs"]).label_set_refs(lab.store, counts["normalization"])
+    path = lab.store.abs(next(ref for ref in refs if "priority" in ref.families).path)
+    rows = read_jsonl(path)
+    rows[1]["policy_hash"] = "sha256:" + "9" * 64
+    import os, stat
+    os.chmod(path, stat.S_IWRITE)
+    write_jsonl(path, rows)
+    with pytest.raises(LabError, match="distinct policy hashes"):
+        __import__("cvslab.data", fromlist=["label_set_refs"]).label_set_refs(lab.store, counts["normalization"])
