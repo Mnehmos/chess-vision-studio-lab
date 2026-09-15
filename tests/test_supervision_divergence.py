@@ -173,62 +173,147 @@ def test_strict_label_cardinality_survives_the_separation(lab):
                            target_spec=EVAL_SPEC, fractions=(1.0, 0.0, 0.0))
 
 
-def test_runs_with_different_evaluation_specs_refuse_to_be_compared(lab):
-    """P1 test 4: two evaluations are not one measurement just because both are centipawns."""
+def comparable_arm(lab, name, *, train_dataset, recipe, protocol, divergence=None, seed=0):
+    registered = lab.register_baseline(name=name, dataset_id=train_dataset.id, training_recipe_id=recipe.id,
+                                       eval_protocol_id=protocol.id, model_config={"INPUT": "RAW", "H": 4},
+                                       supervision_divergence=divergence or "")
+    [queued] = lab.queue_runs(registered.id, seeds=(seed,))
+    finished = lab.execute_run(queued.id)
+    assert finished.status.value == "COMPLETED", [c.detail for c in finished.integrity if c.status == "fail"]
+    return registered, queued
+
+
+def test_arms_with_different_lessons_and_one_exam_are_comparable(lab):
+    """P1 test 4 (the S7 situation): different training data is the treatment, not a conflict.
+
+    Two arms trained on different D#### with different T#### and different training
+    TargetSpecs, judged by one E#### on one evaluation D#### with one evaluation
+    TargetSpec, must compare. A guard that read the TRAINING dataset manifest would
+    declare these incomparable — which would break the entire supervision frontier.
+    """
     normalization, _ = corpus(lab, seed=17)
-    train, exam400, recipe, protocol400 = divergent_pair(lab, normalization)
-    exam16 = lab.freeze_dataset(normalization.id, name="d-exam-16k", required_labels=["search_shallow_cp"],
-                                target_spec=TRAIN_SPEC, fractions=(1.0, 0.0, 0.0))
-    protocol16 = lab.create_eval_protocol(name="e-16k", dataset_id=exam16.id, split="train", k=256.0, lam=1.0,
+    train16 = lab.freeze_dataset(normalization.id, name="d-train-16k", required_labels=["search_shallow_cp"],
+                                 target_spec=TRAIN_SPEC)
+    train400 = lab.freeze_dataset(normalization.id, name="d-train-400k", required_labels=["search_deep_cp"],
+                                  target_spec=EVAL_SPEC)
+    exam = lab.freeze_dataset(normalization.id, name="d-exam-400k", required_labels=["search_deep_cp"],
+                              target_spec=EVAL_SPEC, fractions=(1.0, 0.0, 0.0))
+    recipe16 = lab.create_training_recipe(name="t-16k", params={"K": 256.0, "LAMBDA": 1.0, "EPOCHS": 2},
                                           target_spec=TRAIN_SPEC)
-    # the SAME exam semantics, but a different protocol object (different bootstrap seed)
-    protocol400b = lab.create_eval_protocol(name="e-400k-b", dataset_id=exam400.id, split="train", k=256.0,
-                                            lam=1.0, target_spec=EVAL_SPEC, bootstrap_seed=7)
+    recipe400 = lab.create_training_recipe(name="t-400k", params={"K": 256.0, "LAMBDA": 1.0, "EPOCHS": 2},
+                                           target_spec=EVAL_SPEC)
+    protocol = lab.create_eval_protocol(name="e-common", dataset_id=exam.id, split="train", k=256.0, lam=1.0,
+                                        target_spec=EVAL_SPEC)
 
-    # three arms, one lesson, different examinations; every arm is legitimate on its own
-    def arm(name, protocol):
-        registered = lab.register_baseline(name=name, dataset_id=train.id, training_recipe_id=recipe.id,
-                                           eval_protocol_id=protocol.id, model_config={"INPUT": "RAW", "H": 4},
-                                           supervision_divergence=REASON)
-        [queued] = lab.queue_runs(registered.id, seeds=(0,))
-        assert lab.execute_run(queued.id).status.value == "COMPLETED"
-        return registered, queued
-
-    arm400, run400 = arm("EXAM400", protocol400)
-    arm16, run16 = arm("EXAM16", protocol16)
-    arm400b, run400b = arm("EXAM400B", protocol400b)
-    assert run400.eval_target_spec_hash != run16.eval_target_spec_hash
-
-    # rule 1 (the exam): different evaluation TargetSpecs cannot be compared, and the refusal
-    # names both exam identities so the reason is legible in the evidence
-    with pytest.raises(LabError) as excinfo:
-        lab.assert_runs_comparable([run400.id, run16.id])
-    message = str(excinfo.value)
-    assert "not comparable" in message
-    assert EVAL_SPEC.spec_hash()[:19] in message and TRAIN_SPEC.spec_hash()[:19] in message
-
-    # rule 2 (the instrument): same exam semantics, different protocol object -> still not one
-    # measurement, because the instrument is the protocol, not only its supervision definition
-    with pytest.raises(LabError, match="distinct instruments"):
-        lab.assert_runs_comparable([run400.id, run400b.id])
-
-    # one arm's own runs are comparable, and the guard returns the shared exam identity
-    [other400] = lab.queue_runs(arm400.id, seeds=(1,))
-    assert lab.execute_run(other400.id).status.value == "COMPLETED"
-    assert lab.assert_runs_comparable([run400.id, other400.id]) == EVAL_SPEC.spec_hash()
-
-    # the finding path evaluates the same predicate on a real control/intervention pair:
-    # both arms of one pair share their instrument, so the check passes and the comparison
-    # is allowed — while the cross-exam pair above is refused by the guard
-    hypothesis = lab.create_hypothesis(title="same exam", statement="one instrument per comparison")
-    intervention = lab.create_ablation(baseline_id=arm400.id, overrides={"H": 8}, hypothesis_id=hypothesis.id,
-                                       supervision_divergence=REASON)
+    _, run_narrow = comparable_arm(lab, "ARM_NARROW", train_dataset=train16, recipe=recipe16,
+                                   protocol=protocol, divergence=REASON)
+    _, run_wide = comparable_arm(lab, "ARM_WIDE", train_dataset=train400, recipe=recipe400,
+                                 protocol=protocol, divergence=REASON)
+    # the lessons differ...
+    assert run_narrow.dataset_id != run_wide.dataset_id
+    assert run_narrow.training_recipe_id != run_wide.training_recipe_id
+    assert run_narrow.train_target_spec_hash != run_wide.train_target_spec_hash
+    # ...the exam does not
+    assert lab.instrument_identity(run_narrow) == lab.instrument_identity(run_wide)
+    assert lab.assert_runs_comparable([run_narrow.id, run_wide.id]) == EVAL_SPEC.spec_hash()
+    # and the finding layer agrees (a real control/intervention pair, same exam, different lesson)
+    hypothesis = lab.create_hypothesis(title="lessons vs exam", statement="one exam, two lessons")
+    intervention = lab.create_ablation(baseline_id=run_narrow.ablation_id, overrides={"H": 8},
+                                       hypothesis_id=hypothesis.id, supervision_divergence=REASON)
     [intervention_run] = lab.queue_runs(intervention.id, seeds=(0,))
     assert lab.execute_run(intervention_run.id).status.value == "COMPLETED"
-    finding = lab.draft_finding(hypothesis_id=hypothesis.id, control_ablation_id=arm400.id,
+    finding = lab.draft_finding(hypothesis_id=hypothesis.id, control_ablation_id=run_narrow.ablation_id,
                                 intervention_ablation_id=intervention.id)
     checks = {c.name: c for c in finding.integrity}
-    assert checks["same_evaluation_target_spec"].status == "pass"
     assert checks["same_instrument"].status == "pass"
-    assert checks["same_evaluation_target_spec"].detail.count(EVAL_SPEC.spec_hash()[:19]) == 1
+    assert checks["same_evaluation_target_spec"].status == "pass"
     assert finding.effect is not None
+
+
+def test_a_different_exam_is_refused_by_any_of_its_three_parts(lab):
+    """P1 test 4 (negative): protocol, evaluation dataset or evaluation TargetSpec."""
+    normalization, _ = corpus(lab, seed=18)
+    train16 = lab.freeze_dataset(normalization.id, name="d-train-16k", required_labels=["search_shallow_cp"],
+                                 target_spec=TRAIN_SPEC)
+    exam400 = lab.freeze_dataset(normalization.id, name="d-exam-400k", required_labels=["search_deep_cp"],
+                                 target_spec=EVAL_SPEC, fractions=(1.0, 0.0, 0.0))
+    exam16 = lab.freeze_dataset(normalization.id, name="d-exam-16k", required_labels=["search_shallow_cp"],
+                                target_spec=TRAIN_SPEC, fractions=(1.0, 0.0, 0.0))
+    recipe16 = lab.create_training_recipe(name="t-16k", params={"K": 256.0, "LAMBDA": 1.0, "EPOCHS": 2},
+                                          target_spec=TRAIN_SPEC)
+    exam_protocol = lab.create_eval_protocol(name="e-400k", dataset_id=exam400.id, split="train", k=256.0,
+                                             lam=1.0, target_spec=EVAL_SPEC)
+    # same evaluation dataset and spec, different protocol object (different bootstrap seed)
+    twin_protocol = lab.create_eval_protocol(name="e-400k-twin", dataset_id=exam400.id, split="train", k=256.0,
+                                             lam=1.0, target_spec=EVAL_SPEC, bootstrap_seed=7)
+    # same evaluation dataset, DIFFERENT evaluation TargetSpec (16k instead of 400k)
+    other_spec_protocol = lab.create_eval_protocol(name="e-same-data-16k", dataset_id=exam400.id, split="train",
+                                                   k=256.0, lam=1.0, target_spec=TRAIN_SPEC)
+    # a different evaluation dataset entirely
+    other_data_protocol = lab.create_eval_protocol(name="e-16k", dataset_id=exam16.id, split="train", k=256.0,
+                                                   lam=1.0, target_spec=TRAIN_SPEC)
+
+    _, reference = comparable_arm(lab, "REF", train_dataset=train16, recipe=recipe16,
+                                  protocol=exam_protocol, divergence=REASON)
+    pairs = {
+        "evaluation protocol": twin_protocol,
+        "evaluation dataset": other_data_protocol,
+        "evaluation TargetSpec": other_spec_protocol,
+    }
+    for label, protocol in pairs.items():
+        _, other = comparable_arm(lab, f"OTHER_{label.split()[-1].upper()}", train_dataset=train16,
+                                  recipe=recipe16, protocol=protocol, divergence=REASON)
+        with pytest.raises(LabError) as excinfo:
+            lab.assert_runs_comparable([reference.id, other.id])
+        message = str(excinfo.value)
+        assert "not comparable" in message, (label, message)
+        assert f"distinct {label}s" in message or "evaluation TargetSpecs" in message, (label, message)
+
+
+def _rewrite_run_field(lab, run_id, **changes):
+    """Record a run payload as another code path would have: the field is on the evidence."""
+    import json
+    import os
+    import stat
+
+    from cvslab.store import payload_hash
+    path = lab.store.object_path(run_id)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update(changes)
+    payload["record_hash"] = payload_hash({k: v for k, v in payload.items() if k != "record_hash"})
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def _queued_divergent_run(lab, *, seed):
+    normalization, _ = corpus(lab, seed=seed)
+    train, exam, recipe, protocol = divergent_pair(lab, normalization)
+    registered = lab.register_baseline(name=f"EVIDENCE{seed}", dataset_id=train.id, training_recipe_id=recipe.id,
+                                       eval_protocol_id=protocol.id, model_config={"INPUT": "RAW", "H": 4},
+                                       supervision_divergence=REASON)
+    [queued] = lab.queue_runs(registered.id, seeds=(0,))
+    return queued, recipe, protocol
+
+
+def test_queued_training_supervision_evidence_must_match_the_recipe(lab):
+    """P1 test 3 of the acceptance list: T#### is authority, the run field is evidence."""
+    queued, recipe, protocol = _queued_divergent_run(lab, seed=19)
+    _rewrite_run_field(lab, queued.id, train_target_spec_hash="sha256:" + "0" * 64)
+    finished = lab.execute_run(queued.id)
+    assert finished.status.value == "INVALID"
+    checks = {c.name: c for c in finished.integrity}
+    assert checks["supervision_authority"].status == "fail"
+    assert "authority" in checks["preflight"].detail
+    assert not finished.metrics and finished.model_id is None  # nothing trained on stale evidence
+
+
+def test_queued_evaluation_supervision_evidence_must_match_the_protocol(lab):
+    """P1 test 4 of the acceptance list: E#### is authority, the run field is evidence."""
+    queued, recipe, protocol = _queued_divergent_run(lab, seed=20)
+    _rewrite_run_field(lab, queued.id, eval_target_spec_hash="sha256:" + "1" * 64)
+    finished = lab.execute_run(queued.id)
+    assert finished.status.value == "INVALID"
+    assert {c.name: c for c in finished.integrity}["supervision_authority"].status == "fail"
+    # and the honest evidence still runs, proving the check is about agreement, not the fields
+    queued2, _, _ = _queued_divergent_run(lab, seed=21)
+    assert lab.execute_run(queued2.id).status.value == "COMPLETED"

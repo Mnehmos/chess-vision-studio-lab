@@ -558,6 +558,22 @@ class LabService:
             eval_hash = eval_spec.spec_hash() if eval_spec is not None else None
             declared = (ablation.supervision_divergence or "").strip()
             if train_spec is not None or eval_spec is not None:
+                # The run fields are EVIDENCE; the frozen T#### and E#### objects are AUTHORITY.
+                # Execution proves they agree before training starts, so a sealed run can never
+                # display a supervision identity the recipe or protocol does not pin.
+                def _short(value):
+                    return value[:19] + "…" if value else "none"
+                recorded_ok = (run.train_target_spec_hash == train_hash
+                               and run.eval_target_spec_hash == eval_hash)
+                checks.append(make_check(
+                    "supervision_authority", recorded_ok,
+                    f"run records train {_short(run.train_target_spec_hash)} / eval "
+                    f"{_short(run.eval_target_spec_hash)}; {recipe.id} pins {_short(train_hash)} / "
+                    f"{protocol.id} pins {_short(eval_hash)}"))
+                if not recorded_ok:
+                    raise _PreflightFailed(
+                        "queued supervision identity does not match the frozen recipe/protocol: "
+                        "the T#### and E#### objects are the authority")
                 if train_hash is None or eval_hash is None:
                     checks.append(make_check(
                         "supervision_declared", False,
@@ -717,33 +733,60 @@ class LabService:
         spec = protocol_target_spec(protocol)
         return spec.spec_hash() if spec is not None else ""
 
+    def instrument_identity(self, run: Run) -> tuple:
+        """The EXAM a run sat: (eval protocol id, protocol hash, eval dataset id, eval dataset
+        manifest hash, evaluation TargetSpec hash).
+
+        Built from the evaluation side ONLY. A run's training dataset is the treatment in a
+        supervision experiment — two S7 arms necessarily train on different D#### — so the
+        training manifest must never enter the instrument identity, or legitimate arms would
+        look incomparable. Historical runs that predate the split-dataset convention evaluated
+        on their own dataset; for them the protocol's own binding is the evaluation side.
+        """
+        protocol: EvaluationProtocol = self.store.get_as(run.eval_protocol_id, EvaluationProtocol)
+        return (run.eval_protocol_id, run.protocol_hash,
+                run.eval_dataset_id or protocol.dataset_id,
+                run.eval_dataset_manifest_hash or protocol.dataset_manifest_hash,
+                self.evaluation_spec_hash(run))
+
+    @staticmethod
+    def _exam_differences(exams: list[tuple]) -> list[str]:
+        """Human-readable reasons two exam identities differ, in the reviewer's terms."""
+        reasons: list[str] = []
+        protocols = {(exam[0], exam[1]) for exam in exams}
+        datasets = {(exam[2], exam[3]) for exam in exams}
+        specs = {exam[4] for exam in exams}
+        if len(protocols) > 1:
+            reasons.append(f"{len(protocols)} distinct evaluation protocols")
+        if len(datasets) > 1:
+            reasons.append(f"{len(datasets)} distinct evaluation datasets")
+        if len(specs) > 1:
+            reasons.append("evaluation TargetSpecs "
+                           + ", ".join(sorted(h[:19] + "…" for h in specs)))
+        return reasons
+
     def assert_runs_comparable(self, run_ids: Sequence[str]) -> str:
         """Every run in one comparison must share one evaluation instrument.
 
-        Two runs measured against different evaluation TargetSpecs are not the same
-        measurement, however similar their metric names look: a 16k-node evaluation and a
-        400k-node evaluation may both be a number called test_loss, and comparing them
-        would silently mix two exams. Returns the shared evaluation TargetSpec hash, or
-        raises with the differing component named.
+        Two runs measured against different exams are not the same measurement, however
+        similar their metric names look: a 16k-node evaluation and a 400k-node evaluation
+        may both be a number called test_loss. Returns the shared evaluation TargetSpec
+        hash, or raises naming which part of the exam differs.
 
-        This is the invariant S7 turns into an experiment identity (X####): one shared
-        evaluation protocol and evaluation TargetSpec per experiment, while each treatment
-        arm pins its own training TargetSpec.
+        Different training datasets are EXPECTED here — that is the treatment. This is the
+        invariant S7 turns into an experiment identity (X####): one shared evaluation
+        protocol, evaluation dataset and evaluation TargetSpec per experiment, while each
+        treatment arm pins its own training TargetSpec.
         """
         runs = [self.store.get_as(run_id, Run) for run_id in run_ids]
         if len(runs) < 2:
             raise LabError("a comparison needs at least two runs")
-        instruments = {(r.eval_protocol_id, r.protocol_hash, r.dataset_manifest_hash) for r in runs}
-        specs = {self.evaluation_spec_hash(r) for r in runs}
-        exams = ", ".join(sorted(h[:19] + "…" for h in specs)) or "none pinned"
-        if len(instruments) > 1:
-            raise LabError(f"runs were measured with different evaluation protocols or datasets "
-                           f"({len(instruments)} distinct instruments; evaluation specs {exams}) "
-                           "and are not comparable")
-        if len(specs) > 1:
-            raise LabError(f"runs were measured against different evaluation TargetSpecs ({exams}) "
-                           "and are not comparable: the exam has to be the same measurement")
-        return next(iter(specs))
+        exams = [self.instrument_identity(run) for run in runs]
+        reasons = self._exam_differences(exams)
+        if reasons:
+            raise LabError("runs were not measured on one shared evaluation instrument ("
+                           + "; ".join(reasons) + ") and are not comparable")
+        return exams[0][4]
 
     def draft_finding(self, *, hypothesis_id: str, control_ablation_id: str, intervention_ablation_id: str,
                       interpretation: Optional[str] = None, next_experiment: Optional[str] = None,
@@ -782,11 +825,15 @@ class LabService:
                                      f"{len(completed[arm.id])} completed run(s); invalid runs excluded: "
                                      f"{', '.join(invalid[arm.id]) or 'none'}; tampered: {', '.join(tampered) or 'none'}"))
         used = completed[control.id] + completed[intervention.id]
-        instruments = {(r.eval_protocol_id, r.protocol_hash, r.dataset_manifest_hash) for r in used}
-        checks.append(make_check("same_instrument", len(instruments) <= 1,
-                                 "all runs share one evaluation protocol and one dataset manifest"))
-
-        eval_specs = {self.evaluation_spec_hash(r) for r in used}
+        # one definition of "the exam", shared with assert_runs_comparable: evaluation side
+        # only, so different training datasets never make legitimate arms look incomparable
+        exams = [self.instrument_identity(run) for run in used]
+        exam_differences = self._exam_differences(exams)
+        checks.append(make_check(
+            "same_instrument", not any("protocol" in r or "dataset" in r for r in exam_differences),
+            "all runs share one evaluation protocol and one evaluation dataset"
+            if not exam_differences else "; ".join(exam_differences)))
+        eval_specs = {exam[4] for exam in exams}
         checks.append(make_check(
             "same_evaluation_target_spec", len(eval_specs) <= 1,
             "two runs measured against different evaluation TargetSpecs are not the same measurement: "
