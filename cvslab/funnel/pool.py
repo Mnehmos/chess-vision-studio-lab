@@ -56,7 +56,12 @@ class Teacher(Protocol):
     producer_hash: str
 
     def root_candidates(self, fen: str, *, candidates: int, node_budget: int) -> list[tuple[str, Optional[int]]]:
-        """Ordered [(move_uci, score_cp_stm)] root candidate set from one search."""
+        """Ordered [(move_uci, score_cp_WHITE)] root candidate set.
+
+        All candidate scores share one POV (White) so the window comparison is
+        meaningful: the root's stm-POV best score is converted via white_pov, and each
+        alternative's child score is converted from the child's own stm-POV.
+        """
 
     def search(self, fen: str, *, node_budget: int) -> tuple[str, Optional[int]]:
         """(best_move_uci, score_cp_stm) at a fixed node budget."""
@@ -73,18 +78,20 @@ class AnalyzeTeacher:
         self.root_candidates_from_order = root_candidates_from_order
 
     def root_candidates(self, fen: str, *, candidates: int, node_budget: int):
+        from .triage import white_pov
+
         response = self.transport.request_search(fen, node_budget)
         order = list(response.get("rootOrder") or [])
         best_uci, best_score = response.get("uci"), response.get("scoreCp")
         out: list[tuple[str, Optional[int]]] = []
         for move in order[:candidates]:
             if move == best_uci:
-                out.append((move, best_score))
+                out.append((move, white_pov(fen, best_score)))  # root stm-POV -> White
                 continue
             board = chess.Board(fen)
             board.push_uci(move)
-            _, score = self.search(board.fen(), node_budget=node_budget)
-            out.append((move, score))
+            _, child_score = self.search(board.fen(), node_budget=node_budget)
+            out.append((move, white_pov(board.fen(), child_score)))  # child stm-POV -> White
         return out
 
     def search(self, fen: str, *, node_budget: int) -> tuple[str, Optional[int]]:
@@ -129,13 +136,6 @@ class PoolConfig:
         }
 
 
-def _score_from_stm_pov(score_cp: Optional[int], mover: chess.Color) -> Optional[int]:
-    """Teacher scores are stm-POV; normalize to White-POV for windowing on one move list."""
-    if score_cp is None:
-        return None
-    return score_cp if mover == chess.WHITE else -score_cp
-
-
 class SelfPlayGenerator:
     """Deterministic fresh self-play pool generator. No dedup happens here, by design."""
 
@@ -157,11 +157,9 @@ class SelfPlayGenerator:
     def _choose_move(self, board: chess.Board, ply: int, rng: random.Random,
                      audit: list[dict]) -> tuple[str, Optional[int]]:
         if ply in self.config.diversification_plies:
-            scored: list[tuple[str, Optional[int]]] = []
-            for move, score_stm in self.teacher.root_candidates(
-                    board.fen(), candidates=self.config.diversification_candidates,
-                    node_budget=self.config.diversification_node_budget):
-                scored.append((move, _score_from_stm_pov(score_stm, board.turn)))
+            scored = [(move, score_white) for move, score_white in self.teacher.root_candidates(
+                board.fen(), candidates=self.config.diversification_candidates,
+                node_budget=self.config.diversification_node_budget)]
             known = [(move, score) for move, score in scored if score is not None]
             if known:
                 best = max(score for _, score in known)
@@ -266,7 +264,8 @@ def coverage_report(games: list[dict], positions: list[dict]) -> dict:
     }
 
 
-def write_pool(directory: str | Path, generated: dict, manifest_extra: dict) -> dict:
+def write_pool(directory: str | Path, generated: dict, manifest_extra: dict,
+               opening_lines: Optional[list[dict]] = None) -> dict:
     """Write the raw pool (positions.jsonl, games.jsonl, pool-manifest.json) + return the manifest."""
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
@@ -286,7 +285,7 @@ def write_pool(directory: str | Path, generated: dict, manifest_extra: dict) -> 
         "configSha256": hash_obj(manifest_extra["config"]),
         "config": manifest_extra["config"],
         "engine": manifest_extra["engine"],
-        "openingSourceSha256": opening_source_sha256(),
+        "openingSourceSha256": opening_source_sha256(opening_lines),
         "positionsFile": {"name": "positions.jsonl", "sha256": positions_hash,
                           "rows": len(generated["positions"])},
         "gamesFile": {"name": "games.jsonl", "sha256": games_hash, "rows": len(generated["games"])},
@@ -318,6 +317,7 @@ def snapshot_source(store, pool_directory: str | Path, *, name: str, license: st
     content_hash = write_jsonl(store.abs(rel), rows)
     store.make_readonly(store.abs(rel))
     engine = manifest.get("engine") or {}
+    config_canonical = manifest.get("config") or {}
     return store.create(SourceSnapshot(
         id=source_id, name=name, source_origin=str(pool_directory.resolve()), locality="local",
         generator={key: value for key, value in {
@@ -327,7 +327,16 @@ def snapshot_source(store, pool_directory: str | Path, *, name: str, license: st
             "openingSourceSha256": manifest["openingSourceSha256"],
             "engineCommit": engine.get("commit"), "engineBinarySha256": engine.get("binarySha256"),
             "netHashes": json.dumps(engine.get("netHashes") or {}, sort_keys=True),
-            "games": manifest["report"]["games"]}.items() if value is not None},
+            "engineMissingFiles": json.dumps(engine.get("missingFiles") or []),
+            "games": manifest["report"]["games"],
+            # the generator configuration itself (#11): hashes alone are not enough
+            "seed": config_canonical.get("seed"), "maxPlies": config_canonical.get("max_plies"),
+            "sampleEvery": config_canonical.get("sample_every"), "minPly": config_canonical.get("min_ply"),
+            "diversifyPlies": json.dumps(config_canonical.get("diversification_plies") or []),
+            "diversifyCandidates": config_canonical.get("diversification_candidates"),
+            "diversifyWindowCp": config_canonical.get("diversification_window_cp"),
+            "diversifyNodeBudget": config_canonical.get("diversification_node_budget"),
+            "playNodeBudget": config_canonical.get("play_node_budget")}.items() if value is not None},
         license=license, importer=GENERATOR, importer_version=GENERATOR_VERSION, path=rel,
         content_hash=content_hash, row_count=len(rows),
         game_count=manifest["report"]["games"], label_authorities=["outcome.game_result.v1"],
@@ -361,6 +370,7 @@ def engine_identity(engine_root: str | Path, *, analyze: str = "target/release/a
     except (OSError, subprocess.SubprocessError):
         commit = None
     net_hashes: dict[str, str] = {}
+    missing_files: list[str] = []
     arg_list = list(args if args is not None else DEFAULT_ENGINE_ARGS)
     for index, token in enumerate(arg_list):
         if token.startswith("--") and index + 1 < len(arg_list) and not arg_list[index + 1].startswith("--"):
@@ -371,9 +381,12 @@ def engine_identity(engine_root: str | Path, *, analyze: str = "target/release/a
                     path = root / value
                 if path.is_file():
                     net_hashes[token] = sha256_file(path)
+                else:
+                    missing_files.append(value)  # configured but unhashable: reported, never dropped
     return {"engineRoot": str(root.resolve()), "commit": commit,
             "binarySha256": sha256_file(binary), "binary": analyze,
-            "args": arg_list, "netHashes": dict(sorted(net_hashes.items()))}
+            "args": arg_list, "netHashes": dict(sorted(net_hashes.items())),
+            "missingFiles": missing_files}
 
 
 def generate_and_write(engine_root: str | Path, out_directory: str | Path, *, config: PoolConfig,
@@ -391,7 +404,8 @@ def generate_and_write(engine_root: str | Path, out_directory: str | Path, *, co
         generated = generator.generate()
     finally:
         transport.close()
-    manifest = write_pool(out_directory, generated, {"config": config.canonical(), "engine": identity})
+    manifest = write_pool(out_directory, generated, {"config": config.canonical(), "engine": identity},
+                          opening_lines=config.effective_openings())
     snapshot = (snapshot_source(store, out_directory, name=source_name or f"selfplay-{config.seed}",
                                 license=license, generated=generated, manifest=manifest)
                 if store is not None else None)

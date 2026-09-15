@@ -23,6 +23,7 @@ ANALYZE = ENGINE_ROOT + r"\target\release\analyze.exe"
 # Two declared opening lines that transpose: the same position after six plies.
 ITALIAN_A = {"name": "test-italian-order-a", "moves": ["e2e4", "e7e5", "g1f3", "b8c6", "f1c4", "f8c5"]}
 ITALIAN_B = {"name": "test-italian-order-b", "moves": ["g1f3", "b8c6", "e2e4", "e7e5", "f1c4", "f8c5"]}
+UNRELATED_C = {"name": "test-unrelated-c", "moves": ["d2d4", "d7d5", "c2c4", "e7e6", "b1c3", "g8f6"]}
 
 
 class ScriptedTeacher:
@@ -84,28 +85,70 @@ def test_every_position_carries_identity_fields():
 
 def test_raw_pool_keeps_transposed_position_in_both_games(tmp_path, lab):
     """Adversarial regression for the S2 lesson: two different games reaching the same
-    position stay separate in the RAW source; only normalization may collapse them."""
-    cfg = config(games=2, max_plies=6, sample_every=1, min_ply=6,
-                 opening_lines=(ITALIAN_A, ITALIAN_B))
-    generated = SelfPlayGenerator(cfg, ScriptedTeacher()).generate()
+    position stay separate in the RAW source; normalization collapses the chess position
+    but keeps the whole transposition-connected family split-safe."""
+    cfg = config(games=3, max_plies=8, sample_every=1, min_ply=6,
+                 opening_lines=(ITALIAN_A, ITALIAN_B, UNRELATED_C))
+    # openings cycle with a seed-derived offset: derive the same rotation the generator
+    # uses so each game gets the script written for its line
+    import random as _random
+    lines = cfg.effective_openings()
+    offset = _random.Random(cfg.seed).randrange(len(lines))
+    rotation = lines[offset:] + lines[:offset]
+    scripts_by_line = {ITALIAN_A["name"]: ["f3g5", "h7h6"],   # diverges after the shared position
+                       ITALIAN_B["name"]: ["d2d3", "d7d6"],   # diverges differently
+                       UNRELATED_C["name"]: ["g1f3", "f8e7"]}  # unrelated: no shared positions
+    scripts = [scripts_by_line[line["name"]] for line in rotation]
+    game_of = {line["name"]: f"g{index:06d}" for index, line in enumerate(rotation)}
+    game_a, game_b = game_of[ITALIAN_A["name"]], game_of[ITALIAN_B["name"]]
+    generated = SelfPlayGenerator(cfg, ScriptedTeacher(scripts)).generate()
     report = generated["report"]
-    assert report["rawPositions"] == 2 and report["games"] == 2
-    assert report["uniquePositions"] == 1 and report["duplicatePositions"] == 1
-    assert report["maxMultiplicity"] == 2
-    assert {position["game_id"] for position in generated["positions"]} == {"g000000", "g000001"}
-    assert {position["opening_id"] for position in generated["positions"]} == {ITALIAN_A["name"],
-                                                                              ITALIAN_B["name"]}
-    assert epd_identity(generated["positions"][0]["fen"]) == epd_identity(generated["positions"][1]["fen"])
+    assert report["games"] == 3 and report["rawPositions"] == 9
+    assert report["uniquePositions"] == 8 and report["duplicatePositions"] == 1  # A4..A6 == B4..B6
+    from collections import defaultdict
+    by_identity: dict[str, set[str]] = defaultdict(set)
+    for position in generated["positions"]:
+        by_identity[epd_identity(position["fen"])].add(position["game_id"])
+    shared_identities = [identity for identity, games in by_identity.items() if games == {game_a, game_b}]
+    assert len(shared_identities) == 1  # the sampled shared position (ply 6); later plies diverge
+    shared = [position for position in generated["positions"]
+              if epd_identity(position["fen"]) == shared_identities[0]]
+    assert {position["game_id"] for position in shared} == {game_a, game_b}  # both games retained
 
     manifest = write_pool(tmp_path / "pool", generated, {"config": cfg.canonical(),
-                                                         "engine": {"commit": "x"}})
+                                                         "engine": {"commit": "x"}},
+                          opening_lines=cfg.effective_openings())
+    # the EFFECTIVE opening source is pinned (blocker 3 regression)
+    assert manifest["openingSourceSha256"] == opening_source_sha256([ITALIAN_A, ITALIAN_B, UNRELATED_C])
+    assert manifest["openingSourceSha256"] != opening_source_sha256()
+
     source = snapshot_source(lab.store, tmp_path / "pool", name="raw", license="test",
                              generated=generated, manifest=manifest)
     normalization = lab.normalize([source.id], name="canon")
-    assert normalization.record_count == 1 and normalization.duplicate_count == 1  # dedup happens HERE
     records = [json.loads(line) for line in
                lab.store.abs(normalization.path).read_text(encoding="utf-8").splitlines()]
-    assert len(records) == 1 and records[0]["group"].startswith(source.id + ":g")  # grouping survived
+    assert len(records) == 8 and normalization.duplicate_count == 1  # dedup happens HERE
+
+    prefixed_a, prefixed_b = f"{source.id}:{game_a}", f"{source.id}:{game_b}"
+    shared_records = [record for record in records if prefixed_a in record.get("games", [])
+                      and prefixed_b in record.get("games", [])]
+    assert shared_records and all(record["group"].endswith(record["group"].split(":")[-1])
+                                  and ":xc" in record["group"] for record in shared_records)
+    # every record of the A/B family carries the full two-game provenance
+    ab_records = [record for record in records if prefixed_a in record.get("games", [])]
+    assert len(ab_records) == 5 and all(
+        record["games"] == sorted([prefixed_a, prefixed_b])
+        for record in ab_records)
+
+    # split safety: a group (connected component) never straddles dataset splits
+    dataset = lab.freeze_dataset(source.id and normalization.id, name="split-safety",
+                                 required_labels=[])
+    split_of_group: dict[str, set[str]] = {}
+    for manifest_entry in dataset.splits:
+        for row in json.loads(json.dumps(__import__("cvslab.data", fromlist=["read_jsonl"])
+                                         .read_jsonl(lab.store.abs(manifest_entry.path)))) or []:
+            split_of_group.setdefault(row["group"], set()).add(manifest_entry.name)
+    assert split_of_group and all(len(splits) == 1 for splits in split_of_group.values())
 
 
 def test_opening_diversification_is_auditable_and_seed_deterministic():
