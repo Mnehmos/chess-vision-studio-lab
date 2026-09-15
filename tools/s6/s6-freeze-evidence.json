@@ -1,0 +1,124 @@
+{
+  "arms": {
+    "PRIORITY": {
+      "dataset": "D0003",
+      "deepEngineSeconds": 30.081624999999995,
+      "deepNodes": 36990516,
+      "evalProtocol": "E0002",
+      "manifestHash": "sha256:e6d34d3fb3521ec168d7a9ca6b8f0af9e8d636b425e3da09891ecffcf33b551e",
+      "rows": 94
+    },
+    "UNIFORM": {
+      "dataset": "D0004",
+      "deepEngineSeconds": 28.914793000000007,
+      "deepNodes": 37285491,
+      "evalProtocol": "E0003",
+      "manifestHash": "sha256:52882a98bcee9ed52363396fe2630ebd7d95a1a2d6b944b664829761e87dc8b5",
+      "rows": 94
+    }
+  },
+  "campaign": "S6 PRIORITY vs UNIFORM",
+  "computeParity": {
+    "deep_nodes": {
+      "PRIORITY": 36990516,
+      "UNIFORM": 37285491
+    },
+    "relative_gap": 0.007911,
+    "tolerance": 0.02
+  },
+  "evalSemanticsEqual": true,
+  "evalSemanticsHash": "sha256:22b460d8f6787b0de95dcf0734d7163af7a7de0370d3a852152318e1d197aa27",
+  "gameAwareCorpus": {
+    "duplicates": 1367,
+    "labelsCarried": {
+      "labels_dropped": 0,
+      "labels_kept": 5918,
+      "sets_copied": 7
+    },
+    "normalization": "N0004",
+    "records": 938
+  },
+  "import": {
+    "funnelRun": "R0008",
+    "labelRows": {
+      "facts": 938,
+      "motif": 938,
+      "oracle_cp": 0,
+      "outcome": 80,
+      "priority": 938,
+      "search_deep_cp": 210,
+      "search_shallow_cp": 1876,
+      "strategy": 938
+    },
+    "normalization": "N0003",
+    "policyHash": "sha256:62bf2043dab7fb6a56eba68e1cfa9c924ffec8e5e0e492fa364fc5fb00201384",
+    "records": 938,
+    "source": "S0003"
+  },
+  "pool": {
+    "duplicatePositions": 1367,
+    "games": 70,
+    "maxMultiplicity": 6,
+    "positionsSha256": "sha256:732ff062da25152ec3ad3dd755a81b660c1227687204b300ca127b2b77374bc1",
+    "rawPositions": 2305,
+    "source": "S0002",
+    "uniquePositions": 938
+  },
+  "recipe": {
+    "hash": "sha256:11d0e70bb6eb127acb74222d286fc957d91c0ab6e510ffd2dcbec27f95bc3a95",
+    "id": "T0003"
+  },
+  "recordedAt": null,
+  "s4_run": {
+    "compute": {
+      "engineSeconds": 94.5231,
+      "nodes": 99887781
+    },
+    "manifestSha256": "sha256:9b0e0a8ae67f701879a15d9c892368e1cd5b70b350c1882b8b212f38aa52716d",
+    "stages": {
+      "tier0": {
+        "engine_seconds": 6.1361,
+        "nodes": 0,
+        "positions": 938,
+        "processedThisInvocation": 938,
+        "wallSecondsThisInvocation": 6.1896
+      },
+      "tier1": {
+        "engine_seconds": 20.0886,
+        "nodes": 16811774,
+        "positions": 938,
+        "processedThisInvocation": 938,
+        "wallSecondsThisInvocation": 20.1598
+      },
+      "tier3": {
+        "engine_seconds": 68.2984,
+        "nodes": 83076007,
+        "positions": 210,
+        "processedThisInvocation": 210,
+        "wallSecondsThisInvocation": 68.3158
+      },
+      "tier4": {
+        "engine_seconds": 0.0,
+        "nodes": 0,
+        "positions": 0,
+        "processedThisInvocation": 0,
+        "wallSecondsThisInvocation": 0.0005
+      },
+      "triage": {
+        "engine_seconds": 0.0,
+        "nodes": 0,
+        "positions": 938,
+        "processedThisInvocation": 0,
+        "wallSecondsThisInvocation": 0.0
+      }
+    }
+  },
+  "universe": {
+    "candidateUniverseHash": "sha256:67e781a0b5f4922c213b27518f42495a0aa28e1d1a1588df7726fa122ffe91dc",
+    "candidates": 926,
+    "priority": 94,
+    "splitPolicyHash": "sha256:215de947b6c1d98b10ca82a399d101e25c5f25096606e8b3e37c24ea40cc4d6a",
+    "uniform": 94,
+    "universeHash": "sha256:284161f2604354ca3afe0c69390adb9bde3172e68f6360c0be231959918d8a06"
+  }
+}
