@@ -67,19 +67,32 @@ class EncodedSplit:
         return len(self.record_ids)
 
 
-def encode_records(records: list[dict]) -> tuple[EncodedSplit, int]:
-    """Encode canonical records; rows without an eval_cp label are discarded and counted."""
+def encode_records(records: list[dict], *, target_spec=None) -> tuple[EncodedSplit, int]:
+    """Encode canonical records.
+
+    With a frozen ``TargetSpec`` the supervision is that spec's single matching label per
+    record (strict: zero or multiple matches raise — an integrity failure, never a silent
+    discard). Without a spec the legacy eval_cp behaviour applies (rows lacking the label
+    are discarded and counted).
+    """
+    from .targets import extract_target
+
     feats, cps, results, ids = [], [], [], []
     discarded = 0
     for record in records:
-        label = next((lab for lab in record["labels"] if lab["family"] == "eval_cp"), None)
-        if label is None:
-            discarded += 1
-            continue
         indices, white_to_move = encode_fen(record["fen"])
-        cp = float(label["value"])
-        if label.get("pov", "white") == "white" and not white_to_move:
-            cp = -cp
+        if target_spec is not None:
+            cp = extract_target(record, target_spec)   # raises on zero/multiple matches
+            if target_spec.pov == "white" and not white_to_move:
+                cp = -cp
+        else:
+            label = next((lab for lab in record["labels"] if lab["family"] == "eval_cp"), None)
+            if label is None:
+                discarded += 1
+                continue
+            cp = float(label["value"])
+            if label.get("pov", "white") == "white" and not white_to_move:
+                cp = -cp
         res = record.get("result")
         feats.append(indices)
         cps.append(cp)

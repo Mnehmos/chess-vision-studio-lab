@@ -1,0 +1,514 @@
+{
+ "campaign": "S6 \u2014 PRIORITY vs UNIFORM (independent evaluation population)",
+ "amendments": [
+  "tools/s6/s6-preregistration-amendment-1.json",
+  "tools/s6/s6-preregistration-amendment-2.json"
+ ],
+ "pins": {
+  "s_train": "S0004",
+  "n_train": "N0005",
+  "funnel_run": "R0008",
+  "policy_hash": "sha256:62bf2043dab7fb6a56eba68e1cfa9c924ffec8e5e0e492fa364fc5fb00201384",
+  "eval_source": "S0009",
+  "eval_normalization": "N0010",
+  "eval_selected": 200,
+  "clean_population": 575,
+  "spec_hash": "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8",
+  "recipe": {
+   "id": "T0004",
+   "hash": "sha256:0889bb36b8af5c22ee89c7d63df985294ab26391090361b91234a025523ebf62"
+  },
+  "arms": {
+   "PRIORITY": {
+    "id": "D0008",
+    "manifest": "sha256:47ae388fb4e9363377a275fb8c38f7cff48f32a597923382b2c48c0623f2d8b3",
+    "rows": 94
+   },
+   "UNIFORM": {
+    "id": "D0009",
+    "manifest": "sha256:1b42456d70b361bd5305352c5d029431d6abfba88f78e3ceb7df28cccdb686e4",
+    "rows": 94
+   }
+  },
+  "d_eval": {
+   "id": "D0010",
+   "manifest": "sha256:9aa36820416b0198029bc740d2fe0745ffe250ff3798d191002ed27771705cff",
+   "rows": 200
+  },
+  "e_common": {
+   "id": "E0004",
+   "hash": "sha256:785d4584032edc1febd5b76aa0920e78f996239b27258de0b07bf6538aca43e1",
+   "spec": "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8"
+  },
+  "parity": {
+   "deep_nodes": {
+    "PRIORITY": 36990516,
+    "UNIFORM": 37285491
+   },
+   "relative_gap": 0.007911,
+   "tolerance": 0.02
+  },
+  "eval_compute": {
+   "labels_bought": 200,
+   "nodes": 79600000,
+   "engine_seconds": 68.65
+  }
+ },
+ "cells_total": 40,
+ "cells_complete": 40,
+ "losses": {
+  "H01-PRIORITY-s0": 0.04078443358601229,
+  "H01-PRIORITY-s1": 0.051332798881379295,
+  "H01-PRIORITY-s2": 0.05233496699417506,
+  "H01-PRIORITY-s3": 0.035654471969025624,
+  "H01-PRIORITY-s4": 0.046158128267107995,
+  "H01-UNIFORM-s0": 0.03781696150796219,
+  "H01-UNIFORM-s1": 0.05090137534221075,
+  "H01-UNIFORM-s2": 0.05262171629190148,
+  "H01-UNIFORM-s3": 0.03992578293556735,
+  "H01-UNIFORM-s4": 0.044539398372501454,
+  "H04-PRIORITY-s0": 0.043217402793205226,
+  "H04-PRIORITY-s1": 0.04037049864020728,
+  "H04-PRIORITY-s2": 0.04897221617203699,
+  "H04-PRIORITY-s3": 0.04053930577263138,
+  "H04-PRIORITY-s4": 0.04212992988693781,
+  "H04-UNIFORM-s0": 0.04035096096626857,
+  "H04-UNIFORM-s1": 0.03661006914794419,
+  "H04-UNIFORM-s2": 0.043195340528507674,
+  "H04-UNIFORM-s3": 0.04185452964329592,
+  "H04-UNIFORM-s4": 0.036190176066948625,
+  "H16-PRIORITY-s0": 0.04718066236452836,
+  "H16-PRIORITY-s1": 0.049317914652038,
+  "H16-PRIORITY-s2": 0.04731584659737823,
+  "H16-PRIORITY-s3": 0.05187501560098633,
+  "H16-PRIORITY-s4": 0.04925883783797639,
+  "H16-UNIFORM-s0": 0.03879884036395648,
+  "H16-UNIFORM-s1": 0.04371575449778307,
+  "H16-UNIFORM-s2": 0.04418953115329643,
+  "H16-UNIFORM-s3": 0.03984734280222748,
+  "H16-UNIFORM-s4": 0.04527557466143794,
+  "H32-PRIORITY-s0": 0.043785164688402455,
+  "H32-PRIORITY-s1": 0.0452804072214521,
+  "H32-PRIORITY-s2": 0.04281430480916832,
+  "H32-PRIORITY-s3": 0.04785227852579944,
+  "H32-PRIORITY-s4": 0.050854117361218545,
+  "H32-UNIFORM-s0": 0.04128002332197242,
+  "H32-UNIFORM-s1": 0.04711172310433489,
+  "H32-UNIFORM-s2": 0.04278480726299529,
+  "H32-UNIFORM-s3": 0.04611397924506295,
+  "H32-UNIFORM-s4": 0.04931509801500268
+ },
+ "effects_by_width": {
+  "1": {
+   "width_estimate": 9.19130495114065e-05,
+   "ci_low": -0.0033021023487306367,
+   "ci_high": 0.00348592844775345,
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "differences": [
+    0.0029674720780501,
+    0.00043142353916854337,
+    -0.0002867492977264227,
+    -0.004271310966541729,
+    0.001618729894606541
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)"
+  },
+  "4": {
+   "width_estimate": 0.0034056553824107424,
+   "ci_low": -0.00025338521924957126,
+   "ci_high": 0.007064695984071057,
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "differences": [
+    0.0028664418269366554,
+    0.003760429492263094,
+    0.005776875643529314,
+    -0.0013152238706645378,
+    0.005939753819989187
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)"
+  },
+  "16": {
+   "width_estimate": 0.006624246714841182,
+   "ci_low": 0.002124854118142468,
+   "ci_high": 0.011123639311539896,
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "differences": [
+    0.00838182200057188,
+    0.00560216015425493,
+    0.0031263154440818036,
+    0.012027672798758847,
+    0.003983263176538451
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)"
+  },
+  "32": {
+   "width_estimate": 0.0007961283313345253,
+   "ci_low": -0.0013408043532627757,
+   "ci_high": 0.002933061015931826,
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "differences": [
+    0.0025051413664300345,
+    -0.0018313158828827877,
+    2.94975461730268e-05,
+    0.0017382992807364883,
+    0.0015390193462158641
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)"
+  }
+ },
+ "interaction": {
+  "pairs": {
+   "H1->H4": {
+    "delta": 0.003313742332899336,
+    "ci_low": 0.0005125057383658072,
+    "ci_high": 0.006114978927432865,
+    "per_seed": {
+     "0": -0.00010103025111344449,
+     "1": 0.0033290059530945507,
+     "2": 0.006063624941255737,
+     "3": 0.002956087095877191,
+     "4": 0.004321023925382646
+    },
+    "n": 5
+   },
+   "H4->H16": {
+    "delta": 0.0032185913324304398,
+    "ci_low": -0.004896187917620397,
+    "ci_high": 0.011333370582481277,
+    "per_seed": {
+     "0": 0.0055153801736352245,
+     "1": 0.001841730661991836,
+     "2": -0.0026505601994475103,
+     "3": 0.013342896669423385,
+     "4": -0.0019564906434507354
+    },
+    "n": 5
+   },
+   "H16->H32": {
+    "delta": -0.005828118383506657,
+    "ci_low": -0.009821746226142264,
+    "ci_high": -0.0018344905408710496,
+    "per_seed": {
+     "0": -0.005876680634141845,
+     "1": -0.007433476037137718,
+     "2": -0.003096817897908777,
+     "3": -0.010289373518022359,
+     "4": -0.002444243830322587
+    },
+    "n": 5
+   }
+  },
+  "method": "width x strategy = difference of paired effects between widths, blocked by seed"
+ },
+ "decision": "INCONCLUSIVE",
+ "cell_bindings": {
+  "H01-PRIORITY-s0": {
+   "run_id": "R0049",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s1": {
+   "run_id": "R0050",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s2": {
+   "run_id": "R0051",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s3": {
+   "run_id": "R0052",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-PRIORITY-s4": {
+   "run_id": "R0053",
+   "param_count": 771,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s0": {
+   "run_id": "R0054",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s1": {
+   "run_id": "R0055",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s2": {
+   "run_id": "R0056",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s3": {
+   "run_id": "R0057",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H01-UNIFORM-s4": {
+   "run_id": "R0058",
+   "param_count": 771,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s0": {
+   "run_id": "R0059",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s1": {
+   "run_id": "R0060",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s2": {
+   "run_id": "R0061",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s3": {
+   "run_id": "R0062",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-PRIORITY-s4": {
+   "run_id": "R0063",
+   "param_count": 3081,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s0": {
+   "run_id": "R0064",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s1": {
+   "run_id": "R0065",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s2": {
+   "run_id": "R0066",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s3": {
+   "run_id": "R0067",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H04-UNIFORM-s4": {
+   "run_id": "R0068",
+   "param_count": 3081,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s0": {
+   "run_id": "R0069",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s1": {
+   "run_id": "R0070",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s2": {
+   "run_id": "R0071",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s3": {
+   "run_id": "R0072",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-PRIORITY-s4": {
+   "run_id": "R0073",
+   "param_count": 12321,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s0": {
+   "run_id": "R0074",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s1": {
+   "run_id": "R0075",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s2": {
+   "run_id": "R0076",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s3": {
+   "run_id": "R0077",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H16-UNIFORM-s4": {
+   "run_id": "R0078",
+   "param_count": 12321,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s0": {
+   "run_id": "R0079",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s1": {
+   "run_id": "R0080",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s2": {
+   "run_id": "R0081",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s3": {
+   "run_id": "R0082",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-PRIORITY-s4": {
+   "run_id": "R0083",
+   "param_count": 24641,
+   "train_dataset_id": "D0008",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s0": {
+   "run_id": "R0084",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s1": {
+   "run_id": "R0085",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s2": {
+   "run_id": "R0086",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s3": {
+   "run_id": "R0087",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  },
+  "H32-UNIFORM-s4": {
+   "run_id": "R0088",
+   "param_count": 24641,
+   "train_dataset_id": "D0009",
+   "eval_dataset_id": "D0010",
+   "eval_ids_match": true
+  }
+ }
+}

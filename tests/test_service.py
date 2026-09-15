@@ -52,7 +52,7 @@ def test_rerunning_creates_new_run_ids_not_edits(seeded_lab):
 def test_tampered_run_record_raises_and_alerts(seeded_lab):
     run_id = next(iter(seeded_lab.result["runs"]))
     path = seeded_lab.store.object_path(run_id)
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     record = json.loads(path.read_text(encoding="utf-8"))
     record["seed"] = 42
     path.write_text(json.dumps(record), encoding="utf-8")
@@ -86,7 +86,7 @@ def test_run_fails_closed_to_invalid_when_evidence_corrupted(lab):
     lab.result = lab.run_phase0_proof(n_games=25, epochs=2, seeds=(0,), control_width=1, intervention_width=4)
     dataset = lab.store.get(lab.result["dataset"])
     path = lab.store.abs(dataset.splits[0].path)
-    os.chmod(path, stat.S_IWRITE)
+    os.chmod(path, os.stat(path).st_mode | stat.S_IWRITE)
     path.write_bytes(path.read_bytes() + b'{"record_id": "pos_forged"}\n')
 
     ablation = lab.create_ablation(baseline_id=lab.result["baseline"], overrides={"H": 3})

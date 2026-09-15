@@ -1,0 +1,108 @@
+{
+  "campaign": "S6 PRIORITY vs UNIFORM \u2014 first completed causal campaign",
+  "compute": {
+    "eval_labeling": {
+      "engine_seconds": 68.65,
+      "labels_bought": 200,
+      "nodes": 79600000
+    },
+    "selection_parity": {
+      "deep_nodes": {
+        "PRIORITY": 36990516,
+        "UNIFORM": 37285491
+      },
+      "relative_gap": 0.007911,
+      "tolerance": 0.02
+    }
+  },
+  "decision": "INCONCLUSIVE",
+  "decision_rule": "SUPPORTED iff every width's paired CI upper bound < 0; REJECTED iff every lower bound > 0; else INCONCLUSIVE",
+  "design": "94/94 selected training examples (all-train arms, amendment 1) evaluated on an independent, component-disjoint 200-record population with identical 400k supervision (amendment 2)",
+  "effects_by_width": {
+    "1": {
+      "ci": [
+        -0.0033021023487306367,
+        0.00348592844775345
+      ],
+      "effect": 9.19130495114065e-05,
+      "n": 5
+    },
+    "16": {
+      "ci": [
+        0.002124854118142468,
+        0.011123639311539896
+      ],
+      "effect": 0.006624246714841182,
+      "n": 5
+    },
+    "32": {
+      "ci": [
+        -0.0013408043532627757,
+        0.002933061015931826
+      ],
+      "effect": 0.0007961283313345253,
+      "n": 5
+    },
+    "4": {
+      "ci": [
+        -0.00025338521924957126,
+        0.007064695984071057
+      ],
+      "effect": 0.0034056553824107424,
+      "n": 5
+    }
+  },
+  "evidence": {
+    "amendments": [
+      "tools/s6/s6-preregistration-amendment-1.json",
+      "tools/s6/s6-preregistration-amendment-2.json"
+    ],
+    "cells": 40,
+    "evalPoolAttestation": "tools/s6/s6-eval-pool-attestation.json",
+    "resultBundle": "tools/s6/s6-campaign-result-final.json",
+    "runs": "R0049..R0088"
+  },
+  "interpretation": [
+    "H1 and H32 show no detectable difference; H4 leans priority-worse but includes zero",
+    "H16 shows priority-selected training data significantly WORSE (CI entirely above zero)",
+    "all 20 paired seed differences (5 seeds x 4 widths, 40 runs) are consistent with 'priority selection did not buy better generalization at this scale'; none supports the selective-labeling hypothesis",
+    "this is evidence for THIS candidate pool only; independent-pool replication remains #16"
+  ],
+  "statistics": {
+    "effects_by_width": {
+      "1": {
+        "ci": [
+          -0.0033021023487306367,
+          0.00348592844775345
+        ],
+        "effect": 9.19130495114065e-05,
+        "n": 5
+      },
+      "16": {
+        "ci": [
+          0.002124854118142468,
+          0.011123639311539896
+        ],
+        "effect": 0.006624246714841182,
+        "n": 5
+      },
+      "32": {
+        "ci": [
+          -0.0013408043532627757,
+          0.002933061015931826
+        ],
+        "effect": 0.0007961283313345253,
+        "n": 5
+      },
+      "4": {
+        "ci": [
+          -0.00025338521924957126,
+          0.007064695984071057
+        ],
+        "effect": 0.0034056553824107424,
+        "n": 5
+      }
+    },
+    "unit": "20 seed pairs (5 paired seeds x 4 widths); each pair is one Priority\u2212Uniform seed-level difference"
+  }
+}
