@@ -244,6 +244,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = command("backlog", "engine search switches as clean-lineage re-test backlog")
 
+    p = command("facts-label", "compute CVS analysis facts (geometry, motifs, strategy) per record")
+    p.add_argument("normalization")
+
+    p = command("map", "Lab Map: canonical objects and provenance edges for a projection")
+    p.add_argument("--projection", default="data", choices=["data", "research", "promotion"])
+    p.add_argument("--generation", default=None)
+    p.add_argument("--state", default=None)
+    p.add_argument("--family", default=None)
+
     # -- intake ---------------------------------------------------------------
     p = command("intake-legacy", "import the legacy catalog as LEGACY evidence (I####)")
     p.add_argument("--catalog", default="catalog")
@@ -404,6 +413,11 @@ def _dispatch(args) -> int:
     elif cmd == "backlog":
         _emit(service.search_backlog())
 
+    elif cmd == "facts-label":
+        _emit(service.label_facts(args.normalization))
+    elif cmd == "map":
+        _emit(service.map_view(args.projection, generation=args.generation,
+                               state=args.state, family=args.family))
     elif cmd == "intake-legacy":
         roots = {}
         for pair in args.root:

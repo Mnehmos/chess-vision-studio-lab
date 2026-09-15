@@ -95,7 +95,7 @@ def test_catalog_filters_and_facets(lab, corpus):
     tier_catalog = lab.catalog(lab.norm_id, filters={"tier": "deterministic"})
     assert tier_catalog.total_matching == catalog.record_count  # source eval labels are deterministic tier
     with pytest.raises(LabError, match="unknown catalog filter"):
-        lab.catalog(lab.norm_id, filters={"motif": "interference"})
+        lab.catalog(lab.norm_id, filters={"vibes": "interference"})
 
 
 def test_stack_preview_and_freeze_reproducible(lab, corpus):
@@ -128,7 +128,7 @@ def test_stack_preview_and_freeze_reproducible(lab, corpus):
         lab.freeze_dataset(lab.norm_id, name="too-big",
                            arms=[{"name": "x", "filter": {}, "policy": "fixed_rows", "rows": 10_000}])
     with pytest.raises(LabError, match="unknown field"):
-        lab.stack_preview(lab.norm_id, [{"name": "x", "filter": {"motif": "x"}, "policy": "all"}])
+        lab.stack_preview(lab.norm_id, [{"name": "x", "filter": {"vibes": "x"}, "policy": "all"}])
 
 
 def test_migration_produces_real_diff_and_descendant_dataset(lab, corpus):

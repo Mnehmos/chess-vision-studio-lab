@@ -79,6 +79,9 @@
     "MigrationDiff": {
       "$ref": "#/$defs/MigrationDiff"
     },
+    "MapResponse": {
+      "$ref": "#/$defs/MapResponse"
+    },
     "HypothesisCreate": {
       "$ref": "#/$defs/HypothesisCreate"
     },
@@ -130,6 +133,7 @@
     "CatalogResponse",
     "StackPreview",
     "MigrationDiff",
+    "MapResponse",
     "HypothesisCreate",
     "AblationRequest",
     "RunQueueRequest",
@@ -3863,6 +3867,125 @@
         "findings"
       ],
       "title": "LegacySummary",
+      "type": "object"
+    },
+    "MapEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "title": "Src",
+          "type": "string"
+        },
+        "dst": {
+          "title": "Dst",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "src",
+        "dst",
+        "kind"
+      ],
+      "title": "MapEdge",
+      "type": "object"
+    },
+    "MapNode": {
+      "additionalProperties": false,
+      "description": "One spatial object on the Lab Map; `detail` is display evidence, `link` the 2D page.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "State"
+        },
+        "link": {
+          "default": "",
+          "title": "Link",
+          "type": "string"
+        },
+        "detail": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Detail",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "label",
+        "state",
+        "link",
+        "detail"
+      ],
+      "title": "MapNode",
+      "type": "object"
+    },
+    "MapResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "projection": {
+          "title": "Projection",
+          "type": "string"
+        },
+        "projections_available": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Projections Available",
+          "type": "array"
+        },
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/MapNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/MapEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "filters_applied": {
+          "additionalProperties": true,
+          "title": "Filters Applied",
+          "type": "object"
+        }
+      },
+      "required": [
+        "projection",
+        "projections_available",
+        "nodes",
+        "edges",
+        "filters_applied"
+      ],
+      "title": "MapResponse",
       "type": "object"
     },
     "MatrixCell": {

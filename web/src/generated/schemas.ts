@@ -613,6 +613,18 @@ export type SplitChanges = DatasetSplitChange[];
 export type AffectedDatasetIds = string[];
 export type AffectedRunIds = string[];
 export type Notes2 = string[];
+export type Projection = string;
+export type ProjectionsAvailable = string[];
+export type Id18 = string;
+export type Kind5 = string;
+export type Label1 = string;
+export type State = string | null;
+export type Link = string;
+export type Nodes1 = MapNode[];
+export type Src = string;
+export type Dst = string;
+export type Kind6 = string;
+export type Edges = MapEdge[];
 export type Title1 = string;
 export type Statement1 = string;
 export type Metric5 = string;
@@ -694,6 +706,7 @@ export interface CVSLab {
   CatalogResponse: CatalogResponse;
   StackPreview: StackPreview;
   MigrationDiff: MigrationDiff;
+  MapResponse: MapResponse;
   HypothesisCreate: HypothesisCreate;
   AblationRequest: AblationRequest;
   RunQueueRequest: RunQueueRequest;
@@ -1766,6 +1779,35 @@ export interface DatasetSplitChange {
   dataset_id: DatasetId6;
   surviving_records: SurvivingRecords;
   split_changes: SplitChanges1;
+}
+export interface MapResponse {
+  projection: Projection;
+  projections_available: ProjectionsAvailable;
+  nodes: Nodes1;
+  edges: Edges;
+  filters_applied: FiltersApplied1;
+}
+/**
+ * One spatial object on the Lab Map; `detail` is display evidence, `link` the 2D page.
+ */
+export interface MapNode {
+  id: Id18;
+  kind: Kind5;
+  label: Label1;
+  state: State;
+  link: Link;
+  detail: Detail2;
+}
+export interface Detail2 {
+  [k: string]: unknown;
+}
+export interface MapEdge {
+  src: Src;
+  dst: Dst;
+  kind: Kind6;
+}
+export interface FiltersApplied1 {
+  [k: string]: unknown;
 }
 export interface HypothesisCreate {
   title: Title1;
