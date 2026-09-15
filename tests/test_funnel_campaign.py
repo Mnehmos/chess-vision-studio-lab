@@ -296,6 +296,13 @@ def test_freeze_arm_pair_records_full_provenance_and_excludes_non_members(lab):
     # the arms must be row-matched and deep-labeled; duplicate the corpus to get two distinct positions
     from cvslab.data import _load_canonical
     subset = _load_canonical(lab.store, lab.store.get(normalization.id))
+    # the arms are frozen from deep-labeled evidence: register the Tier-3 labels the
+    # real S4 run would have produced (this fixture corpus has none of its own)
+    lab.register_labels(normalization.id, family="search_deep_cp", producer="legacy.cvs.search.deep",
+                        authority="legacy.cvs.search.deep", pov="stm",
+                        rows=[{"record_id": record["record_id"],
+                               "value": {"targets": {}, "deep": {}, "shallowToDeep": {}},
+                               "budget": {"nodeBudget": 400000}} for record in subset])
     universe = freeze_universe(
         source_id=source_id, normalization_id=normalization.id, funnel_run_id="R0001",
         policy_version="priority-v1", policy_hash="sha256:" + "a" * 64,
