@@ -307,3 +307,51 @@ def test_transposition_across_sources_has_one_global_group(lab):
                 lab.store.abs(manifest.path)))):
             split_by_group.setdefault(row["group"], set()).add(manifest.name)
     assert all(len(splits) == 1 for splits in split_by_group.values())  # one split for the component
+
+
+def test_epd_start_source_is_a_versioned_contract(tmp_path):
+    """v3: games begin at frozen EPD positions, and the contract records that truthfully."""
+    import chess
+    import pytest
+
+    from cvslab.funnel.pool import PoolConfig, SelfPlayGenerator
+    from cvslab.store import LabError
+
+    book = tmp_path / "start.epd"
+    book.write_text("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\n"
+                    "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\n",
+                    encoding="utf-8")
+    digest = "sha256:" + __import__("hashlib").sha256(
+        book.read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")).hexdigest()
+
+    class LegalTeacher:
+        producer_hash = "x" * 64
+
+        def search(self, fen, *, node_budget):
+            board = chess.Board(fen)
+            return next(move.uci() for move in board.legal_moves), 20
+
+        def root_candidates(self, fen, *, candidates, node_budget):
+            return [(next(move.uci() for move in chess.Board(fen).legal_moves), 20)]
+
+    config = PoolConfig(seed=5, games=2, max_plies=8, sample_every=2, min_ply=6, rng_mode="per-game",
+                        start_source="epd-file", epd_path=str(book), epd_sha256=digest)
+    assert config.generator_version == 3
+    assert config.canonical()["start_source"] == "epd-file"
+    assert config.canonical()["epd_sha256"] == digest
+    assert config.opening_source_sha256() == digest          # the suite hash travels in the manifest
+
+    generated = SelfPlayGenerator(config, LegalTeacher()).generate(count=2)
+    assert all("start_fen" in game for game in generated["games"])
+    assert all(game["opening_moves"] == [] for game in generated["games"])
+    # the frozen start position itself is a sampled candidate (ply 0)
+    assert all(any(position["ply"] == 0 for position in game["positions"]) for game in generated["games"])
+
+    # a wrong pin, or no pin, is refused rather than trusted
+    with pytest.raises(LabError, match="hashes"):
+        PoolConfig(start_source="epd-file", epd_path=str(book), epd_sha256="sha256:" + "0" * 64).epd_positions()
+    with pytest.raises(LabError, match="requires epd_sha256"):
+        PoolConfig(start_source="epd-file", epd_path=str(book)).opening_source_sha256()
+    # move-line mode is untouched by the new source
+    assert PoolConfig(seed=5).generator_version == 1
+    assert PoolConfig(seed=5, rng_mode="per-game").generator_version == 2

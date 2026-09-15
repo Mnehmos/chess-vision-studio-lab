@@ -122,13 +122,65 @@ class PoolConfig:
     # each game's RNG derived from (seed, index), so contiguous batches can be generated
     # in parallel and merged in index order, byte-identically to a serial run.
     rng_mode: str = "stream"
+    # "move-lines" = v1/v2: games start from the initial position and play declared opening
+    # lines. "epd-file" = v3: games start from frozen EPD positions — a different input
+    # type, recorded as such (kind, file hash, count) rather than dressed up as openings.
+    start_source: str = "move-lines"
+    epd_path: Optional[str] = None
+    epd_sha256: Optional[str] = None      # LF-normalized content hash of the EPD file
+    epd_limit: Optional[int] = None       # deterministic prefix of the file, for probes
 
     def effective_openings(self) -> list[dict]:
         return list(self.opening_lines) if self.opening_lines else list(OPENING_LINES)
 
     @property
     def generator_version(self) -> int:
+        if self.start_source == "epd-file":
+            return 3
         return 2 if self.rng_mode == "per-game" else GENERATOR_VERSION
+
+    def epd_positions(self) -> list[dict]:
+        """Frozen start positions: [{"name": <file stem>#<index>, "fen": <FEN>}].
+
+        The file is read as text, normalized to LF, and hashed before use: the pin is on the
+        committed content, not on one platform's checkout bytes.
+        """
+        if self.start_source != "epd-file":
+            raise LabError("epd_positions() needs start_source='epd-file'")
+        if not self.epd_path:
+            raise LabError("start_source='epd-file' requires epd_path")
+        path = Path(self.epd_path)
+        if not path.is_file():
+            raise LabError(f"EPD start-position file not found: {path}")
+        text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+        digest = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+        if self.epd_sha256 and digest != self.epd_sha256:
+            raise LabError(f"EPD start-position file hashes {digest} (LF-normalized) but the config "
+                           f"pins {self.epd_sha256}; refusing to generate from unpinned positions")
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if self.epd_limit is not None:
+            lines = lines[: int(self.epd_limit)]
+        positions = []
+        for index, line in enumerate(lines):
+            fields = line.split()
+            if len(fields) < 4:
+                raise LabError(f"{path.name} line {index + 1}: not an EPD/FEN record: {line[:60]!r}")
+            fen = line if len(fields) >= 5 else line + " 0 1"   # append missing clocks
+            positions.append({"name": f"{path.stem}#{index}", "fen": fen})
+        if not positions:
+            raise LabError(f"{path.name} holds no positions")
+        return positions
+
+    def opening_source_sha256(self) -> str:
+        """What the games start from: the declared lines, or the frozen position file."""
+        if self.start_source == "epd-file":
+            if not self.epd_sha256:
+                raise LabError("start_source='epd-file' requires epd_sha256 in the identity")
+            return self.epd_sha256
+        return opening_source_sha256(self.effective_openings())
+
+    def start_entries(self) -> list[dict]:
+        return self.epd_positions() if self.start_source == "epd-file" else self.effective_openings()
 
     def opening_offset(self) -> int:
         """v2 opening offset: derived from its own stream so no game state is needed."""
@@ -142,10 +194,11 @@ class PoolConfig:
         return random.Random(f"{self.seed}:game:{int(index)}")
 
     def canonical(self) -> dict:
-        return {
+        payload = {
             "generator": GENERATOR, "generator_version": self.generator_version,
             "rng_mode": self.rng_mode,
-            "openingSourceSha256": opening_source_sha256(self.effective_openings()),
+            "start_source": self.start_source,
+            "openingSourceSha256": self.opening_source_sha256(),
             "seed": self.seed, "games": self.games, "max_plies": self.max_plies,
             "diversification_plies": list(self.diversification_plies),
             "diversification_candidates": self.diversification_candidates,
@@ -154,6 +207,11 @@ class PoolConfig:
             "play_node_budget": self.play_node_budget,
             "sample_every": self.sample_every, "min_ply": self.min_ply,
         }
+        if self.start_source == "epd-file":
+            payload["epd_path"] = self.epd_path
+            payload["epd_sha256"] = self.epd_sha256
+            payload["epd_limit"] = self.epd_limit
+        return payload
 
 
 class SelfPlayGenerator:
@@ -162,6 +220,7 @@ class SelfPlayGenerator:
     def __init__(self, config: PoolConfig, teacher: Teacher):
         self.config = config
         self.teacher = teacher
+        self._start_entries = config.start_entries()
 
     # -- one game --------------------------------------------------------------
 
@@ -205,23 +264,35 @@ class SelfPlayGenerator:
         return move, score
 
     def _play_game(self, game_index: int, rng: random.Random, offset: int) -> dict:
-        opening = self._pick_opening(offset, game_index)
+        entries = self._start_entries
+        opening = entries[(offset + game_index) % len(entries)]
         game_id = f"g{game_index:06d}"
-        if self.config.max_plies < len(opening["moves"]):
-            raise LabError(
-                f"{game_id}: opening {opening['name']!r} needs {len(opening['moves'])} plies but "
-                f"max_plies={self.config.max_plies}; raise max_plies above the opening length")
-        board = chess.Board()
         audit: list[dict] = []
         plies: list[dict] = []
 
-        def sample(ply: int) -> None:
-            if ply >= self.config.min_ply and ply % self.config.sample_every == 0:
-                plies.append({"ply": ply, "fen": board.fen()})
+        if self.config.start_source == "epd-file":
+            # v3: the game BEGINS at a frozen position. That position is itself a candidate
+            # (it is the diverse thing the source contributes), then every sample_every ply.
+            board = chess.Board(opening["fen"])
+            plies.append({"ply": 0, "fen": board.fen()})
 
-        for move_uci in opening["moves"]:
-            board.push_uci(move_uci)
-            sample(board.ply())
+            def sample(ply: int) -> None:
+                if ply % self.config.sample_every == 0:
+                    plies.append({"ply": ply, "fen": board.fen()})
+        else:
+            if self.config.max_plies < len(opening["moves"]):
+                raise LabError(
+                    f"{game_id}: opening {opening['name']!r} needs {len(opening['moves'])} plies but "
+                    f"max_plies={self.config.max_plies}; raise max_plies above the opening length")
+            board = chess.Board()
+
+            def sample(ply: int) -> None:
+                if ply >= self.config.min_ply and ply % self.config.sample_every == 0:
+                    plies.append({"ply": ply, "fen": board.fen()})
+
+            for move_uci in opening["moves"]:
+                board.push_uci(move_uci)
+                sample(board.ply())
         for ply in range(board.ply() + 1, self.config.max_plies + 1):
             if board.is_game_over():
                 break
@@ -233,10 +304,15 @@ class SelfPlayGenerator:
             sample(board.ply())
         result = board.result(claim_draw=True)
         white_score = {"1-0": 1.0, "0-1": 0.0, "1/2-1/2": 0.5}.get(result)
-        return {"game_id": game_id, "opening_id": opening["name"],
-                "opening_moves": list(opening["moves"]), "positions": plies,
-                "result": result, "gameOutcome": ({"whiteScore": white_score} if white_score is not None else None),
-                "diversification": audit}
+        record = {"game_id": game_id, "opening_id": opening["name"],
+                  "opening_moves": list(opening.get("moves") or []), "positions": plies,
+                  "result": result,
+                  "gameOutcome": ({"whiteScore": white_score} if white_score is not None else None),
+                  "diversification": audit}
+        if "fen" in opening:
+            # v3: the game began at a frozen position, and the record says so
+            record["start_fen"] = opening["fen"]
+        return record
 
     # -- whole pool ------------------------------------------------------------
 

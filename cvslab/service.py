@@ -806,7 +806,7 @@ class LabService:
                           source_id: str, normalization_id: str, candidate_universe_hash: str,
                           order_seed: int, order_hash: str, analysis: Mapping[str, object],
                           family: str = DEFAULT_FAMILY, generation: Optional[str] = None,
-                          notes: str = "") -> "Experiment":
+                          notes: str = "", experiment_id: Optional[str] = None) -> "Experiment":
         """Freeze one study. Every arm is verified against its frozen D####/T#### BEFORE the X
         exists, and the exam is taken from the protocol rather than trusted from the caller."""
         from .schemas import Experiment, ExperimentArm
@@ -826,14 +826,21 @@ class LabService:
             seen.add(arm_id)
             dataset: Dataset = self.store.get_as(str(arm["dataset_id"]), Dataset)
             recipe: TrainingRecipe = self.store.get_as(str(arm["training_recipe_id"]), TrainingRecipe)
+            # the arm's identity is DECLARED by the caller and then verified against the frozen
+            # objects; it is never silently normalized from them, or a wrong declaration would
+            # be healed instead of refused
+            missing = [key for key in ("dataset_manifest_hash", "recipe_hash", "train_target_spec_hash",
+                                       "record_ids_hash") if not arm.get(key)]
+            if missing:
+                raise LabError(f"arm {arm_id} must declare {', '.join(missing)}; the arm identity is "
+                               "verified against the frozen objects, not inferred from them")
             entry = ExperimentArm(
                 arm_id=arm_id, scale=str(arm["scale"]), scale_nodes=int(arm["scale_nodes"]),
                 node_budget=int(arm["node_budget"]), prefix_size=int(arm["prefix_size"]),
-                realized_nodes=int(arm["realized_nodes"]), dataset_id=dataset.id,
-                dataset_manifest_hash=dataset.manifest_hash, training_recipe_id=recipe.id,
-                recipe_hash=recipe_hash(recipe),
-                train_target_spec_hash=(recipe_target_spec(recipe).spec_hash()
-                                        if recipe_target_spec(recipe) else ""),
+                realized_nodes=int(arm["realized_nodes"]), dataset_id=str(arm["dataset_id"]),
+                dataset_manifest_hash=str(arm["dataset_manifest_hash"]),
+                training_recipe_id=str(arm["training_recipe_id"]), recipe_hash=str(arm["recipe_hash"]),
+                train_target_spec_hash=str(arm["train_target_spec_hash"]),
                 record_ids_hash=str(arm["record_ids_hash"]),
                 ablations=[str(a) for a in arm.get("ablations") or []])
             problems = self.verify_experiment_arm(entry, dataset, recipe)
@@ -848,9 +855,25 @@ class LabService:
                     raise LabError(f"{ablation_id} is not defined on this arm's dataset/recipe/protocol")
             frozen_arms.append(entry)
 
+        # The X<->A binding must be REAL: take the id before creation so ablations can carry it,
+        # then require every listed ablation to carry it back and every carrying ablation to be
+        # listed. A run's membership therefore rests on a verified back-reference, not a promise.
+        xid = experiment_id or self.store.next_id("X")
+        listed = {ablation_id for arm in frozen_arms for ablation_id in arm.ablations}
+        for arm in frozen_arms:
+            for ablation_id in arm.ablations:
+                ablation: Ablation = self.store.get_as(ablation_id, Ablation)
+                if ablation.experiment_id != xid:
+                    raise LabError(f"{ablation_id} carries experiment_id={ablation.experiment_id!r}, "
+                                   f"not {xid!r}: it is not bound to this experiment")
+        for ablation in self.store.list("A", verify=True, kind=Ablation):
+            if ablation.experiment_id == xid and ablation.id not in listed:
+                raise LabError(f"{ablation.id} claims {xid} but no arm lists it; refusing an "
+                               "experiment with unlisted members")
+
         run_count = sum(len(arm.ablations) for arm in frozen_arms) * len(list(seeds))
         experiment = Experiment(
-            id=self.store.next_id("X"), name=name, family=family, generation=generation,
+            id=xid, name=name, family=family, generation=generation,
             preregistration_hash=preregistration_hash, reference_unit_nodes=int(reference_unit_nodes),
             scales={str(k): int(v) for k, v in scales.items()}, node_budgets=[int(b) for b in node_budgets],
             source_id=source_id, normalization_id=normalization_id,
@@ -879,6 +902,69 @@ class LabService:
             if not problems else "; ".join(problems)))
         return checks, problems
 
+    def expected_membership(self, experiment) -> dict:
+        """The Cartesian product the study declared: every (ablations x seeds) cell.
+
+        Derived from the FROZEN design, not from whatever runs happen to exist, so a partial
+        study cannot masquerade as a complete one.
+        """
+        keys: dict = {}
+        for arm in experiment.arms:
+            if not arm.ablations:
+                raise LabError(f"arm {arm.arm_id} lists no ablations; expected membership cannot "
+                               "be derived from this design")
+            for ablation_id in arm.ablations:
+                for seed in experiment.seeds:
+                    key = (ablation_id, int(seed))
+                    if key in keys:
+                        raise LabError(f"cell {key} is claimed by two arms "
+                                       f"({keys[key]['arm_id']} and {arm.arm_id})")
+                    keys[key] = {"arm_id": arm.arm_id, "seed": int(seed), "scale": arm.scale,
+                                 "node_budget": arm.node_budget}
+        return keys
+
+    def membership_report(self, experiment) -> dict:
+        """Exactly one terminal run per expected cell, no duplicates, no extras."""
+        expected = self.expected_membership(experiment)
+        runs = [r for r in self.store.list("R", verify=True, kind=Run)
+                if r.experiment_id == experiment.id]
+        by_key: dict = {}
+        for run in runs:
+            by_key.setdefault((run.ablation_id, run.seed), []).append(run)
+        missing = sorted(key for key in expected if key not in by_key)
+        duplicates = {f"{key[0]}:{key[1]}": [r.id for r in value]
+                      for key, value in by_key.items() if len(value) > 1}
+        extra = sorted(key for key in by_key if key not in expected)
+        nonterminal = sorted(run.id for run in runs if run.status not in TERMINAL_RUN_STATUSES)
+        completed = sorted(key for key, value in by_key.items()
+                           if len(value) == 1 and value[0].status == RunStatus.COMPLETED)
+        invalid = sorted(key for key, value in by_key.items()
+                         if len(value) == 1 and value[0].status == RunStatus.INVALID)
+        return {"experiment": experiment.id, "expected_cells": len(expected), "runs_found": len(runs),
+                "completed_cells": len(completed), "invalid_cells": len(invalid),
+                "missing": [[key[0], key[1]] for key in missing], "duplicates": duplicates,
+                "extra": [[key[0], key[1]] for key in extra], "nonterminal": nonterminal}
+
+    def assert_experiment_complete(self, experiment) -> dict:
+        """Fail closed unless the frozen matrix exists exactly once and is fully terminal."""
+        report = self.membership_report(experiment)
+        problems = []
+        if report["missing"]:
+            problems.append(f"{len(report['missing'])} expected cells have no run "
+                            f"(first: {report['missing'][0]})")
+        if report["duplicates"]:
+            problems.append(f"{len(report['duplicates'])} cells have more than one run "
+                            f"({list(report['duplicates'])[0]})")
+        if report["extra"]:
+            problems.append(f"{len(report['extra'])} runs are not in the design "
+                            f"(first: {report['extra'][0]})")
+        if report["nonterminal"]:
+            problems.append(f"{len(report['nonterminal'])} runs are not terminal "
+                            f"(first: {report['nonterminal'][0]})")
+        if problems:
+            raise LabError(f"{experiment.id} membership is not the frozen design: " + "; ".join(problems))
+        return report
+
     def assert_experiment_runs(self, run_ids: Sequence[str]) -> str:
         """Analysis-time gate: one experiment, complete membership, every contract intact."""
         runs = [self.store.get_as(run_id, Run) for run_id in run_ids]
@@ -889,13 +975,18 @@ class LabService:
             raise LabError(f"runs span {sorted(str(e) for e in experiments)}; a comparison must stay "
                            "inside one experiment")
         experiment = self.store.get(next(iter(experiments)))
+        expected = self.expected_membership(experiment)
         for run in runs:
             arm = self.arm_of(experiment, run.ablation_id)
             if arm is None:
                 raise LabError(f"{run.id}: ablation {run.ablation_id} is not an arm of {experiment.id}")
+            if (run.ablation_id, run.seed) not in expected:
+                raise LabError(f"{run.id}: cell ({run.ablation_id}, {run.seed}) is not in the design")
             problems = self.verify_experiment_run(run, experiment, arm)
             if problems:
                 raise LabError(f"{run.id}: " + "; ".join(problems))
+        # a comparison inside a study is only meaningful when the whole frozen matrix exists
+        self.assert_experiment_complete(experiment)
         self.assert_runs_comparable([run.id for run in runs])
         return experiment.id
 
@@ -903,13 +994,9 @@ class LabService:
         from .schemas import Experiment
 
         experiment: Experiment = self.store.get_as(experiment_id, Experiment)
-        finished = {r.status.value for r in self.store.list("R", verify=True, kind=Run)
-                    if r.experiment_id == experiment.id}
-        counts = {status: sum(1 for r in self.store.list("R", verify=True, kind=Run)
-                              if r.experiment_id == experiment.id and r.status.value == status)
-                  for status in sorted(finished)}
+        membership = self.assert_experiment_complete(experiment)   # no sealing a partial study
         experiment.status = "SEALED"
-        experiment.result = {**dict(result), "run_status_counts": counts,
+        experiment.result = {**dict(result), "membership": membership,
                              "expected_run_count": experiment.expected_run_count}
         experiment.state_history = list(experiment.state_history) + [
             StateChange(state=EvidenceState.PROPOSED, at=utc_now(), reason="result sealed")]
