@@ -1,0 +1,59 @@
+{
+  "id": "s7s-pool-blocker",
+  "status": "STOPPED — the frozen generator cannot produce the study's required candidate pool",
+  "requirement": "tools/s7/s7-scaling-preregistration.json (to be materialised) and the review brief: generate in frozen batches until there are at least 60,000 leakage-clean unique candidates, and at least 1.15x the calibration-predicted size of the largest 20x/16k arm (~46,600 rows)",
+  "measured": {
+    "generator": "cvslab.pool.selfplay, per-game RNG mode (generatorVersion 2), seed 20260920, 12 built-in opening lines, max_plies 70, sample_every 2, min_ply 6, play 20k nodes/move, diversification at plies (8,10,12) x 3 candidates within 25cp, diversification 2k nodes",
+    "games_generated": 1600,
+    "raw_rows": 52703,
+    "unique_candidates": 1176,
+    "round_1": {"games": [0, 800], "raw_rows": 26347, "unique_after": 1176},
+    "round_2": {"games": [800, 1600], "raw_rows": 26356, "unique_added": 0},
+    "disjoint_range_overlap": {
+      "games_0_99_unique_fens": 1041,
+      "games_800_899_unique_fens": 1042,
+      "shared_fens": 921,
+      "note": "two game ranges 800 games apart produce almost the same positions"
+    },
+    "single_batch_yield": [
+      {"games": 20, "unique": 552, "unique_per_game": 27.6},
+      {"games": 100, "unique": 1030, "unique_per_game": 10.3},
+      {"games": 800, "unique": 1176, "unique_per_game": 1.47},
+      {"games": 1600, "unique": 1176, "unique_per_game": 0.74}
+    ]
+  },
+  "cause": "the teacher is deterministic (cold fixed-node search), so play is a pure function of the start position except at the three diversification plies; the number of distinct game trajectories is therefore bounded by the declared opening source (12 lines) times the branching at plies 8/10/12, and the pool saturates at roughly 1.2k unique positions",
+  "consequence": "the 20x/16k arm alone needs ~46,600 rows; the pool saturates three orders of magnitude short of that. No amount of additional generation reaches 60,000 with this opening source.",
+  "options": [
+    {
+      "id": "A",
+      "change": "diversify play: sample among near-equal moves at every ply (or every N plies) instead of only plies 8/10/12 — a new generator contract (version 3)",
+      "yield_estimate": "tens of thousands of unique positions; unverified",
+      "cost": "generator change + verification, then ~20-40 min of parallel generation",
+      "scientific_effect": "the pool becomes stochastic-play positions rather than deterministic-play positions; the S5/S6 pools' play contract is not preserved"
+    },
+    {
+      "id": "B",
+      "change": "start games from the engine's committed opening suite instead of the 12 hand-declared lines: benchmarks/suites/openings-inv1-20260910.epd, 4,910 positions, sha256 a477672523185ddc521e746de38b66bd253cade43488d640d43a0ec5175725dd",
+      "yield_estimate": "~4,900 start positions x ~33 sampled plies per game, mostly disjoint continuations: on the order of 100k+ raw rows and comfortably more than 60,000 unique candidates from one game per start position",
+      "cost": "an opening-source loader + validation (~1 h), then ~20-30 min of parallel generation",
+      "scientific_effect": "the generator contract is unchanged (deterministic cold play from a frozen, hashed start-position set); the start positions become Lichess-derived opening/middlegame positions (provenance file: harvested 2,300 positions from the app's lichess-dataset.jsonl, sha256 03410519..., filtered to fullmove 4-16, halfmove clock <= 6, material diff <= 2 pawns, >= 2 non-pawns per side, phases opening/middlegame), so the pool's distribution differs from the S5/S6 pools",
+      "note": "the opening source is already a declared, hashed field of the pool config (openingSourceSha256), so this is a change of the declared source, not of the generator's semantics"
+    },
+    {
+      "id": "C",
+      "change": "take the candidate population from an existing corpus (e.g. the legacy gen9/gen10 shards or corpus-d20's ~43.4k unique positions) instead of generating one",
+      "yield_estimate": "immediate, but corpus-d20 alone is below 46.6k + the 1.15x margin; corpus-static-full holds ~2.36M unique positions",
+      "cost": "corpus selection + provenance + leakage join (the same machinery), no generation compute",
+      "scientific_effect": "the pool is no longer fresh self-play; it is a legacy corpus with its own filters and provenance, which changes what the study's rows represent"
+    }
+  ],
+  "recommendation": "B",
+  "recommendation_reason": "it is the smallest change that reaches 60,000 candidates while keeping the frozen generator contract intact: only the declared opening source changes, and that source is a committed, hashed, provenance-documented engine artifact whose hash already travels in the pool manifest",
+  "blocked_until": "the study's candidate-population decision is made; nothing downstream (calibration, 16 prefixes, labels, training) can be honestly frozen before it",
+  "already_complete_and_verified": [
+    "cvslab/funnel/pool.py: per-game RNG mode (generatorVersion 2) with deterministic parallel batching, byte-identical to a serial run (smoke-verified against the engine: 2 batches == 1 serial call)",
+    "tools/s7/s7_pool_worker.py + tools/s7/s7_scale_pool.py: resumable parallel batch driver with incremental uniqueness tracking, contiguity checks and serial-equivalence verification",
+    "X#### experiment identity: schema, store sealing rules, create_experiment with per-arm contract verification, queue-time and execution-time contract checks, assert_experiment_runs, seal_experiment (167 tests pass)"
+  ]
+}

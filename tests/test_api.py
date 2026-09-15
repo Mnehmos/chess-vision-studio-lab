@@ -41,7 +41,7 @@ def test_matrix_scaling_findings_and_objects(client):
     assert http.get("/api/object/D0001").status_code == 200
     assert http.get("/api/object/R9999").status_code == 404
     assert http.get("/api/objects/A").status_code == 200
-    assert http.get("/api/objects/X").status_code == 400
+    assert http.get("/api/objects/Z").status_code == 400  # Z is not an identity prefix
 
 
 def test_builder_flow_over_http(client):

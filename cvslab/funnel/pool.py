@@ -118,13 +118,33 @@ class PoolConfig:
     # declared opening source: None = the built-in OPENING_LINES; a tuple of
     # {"name","moves"} replaces it for a run (the effective source is hashed).
     opening_lines: Optional[tuple] = None
+    # "stream" = v1, one RNG shared by all games (the S5/S6 contract). "per-game" = v2,
+    # each game's RNG derived from (seed, index), so contiguous batches can be generated
+    # in parallel and merged in index order, byte-identically to a serial run.
+    rng_mode: str = "stream"
 
     def effective_openings(self) -> list[dict]:
         return list(self.opening_lines) if self.opening_lines else list(OPENING_LINES)
 
+    @property
+    def generator_version(self) -> int:
+        return 2 if self.rng_mode == "per-game" else GENERATOR_VERSION
+
+    def opening_offset(self) -> int:
+        """v2 opening offset: derived from its own stream so no game state is needed."""
+        if self.rng_mode != "per-game":
+            raise LabError("opening_offset() is defined for per-game generation")
+        return random.Random(f"{self.seed}:openings").randrange(len(self.effective_openings()))
+
+    def game_rng(self, index: int) -> "random.Random":
+        if self.rng_mode != "per-game":
+            raise LabError("game_rng() is defined for per-game generation")
+        return random.Random(f"{self.seed}:game:{int(index)}")
+
     def canonical(self) -> dict:
         return {
-            "generator": GENERATOR, "generator_version": GENERATOR_VERSION,
+            "generator": GENERATOR, "generator_version": self.generator_version,
+            "rng_mode": self.rng_mode,
             "openingSourceSha256": opening_source_sha256(self.effective_openings()),
             "seed": self.seed, "games": self.games, "max_plies": self.max_plies,
             "diversification_plies": list(self.diversification_plies),
@@ -220,18 +240,32 @@ class SelfPlayGenerator:
 
     # -- whole pool ------------------------------------------------------------
 
-    def generate(self) -> dict:
-        """Returns {games, positions, report}. Raw: duplicate positions across games are kept."""
-        rng = random.Random(self.config.seed)
-        offset = self._opening_offset(rng)
-        games = [self._play_game(index, rng, offset) for index in range(self.config.games)]
+    def generate(self, *, start_index: int = 0, count: Optional[int] = None) -> dict:
+        """Returns {games, positions, report}. Raw: duplicate positions across games are kept.
+
+        `start_index`/`count` select a contiguous game range. They are honoured in per-game
+        mode (v2), where game k is a pure function of (config, k, teacher); stream mode (v1)
+        refuses a non-zero start because its RNG state depends on every earlier game.
+        """
+        count = self.config.games if count is None else int(count)
+        if self.config.rng_mode == "per-game":
+            offset = self.config.opening_offset()
+            indices = range(start_index, start_index + count)
+            games = [self._play_game(index, self.config.game_rng(index), offset) for index in indices]
+        else:
+            if start_index:
+                raise LabError("stream-mode generation cannot start at a non-zero index "
+                               "(its RNG is shared across games); use rng_mode='per-game'")
+            rng = random.Random(self.config.seed)
+            offset = self._opening_offset(rng)
+            games = [self._play_game(index, rng, offset) for index in range(count)]
         positions = []
         for game in games:
             for entry in game["positions"]:
                 positions.append({
                     "game_id": game["game_id"], "opening_id": game["opening_id"], "ply": entry["ply"],
                     "fen": entry["fen"], "gameOutcome": game["gameOutcome"],
-                    "source": {"generator": GENERATOR, "generator_version": GENERATOR_VERSION,
+                    "source": {"generator": GENERATOR, "generator_version": self.config.generator_version,
                                "seed": self.config.seed},
                 })
         return {"games": games, "positions": positions, "report": coverage_report(games, positions)}
@@ -290,7 +324,8 @@ def write_pool(directory: str | Path, generated: dict, manifest_extra: dict,
     games_hash = write_jsonl("games.jsonl", [
         {key: value for key, value in game.items() if key != "positions"} for game in generated["games"]])
     manifest = {
-        "generator": GENERATOR, "generatorVersion": GENERATOR_VERSION,
+        "generator": GENERATOR,
+        "generatorVersion": (manifest_extra.get("config") or {}).get("generator_version", GENERATOR_VERSION),
         "configSha256": hash_obj(manifest_extra["config"]),
         "config": manifest_extra["config"],
         "engine": manifest_extra["engine"],
@@ -330,7 +365,8 @@ def snapshot_source(store, pool_directory: str | Path, *, name: str, license: st
     return store.create(SourceSnapshot(
         id=source_id, name=name, source_origin=str(pool_directory.resolve()), locality="local",
         generator={key: value for key, value in {
-            "name": GENERATOR, "version": GENERATOR_VERSION,
+            "name": GENERATOR,
+            "version": (manifest.get("config") or {}).get("generator_version", GENERATOR_VERSION),
             "configSha256": manifest["configSha256"],
             "manifestSha256": manifest["manifestSha256"],
             "openingSourceSha256": manifest["openingSourceSha256"],

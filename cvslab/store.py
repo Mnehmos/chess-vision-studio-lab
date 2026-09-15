@@ -77,7 +77,18 @@ RUN_IDENTITY_FIELDS = (
     "train_target_spec_hash",
     "eval_target_spec_hash",
     "supervision_divergence",
+    "experiment_id",
     "queued_at",
+)
+
+# Fields of an experiment fixed when it is created: runs are produced against them, so the
+# design may not drift while the study is running (only status/result/state_history move).
+EXPERIMENT_FROZEN_FIELDS = (
+    "name", "family", "generation", "preregistration_hash", "reference_unit_nodes", "scales",
+    "node_budgets", "source_id", "normalization_id", "candidate_universe_hash", "order_seed",
+    "order_hash", "arms", "eval_dataset_id", "eval_dataset_manifest_hash", "eval_protocol_id",
+    "eval_protocol_hash", "eval_target_spec_hash", "widths", "seeds", "expected_run_count",
+    "analysis",
 )
 
 
@@ -107,9 +118,12 @@ def model_adapter(prefix: str) -> TypeAdapter:
 
 
 def _is_sealed(obj: LabModel) -> bool:
-    """Runs seal when they finish; every other object with a record hash seals on creation."""
+    """Runs seal when they finish, experiments when their result is recorded, everything else
+    with a record hash seals on creation."""
     if isinstance(obj, Run):
         return obj.status in TERMINAL_RUN_STATUSES
+    if type(obj).__name__ == "Experiment":
+        return getattr(obj, "status", "") == "SEALED"
     return "record_hash" in type(obj).model_fields
 
 
@@ -213,7 +227,7 @@ class Store:
         tmp = path.with_name(path.name + ".tmp")
         tmp.write_bytes(payload)
         os.replace(tmp, path)
-        if _is_sealed(obj) or obj.id[0] not in MUTABLE_STATE_PREFIXES | {"R"}:
+        if _is_sealed(obj) or obj.id[0] not in MUTABLE_STATE_PREFIXES | {"R", "X"}:
             self.make_readonly(path)
 
     def create(self, obj: LabModel):
@@ -248,6 +262,27 @@ class Store:
                 run.record_hash = compute_record_hash(run)
             self._write(self.object_path(run.id), run)
         return run
+
+    def update_experiment(self, experiment):
+        """Move an experiment from FROZEN to SEALED (result + state history), or refuse.
+
+        The design frozen at creation is immutable: only status, result and state history may
+        change, so a study cannot be redefined once its runs exist.
+        """
+        with self._lock:
+            current = self.get(experiment.id)
+            if type(current).__name__ != "Experiment":
+                raise ImmutableError(f"{experiment.id} is {type(current).__name__}, not an experiment")
+            if current.status == "SEALED":
+                raise ImmutableError(f"{experiment.id} is SEALED; a finished study is immutable")
+            for field in EXPERIMENT_FROZEN_FIELDS:
+                if getattr(current, field) != getattr(experiment, field):
+                    raise ImmutableError(f"{experiment.id}: '{field}' is fixed when the experiment is created")
+            experiment.record_hash = None
+            if experiment.status == "SEALED":
+                experiment.record_hash = compute_record_hash(experiment)
+            self._write(self.object_path(experiment.id), experiment)
+        return experiment
 
     def update_state(self, obj_id: str, state: EvidenceState, reason: str):
         prefix, _ = parse_id(obj_id)

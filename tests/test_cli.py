@@ -59,5 +59,5 @@ def test_cli_reports_errors_and_exits_nonzero(tmp_path, capsys):
     assert "not found" in capsys.readouterr().err
     import pytest
     with pytest.raises(SystemExit) as exc:  # argparse rejects the prefix choice before main returns
-        cli.main(["--home", str(tmp_path / "labstore"), "ls", "X"])
+        cli.main(["--home", str(tmp_path / "labstore"), "ls", "Z"])  # Z is not an identity prefix
     assert exc.value.code == 2
