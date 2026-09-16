@@ -111,3 +111,27 @@ than spend another ~1,000 seeds on H16.
 [−0.000268, +0.000780], H16 +0.000878 [+0.000249, +0.001508], H32 +0.000722 [+0.000496, +0.000948].
 These now use exact df-specific Student-t values (df=39 → 1.6849, df=399 → 1.6487) rather than the
 normal fallback the first S11 bundle used.
+
+---
+
+## The successor experiment: X0007, sealed (the identity repair)
+
+The repaired contract lets width-specific arms partition one `(scale, supervision-depth)` cell with
+seed allocation living solely in `arm.seeds` — so the successor could be frozen cleanly:
+
+* **8 partitioned arms** (4 widths × 2 depths) over the two `(same-9495, depth)` cells; the scale axis
+  carries the real stratum (`scale_nodes = 1`), never the seed count.
+* **880 fresh-seed confirmatory cells**: 20 paired seeds each for H1/H4/H16, 380 for H32; same
+  positions, same student compute, zero new labels.
+* **Determinism verified: 880 of 880 cells reproduce X0006's per-seed values exactly** (0 mismatches),
+  so the successor changes the identity, not the evidence.
+* Sealed `sha256:33134177c7b1b9211…` with the same membership guarantees (no missing, duplicate,
+  extra or nonterminal cells).
+
+**Sealed conclusion.** 4k is non-inferior to 8k at H1, H4 and H32 under δ = 0.001. H16 remains
+unresolved, with its fresh estimate lying above the margin. Therefore 4k is not established as
+globally non-inferior across widths. X0006 stays preserved as the historical malformed attempt and is
+explicitly superseded by X0007 rather than rewritten.
+
+That is enough evidence to move on: the next experiment is the 1k/512 economic frontier, not another
+~1,000 seeds at H16.
