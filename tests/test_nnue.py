@@ -125,8 +125,9 @@ def test_fixed_update_regime_runs_exactly_the_declared_updates(lab):
     again = run_with(max_updates=10, epochs=99, seed=0)
     assert [log.train_loss for log in again.training_curve] == [log.train_loss for log in first.training_curve]
 
-    # and the epoch-bounded regime is untouched: 3 epochs x floor(rows/16) updates
+    # and the epoch-bounded regime keeps its historical definition: every sample in every
+    # epoch, partial tail batch included (the S8 patch briefly counted full batches only)
     epoch_bounded = run_with(max_updates=0, epochs=3, seed=0)
     rows = dataset.splits[0].count
-    assert epoch_bounded.compute.train_examples_seen == 3 * max(rows // 16, 1) * 16
+    assert epoch_bounded.compute.train_examples_seen == 3 * rows
     assert len(epoch_bounded.training_curve) == 3
