@@ -857,11 +857,15 @@ class LabService:
         declared_budgets = {int(budget) for budget in node_budgets}
         numeric_scale = {str(key): int(value) for key, value in scales.items()}
         declared_widths = {int(width) for width in widths}
+        # Arms may partition a condition: several width-specific arms can share one
+        # (scale, supervision depth) cell, which is what a targeted precision design needs.
+        # What must hold is that the SET of cells is exactly the declared lattice.
         cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
-        if len(cells) != len(list(arms)):
-            raise LabError("the design names the same (scale, node budget) cell more than once")
         lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
         for arm in arms:
+            if str(arm["scale"]) not in numeric_scale:
+                raise LabError(f"arm {arm['arm_id']} names scale {arm['scale']!r}, which the design does "
+                               f"not declare (declared: {sorted(numeric_scale)})")
             # the scale NAME must carry its frozen numeric target: a cell called "20x" with a
             # 2x budget would otherwise pass every check and quietly misspend the study
             if int(arm["scale_nodes"]) != numeric_scale[str(arm["scale"])]:
@@ -874,7 +878,7 @@ class LabService:
                            f"not declared {undeclared_cells}")
 
         frozen_arms: list[ExperimentArm] = []
-        per_budget: dict = {}
+        per_cell: dict = {}
         seen: set[str] = set()
         for arm in arms:
             arm_id = str(arm["arm_id"])
@@ -923,7 +927,7 @@ class LabService:
             if duplicated:
                 raise LabError(f"arm {arm_id} lists more than one ablation for width(s) "
                                f"{sorted(duplicated)}: {duplicated}")
-            per_budget.setdefault(int(entry.node_budget), []).append((arm_id, covered))
+            per_cell.setdefault((entry.scale, int(entry.node_budget)), []).append((arm_id, covered))
             frozen_arms.append(entry)
 
         # The X<->A binding must be REAL: take the id before creation so ablations can carry it,
@@ -942,14 +946,14 @@ class LabService:
                 raise LabError(f"{ablation.id} claims {xid} but no arm lists it; refusing an "
                                "experiment with unlisted members")
 
-        # Every supervision depth in the design must present the full width ladder among its arms.
-        # The union, not a per-arm requirement: one arm may carry all four widths (S7-S/S9/S10), or
-        # several arms may carry one width each (S11's targeted precision design). Multiple arms of
-        # the same depth covering the same width is legitimate (two scales at one depth).
-        for budget, entries in sorted(per_budget.items()):
+        # Each (scale, supervision depth) cell must present the full width ladder across its arms:
+        # one arm may carry all four widths (S7-S/S9/S10), or several arms may carry one width each
+        # (S11's targeted precision design). The union, not a per-arm requirement: a missing width
+        # still fails closed, and a width may not appear twice within one arm.
+        for (scale, budget), entries in sorted(per_cell.items()):
             covered_here = {width for _arm_id, covered in entries for width in covered}
             if covered_here != declared_widths:
-                raise LabError(f"supervision depth {budget} presents widths {sorted(covered_here)} but the "
+                raise LabError(f"cell ({scale}, {budget}) presents widths {sorted(covered_here)} but the "
                                f"design declares {sorted(declared_widths)}")
 
         declared_seeds = {int(value) for value in seeds}

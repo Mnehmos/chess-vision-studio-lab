@@ -128,9 +128,14 @@ def test_the_design_must_be_exactly_the_declared_lattice(lab):
     with pytest.raises(LabError, match="exactly the declared lattice"):
         make_experiment(lab, [first], protocol, xid)          # a cell is missing
     second = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="B")
-    third = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="C")
-    with pytest.raises(LabError, match="more than once"):
-        make_experiment(lab, [first, second, dict(third, arm_id="duplicate-cell")], protocol, xid)
+    # an undeclared scale is refused (and refused cleanly, not with a KeyError)
+    with pytest.raises(LabError, match="does not declare"):
+        make_experiment(lab, [first, dict(second, scale="9x")], protocol, xid)
+    # arms may PARTITION one cell: two arms of the same (scale, depth) split the width ladder.
+    # The cell is then incomplete, so the coverage rule refuses it.
+    half_a = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="P", widths=(1, 4))
+    with pytest.raises(LabError, match="presents widths"):
+        make_experiment(lab, [first, second, half_a], protocol, xid)
 
 
 def test_the_scale_name_must_carry_its_numeric_target(lab):

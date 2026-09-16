@@ -24,6 +24,7 @@ Pre-registered statistics (before any result was seen) are in PREREGISTRATION.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 from typing import Optional
 
@@ -321,6 +322,83 @@ _T95_ONE_SIDED = {1: 6.314, 2: 2.920, 3: 2.353, 4: 2.132, 5: 2.015, 6: 1.943, 7:
                   30: 1.697}
 
 
+def _betacf(a: float, b: float, x: float, itmax: int = 300, eps: float = 3e-16) -> float:
+    """Lentz continued fraction for the incomplete beta function."""
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    if abs(d) < 1e-30:
+        d = 1e-30
+    d = 1.0 / d
+    h = d
+    for m in range(1, itmax + 1):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        if abs(d) < 1e-30:
+            d = 1e-30
+        c = 1.0 + aa / c
+        if abs(c) < 1e-30:
+            c = 1e-30
+        d = 1.0 / d
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        if abs(d) < 1e-30:
+            d = 1e-30
+        c = 1.0 + aa / c
+        if abs(c) < 1e-30:
+            c = 1e-30
+        d = 1.0 / d
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < eps:
+            break
+    return h
+
+
+def _betai(a: float, b: float, x: float) -> float:
+    """Regularized incomplete beta function I_x(a, b)."""
+    if x <= 0.0:
+        return 0.0
+    if x >= 1.0:
+        return 1.0
+    lbeta = math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b)
+    front = math.exp(lbeta + a * math.log(x) + b * math.log(1.0 - x))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _betacf(a, b, x) / a
+    return 1.0 - front * _betacf(b, a, 1.0 - x) / b
+
+
+def student_t_cdf(t: float, df: float) -> float:
+    if df <= 0:
+        raise LabError("Student-t needs positive degrees of freedom")
+    tail = 0.5 * _betai(df / 2.0, 0.5, df / (df + t * t))     # P(T > |t|)
+    return 1.0 - tail if t > 0 else tail
+
+
+def t_critical(df: float, *, one_sided: bool = False) -> float:
+    """Exact Student-t critical value at the requested confidence level.
+
+    Computed by inverting the t CDF (bisection on a pure-Python incomplete beta), so a width
+    with df = 399 gets t = 1.649 rather than a normal approximation. The tabulated values above
+    are kept only as documented checkpoints for the tests: for df <= 30 the exact function
+    reproduces every entry.
+    """
+    wanted = 0.95 if one_sided else 0.975
+    low, high = 0.0, 1.0
+    while student_t_cdf(high, df) < wanted:
+        high *= 2.0
+        if high > 1e6:
+            raise LabError("t critical did not converge")
+    for _ in range(200):
+        mid = (low + high) / 2.0
+        if student_t_cdf(mid, df) < wanted:
+            low = mid
+        else:
+            high = mid
+    return (low + high) / 2.0
+
+
 def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int, float],
                   *, seeds: tuple[int, ...] = DEFAULT_SEEDS, one_sided: bool = False) -> dict:
     """Per-width primary estimate: paired differences over the PREREGISTERED seed set.
@@ -340,7 +418,7 @@ def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int,
     mean = sum(differences) / n
     variance = sum((value - mean) ** 2 for value in differences) / (n - 1)
     standard_error = math.sqrt(variance / n)
-    critical = (_T95_ONE_SIDED if one_sided else _T95).get(n - 1, 1.645 if one_sided else 1.96)
+    critical = t_critical(n - 1, one_sided=one_sided)
     return {"width_estimate": mean, "ci_low": mean - critical * standard_error,
             "ci_high": mean + critical * standard_error, "n": n, "seeds": shared,
             "differences": differences, "critical": critical,
