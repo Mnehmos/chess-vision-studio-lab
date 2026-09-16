@@ -1,0 +1,80 @@
+{
+ "decision": "INCONCLUSIVE",
+ "determinism_mismatches": 0,
+ "equivalence_all_widths": false,
+ "evidence": {
+  "power_planning": "tools/s11/s11-power-planning.json",
+  "preregistration": "tools/s11/s11-preregistration.json",
+  "result": "tools/s11/s11-result.json",
+  "state": "tools/s11/s11-state.json"
+ },
+ "experiment": "X0006",
+ "margin_delta": 0.001,
+ "max_upper_bound": 0.0014934327778137108,
+ "mean_test_loss": {
+  "4K-H1": 0.015463,
+  "4K-H16": 0.021961,
+  "4K-H32": 0.022906,
+  "4K-H4": 0.017624,
+  "8K-H1": 0.014782,
+  "8K-H16": 0.021083,
+  "8K-H32": 0.022184,
+  "8K-H4": 0.017368
+ },
+ "primary_4k_minus_8k": {
+  "1": {
+   "d": 0.000681,
+   "n": 40,
+   "one_sided_bounds": [
+    0.000509,
+    0.000853
+   ],
+   "two_sided_ci": [
+    0.000476,
+    0.000886
+   ]
+  },
+  "4": {
+   "d": 0.000256,
+   "n": 40,
+   "one_sided_bounds": [
+    -0.000256,
+    0.000767
+   ],
+   "two_sided_ci": [
+    -0.000354,
+    0.000865
+   ]
+  },
+  "16": {
+   "d": 0.000878,
+   "n": 40,
+   "one_sided_bounds": [
+    0.000263,
+    0.001493
+   ],
+   "two_sided_ci": [
+    0.000146,
+    0.001611
+   ]
+  },
+  "32": {
+   "d": 0.000722,
+   "n": 400,
+   "one_sided_bounds": [
+    0.000497,
+    0.000947
+   ],
+   "two_sided_ci": [
+    0.000454,
+    0.000991
+   ]
+  }
+ },
+ "targeted_seeds": {
+  "h1": 40,
+  "h16": 40,
+  "h32": 400,
+  "h4": 40
+ }
+}

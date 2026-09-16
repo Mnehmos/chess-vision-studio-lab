@@ -1,0 +1,36 @@
+{
+ "allocation": {
+  "1": 40,
+  "16": 40,
+  "32": 280,
+  "4": 40
+ },
+ "note": "PLANNING ONLY, not a preregistered result: the seed counts use S10's point estimates and standard errors, which themselves carry uncertainty; the study preregisters fixed seed counts per width rather than a sequential stopping rule",
+ "per_width": {
+  "1": {
+   "d": 0.000732,
+   "se_20_seeds": 0.0001700404858299595,
+   "seeds_needed_estimate": 24,
+   "upper_bound": 0.001026
+  },
+  "16": {
+   "d": 0.000213,
+   "se_20_seeds": 0.0004580682475419318,
+   "seeds_needed_estimate": 21,
+   "upper_bound": 0.001005
+  },
+  "32": {
+   "d": 0.000671,
+   "se_20_seeds": 0.0007408906882591093,
+   "seeds_needed_estimate": 390,
+   "upper_bound": 0.001952
+  },
+  "4": {
+   "d": 0.000344,
+   "se_20_seeds": 0.00043030653556969345,
+   "seeds_needed_estimate": 26,
+   "upper_bound": 0.001088
+  }
+ },
+ "source": "tools/s10/s10-result-summary.json (sealed X0004)"
+}

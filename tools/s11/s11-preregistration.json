@@ -1,0 +1,58 @@
+{
+ "additional_checks": {
+  "determinism_across_experiments": "seeds 0..19 must reproduce X0004's per-seed values exactly for the same (depth, width) cells; a mismatch is a STOP, because it would mean the pipeline is not deterministic",
+  "realized_cost_ratio": "recomputed over the frozen id list"
+ },
+ "context": "S10 (X0004) left 4K_NONINFERIOR unresolved: all four point estimates were below the margin but every upper bound crossed it. H1/H4/H16 were close to resolving; H32 was the bottleneck (estimate +0.000671, upper bound +0.001952) because that width has much higher variance.",
+ "design": {
+  "arms_compared": "4k vs 8k, paired by seed",
+  "matrix": {
+   "arms": 8,
+   "arms_note": "each (depth, width) pair is one arm, which is what lets a width carry its own seed budget",
+   "expected_cells": 1040
+  },
+  "planning_disclaimer": "the seed counts are PLANNING, computed from S10's own estimates; they are preregistered as fixed counts, not as a sequential stopping rule",
+  "positions": "the same frozen 9,495 ids as S9/S10 (identical order, identical datasets, zero new labels)",
+  "targeted_seeds": {
+   "h1": 40,
+   "h16": 40,
+   "h32": 400,
+   "h4": 40
+  },
+  "targeted_seeds_why": "an arm may declare its own seed subset, so extra seeds go where variance limits: the allocation comes from the S10 point estimates and standard errors (tools/s11/s11-power-planning.json). 280 seeds would put H32's upper bound at ~0.000998 against a 0.001 margin, so 400 is preregistered to avoid landing on that knife edge.",
+  "training": "fixed updates, 760 x batch 256; identical optimizer, LR, init, RAW-768, exam E0004/D0010"
+ },
+ "id": "s11-targeted-precision-4k-vs-8k",
+ "primary_analysis": {
+  "bounds": "separate one-sided 95% lower and upper bounds (Student t by the width's own df)",
+  "decision": {
+   "4K_NONINFERIOR": "upper bound < +0.001 at all four widths",
+   "4K_TAXED": "lower bound > +0.001 at every width",
+   "INCONCLUSIVE": "otherwise"
+  },
+  "margin": {
+   "delta": 0.001
+  },
+  "quantity": "d = test_loss(4k) - test_loss(8k), paired by seed, per width; positive = 4k worse",
+  "secondary_equivalence": "two-sided 95% CI inside [-0.001, +0.001] at every width"
+ },
+ "question": "Is 4k supervision non-inferior to 8k at delta = 0.001 on the same positions, once the widths that actually limit the interval are given the seeds they need?",
+ "scope_exclusions": [
+  "no new pool",
+  "no new labels",
+  "no 1k or 512 arm",
+  "no GEO",
+  "no Stockfish",
+  "no games",
+  "no optimizer tuning",
+  "no wider models",
+  "no balanced matrix by reflex"
+ ],
+ "status": "materialized before the freeze; X0005 binds the hash of this file",
+ "stop_conditions": [
+  "the 9,495 ids or the datasets do not reproduce",
+  "seeds 0..19 do not reproduce X0004 exactly",
+  "X0005 cannot truthfully seal the targeted design"
+ ],
+ "version": 1
+}
