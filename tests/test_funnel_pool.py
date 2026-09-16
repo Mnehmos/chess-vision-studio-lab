@@ -355,3 +355,22 @@ def test_epd_start_source_is_a_versioned_contract(tmp_path):
     # move-line mode is untouched by the new source
     assert PoolConfig(seed=5).generator_version == 1
     assert PoolConfig(seed=5, rng_mode="per-game").generator_version == 2
+
+
+def test_write_pool_records_the_declared_source_from_the_config(tmp_path):
+    """The manifest's opening-source hash must be the config's, not a default."""
+    import hashlib
+
+    from cvslab.funnel.pool import PoolConfig, write_pool
+
+    book = tmp_path / "start.epd"
+    book.write_text("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\n", encoding="utf-8")
+    digest = "sha256:" + hashlib.sha256(
+        book.read_text(encoding="utf-8").replace("\r\n", "\n").encode("utf-8")).hexdigest()
+    config = PoolConfig(seed=1, games=1, rng_mode="per-game", start_source="epd-file",
+                        epd_path=str(book), epd_sha256=digest)
+    generated = {"games": [], "positions": [], "report": {"games": 0}}
+    manifest = write_pool(tmp_path / "pool", generated, {"config": config.canonical(), "engine": {}})
+    assert manifest["openingSourceSha256"] == digest          # not the 12-line default
+    assert manifest["config"]["openingSourceSha256"] == digest
+    assert manifest["generatorVersion"] == 3

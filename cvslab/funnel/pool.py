@@ -411,7 +411,11 @@ def write_pool(directory: str | Path, generated: dict, manifest_extra: dict,
         "configSha256": hash_obj(manifest_extra["config"]),
         "config": manifest_extra["config"],
         "engine": manifest_extra["engine"],
-        "openingSourceSha256": opening_source_sha256(opening_lines),
+        # the declared source in the config is authoritative when present (it covers both the
+        # move-line lists and the EPD start-position file); the argument remains for callers
+        # that build a manifest without a canonical config
+        "openingSourceSha256": ((manifest_extra.get("config") or {}).get("openingSourceSha256")
+                                or opening_source_sha256(opening_lines)),
         "positionsFile": {"name": "positions.jsonl", "sha256": positions_hash,
                           "rows": len(generated["positions"])},
         "gamesFile": {"name": "games.jsonl", "sha256": games_hash, "rows": len(generated["games"])},

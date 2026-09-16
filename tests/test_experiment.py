@@ -133,6 +133,16 @@ def test_the_design_must_be_exactly_the_declared_lattice(lab):
         make_experiment(lab, [first, second, dict(third, arm_id="duplicate-cell")], protocol, xid)
 
 
+def test_the_scale_name_must_carry_its_numeric_target(lab):
+    """2b. a cell called "20x" may not carry the 2x budget."""
+    normalization, train, exam, recipe, protocol = build_lab(lab)
+    xid = lab.store.next_id("X")
+    first = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="A")
+    partner = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="B")
+    with pytest.raises(LabError, match="declares scale_nodes"):
+        make_experiment(lab, [dict(first, scale_nodes=SCALES["2x"] * 10), partner], protocol, xid)
+
+
 def test_every_arm_must_cover_the_declared_widths(lab):
     """3. an arm without H1/H4/H16/H32 is not the frozen ladder."""
     normalization, train, exam, recipe, protocol = build_lab(lab)

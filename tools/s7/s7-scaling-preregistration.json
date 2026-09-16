@@ -1,0 +1,105 @@
+{
+  "id": "s7-supervision-density-scaling",
+  "version": 1,
+  "status": "materialized before generation; X#### binds the hash of this file",
+  "supersedes": "the S7-F single-scale frontier described in docs/SUPERVISION_DENSITY_FRONTIER.md section 5 (never run as written); the 1x frontier is retained only as the unit of scale",
+  "question": "As the teacher's total supervision budget grows from 2x to 20x, does the best way to spend it change between a few very deep lessons and many shallow ones?",
+  "teaching_statement": "We increased the teacher's total thinking budget from 2x to 20x. At every scale we spent exactly that budget in four different ways: a few very deep lessons through many shallow lessons. Because the datasets and scales are nested, we can see both how more supervision helps and whether the best allocation of that supervision changes as compute grows.",
+
+  "reference_unit": {"name": "1x", "nodes": 37285491,
+                     "source": "S6 UNIFORM arm realized deep nodes (labstore/objects/datasets/D0009.json campaign.deep_nodes)"},
+  "scales": {"2x": 74570982, "5x": 186427455, "10x": 372854910, "20x": 745709820},
+  "scales_note": "4 x 1x, 10 x 1x, 20 x 1x: the four total teacher budgets each arm is filled to",
+  "depths": [400000, 160000, 64000, 16000],
+  "representation": "RAW-768 only",
+  "widths": [1, 4, 16, 32],
+  "seeds": [0, 1, 2, 3, 4],
+  "expected_cells": 320,
+
+  "source_decision": {
+    "choice": "B — games start from the engine's committed EPD start-position suite",
+    "why": "the 12-opening move-line generator saturates: 1,600 games yielded 1,176 unique candidates with zero marginal yield in the second 800-game range (tools/s7/s7-scaling-pool-blocker.json)",
+    "file": "chess-vision-studio-rust-engine/benchmarks/suites/openings-inv1-20260910.epd",
+    "positions": 4910,
+    "content_sha256_lf_normalized": "sha256:4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3",
+    "hash_note": "the pin is the LF-normalized content hash (the committed git blob). A Windows checkout with core.autocrlf=true hashes the same file as a4776725…; the loader normalizes before hashing, so the pin cannot depend on line endings.",
+    "provenance": {"harvest": "lichess-dataset.jsonl", "sampled": 5804,
+                   "source_sha256": "c7bba9e3eee42e578b2436d5b3626db049689c23f7e2b1e5bf422fe31b59b652",
+                   "seed": 20260911,
+                   "filters": {"fullmove": [4, 20], "maxHalfmoveClock": 6, "maxMaterialDiffPawns": 3.0,
+                               "minNonPawnsPerSide": 2, "minNonPawnsTotal": 6,
+                               "phases": ["opening", "middlegame"]}},
+    "probe": {"games": 400, "rows": 12627, "unique": 12348, "unique_per_game": 30.87,
+              "marginal_yield": "flat (first batch 1,492 new, last batch 1,553 new)",
+              "artifact": "tools/s7/s7-scaling-epd-probe.json"}
+  },
+
+  "generator": {"name": "cvslab.pool.selfplay", "version": 3, "rng_mode": "per-game",
+                "seed": 20260920, "max_plies": 70, "sample_every": 2, "min_ply": 6,
+                "play_node_budget": 20000, "diversification_plies": [8, 10, 12],
+                "diversification_candidates": 3, "diversification_window_cp": 25,
+                "diversification_node_budget": 2000,
+                "engine_args": ["--depth", "64", "--nnue", "target-cvs/matrix-raw.json",
+                                "--nnue-cal", "nets/eval-cal.json", "--helper-nnue",
+                                "target-cvs/matrix-residual.json"]},
+
+  "candidate_universe": {
+    "generation": "deterministic contiguous batches from distinct EPD starts until the POST-LEAKAGE universe holds >= 60000 unique eligible records",
+    "leakage_join": "joint transposition components of the new records against the FULL 575-record N0010 evaluation-source population (not only D0010); any candidate whose component touches that protected population is removed",
+    "also_require": ">= 1.15 x the calibration-predicted size of the largest 20x/16k prefix",
+    "order": "one deterministic order: sort(universe, key=sha256(f'{order_seed}:{record_id}')), order_seed 20260920; every downstream step uses it"
+  },
+
+  "calibration": {
+    "sample": 64,
+    "rule": "first 64 records of the frozen order",
+    "budgets": [16000, 64000, 160000, 400000],
+    "may_inspect": ["executed node counts", "wall time", "termination behaviour"],
+    "must_not_inspect": ["centipawn values", "best moves", "game outcomes", "evaluation losses",
+                          "anything that says whether a position is good for training"],
+    "why": "we are calibrating the price of a label, not its content"
+  },
+
+  "prefix_construction": {
+    "rule": "for each depth, walk the frozen order and purchase labels until the cumulative realized nodes cross the 20x target; each scale's prefix is the one whose cumulative realized nodes is closest to that scale's frozen target; the probe label that resolves the stop is purchased, recorded and excluded",
+    "buy_once": "labels are purchased only along the 20x walk at each depth; every smaller scale reuses a prefix of the same purchased stream (2x/64k subset 5x/64k subset 10x/64k subset 20x/64k, etc.)",
+    "expected_primary_cost_nodes": 2982839280,
+    "cost_note": "80 reference units (20x x four depths) rather than 148; calibration and probe labels are extra",
+    "no_target_values": "prefix membership is decided by realized node counts only"
+  },
+
+  "instrument": {
+    "dataset": "D0010", "protocol": "E0004", "records": 200, "split": "test",
+    "target_spec": "search_deep_cp @ nodeBudget 400000, value.targets.scoreCpStm, stm POV",
+    "rule": "one common instrument for every cell; all 320 runs pin the same protocol hash and evaluation TargetSpec hash"
+  },
+
+  "analysis": {
+    "primary_endpoint": "test_loss on E0004/D0010",
+    "unit": "paired seed difference, five seeds, 95% CI (Student t, df=4, t=2.776)",
+    "sign_convention": "negative favours the first named term",
+    "frontier_per_scale": ["160k - 400k", "64k - 160k", "16k - 64k", "16k - 400k (primary)"],
+    "scaling_per_depth": ["5x - 2x", "10x - 5x", "20x - 10x", "20x - 2x"],
+    "interaction": "does the best allocation change as total supervision grows: per width, the depth-ordered profile at 2x versus at 20x, and where each depth's scaling slope turns",
+    "student_compute": "reported separately per cell (rows, examples seen, optimizer batches, cpu/wall, examples per second): broader arms receive more optimizer work under fixed epochs, so the claim is about supervision scaling under one fixed training recipe",
+    "no_pooling": "widths are reported, not pooled into a winner",
+    "no_promotion": "the exploratory 2k arm of the merged pilot is not part of this study; GEO, HYBRID, the teacher and the optimizer are untouched"
+  },
+
+  "firewall": {
+    "no_outcome_inspection": "no training outcome may be inspected until the complete 16-arm lattice and its X#### are frozen; labels may be purchased beforehand but their chess values may never decide membership",
+    "ordering": ["materialize this preregistration", "generate the pool", "leakage join", "freeze the universe and its order",
+                 "calibrate cost", "purchase the four 20x label streams", "construct the sixteen prefixes",
+                 "assert both nesting dimensions", "freeze the sixteen D####", "freeze the T####/A####",
+                 "freeze X#### with the 320-cell membership", "queue and execute the matrix", "analyse and seal"]
+  },
+
+  "stop_conditions": [
+    "the B source cannot provide enough leakage-clean candidates",
+    "the common exam is no longer component-disjoint from the universe",
+    "a TargetSpec cannot provide strict one-observation cardinality per row",
+    "realized node accounting cannot construct the required lattice",
+    "either nesting dimension fails",
+    "X#### cannot truthfully seal the intended 320-cell design"
+  ]
+}
