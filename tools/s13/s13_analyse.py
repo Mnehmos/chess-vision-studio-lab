@@ -80,7 +80,7 @@ def step_dual() -> int:
     for run in runs:
         if run.status != RunStatus.COMPLETED:
             continue
-        label = arm_of[run.ablation_id]
+        label = arm_of[run.ablation_id].replace("S13-", "")
         artifact = f"artifacts/{run.id}/model.json"
         payload = json.loads(service.store.abs(artifact).read_bytes())
         recorded_hash = run.artifact_hashes.get("model.json")
@@ -214,12 +214,20 @@ def step_report() -> int:
     both = [str(w) for w in WIDTHS
             if per_width[str(w)]["primary"]["CVS-DEEP"]["verdict"] == "SF-32k_better"
             and per_width[str(w)]["primary"]["SF-DEEP"]["verdict"] == "SF-32k_better"]
+    cvs_both = [str(w) for w in WIDTHS
+                if per_width[str(w)]["primary"]["CVS-DEEP"]["verdict"] == "SF-32k_worse"
+                and per_width[str(w)]["primary"]["SF-DEEP"]["verdict"] == "SF-32k_worse"]
+    dose_worse = [str(w) for w in WIDTHS
+                  if per_width[str(w)]["dose"]["CVS-DEEP"]["SF-1M - SF-32k"]["verdict"] == "SF-1M_worse"
+                  and per_width[str(w)]["dose"]["SF-DEEP"]["SF-1M - SF-32k"]["verdict"] == "SF-1M_worse"]
     if len(own) == len(WIDTHS):
         decision = "WORLDVIEW_DISAGREEMENT"
     elif len(both) == len(WIDTHS):
         decision = "GENERIC_SF_GAIN"
     else:
         decision = "INCONCLUSIVE"
+    observed = ("CVS_BETTER_ON_BOTH_EXAMS" if len(cvs_both) == len(WIDTHS)
+                else "MIXED" if cvs_both else "NOT_CVS_BETTER_ON_BOTH")
     result = {
         "experiment": experiment.id,
         "preregistration_hash": experiment.preregistration_hash,
@@ -236,6 +244,14 @@ def step_report() -> int:
                          "pattern); GENERIC_SF_GAIN iff the SF-trained student is strictly better on "
                          "both exams at every width; otherwise INCONCLUSIVE",
         "widths_own_authority": own, "widths_sf_better_on_both": both,
+        "observed_pattern": observed,
+        "widths_cvs_better_on_both_exams": cvs_both,
+        "widths_dose_arm_worse_than_primary": dose_worse,
+        "observed_pattern_note": (
+            "the preregistered decision rule enumerated only two clean patterns (worldview "
+            "disagreement; generic SF gain). The realized pattern is a third one it did not name. "
+            "The registered verdict vocabulary is kept verbatim (decision above) and the observed "
+            "pattern is reported beside it, never substituted for it."),
         "economics": {label: state()["conditions"][label] for label in LABELS},
         "scope": {"no_stockfish_as_truth": True, "losses_never_averaged": True,
                   "no_playing_strength_claim": True},

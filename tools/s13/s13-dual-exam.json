@@ -1,0 +1,4622 @@
+{
+ "exams": {
+  "CVS-DEEP": {
+   "dataset_id": "D0010",
+   "dataset_manifest_hash": "sha256:9aa36820416b0198029bc740d2fe0745ffe250ff3798d191002ed27771705cff",
+   "dropped_rows": 0,
+   "mate_sentinels": 1,
+   "positions": 200,
+   "protocol_hash": "sha256:785d4584032edc1febd5b76aa0920e78f996239b27258de0b07bf6538aca43e1",
+   "protocol_id": "E0004",
+   "spec_hash": "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8",
+   "split": "test"
+  },
+  "SF-DEEP": {
+   "dataset_id": "D0040",
+   "dataset_manifest_hash": "sha256:cd1da279beb3f97cdeffbd39f336e485ec1f2c7eba21626193b24f97189ea6b7",
+   "dropped_rows": 0,
+   "mate_sentinels": 1,
+   "positions": 200,
+   "protocol_hash": "sha256:2993ef2cadaf8bdbe6ae95e1a9079afe44435ea7b3398bff5ca62513f1a43e5f",
+   "protocol_id": "E0005",
+   "spec_hash": "sha256:feeccd243977d35d89ea1cbecdf9b8f55cf64886f348cb68f8a28782c42adad6",
+   "split": "test"
+  }
+ },
+ "experiment": "X0009",
+ "id": "s13-dual-exam-scores",
+ "scores": {
+  "CVS-4k": {
+   "1": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.018605466546497945,
+      "ci_low": 0.01220001217476021,
+      "cp_mae": 130.68549952933688,
+      "n": 200,
+      "test_loss": 0.015039759840716108
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0358231157811627,
+      "ci_low": 0.01936856843659863,
+      "cp_mae": 175.37609613067582,
+      "n": 200,
+      "test_loss": 0.026292742507607963
+     },
+     "model_artifact": "artifacts/R3269/model.json",
+     "model_hash": "sha256:c941625d797ff44fc5b986e07d7db00815c72c2fcabc47db6ae27585e47254b5",
+     "param_count": 771
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.017811019956682796,
+      "ci_low": 0.011722951114890865,
+      "cp_mae": 130.72485643353906,
+      "n": 200,
+      "test_loss": 0.014367423422799125
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03430305919971116,
+      "ci_low": 0.01865549870641202,
+      "cp_mae": 173.1641252083626,
+      "n": 200,
+      "test_loss": 0.02508660167356431
+     },
+     "model_artifact": "artifacts/R3270/model.json",
+     "model_hash": "sha256:d7626df1c01a1a509647c82ffad5a4c0d62f968609da0a04af3ab338fde8916d",
+     "param_count": 771
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.019911124035258528,
+      "ci_low": 0.012723161669617209,
+      "cp_mae": 134.5197884751255,
+      "n": 200,
+      "test_loss": 0.016043452437684572
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03298649994453801,
+      "ci_low": 0.01892385113990369,
+      "cp_mae": 171.30337975211324,
+      "n": 200,
+      "test_loss": 0.025245799288109976
+     },
+     "model_artifact": "artifacts/R3279/model.json",
+     "model_hash": "sha256:d0df38c2f0498f934ee3ad3557313e66f4530bfe20f91ff92acab5c9a407d784",
+     "param_count": 771
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.01778457462119075,
+      "ci_low": 0.011598749344852647,
+      "cp_mae": 132.37132061337238,
+      "n": 200,
+      "test_loss": 0.014530157947537599
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03452531209189891,
+      "ci_low": 0.0188649280855479,
+      "cp_mae": 173.1145324553745,
+      "n": 200,
+      "test_loss": 0.02544876780138618
+     },
+     "model_artifact": "artifacts/R3280/model.json",
+     "model_hash": "sha256:19eeeaea04fdc76838eed95433c8fd9893afcab21668cdf2948e305f2a0dc54e",
+     "param_count": 771
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.01904669327766768,
+      "ci_low": 0.012246537367804967,
+      "cp_mae": 130.9317712807566,
+      "n": 200,
+      "test_loss": 0.015246623710386315
+     },
+     "SF-DEEP": {
+      "ci_high": 0.033019739363913114,
+      "ci_low": 0.018745716605587125,
+      "cp_mae": 170.59760318528845,
+      "n": 200,
+      "test_loss": 0.024793394742686006
+     },
+     "model_artifact": "artifacts/R3281/model.json",
+     "model_hash": "sha256:e703ef1dc7c36f73fd7d7206f469262cd7a686c9b6f92baf391ace047b00fab1",
+     "param_count": 771
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.023606279687671258,
+      "ci_low": 0.015004489067573557,
+      "cp_mae": 144.05063194786695,
+      "n": 200,
+      "test_loss": 0.018950351871426276
+     },
+     "SF-DEEP": {
+      "ci_high": 0.035826978160519184,
+      "ci_low": 0.022131562921197508,
+      "cp_mae": 182.10477385808298,
+      "n": 200,
+      "test_loss": 0.028452249435166607
+     },
+     "model_artifact": "artifacts/R3282/model.json",
+     "model_hash": "sha256:34aee5613728bd05855e40e28438b5db9774942aa7c7d51da138a0b4339846b2",
+     "param_count": 771
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.021445803811010467,
+      "ci_low": 0.013717818186938336,
+      "cp_mae": 140.92322060983915,
+      "n": 200,
+      "test_loss": 0.01728619464586724
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03382067997170281,
+      "ci_low": 0.02006645550135435,
+      "cp_mae": 174.4873674764446,
+      "n": 200,
+      "test_loss": 0.026181564221368147
+     },
+     "model_artifact": "artifacts/R3283/model.json",
+     "model_hash": "sha256:39866f0550c9965c79d90a58dbcef15d00e4d536de05cc08a9f65de1de02840c",
+     "param_count": 771
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.025333918615967323,
+      "ci_low": 0.01720739741836223,
+      "cp_mae": 157.09813380664937,
+      "n": 200,
+      "test_loss": 0.020969606005938207
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04151574745024403,
+      "ci_low": 0.02566192647452331,
+      "cp_mae": 197.0658810655719,
+      "n": 200,
+      "test_loss": 0.032832087585768
+     },
+     "model_artifact": "artifacts/R3284/model.json",
+     "model_hash": "sha256:972528250a49881b3b64c94dc92e9bd56debb592abf542c368f55dd2c04b4023",
+     "param_count": 771
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.01793448581838331,
+      "ci_low": 0.012173230101519985,
+      "cp_mae": 133.22091561943668,
+      "n": 200,
+      "test_loss": 0.014877012178076784
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03202213441950829,
+      "ci_low": 0.019043127685509635,
+      "cp_mae": 173.71226364486793,
+      "n": 200,
+      "test_loss": 0.024699559991679467
+     },
+     "model_artifact": "artifacts/R3285/model.json",
+     "model_hash": "sha256:b9756d64d7fa1bf42b3e1a72864859d3712ba5c7280fedeb0015445e09a83cc3",
+     "param_count": 771
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.018139487878471944,
+      "ci_low": 0.011919084196855795,
+      "cp_mae": 132.96164022956376,
+      "n": 200,
+      "test_loss": 0.014837615401665923
+     },
+     "SF-DEEP": {
+      "ci_high": 0.032647338789738294,
+      "ci_low": 0.018106644048940822,
+      "cp_mae": 169.20630710988618,
+      "n": 200,
+      "test_loss": 0.024388237951814454
+     },
+     "model_artifact": "artifacts/R3286/model.json",
+     "model_hash": "sha256:2086281cc8ce56a1ca6cda507de30d0ad9a9984be1820f9f03bbb4f9e64a32b0",
+     "param_count": 771
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.018960720920119255,
+      "ci_low": 0.012733706177217516,
+      "cp_mae": 137.1329352855967,
+      "n": 200,
+      "test_loss": 0.0156887630912421
+     },
+     "SF-DEEP": {
+      "ci_high": 0.032898520005526864,
+      "ci_low": 0.018855358383512058,
+      "cp_mae": 171.52400656378302,
+      "n": 200,
+      "test_loss": 0.024903724747526022
+     },
+     "model_artifact": "artifacts/R3287/model.json",
+     "model_hash": "sha256:d21d7d966900bfddb50e979314837099cbda3c14c28eb8255130867523ede2c4",
+     "param_count": 771
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.018838649758999123,
+      "ci_low": 0.011849197634187807,
+      "cp_mae": 128.61299790122544,
+      "n": 200,
+      "test_loss": 0.014987583917443911
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0299581791200829,
+      "ci_low": 0.018117709604686342,
+      "cp_mae": 167.7679078721345,
+      "n": 200,
+      "test_loss": 0.023534580290765206
+     },
+     "model_artifact": "artifacts/R3288/model.json",
+     "model_hash": "sha256:4547fb9119155654ccf2a0b842262cc2cda55563c474a4b186a6da990179e669",
+     "param_count": 771
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.019817143462590756,
+      "ci_low": 0.012836835046892953,
+      "cp_mae": 134.4740464031269,
+      "n": 200,
+      "test_loss": 0.01598356565903071
+     },
+     "SF-DEEP": {
+      "ci_high": 0.034845107905862927,
+      "ci_low": 0.02112843708174503,
+      "cp_mae": 182.8770734558723,
+      "n": 200,
+      "test_loss": 0.027284649970159523
+     },
+     "model_artifact": "artifacts/R3271/model.json",
+     "model_hash": "sha256:d691d0ff4aeee34754d4ac0e36c69cf71e8e6705f4a88c432dda0f8968c737c3",
+     "param_count": 771
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.017988245429802836,
+      "ci_low": 0.01166683372618887,
+      "cp_mae": 128.51845303802997,
+      "n": 200,
+      "test_loss": 0.014482848814629084
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03147072326667107,
+      "ci_low": 0.017839494607539887,
+      "cp_mae": 164.29034978416655,
+      "n": 200,
+      "test_loss": 0.02369864417890038
+     },
+     "model_artifact": "artifacts/R3272/model.json",
+     "model_hash": "sha256:21a42547bc41df4b482a6ec05ee105108ff01383df5462a20d99bfe6a2cf36bf",
+     "param_count": 771
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.018293430442348473,
+      "ci_low": 0.011885184268816042,
+      "cp_mae": 131.84565949844094,
+      "n": 200,
+      "test_loss": 0.014818373953932134
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03525175509295492,
+      "ci_low": 0.018598031751534728,
+      "cp_mae": 169.9229673765099,
+      "n": 200,
+      "test_loss": 0.025603638411520368
+     },
+     "model_artifact": "artifacts/R3273/model.json",
+     "model_hash": "sha256:d9676cebccedc33a1712063aac1ff4265621ff59adf019eb9655387478e02416",
+     "param_count": 771
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.02488902653950852,
+      "ci_low": 0.01574643839170484,
+      "cp_mae": 147.31242795332815,
+      "n": 200,
+      "test_loss": 0.019936128244410854
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03722375801785707,
+      "ci_low": 0.022630079048141474,
+      "cp_mae": 182.40933002599948,
+      "n": 200,
+      "test_loss": 0.029432401728384273
+     },
+     "model_artifact": "artifacts/R3274/model.json",
+     "model_hash": "sha256:959365ff9feaeb700c262be2c31808da7d877a79f198721186fa3440a048311f",
+     "param_count": 771
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.02113995486242896,
+      "ci_low": 0.014757782986244068,
+      "cp_mae": 149.25866933559078,
+      "n": 200,
+      "test_loss": 0.017800138307968384
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03644891279518279,
+      "ci_low": 0.020635352229360675,
+      "cp_mae": 182.08423143500727,
+      "n": 200,
+      "test_loss": 0.027265960111593487
+     },
+     "model_artifact": "artifacts/R3275/model.json",
+     "model_hash": "sha256:c28054da62fefe44c7d5b5182eb8303a25513f7311aafe07c9d8b068c32a4686",
+     "param_count": 771
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.021255893899130067,
+      "ci_low": 0.014309794928568976,
+      "cp_mae": 142.72972473742942,
+      "n": 200,
+      "test_loss": 0.017454671032901214
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0348541532758078,
+      "ci_low": 0.020611574945153584,
+      "cp_mae": 173.30365033482147,
+      "n": 200,
+      "test_loss": 0.02659346008944133
+     },
+     "model_artifact": "artifacts/R3276/model.json",
+     "model_hash": "sha256:3a411c1a42cca7a8b6da6f1f4e148cf0b99d6dd2c00481c7d056a01a1e859b3f",
+     "param_count": 771
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.017001495521597007,
+      "ci_low": 0.01102311713880176,
+      "cp_mae": 126.31686902242224,
+      "n": 200,
+      "test_loss": 0.013765381720597951
+     },
+     "SF-DEEP": {
+      "ci_high": 0.034265399370152355,
+      "ci_low": 0.018378851816271274,
+      "cp_mae": 170.5806191912314,
+      "n": 200,
+      "test_loss": 0.025018807815240827
+     },
+     "model_artifact": "artifacts/R3277/model.json",
+     "model_hash": "sha256:0ed806ac5b61365e44363eb19cd26c225068e4c3f0a569a3702504afc76fd578",
+     "param_count": 771
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.0229843894386944,
+      "ci_low": 0.014311696645210545,
+      "cp_mae": 140.07121830836417,
+      "n": 200,
+      "test_loss": 0.01835907159550991
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0352190490754195,
+      "ci_low": 0.02176269566268066,
+      "cp_mae": 181.26524259895953,
+      "n": 200,
+      "test_loss": 0.028012426188008616
+     },
+     "model_artifact": "artifacts/R3278/model.json",
+     "model_hash": "sha256:7be7649fcb14c81e19c5c767ba142f05a38745f590126fc8eddbea3baf8a489e",
+     "param_count": 771
+    }
+   },
+   "16": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.020456376407020423,
+      "ci_low": 0.012296950447734366,
+      "cp_mae": 126.24386204795735,
+      "n": 200,
+      "test_loss": 0.01588015882464449
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03705595444096598,
+      "ci_low": 0.01888040440099716,
+      "cp_mae": 166.49938400732012,
+      "n": 200,
+      "test_loss": 0.026792269870856016
+     },
+     "model_artifact": "artifacts/R3309/model.json",
+     "model_hash": "sha256:ea56e2b9f74137ef6be861b6aae0db260605eab89e9b509afb1a93c16d1481ad",
+     "param_count": 12321
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.02185197529211785,
+      "ci_low": 0.014043830418774154,
+      "cp_mae": 137.7782521781553,
+      "n": 200,
+      "test_loss": 0.017920917190291562
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03614565530082614,
+      "ci_low": 0.02038411599189658,
+      "cp_mae": 174.653747680019,
+      "n": 200,
+      "test_loss": 0.0275614554014888
+     },
+     "model_artifact": "artifacts/R3310/model.json",
+     "model_hash": "sha256:fa1bc818a555a5a3a913a037fdebf1359f093621cde3c35c5ecaf0c9cdf08af1",
+     "param_count": 12321
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.023653773755264902,
+      "ci_low": 0.014534872189532443,
+      "cp_mae": 138.83152562895367,
+      "n": 200,
+      "test_loss": 0.018747672172220883
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03922422130637674,
+      "ci_low": 0.020287051625813308,
+      "cp_mae": 170.86318601307283,
+      "n": 200,
+      "test_loss": 0.028413133249281772
+     },
+     "model_artifact": "artifacts/R3319/model.json",
+     "model_hash": "sha256:4c64e053797d5493ec0f2cb32406cbdfdedf3ae0296c5bb8f1d24da6cc01e18e",
+     "param_count": 12321
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.021747245199751457,
+      "ci_low": 0.01425581384464951,
+      "cp_mae": 130.68041924614704,
+      "n": 200,
+      "test_loss": 0.01761085985156258
+     },
+     "SF-DEEP": {
+      "ci_high": 0.039337722417289334,
+      "ci_low": 0.021784115962561523,
+      "cp_mae": 169.78719036639225,
+      "n": 200,
+      "test_loss": 0.02935248556568836
+     },
+     "model_artifact": "artifacts/R3320/model.json",
+     "model_hash": "sha256:f4bab28ec9c5e06d802af534bed5fe6ad3853b71ac0a7c8bf40dd4861071ee02",
+     "param_count": 12321
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.020912477481434703,
+      "ci_low": 0.013281002271242763,
+      "cp_mae": 128.90256227659293,
+      "n": 200,
+      "test_loss": 0.01694108140764416
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03966338890783269,
+      "ci_low": 0.02014752085523217,
+      "cp_mae": 168.37734323108103,
+      "n": 200,
+      "test_loss": 0.02839097556313966
+     },
+     "model_artifact": "artifacts/R3321/model.json",
+     "model_hash": "sha256:709f7f488a8fab41e1f8059b65fd9fe453060845c452482b47965e7e99ed22a7",
+     "param_count": 12321
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.023359423068037195,
+      "ci_low": 0.014754133765433285,
+      "cp_mae": 134.31028121824036,
+      "n": 200,
+      "test_loss": 0.018681948261522776
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03936752162442752,
+      "ci_low": 0.02073872663260889,
+      "cp_mae": 171.40351376159575,
+      "n": 200,
+      "test_loss": 0.028653258786497354
+     },
+     "model_artifact": "artifacts/R3322/model.json",
+     "model_hash": "sha256:b4c95daa508f04f352a95286b3f0ce00b04521ef0d8b4555f5f3260d455d8e87",
+     "param_count": 12321
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.026787242284306758,
+      "ci_low": 0.017182578504786845,
+      "cp_mae": 146.42652051900964,
+      "n": 200,
+      "test_loss": 0.02146859187914044
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04343698140456447,
+      "ci_low": 0.024382797301384884,
+      "cp_mae": 183.2755158890884,
+      "n": 200,
+      "test_loss": 0.033183021216223574
+     },
+     "model_artifact": "artifacts/R3323/model.json",
+     "model_hash": "sha256:cb5209045664141fcd7f977a4db2aabcd41e67418a1a1e2748bc48be548d97ba",
+     "param_count": 12321
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.023366486406405033,
+      "ci_low": 0.015023283471415131,
+      "cp_mae": 139.00784732645386,
+      "n": 200,
+      "test_loss": 0.01865893040409999
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04081969547046466,
+      "ci_low": 0.022662334797031777,
+      "cp_mae": 179.24422083237957,
+      "n": 200,
+      "test_loss": 0.030805922585675615
+     },
+     "model_artifact": "artifacts/R3324/model.json",
+     "model_hash": "sha256:7c15ba212dd2d79c2a9ceffb2366fe0f77684b26ee7ae56daa35767b0b33281e",
+     "param_count": 12321
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.020692169540367733,
+      "ci_low": 0.013117075197109845,
+      "cp_mae": 129.6012114446775,
+      "n": 200,
+      "test_loss": 0.0166764178888074
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03974350672520473,
+      "ci_low": 0.020524691465647237,
+      "cp_mae": 173.70200354096983,
+      "n": 200,
+      "test_loss": 0.02868300914787794
+     },
+     "model_artifact": "artifacts/R3325/model.json",
+     "model_hash": "sha256:76f26a0ec094cb5adca283d39c41cb307cd20167865866aa35a759643545d822",
+     "param_count": 12321
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.02776565602778728,
+      "ci_low": 0.01650094032653711,
+      "cp_mae": 140.93352709317162,
+      "n": 200,
+      "test_loss": 0.021922206141007674
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04813513785328171,
+      "ci_low": 0.026836006500152262,
+      "cp_mae": 185.97448129291246,
+      "n": 200,
+      "test_loss": 0.03650412268176336
+     },
+     "model_artifact": "artifacts/R3326/model.json",
+     "model_hash": "sha256:25edf2d073951068dbb9b138e8c1e56805c1361f7b1cca5d21d8f25f774c8115",
+     "param_count": 12321
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.019670488049732517,
+      "ci_low": 0.012216319170849024,
+      "cp_mae": 125.7788183489034,
+      "n": 200,
+      "test_loss": 0.015502503429498583
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03810248287641187,
+      "ci_low": 0.02013016242631345,
+      "cp_mae": 173.16170526659246,
+      "n": 200,
+      "test_loss": 0.027655232950634476
+     },
+     "model_artifact": "artifacts/R3327/model.json",
+     "model_hash": "sha256:10953794de4e39f4d4d1b4c67802f5bdf0f5f20f657e6ae574ebcdcd6726dbc8",
+     "param_count": 12321
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.02481602198927502,
+      "ci_low": 0.01577333130440713,
+      "cp_mae": 136.56409731353523,
+      "n": 200,
+      "test_loss": 0.019883347542897733
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0424569852846944,
+      "ci_low": 0.023897761113355488,
+      "cp_mae": 176.71688021604803,
+      "n": 200,
+      "test_loss": 0.03209214208236503
+     },
+     "model_artifact": "artifacts/R3328/model.json",
+     "model_hash": "sha256:9cd1a59b5129a0131ef4d1da898c34a154b185d2d380a9c24ea7f62921473308",
+     "param_count": 12321
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.018265088343835074,
+      "ci_low": 0.011202804465911948,
+      "cp_mae": 118.87029223712766,
+      "n": 200,
+      "test_loss": 0.01439535630922196
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03601617653883699,
+      "ci_low": 0.017776729791355358,
+      "cp_mae": 157.90079448266,
+      "n": 200,
+      "test_loss": 0.025210858948083725
+     },
+     "model_artifact": "artifacts/R3311/model.json",
+     "model_hash": "sha256:ad32e28642c2d301605e76273a50572b890f038130d2fad2772da17b2b6f0b77",
+     "param_count": 12321
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.02160448193450031,
+      "ci_low": 0.013363660265469184,
+      "cp_mae": 135.62469806984393,
+      "n": 200,
+      "test_loss": 0.01705426215183575
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036860857333506115,
+      "ci_low": 0.02039432584244572,
+      "cp_mae": 172.79065904261412,
+      "n": 200,
+      "test_loss": 0.027875343191330015
+     },
+     "model_artifact": "artifacts/R3312/model.json",
+     "model_hash": "sha256:dc392917a26d214aef6e87658ecbd534dcc6cceef4cad578043d671234417148",
+     "param_count": 12321
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.023878786277792188,
+      "ci_low": 0.014855763096773389,
+      "cp_mae": 136.4014900757628,
+      "n": 200,
+      "test_loss": 0.01891676072290891
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03959984863379036,
+      "ci_low": 0.021526269439225407,
+      "cp_mae": 175.5012484654254,
+      "n": 200,
+      "test_loss": 0.029416062964842372
+     },
+     "model_artifact": "artifacts/R3313/model.json",
+     "model_hash": "sha256:28d41d59c061e0022819c552535f4a5ea434f0528dd69b2b1b8eca45ef474bf4",
+     "param_count": 12321
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.021997156969404907,
+      "ci_low": 0.013595905392652442,
+      "cp_mae": 128.11353095298168,
+      "n": 200,
+      "test_loss": 0.017540320503306676
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03949500476954404,
+      "ci_low": 0.02195932102720331,
+      "cp_mae": 171.94821294156827,
+      "n": 200,
+      "test_loss": 0.0297456048850513
+     },
+     "model_artifact": "artifacts/R3314/model.json",
+     "model_hash": "sha256:3b2b85f03316ab21d2bd273f6b266efa9bb966aaf2a6c0858538b9ba62953a45",
+     "param_count": 12321
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.02593463238014639,
+      "ci_low": 0.015200892638770338,
+      "cp_mae": 138.4358908982688,
+      "n": 200,
+      "test_loss": 0.019978507343076143
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04012769564309187,
+      "ci_low": 0.021946133806436126,
+      "cp_mae": 171.54668050478745,
+      "n": 200,
+      "test_loss": 0.030169997480375025
+     },
+     "model_artifact": "artifacts/R3315/model.json",
+     "model_hash": "sha256:74d8679200e43602f4166ca841d6d79f97d0e6bbf091393bb9786436ac0f4bfa",
+     "param_count": 12321
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.02164821860205483,
+      "ci_low": 0.013991940220494397,
+      "cp_mae": 135.47218438765785,
+      "n": 200,
+      "test_loss": 0.01756713085981638
+     },
+     "SF-DEEP": {
+      "ci_high": 0.039174211426409276,
+      "ci_low": 0.02126161967160871,
+      "cp_mae": 173.6068025789518,
+      "n": 200,
+      "test_loss": 0.028875044566774165
+     },
+     "model_artifact": "artifacts/R3316/model.json",
+     "model_hash": "sha256:55defb394c1bd034a7c4ddb5215df13307ccf63b85999d7b0c89b67a5c915243",
+     "param_count": 12321
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.022410465961657064,
+      "ci_low": 0.015316739317047792,
+      "cp_mae": 146.922699426308,
+      "n": 200,
+      "test_loss": 0.018847780671838153
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03575169146670342,
+      "ci_low": 0.02160282993383418,
+      "cp_mae": 180.7170667617754,
+      "n": 200,
+      "test_loss": 0.027912324777136677
+     },
+     "model_artifact": "artifacts/R3317/model.json",
+     "model_hash": "sha256:11a917c4c4d8e10bc40df5b9322548202967f4e8c2714ada159f4ac6204b9ea0",
+     "param_count": 12321
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.020175271305622494,
+      "ci_low": 0.011764248177994827,
+      "cp_mae": 124.28092335103736,
+      "n": 200,
+      "test_loss": 0.015619514489335472
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03773761374274801,
+      "ci_low": 0.021125777613298195,
+      "cp_mae": 172.34335809414551,
+      "n": 200,
+      "test_loss": 0.028532993842701995
+     },
+     "model_artifact": "artifacts/R3318/model.json",
+     "model_hash": "sha256:694610850cc3ad4871561bf8a84e6f6b346a4cc81274dcfecf4109d51be84fad",
+     "param_count": 12321
+    }
+   },
+   "32": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.020519800929797615,
+      "ci_low": 0.012385056260007623,
+      "cp_mae": 129.2273663140137,
+      "n": 200,
+      "test_loss": 0.01634422280325858
+     },
+     "SF-DEEP": {
+      "ci_high": 0.035645841496106875,
+      "ci_low": 0.018817664614415808,
+      "cp_mae": 165.37102409661279,
+      "n": 200,
+      "test_loss": 0.026012063872564554
+     },
+     "model_artifact": "artifacts/R3329/model.json",
+     "model_hash": "sha256:87a9a193bfd1197d42ebadf762067e48f8ce413ae4f09b031d5eede8ad987e85",
+     "param_count": 24641
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.023188951569889052,
+      "ci_low": 0.014893702626650577,
+      "cp_mae": 138.40671290447864,
+      "n": 200,
+      "test_loss": 0.018631995381776758
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038293101165750645,
+      "ci_low": 0.02221575662441017,
+      "cp_mae": 173.733668325502,
+      "n": 200,
+      "test_loss": 0.029584897183393955
+     },
+     "model_artifact": "artifacts/R3330/model.json",
+     "model_hash": "sha256:528234b4c6bca7bb9f10bf5509640fd3bb7ff897071b34c4a964da13fb459b3f",
+     "param_count": 24641
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.02565233743042586,
+      "ci_low": 0.01543759310344996,
+      "cp_mae": 142.19655221722456,
+      "n": 200,
+      "test_loss": 0.020074604113249846
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044369031769892486,
+      "ci_low": 0.023899010374020733,
+      "cp_mae": 186.57917798773605,
+      "n": 200,
+      "test_loss": 0.03280051987364543
+     },
+     "model_artifact": "artifacts/R3339/model.json",
+     "model_hash": "sha256:f0d6c91e12713670fd440f9819ca1bf6d288bebce62b08ecc28b8a839897ed52",
+     "param_count": 24641
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.02284546449882129,
+      "ci_low": 0.01411357254594609,
+      "cp_mae": 132.6894447973368,
+      "n": 200,
+      "test_loss": 0.018023167492324486
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037508462315227135,
+      "ci_low": 0.0214764841727276,
+      "cp_mae": 171.6350455531363,
+      "n": 200,
+      "test_loss": 0.02856613596556687
+     },
+     "model_artifact": "artifacts/R3340/model.json",
+     "model_hash": "sha256:1ea0372ad17561211860d512528b52b7aff882ef6e7ffabb44985e91172b14a8",
+     "param_count": 24641
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.022798668996939987,
+      "ci_low": 0.015037774700749351,
+      "cp_mae": 138.07845796205768,
+      "n": 200,
+      "test_loss": 0.01865813528204547
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03868926701807408,
+      "ci_low": 0.022696004470018426,
+      "cp_mae": 180.00022358562026,
+      "n": 200,
+      "test_loss": 0.029864603189757536
+     },
+     "model_artifact": "artifacts/R3341/model.json",
+     "model_hash": "sha256:ab93e82d982cfb739f527faac72d699e9d9ea146df8c16aedd25ab0bf639bee5",
+     "param_count": 24641
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.020117355051567847,
+      "ci_low": 0.013442334564736412,
+      "cp_mae": 136.68081271512816,
+      "n": 200,
+      "test_loss": 0.01668695972754293
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03634867789130608,
+      "ci_low": 0.02069069722229613,
+      "cp_mae": 172.86510934735097,
+      "n": 200,
+      "test_loss": 0.027660470304304952
+     },
+     "model_artifact": "artifacts/R3342/model.json",
+     "model_hash": "sha256:9c0ff9e64692acbde1100450563361b765de46f345f17d6aec6d1c67f208e63a",
+     "param_count": 24641
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.022609465254569007,
+      "ci_low": 0.014227592527752927,
+      "cp_mae": 130.94892018918458,
+      "n": 200,
+      "test_loss": 0.01819259621225308
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037080066817336596,
+      "ci_low": 0.019738430790820705,
+      "cp_mae": 162.06820094398384,
+      "n": 200,
+      "test_loss": 0.027704486255769156
+     },
+     "model_artifact": "artifacts/R3343/model.json",
+     "model_hash": "sha256:d334b7ea17d273dd853be9ec78915d190352b8cc004b630fb41120d933b380c7",
+     "param_count": 24641
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.026198818532089187,
+      "ci_low": 0.017631962720981015,
+      "cp_mae": 149.04126729197634,
+      "n": 200,
+      "test_loss": 0.02150191281456673
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040880916037251906,
+      "ci_low": 0.024884879034449275,
+      "cp_mae": 181.82907424168488,
+      "n": 200,
+      "test_loss": 0.03234490649682756
+     },
+     "model_artifact": "artifacts/R3344/model.json",
+     "model_hash": "sha256:e421948dd4e889a6ed92267bc163a0e160d6cf15c8e921061d697d7699132b8f",
+     "param_count": 24641
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.021708334582015792,
+      "ci_low": 0.01415179841264809,
+      "cp_mae": 135.386595698779,
+      "n": 200,
+      "test_loss": 0.017637663300723225
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04095987619945011,
+      "ci_low": 0.02096431062319248,
+      "cp_mae": 173.39665999117477,
+      "n": 200,
+      "test_loss": 0.02933653567460661
+     },
+     "model_artifact": "artifacts/R3345/model.json",
+     "model_hash": "sha256:51266c30ded0eed7dffebd711b92f35df4b6a085e054fb73a27a4f3f80e0b7e0",
+     "param_count": 24641
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.026573740404318695,
+      "ci_low": 0.017682652577922373,
+      "cp_mae": 146.17340808769555,
+      "n": 200,
+      "test_loss": 0.021928138940236694
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04476166003387227,
+      "ci_low": 0.025461629226728136,
+      "cp_mae": 184.38546396140745,
+      "n": 200,
+      "test_loss": 0.0338436346759611
+     },
+     "model_artifact": "artifacts/R3346/model.json",
+     "model_hash": "sha256:79d8df095d16b60c1fd49180e8ca2fb2229f3e7f1994cf94475cb3d5e3060dea",
+     "param_count": 24641
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.02502550543464559,
+      "ci_low": 0.015227809841464738,
+      "cp_mae": 137.67368541315074,
+      "n": 200,
+      "test_loss": 0.019690841821755845
+     },
+     "SF-DEEP": {
+      "ci_high": 0.039558359154564356,
+      "ci_low": 0.022677653166161035,
+      "cp_mae": 176.78005169562573,
+      "n": 200,
+      "test_loss": 0.030583949362724853
+     },
+     "model_artifact": "artifacts/R3347/model.json",
+     "model_hash": "sha256:9164a05fba8f577453aba68953dcbf53602f0843df51fa638fe0ae53a5967fd9",
+     "param_count": 24641
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.01775860947502938,
+      "ci_low": 0.012299068680445351,
+      "cp_mae": 125.69225803910071,
+      "n": 200,
+      "test_loss": 0.015006779957870968
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03674581688443989,
+      "ci_low": 0.020421744866199208,
+      "cp_mae": 170.37009682513977,
+      "n": 200,
+      "test_loss": 0.027320581861815248
+     },
+     "model_artifact": "artifacts/R3348/model.json",
+     "model_hash": "sha256:493be5ecc3fe4d79f7137298527fae67c3c0a8ed00f5b5652e73da234f4d135d",
+     "param_count": 24641
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.026503467473704134,
+      "ci_low": 0.01659457327521855,
+      "cp_mae": 146.2967870845442,
+      "n": 200,
+      "test_loss": 0.021006949732402216
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044286400019364014,
+      "ci_low": 0.024211813321512694,
+      "cp_mae": 188.65942921028065,
+      "n": 200,
+      "test_loss": 0.03337039390373281
+     },
+     "model_artifact": "artifacts/R3331/model.json",
+     "model_hash": "sha256:fd7dc4a9343c517ec9c17ef619af7507b802e65e3bef493cc367266fe712e460",
+     "param_count": 24641
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.023097884758006407,
+      "ci_low": 0.01391706863947884,
+      "cp_mae": 131.32180475385275,
+      "n": 200,
+      "test_loss": 0.0180346941353836
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03965777201590491,
+      "ci_low": 0.021369477202419437,
+      "cp_mae": 169.8464221430468,
+      "n": 200,
+      "test_loss": 0.028881112724395495
+     },
+     "model_artifact": "artifacts/R3332/model.json",
+     "model_hash": "sha256:89bf515a6296d437888a3d31c529346fc3e3f42bf3858886f27a8be193ae4ffa",
+     "param_count": 24641
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.0276873735567557,
+      "ci_low": 0.018186050143743103,
+      "cp_mae": 152.5857368816892,
+      "n": 200,
+      "test_loss": 0.022493933672358767
+     },
+     "SF-DEEP": {
+      "ci_high": 0.045561375728650724,
+      "ci_low": 0.02647200265366234,
+      "cp_mae": 191.32670783601955,
+      "n": 200,
+      "test_loss": 0.035169074542258885
+     },
+     "model_artifact": "artifacts/R3333/model.json",
+     "model_hash": "sha256:456f4dc34489a75a3e573b1287a74971c06e7b44614272f006f18a6063b7dcca",
+     "param_count": 24641
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.02467170613679975,
+      "ci_low": 0.014867467452735282,
+      "cp_mae": 137.87589764418144,
+      "n": 200,
+      "test_loss": 0.019061769147141843
+     },
+     "SF-DEEP": {
+      "ci_high": 0.041697285726592176,
+      "ci_low": 0.023391360281171045,
+      "cp_mae": 181.8989256447849,
+      "n": 200,
+      "test_loss": 0.03141192631311467
+     },
+     "model_artifact": "artifacts/R3334/model.json",
+     "model_hash": "sha256:05aae7eb992fd46179def79f0a0c7a0e63448199e1f5d4c4a5424ea7afc83486",
+     "param_count": 24641
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.025206941430680647,
+      "ci_low": 0.015723694105789724,
+      "cp_mae": 139.91471737142712,
+      "n": 200,
+      "test_loss": 0.01990723115363492
+     },
+     "SF-DEEP": {
+      "ci_high": 0.041819126708183656,
+      "ci_low": 0.02356642172237413,
+      "cp_mae": 184.85688959615757,
+      "n": 200,
+      "test_loss": 0.03148511839352203
+     },
+     "model_artifact": "artifacts/R3335/model.json",
+     "model_hash": "sha256:17e205110cfe741a0e0dce44e9c694948a024c906e32c69d055cd2750dbde4e6",
+     "param_count": 24641
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.02784782408718533,
+      "ci_low": 0.018083017523467387,
+      "cp_mae": 154.03274326145566,
+      "n": 200,
+      "test_loss": 0.022330889243487105
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0454000108369101,
+      "ci_low": 0.02570287449486629,
+      "cp_mae": 191.16504731339302,
+      "n": 200,
+      "test_loss": 0.03422038812700265
+     },
+     "model_artifact": "artifacts/R3336/model.json",
+     "model_hash": "sha256:0bea4b1d7ea4e7bd5e23d87cfd58dc92069ade7745b07b295f572b777207eba9",
+     "param_count": 24641
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.021627835949670157,
+      "ci_low": 0.014436092460168751,
+      "cp_mae": 140.2474271025271,
+      "n": 200,
+      "test_loss": 0.018013539562864944
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03845044145364379,
+      "ci_low": 0.021261687074034107,
+      "cp_mae": 173.7531453068203,
+      "n": 200,
+      "test_loss": 0.028652898521578374
+     },
+     "model_artifact": "artifacts/R3337/model.json",
+     "model_hash": "sha256:0c27519c8405b392ed4e6ea248512ab03b852ee5fe0e2a31956c4e95118f9793",
+     "param_count": 24641
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.02177526182506912,
+      "ci_low": 0.013896287601861157,
+      "cp_mae": 133.37535676082683,
+      "n": 200,
+      "test_loss": 0.017573437844452942
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03568007186420245,
+      "ci_low": 0.02033540530390297,
+      "cp_mae": 174.81686813138992,
+      "n": 200,
+      "test_loss": 0.0274641516179491
+     },
+     "model_artifact": "artifacts/R3338/model.json",
+     "model_hash": "sha256:00e8e1ea1c5acd880d6d341cf991ef7fb11505eefaed860cec48abdb1cdc560b",
+     "param_count": 24641
+    }
+   },
+   "4": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.01904172721526175,
+      "ci_low": 0.011678031333657746,
+      "cp_mae": 127.29653851950617,
+      "n": 200,
+      "test_loss": 0.015087348270050777
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03180414614009705,
+      "ci_low": 0.01726045385163086,
+      "cp_mae": 159.64840969100632,
+      "n": 200,
+      "test_loss": 0.02372025076774877
+     },
+     "model_artifact": "artifacts/R3289/model.json",
+     "model_hash": "sha256:8e2fbdecfe3ebd5089fde151a6a6b9465a7a77893909d536ea44bfef8cadd8bd",
+     "param_count": 3081
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.017794578670482685,
+      "ci_low": 0.01129807740852218,
+      "cp_mae": 123.69744825644649,
+      "n": 200,
+      "test_loss": 0.01426662338403507
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03499498667148576,
+      "ci_low": 0.01810600329582979,
+      "cp_mae": 163.67023841438896,
+      "n": 200,
+      "test_loss": 0.025192643471158852
+     },
+     "model_artifact": "artifacts/R3290/model.json",
+     "model_hash": "sha256:49f370f17c57b41e23e6269b9e0aed749d1ccf7d07c199ce00e190186c7be26c",
+     "param_count": 3081
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.02120500964282668,
+      "ci_low": 0.013539540298980465,
+      "cp_mae": 134.92785571544954,
+      "n": 200,
+      "test_loss": 0.016988564121886554
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03536991909123818,
+      "ci_low": 0.020291946181790622,
+      "cp_mae": 171.4574877687952,
+      "n": 200,
+      "test_loss": 0.026897285016987082
+     },
+     "model_artifact": "artifacts/R3299/model.json",
+     "model_hash": "sha256:04650d53b6f6d3ddf40be26dc06235b8c6d98f25118b1a5e530e3f612f0e8e40",
+     "param_count": 3081
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.017019927080886062,
+      "ci_low": 0.010850054283956367,
+      "cp_mae": 121.39856498672016,
+      "n": 200,
+      "test_loss": 0.013533979412780535
+     },
+     "SF-DEEP": {
+      "ci_high": 0.035498028161618046,
+      "ci_low": 0.01878898434456821,
+      "cp_mae": 170.51383425093664,
+      "n": 200,
+      "test_loss": 0.025746554312233424
+     },
+     "model_artifact": "artifacts/R3300/model.json",
+     "model_hash": "sha256:81dc0c71da02853b0d29b36a93720d22b291e1c620aeec2b879b3921076f56ee",
+     "param_count": 3081
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.018428456886475042,
+      "ci_low": 0.012126484855670309,
+      "cp_mae": 133.00972749349359,
+      "n": 200,
+      "test_loss": 0.014938991957055468
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036724462800406324,
+      "ci_low": 0.01966620910287103,
+      "cp_mae": 177.36005345296064,
+      "n": 200,
+      "test_loss": 0.026774175910524747
+     },
+     "model_artifact": "artifacts/R3301/model.json",
+     "model_hash": "sha256:8865ece9d06e5514a394e960f9299b8e3cdea85a48891db88379ee504e63b05b",
+     "param_count": 3081
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.01824310222586684,
+      "ci_low": 0.0114163304428395,
+      "cp_mae": 124.97419291995661,
+      "n": 200,
+      "test_loss": 0.014480157292394158
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036577931399412164,
+      "ci_low": 0.019111160607032694,
+      "cp_mae": 173.0309074230305,
+      "n": 200,
+      "test_loss": 0.026465619561026995
+     },
+     "model_artifact": "artifacts/R3302/model.json",
+     "model_hash": "sha256:ff9ea1d8a62f07246f9d77e1fc12f79d62d4b36e1b3e900a70ffe8989a93f5b4",
+     "param_count": 3081
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.019330314140373804,
+      "ci_low": 0.012260121376977446,
+      "cp_mae": 130.68822381346487,
+      "n": 200,
+      "test_loss": 0.015402617764626344
+     },
+     "SF-DEEP": {
+      "ci_high": 0.034546999498285234,
+      "ci_low": 0.017971501913068302,
+      "cp_mae": 166.92415640536757,
+      "n": 200,
+      "test_loss": 0.025106293931616844
+     },
+     "model_artifact": "artifacts/R3303/model.json",
+     "model_hash": "sha256:539a0f3936a75d79296da8760aae36fb13e6b43cc8a77d9415f39ae3dc890460",
+     "param_count": 3081
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.020765650155397948,
+      "ci_low": 0.012710807582434763,
+      "cp_mae": 128.09992809058235,
+      "n": 200,
+      "test_loss": 0.016277567770746702
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037694474826318686,
+      "ci_low": 0.020423857281325897,
+      "cp_mae": 172.44811884889674,
+      "n": 200,
+      "test_loss": 0.027781365686667624
+     },
+     "model_artifact": "artifacts/R3304/model.json",
+     "model_hash": "sha256:47fdfe841f61099078c0cdbad97a3d8068c696a2d3a18daee2969912e0d855c5",
+     "param_count": 3081
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.01988995775360126,
+      "ci_low": 0.012892967456290295,
+      "cp_mae": 130.00525268538334,
+      "n": 200,
+      "test_loss": 0.015976995550648746
+     },
+     "SF-DEEP": {
+      "ci_high": 0.032811228185003434,
+      "ci_low": 0.018842468674067074,
+      "cp_mae": 164.90241435065937,
+      "n": 200,
+      "test_loss": 0.02505770522925657
+     },
+     "model_artifact": "artifacts/R3305/model.json",
+     "model_hash": "sha256:1ddb27cbf5f6d0d00589ed11277f85f6f7a2d32d7e00b04af855053563df5071",
+     "param_count": 3081
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.01995119584421251,
+      "ci_low": 0.012655372325669902,
+      "cp_mae": 131.91498488262474,
+      "n": 200,
+      "test_loss": 0.016009850913700652
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03776469442715091,
+      "ci_low": 0.020674630422545148,
+      "cp_mae": 174.73394836321626,
+      "n": 200,
+      "test_loss": 0.028045537705849385
+     },
+     "model_artifact": "artifacts/R3306/model.json",
+     "model_hash": "sha256:3f7ead458ac3ffff85fbaedb3d49b19f232e0f262d2097a088d8a2939a5548d6",
+     "param_count": 3081
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.022060398542039693,
+      "ci_low": 0.014671281482921269,
+      "cp_mae": 143.37356230432718,
+      "n": 200,
+      "test_loss": 0.018067319176468997
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03732894605240961,
+      "ci_low": 0.01999588530304049,
+      "cp_mae": 175.32737085330294,
+      "n": 200,
+      "test_loss": 0.027633202492028667
+     },
+     "model_artifact": "artifacts/R3307/model.json",
+     "model_hash": "sha256:81695aac75ba55cb928a5d291ab50dc4823f8793ed717c63da69c441df2aad4e",
+     "param_count": 3081
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.02070236758148959,
+      "ci_low": 0.01373808268504485,
+      "cp_mae": 135.61040207630916,
+      "n": 200,
+      "test_loss": 0.016990161786929824
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0365725679678166,
+      "ci_low": 0.019610003800841904,
+      "cp_mae": 167.38444181115483,
+      "n": 200,
+      "test_loss": 0.026603200195620597
+     },
+     "model_artifact": "artifacts/R3308/model.json",
+     "model_hash": "sha256:f3fefb5ca5b27c97b8ba42d4234c4ec51373bcbdebbd462f6f700a1934914d37",
+     "param_count": 3081
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.026429856146078144,
+      "ci_low": 0.016259529355875667,
+      "cp_mae": 143.2482281015564,
+      "n": 200,
+      "test_loss": 0.020640999898266656
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03943775032151701,
+      "ci_low": 0.02297149836750363,
+      "cp_mae": 180.44609699247027,
+      "n": 200,
+      "test_loss": 0.030259277269743912
+     },
+     "model_artifact": "artifacts/R3291/model.json",
+     "model_hash": "sha256:60be48e2929f3471035d9db70ebe87bf888b6cb75c564f72c40728e3876ff6bc",
+     "param_count": 3081
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.0196414888071984,
+      "ci_low": 0.012248445592063202,
+      "cp_mae": 130.74914853427362,
+      "n": 200,
+      "test_loss": 0.015591973483726573
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03724000228510813,
+      "ci_low": 0.019702903149498747,
+      "cp_mae": 172.66872944009754,
+      "n": 200,
+      "test_loss": 0.02717551076027853
+     },
+     "model_artifact": "artifacts/R3292/model.json",
+     "model_hash": "sha256:19cb1fdaf2960308337365277e1c717bd773fde7cfc71ccca9bab3bf7b037d0b",
+     "param_count": 3081
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.01883716621827423,
+      "ci_low": 0.011589163429604992,
+      "cp_mae": 127.40855777961485,
+      "n": 200,
+      "test_loss": 0.014807111323094395
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037630483518001155,
+      "ci_low": 0.02053886844360569,
+      "cp_mae": 176.90606161741417,
+      "n": 200,
+      "test_loss": 0.027665567690185654
+     },
+     "model_artifact": "artifacts/R3293/model.json",
+     "model_hash": "sha256:7adf9a8999c79273bdac1e916c07fe0ff30b4c83f1d305068db220ad1a3f1ca8",
+     "param_count": 3081
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.023452645493107126,
+      "ci_low": 0.015052148897822946,
+      "cp_mae": 146.427179174689,
+      "n": 200,
+      "test_loss": 0.018999071440218455
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03895890947701402,
+      "ci_low": 0.02298216042896239,
+      "cp_mae": 186.7661005138641,
+      "n": 200,
+      "test_loss": 0.03009420453098735
+     },
+     "model_artifact": "artifacts/R3294/model.json",
+     "model_hash": "sha256:c9c40ea9bc32217813a259cf8608414aa0a200e4258a2a3157869a6ae9506093",
+     "param_count": 3081
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.018857072873052737,
+      "ci_low": 0.011388099707899469,
+      "cp_mae": 124.17405023436159,
+      "n": 200,
+      "test_loss": 0.014622599464334743
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03492049272569858,
+      "ci_low": 0.019263806175110823,
+      "cp_mae": 169.71949029426116,
+      "n": 200,
+      "test_loss": 0.025868200496390038
+     },
+     "model_artifact": "artifacts/R3295/model.json",
+     "model_hash": "sha256:6445cd3227190e91d8e8de1a9c8d2623eb6b340b6709eb058df96cd92dddf694",
+     "param_count": 3081
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.021310246391403026,
+      "ci_low": 0.01240673010527481,
+      "cp_mae": 126.43481787591318,
+      "n": 200,
+      "test_loss": 0.016284507376735268
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03698842194134896,
+      "ci_low": 0.02073275599716947,
+      "cp_mae": 175.5025941141737,
+      "n": 200,
+      "test_loss": 0.027984424152708253
+     },
+     "model_artifact": "artifacts/R3296/model.json",
+     "model_hash": "sha256:790d901255fcb99b2ed2be71e9389befb77a0a916233bd6aedda2294d690adfa",
+     "param_count": 3081
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.02026827125759548,
+      "ci_low": 0.01343551333770903,
+      "cp_mae": 134.41705526810935,
+      "n": 200,
+      "test_loss": 0.01663431712364025
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0337624308874203,
+      "ci_low": 0.02001094504169843,
+      "cp_mae": 172.64393173962438,
+      "n": 200,
+      "test_loss": 0.026017394316060892
+     },
+     "model_artifact": "artifacts/R3297/model.json",
+     "model_hash": "sha256:4330a884a2922d78c75bc6bd9bda56a3b5f6d4e8c451abfb7c2b1c4b85d6db4b",
+     "param_count": 3081
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.024030485748327075,
+      "ci_low": 0.015955450954012757,
+      "cp_mae": 138.68170510364678,
+      "n": 200,
+      "test_loss": 0.019620617143297932
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03955049546708271,
+      "ci_low": 0.020729981825747704,
+      "cp_mae": 164.72558752000973,
+      "n": 200,
+      "test_loss": 0.02868976117027236
+     },
+     "model_artifact": "artifacts/R3298/model.json",
+     "model_hash": "sha256:8a152e5190ec6eaf63cdf6bd91c07ccb659b86882a179b155c1c43802c30d3bc",
+     "param_count": 3081
+    }
+   }
+  },
+  "SF-1M": {
+   "1": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.02103918299892314,
+      "ci_low": 0.013087367092309034,
+      "cp_mae": 132.33333649060097,
+      "n": 200,
+      "test_loss": 0.016555940228940653
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03770133649106873,
+      "ci_low": 0.020426417422656627,
+      "cp_mae": 174.44251751649216,
+      "n": 200,
+      "test_loss": 0.027767225331652084
+     },
+     "model_artifact": "artifacts/R3429/model.json",
+     "model_hash": "sha256:69c7851354cdc5a604b41516c380a8062d60234fb1e061559e1b81a8f4433d01",
+     "param_count": 771
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.022935638551158447,
+      "ci_low": 0.014538937690609067,
+      "cp_mae": 144.39842425582876,
+      "n": 200,
+      "test_loss": 0.01825798103224868
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03976606726574759,
+      "ci_low": 0.021226282629395486,
+      "cp_mae": 181.11547174500183,
+      "n": 200,
+      "test_loss": 0.029224318691335217
+     },
+     "model_artifact": "artifacts/R3430/model.json",
+     "model_hash": "sha256:d2ce89570337cbc36f1d9cbf1cb34a54ff4bf00e124d6b019dcc8921e9ee9b1b",
+     "param_count": 771
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.026639627204648676,
+      "ci_low": 0.016350424373375798,
+      "cp_mae": 150.3028369646489,
+      "n": 200,
+      "test_loss": 0.02091436837509807
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03905475224348294,
+      "ci_low": 0.02238506723893047,
+      "cp_mae": 180.01578688280853,
+      "n": 200,
+      "test_loss": 0.029967591504866053
+     },
+     "model_artifact": "artifacts/R3439/model.json",
+     "model_hash": "sha256:983631a8cb25d80d2c0af3d74cc312cc079d041b9152a95f7959d89ba3bb399d",
+     "param_count": 771
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.02273832536640679,
+      "ci_low": 0.014187428916140834,
+      "cp_mae": 138.82478493202706,
+      "n": 200,
+      "test_loss": 0.01793275180417663
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03943217911317558,
+      "ci_low": 0.02239685151989577,
+      "cp_mae": 182.50660749173846,
+      "n": 200,
+      "test_loss": 0.029876225716758867
+     },
+     "model_artifact": "artifacts/R3440/model.json",
+     "model_hash": "sha256:4f2dfbd62534a3583ae02cca52caecfd6fdecaeba3be46273a95498a56de43ce",
+     "param_count": 771
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.02221837472231999,
+      "ci_low": 0.013680593883464046,
+      "cp_mae": 138.65561301635395,
+      "n": 200,
+      "test_loss": 0.0175409207313307
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03633450157468871,
+      "ci_low": 0.020488757210403337,
+      "cp_mae": 174.96224814736814,
+      "n": 200,
+      "test_loss": 0.027456318267681273
+     },
+     "model_artifact": "artifacts/R3441/model.json",
+     "model_hash": "sha256:b0c620130a80a5ad51bb284e9f46ace5a4f83d05a194f113c176caeb5d0d20f7",
+     "param_count": 771
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.028694291131268722,
+      "ci_low": 0.01728622725686424,
+      "cp_mae": 150.5672666115411,
+      "n": 200,
+      "test_loss": 0.022403749924610968
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0410963634791275,
+      "ci_low": 0.02535756350705736,
+      "cp_mae": 191.37621482648126,
+      "n": 200,
+      "test_loss": 0.032668754791731765
+     },
+     "model_artifact": "artifacts/R3442/model.json",
+     "model_hash": "sha256:817af39c95d295994d4b8cd7b911abdfc4a18e7716f3a571e7cbba8cbdf637fb",
+     "param_count": 771
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.028478422056201054,
+      "ci_low": 0.017232645140538218,
+      "cp_mae": 155.40007448071393,
+      "n": 200,
+      "test_loss": 0.022348472895269825
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04002611796282613,
+      "ci_low": 0.023558543264767067,
+      "cp_mae": 183.31369387250206,
+      "n": 200,
+      "test_loss": 0.031127511584201337
+     },
+     "model_artifact": "artifacts/R3443/model.json",
+     "model_hash": "sha256:8b745e163a6e547db602c47d1612d5f7103f5a5fc95d8f05f8e9878fb9080c4a",
+     "param_count": 771
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.03627284927378035,
+      "ci_low": 0.021641298603276245,
+      "cp_mae": 171.69399486045148,
+      "n": 200,
+      "test_loss": 0.028392831068198808
+     },
+     "SF-DEEP": {
+      "ci_high": 0.05094149504014632,
+      "ci_low": 0.030973523877679647,
+      "cp_mae": 211.39166658227805,
+      "n": 200,
+      "test_loss": 0.040751700609839674
+     },
+     "model_artifact": "artifacts/R3444/model.json",
+     "model_hash": "sha256:83a2fefedddcdcb3969b496f113562f1dd2d25972e2ad4b023b3bbab511959a2",
+     "param_count": 771
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.02401540123080794,
+      "ci_low": 0.015203256230171018,
+      "cp_mae": 146.4818153843092,
+      "n": 200,
+      "test_loss": 0.019255608198711572
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037968015724917585,
+      "ci_low": 0.02245905970848999,
+      "cp_mae": 182.94302461221466,
+      "n": 200,
+      "test_loss": 0.029470964303524517
+     },
+     "model_artifact": "artifacts/R3445/model.json",
+     "model_hash": "sha256:65b6e9a8a45f1eacdcf8a7af1be51c5f1af8dcbee3bfb8254c5e44bb66047967",
+     "param_count": 771
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.024730966381687543,
+      "ci_low": 0.015356894924745025,
+      "cp_mae": 147.613133356729,
+      "n": 200,
+      "test_loss": 0.019643438304359277
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03855134824649449,
+      "ci_low": 0.021576515016208355,
+      "cp_mae": 177.6747053206078,
+      "n": 200,
+      "test_loss": 0.029112656299216572
+     },
+     "model_artifact": "artifacts/R3446/model.json",
+     "model_hash": "sha256:e075849da1b259af3570e5d34ab5fb43498d5fabe4d44e7c3b67d44a59ca29e8",
+     "param_count": 771
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.02292712276229906,
+      "ci_low": 0.014335514862915738,
+      "cp_mae": 142.55511677031546,
+      "n": 200,
+      "test_loss": 0.01825002226576558
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036111271883408416,
+      "ci_low": 0.02091478139180532,
+      "cp_mae": 177.0503916297765,
+      "n": 200,
+      "test_loss": 0.02769926093893882
+     },
+     "model_artifact": "artifacts/R3447/model.json",
+     "model_hash": "sha256:ddc30b901ab364b0ec263fd5a6bc525b271f304aedfeb9d631effbdda96846d8",
+     "param_count": 771
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.022542015058880593,
+      "ci_low": 0.01404243376454343,
+      "cp_mae": 138.99765889503294,
+      "n": 200,
+      "test_loss": 0.017912011034017492
+     },
+     "SF-DEEP": {
+      "ci_high": 0.034064817762592736,
+      "ci_low": 0.020626139514264126,
+      "cp_mae": 174.70519589948992,
+      "n": 200,
+      "test_loss": 0.026721213857136293
+     },
+     "model_artifact": "artifacts/R3448/model.json",
+     "model_hash": "sha256:8d1a8d47dbe37d5fe75bc66f329ace52a4f01c19e4b752a36f2440e393022dd9",
+     "param_count": 771
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.025381237337450673,
+      "ci_low": 0.015750231721103656,
+      "cp_mae": 144.02344459145186,
+      "n": 200,
+      "test_loss": 0.02004855635894338
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040281264411651696,
+      "ci_low": 0.024292351059878405,
+      "cp_mae": 188.95715732560222,
+      "n": 200,
+      "test_loss": 0.0315373761480641
+     },
+     "model_artifact": "artifacts/R3431/model.json",
+     "model_hash": "sha256:529b97f4bcb21b55d393a5aafbe9225bb314ee8ef0bdc5de013f60a8e6e69daf",
+     "param_count": 771
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.022517464965433512,
+      "ci_low": 0.013874070647290113,
+      "cp_mae": 140.00934876301397,
+      "n": 200,
+      "test_loss": 0.01772570546805699
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036135142224655845,
+      "ci_low": 0.019846512044244684,
+      "cp_mae": 170.51734590725994,
+      "n": 200,
+      "test_loss": 0.026872388876527698
+     },
+     "model_artifact": "artifacts/R3432/model.json",
+     "model_hash": "sha256:1b0f41ff7046c2d1d599f76fde164f91c1740398a5e05815d811db1cfd8013ce",
+     "param_count": 771
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.024300316266052658,
+      "ci_low": 0.015165549093775696,
+      "cp_mae": 145.68839802356706,
+      "n": 200,
+      "test_loss": 0.019254473042672457
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04027005622590154,
+      "ci_low": 0.021265431227507573,
+      "cp_mae": 177.1180655103343,
+      "n": 200,
+      "test_loss": 0.029572153627233685
+     },
+     "model_artifact": "artifacts/R3433/model.json",
+     "model_hash": "sha256:a864d1eefdf8236c1dd252d2d59b8076fff2445bbd953ab91602415c0667d522",
+     "param_count": 771
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.030804787656761645,
+      "ci_low": 0.018761589715022415,
+      "cp_mae": 157.26173676167645,
+      "n": 200,
+      "test_loss": 0.02427523466514452
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04328294368118169,
+      "ci_low": 0.026487687745761115,
+      "cp_mae": 192.044393790996,
+      "n": 200,
+      "test_loss": 0.03425490633233196
+     },
+     "model_artifact": "artifacts/R3434/model.json",
+     "model_hash": "sha256:ef2d1d68284aa2a3555b7939be536b76e63a8bf2b6e3d2f26c5de1ff64aa2c98",
+     "param_count": 771
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.02329644504431717,
+      "ci_low": 0.014687726674564859,
+      "cp_mae": 142.6434962172655,
+      "n": 200,
+      "test_loss": 0.018561113037134404
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03891630708583621,
+      "ci_low": 0.021386360874452212,
+      "cp_mae": 179.38974639826824,
+      "n": 200,
+      "test_loss": 0.02905758989163646
+     },
+     "model_artifact": "artifacts/R3435/model.json",
+     "model_hash": "sha256:b3ef348431b052fb86d1047df1b4eb216e6440ef02aef5818b60ea6b0a1f8399",
+     "param_count": 771
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.0263252084699221,
+      "ci_low": 0.01727862697018461,
+      "cp_mae": 156.39791726873074,
+      "n": 200,
+      "test_loss": 0.021415138025413203
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03922037959286286,
+      "ci_low": 0.0231609453773119,
+      "cp_mae": 184.0057763369358,
+      "n": 200,
+      "test_loss": 0.030229549435810795
+     },
+     "model_artifact": "artifacts/R3436/model.json",
+     "model_hash": "sha256:cba36763ce3eb9819ffed523c334187286dc60f5733ab49b3c83e6ac3600c332",
+     "param_count": 771
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.02215732178427045,
+      "ci_low": 0.01366539045556004,
+      "cp_mae": 137.68457536179596,
+      "n": 200,
+      "test_loss": 0.017505824247271026
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03825850875599858,
+      "ci_low": 0.020800711251352275,
+      "cp_mae": 176.51781617833072,
+      "n": 200,
+      "test_loss": 0.028365154377081047
+     },
+     "model_artifact": "artifacts/R3437/model.json",
+     "model_hash": "sha256:75e32dc48abe210d6d375986ef75616829d76d1b93df48bf4c12b290de7f073b",
+     "param_count": 771
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.028958271944153964,
+      "ci_low": 0.017285584281205812,
+      "cp_mae": 149.14689510738955,
+      "n": 200,
+      "test_loss": 0.022560862901158815
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04098626172110984,
+      "ci_low": 0.02505569860365067,
+      "cp_mae": 186.66789899429884,
+      "n": 200,
+      "test_loss": 0.03242491977567889
+     },
+     "model_artifact": "artifacts/R3438/model.json",
+     "model_hash": "sha256:25bc018922f0ea46b7f858fa53fce3e67df324c015e00bb75eb7dfb53cdb412e",
+     "param_count": 771
+    }
+   },
+   "16": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.02966760479989182,
+      "ci_low": 0.017848988556048155,
+      "cp_mae": 148.1282711792582,
+      "n": 200,
+      "test_loss": 0.023088221950849527
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04574623188681378,
+      "ci_low": 0.02451791243943949,
+      "cp_mae": 178.78331465416224,
+      "n": 200,
+      "test_loss": 0.0339209439046082
+     },
+     "model_artifact": "artifacts/R3469/model.json",
+     "model_hash": "sha256:8987afab301c29ee87fdf766fd6ad8df03ac764d64867a978020f2587b5c9da9",
+     "param_count": 12321
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.032529679178651426,
+      "ci_low": 0.01983182837246341,
+      "cp_mae": 159.5098006692525,
+      "n": 200,
+      "test_loss": 0.025436354116855076
+     },
+     "SF-DEEP": {
+      "ci_high": 0.045542436566832635,
+      "ci_low": 0.024192463546426093,
+      "cp_mae": 184.35823802022722,
+      "n": 200,
+      "test_loss": 0.03339473828047094
+     },
+     "model_artifact": "artifacts/R3470/model.json",
+     "model_hash": "sha256:32bde8e1be0e01db55dc08aea0c01ddf4d2ef7987fed3fb4fea857f865ba3e65",
+     "param_count": 12321
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.030926429208683347,
+      "ci_low": 0.019220682886933845,
+      "cp_mae": 164.0940417380621,
+      "n": 200,
+      "test_loss": 0.024520116633262007
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04236527560351478,
+      "ci_low": 0.023342012534376955,
+      "cp_mae": 180.45280759731654,
+      "n": 200,
+      "test_loss": 0.032043111099379754
+     },
+     "model_artifact": "artifacts/R3479/model.json",
+     "model_hash": "sha256:fd377bfe8d1d15bbec4f8690bb809fd6712b324faeb1b76057cb5df3878c888d",
+     "param_count": 12321
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.02803923390390204,
+      "ci_low": 0.017169361792399262,
+      "cp_mae": 148.064954419671,
+      "n": 200,
+      "test_loss": 0.0219067988054468
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04538465394643213,
+      "ci_low": 0.024265392490254716,
+      "cp_mae": 182.12441375107366,
+      "n": 200,
+      "test_loss": 0.03388083839967326
+     },
+     "model_artifact": "artifacts/R3480/model.json",
+     "model_hash": "sha256:1bc2cbd991497009267b6d5f2b8cb51e8338819ed7b29cde557f63bd556f1206",
+     "param_count": 12321
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.025057319503070646,
+      "ci_low": 0.015947198777168506,
+      "cp_mae": 141.41928351573088,
+      "n": 200,
+      "test_loss": 0.02000249918097485
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03877838537495839,
+      "ci_low": 0.02051280917806023,
+      "cp_mae": 167.9135384479465,
+      "n": 200,
+      "test_loss": 0.028705564612466615
+     },
+     "model_artifact": "artifacts/R3481/model.json",
+     "model_hash": "sha256:89c517f760a35ad8d8de04aafad28d03a24be6bd415e838bc0c9e2a21f846b0b",
+     "param_count": 12321
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.03002483737721165,
+      "ci_low": 0.01859953828790792,
+      "cp_mae": 161.0001155925339,
+      "n": 200,
+      "test_loss": 0.023998295689891185
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040861607323612686,
+      "ci_low": 0.023360255609654938,
+      "cp_mae": 176.62782383820434,
+      "n": 200,
+      "test_loss": 0.03145718650886086
+     },
+     "model_artifact": "artifacts/R3482/model.json",
+     "model_hash": "sha256:b70547ec0f3d7ef64812ae52d7c959775837a8d0c94685f3485364cb4d54b4a5",
+     "param_count": 12321
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.043389180137576866,
+      "ci_low": 0.023913199872681087,
+      "cp_mae": 164.0773929391008,
+      "n": 200,
+      "test_loss": 0.03268060537156009
+     },
+     "SF-DEEP": {
+      "ci_high": 0.058127285890090474,
+      "ci_low": 0.0319822239141422,
+      "cp_mae": 194.74171030973733,
+      "n": 200,
+      "test_loss": 0.044362119986492844
+     },
+     "model_artifact": "artifacts/R3483/model.json",
+     "model_hash": "sha256:5f6f44df777e802541b7cff7ae8c9ab236db6fcebf08f4d53022de819d5b3b54",
+     "param_count": 12321
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.030816955127067013,
+      "ci_low": 0.01929519984015243,
+      "cp_mae": 156.04094111452122,
+      "n": 200,
+      "test_loss": 0.02452454501325607
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04349541617057889,
+      "ci_low": 0.02351297102968886,
+      "cp_mae": 182.40922592100577,
+      "n": 200,
+      "test_loss": 0.03241063431887006
+     },
+     "model_artifact": "artifacts/R3484/model.json",
+     "model_hash": "sha256:e8f80c7b87d4833b62f89699c63740b2fe86a17423e3db47ab47dfe960871674",
+     "param_count": 12321
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.02995657861554563,
+      "ci_low": 0.01692125373977635,
+      "cp_mae": 151.1471147461428,
+      "n": 200,
+      "test_loss": 0.023078526567584055
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04527502790441578,
+      "ci_low": 0.023624598105685284,
+      "cp_mae": 181.80256053443728,
+      "n": 200,
+      "test_loss": 0.033431964925997135
+     },
+     "model_artifact": "artifacts/R3485/model.json",
+     "model_hash": "sha256:d007fd1048d8554d58f13c29309142e2be799e01552e493096fe70943d363742",
+     "param_count": 12321
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.026527960183363467,
+      "ci_low": 0.017458372641278717,
+      "cp_mae": 145.8293415763392,
+      "n": 200,
+      "test_loss": 0.021734573861069757
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03682573019548449,
+      "ci_low": 0.022783234425358553,
+      "cp_mae": 172.2221952658541,
+      "n": 200,
+      "test_loss": 0.029286063421423713
+     },
+     "model_artifact": "artifacts/R3486/model.json",
+     "model_hash": "sha256:74f01858984a2de789b033ab2159b5ddb8a0a481e41b75242e452423e1b9c1a3",
+     "param_count": 12321
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.026502253746093975,
+      "ci_low": 0.01577646935590224,
+      "cp_mae": 149.3963719503663,
+      "n": 200,
+      "test_loss": 0.020672747858052478
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040471551885661365,
+      "ci_low": 0.020134914045055612,
+      "cp_mae": 175.10301105016154,
+      "n": 200,
+      "test_loss": 0.029141428760636457
+     },
+     "model_artifact": "artifacts/R3487/model.json",
+     "model_hash": "sha256:315e61b06d4ca2842856ed08da808adb37bb2093b89708a20609ce8939ff6ebe",
+     "param_count": 12321
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.027762925230551013,
+      "ci_low": 0.01801095939358317,
+      "cp_mae": 157.06365089201964,
+      "n": 200,
+      "test_loss": 0.02257243916593076
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03944105364838565,
+      "ci_low": 0.023586151257618954,
+      "cp_mae": 180.30990104517406,
+      "n": 200,
+      "test_loss": 0.030647381519175523
+     },
+     "model_artifact": "artifacts/R3488/model.json",
+     "model_hash": "sha256:b3af759af9c8f16f8fab523fb6f4fbd7683833ecd091e65d114772b052011d69",
+     "param_count": 12321
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.02865691944462479,
+      "ci_low": 0.017837731308050633,
+      "cp_mae": 155.88520527904797,
+      "n": 200,
+      "test_loss": 0.022771286536095663
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04354675743279604,
+      "ci_low": 0.02434331962889198,
+      "cp_mae": 183.62840659351176,
+      "n": 200,
+      "test_loss": 0.03282791284346295
+     },
+     "model_artifact": "artifacts/R3471/model.json",
+     "model_hash": "sha256:fa5138b6c01bf677198e420aab4679d854f46e6f76396cb24acc71881450e118",
+     "param_count": 12321
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.031266409956179096,
+      "ci_low": 0.018492398154101166,
+      "cp_mae": 156.30029626273245,
+      "n": 200,
+      "test_loss": 0.02421159569096722
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04566532030651369,
+      "ci_low": 0.02533031856544786,
+      "cp_mae": 184.8680719359976,
+      "n": 200,
+      "test_loss": 0.034960730582055594
+     },
+     "model_artifact": "artifacts/R3472/model.json",
+     "model_hash": "sha256:2208ed8135850aff99e4b722504135f9eac9e6361ac88e7fd026a653d4b01566",
+     "param_count": 12321
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.026381070095189224,
+      "ci_low": 0.01495586990370048,
+      "cp_mae": 141.7217440577066,
+      "n": 200,
+      "test_loss": 0.020174527301497745
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03541006164633049,
+      "ci_low": 0.018631383908137684,
+      "cp_mae": 163.42560360776147,
+      "n": 200,
+      "test_loss": 0.026604158141327633
+     },
+     "model_artifact": "artifacts/R3473/model.json",
+     "model_hash": "sha256:655c3e3668289fc03270c7e488bc0b9a6f7097b579cb1d275014da8a8c483032",
+     "param_count": 12321
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.034350361164108154,
+      "ci_low": 0.019542910424657466,
+      "cp_mae": 157.8681794170281,
+      "n": 200,
+      "test_loss": 0.025705201413091988
+     },
+     "SF-DEEP": {
+      "ci_high": 0.047726890012472614,
+      "ci_low": 0.026165321639297252,
+      "cp_mae": 190.89970167974897,
+      "n": 200,
+      "test_loss": 0.03596754582815443
+     },
+     "model_artifact": "artifacts/R3474/model.json",
+     "model_hash": "sha256:ce65189a448778671735273f0d55984767e1de72b9280d1ed6d3210be9d5cbaf",
+     "param_count": 12321
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.03446777645855052,
+      "ci_low": 0.021131432827145795,
+      "cp_mae": 163.9911445203803,
+      "n": 200,
+      "test_loss": 0.027181971298085562
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04615554113940546,
+      "ci_low": 0.027502664596981058,
+      "cp_mae": 193.39958068894143,
+      "n": 200,
+      "test_loss": 0.035652439459207
+     },
+     "model_artifact": "artifacts/R3475/model.json",
+     "model_hash": "sha256:d07ea62b0f180d8bdce2a53fcdab70ee80156b7fbfbaecfdff64ff7d693660f6",
+     "param_count": 12321
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.029145095307441225,
+      "ci_low": 0.018095620752548117,
+      "cp_mae": 148.59304556987942,
+      "n": 200,
+      "test_loss": 0.023190557887744018
+     },
+     "SF-DEEP": {
+      "ci_high": 0.042751132285721936,
+      "ci_low": 0.02333001008167305,
+      "cp_mae": 178.4934162509474,
+      "n": 200,
+      "test_loss": 0.03207143031167333
+     },
+     "model_artifact": "artifacts/R3476/model.json",
+     "model_hash": "sha256:c255c99063462809772d844336f69059eba6aa024f55e42c4f89ae94150c34b2",
+     "param_count": 12321
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.028331159754529628,
+      "ci_low": 0.019098657537358284,
+      "cp_mae": 163.23247889995878,
+      "n": 200,
+      "test_loss": 0.023437213329310667
+     },
+     "SF-DEEP": {
+      "ci_high": 0.043353022921631415,
+      "ci_low": 0.02407511164215101,
+      "cp_mae": 187.96295096312483,
+      "n": 200,
+      "test_loss": 0.03232229383087298
+     },
+     "model_artifact": "artifacts/R3477/model.json",
+     "model_hash": "sha256:8c934eb8e00c7c35e016b38785a286c617f996646e917f9c65ce288c9e3f5ca5",
+     "param_count": 12321
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.02779391983332504,
+      "ci_low": 0.016686110522727927,
+      "cp_mae": 140.5813968914414,
+      "n": 200,
+      "test_loss": 0.021476796273721316
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04453042217621519,
+      "ci_low": 0.024428566717605377,
+      "cp_mae": 178.821447819706,
+      "n": 200,
+      "test_loss": 0.03332421658057112
+     },
+     "model_artifact": "artifacts/R3478/model.json",
+     "model_hash": "sha256:4a3a4e4e90dcbafa2f62b3a43f95ac04146ea3f6406dc8ca1bfe8ac53399ff7d",
+     "param_count": 12321
+    }
+   },
+   "32": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.027939515219511768,
+      "ci_low": 0.01943812914526574,
+      "cp_mae": 167.83025739222506,
+      "n": 200,
+      "test_loss": 0.023428564413394682
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04010832542303808,
+      "ci_low": 0.023536109386292126,
+      "cp_mae": 182.52528607170527,
+      "n": 200,
+      "test_loss": 0.031307829839228696
+     },
+     "model_artifact": "artifacts/R3489/model.json",
+     "model_hash": "sha256:fc7557e789eab95414872835f46d6374600a59b91b47836334fa06649c9276e4",
+     "param_count": 24641
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.022596721681302015,
+      "ci_low": 0.01478258036837223,
+      "cp_mae": 141.05505097795785,
+      "n": 200,
+      "test_loss": 0.018405289279926802
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038182715410356116,
+      "ci_low": 0.02020832808046865,
+      "cp_mae": 168.63432538742774,
+      "n": 200,
+      "test_loss": 0.028227115041649528
+     },
+     "model_artifact": "artifacts/R3490/model.json",
+     "model_hash": "sha256:84f0cf7d7e8d2d3ceaf9c066001d3cfa8c4ff58ac45cf3d90d36a871df232da3",
+     "param_count": 24641
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.032187967052428046,
+      "ci_low": 0.0202170217817017,
+      "cp_mae": 161.00133091752926,
+      "n": 200,
+      "test_loss": 0.025682300744129555
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04734080758814313,
+      "ci_low": 0.027856009937451243,
+      "cp_mae": 194.402445833703,
+      "n": 200,
+      "test_loss": 0.03654431252975606
+     },
+     "model_artifact": "artifacts/R3499/model.json",
+     "model_hash": "sha256:715ece78e45e6720a663f990bc9067efa959785eb5bc1e9af96510dbad825841",
+     "param_count": 24641
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.036718099728675714,
+      "ci_low": 0.022370094070273922,
+      "cp_mae": 170.53454754758926,
+      "n": 200,
+      "test_loss": 0.028766029927570894
+     },
+     "SF-DEEP": {
+      "ci_high": 0.046604928154631686,
+      "ci_low": 0.028086996818617985,
+      "cp_mae": 195.04374720310952,
+      "n": 200,
+      "test_loss": 0.03621508561576748
+     },
+     "model_artifact": "artifacts/R3500/model.json",
+     "model_hash": "sha256:52d6f03d918d47cdd513bd0b8dafe1bb6c014cf14f8f899c96480be5ae674625",
+     "param_count": 24641
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.030493992126098515,
+      "ci_low": 0.018628241461545094,
+      "cp_mae": 156.30146169565504,
+      "n": 200,
+      "test_loss": 0.023996538698463025
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04599582557855129,
+      "ci_low": 0.02421873798126773,
+      "cp_mae": 191.04770937511705,
+      "n": 200,
+      "test_loss": 0.03407109838142421
+     },
+     "model_artifact": "artifacts/R3501/model.json",
+     "model_hash": "sha256:93722abeacbe56f61c5a11e32da54312f106d637fd5e8c2aab8f6db3607bb433",
+     "param_count": 24641
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.026945997531642597,
+      "ci_low": 0.017802389010789985,
+      "cp_mae": 157.9358935538857,
+      "n": 200,
+      "test_loss": 0.021885403313706493
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044085224754051806,
+      "ci_low": 0.025067445670434146,
+      "cp_mae": 187.67943116543807,
+      "n": 200,
+      "test_loss": 0.03334404341538601
+     },
+     "model_artifact": "artifacts/R3502/model.json",
+     "model_hash": "sha256:a0d3263bde977302b7ef41427cd8e68d09f9d283a923f842bd3fe5391bbbbb14",
+     "param_count": 24641
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.03326125192696845,
+      "ci_low": 0.020568673376003863,
+      "cp_mae": 167.34295823203473,
+      "n": 200,
+      "test_loss": 0.026419217039249192
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04382786810112189,
+      "ci_low": 0.026383232107052186,
+      "cp_mae": 189.42756460324054,
+      "n": 200,
+      "test_loss": 0.034632990352912826
+     },
+     "model_artifact": "artifacts/R3503/model.json",
+     "model_hash": "sha256:a5b5ced40fd747d3407be07870da247da13c0e1924bfb94348e0373430747775",
+     "param_count": 24641
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.038001004882449244,
+      "ci_low": 0.022927555151490146,
+      "cp_mae": 167.5925176299684,
+      "n": 200,
+      "test_loss": 0.029389719146077253
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04405539939113243,
+      "ci_low": 0.025819130101014817,
+      "cp_mae": 181.28509219266084,
+      "n": 200,
+      "test_loss": 0.03349517701450335
+     },
+     "model_artifact": "artifacts/R3504/model.json",
+     "model_hash": "sha256:172ac21172d27f870519d72ad10ce33390612b6002e6615d8177f57dae33cf5d",
+     "param_count": 24641
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.034593783168664134,
+      "ci_low": 0.020957270395804938,
+      "cp_mae": 161.2804578132466,
+      "n": 200,
+      "test_loss": 0.02709622169434751
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04802387106694554,
+      "ci_low": 0.027213328178055027,
+      "cp_mae": 185.243870836677,
+      "n": 200,
+      "test_loss": 0.03631941513831259
+     },
+     "model_artifact": "artifacts/R3505/model.json",
+     "model_hash": "sha256:6cce4ef06b5330dc0cc3d292877b38e937c2abca4c0bafa19e472a91283ad8f9",
+     "param_count": 24641
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.03399681794302188,
+      "ci_low": 0.021280291830011764,
+      "cp_mae": 163.6966059184408,
+      "n": 200,
+      "test_loss": 0.027026657505632982
+     },
+     "SF-DEEP": {
+      "ci_high": 0.05080277966876257,
+      "ci_low": 0.027450027991495738,
+      "cp_mae": 197.30794614472742,
+      "n": 200,
+      "test_loss": 0.03795480045460709
+     },
+     "model_artifact": "artifacts/R3506/model.json",
+     "model_hash": "sha256:0a4118b82aabcdd0dc6ba4d6d31aa7fd3f7b8b5d777cfc505984b5dc4880968e",
+     "param_count": 24641
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.028782153371697927,
+      "ci_low": 0.018504117643397038,
+      "cp_mae": 150.60545691906518,
+      "n": 200,
+      "test_loss": 0.023028260674010047
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044818159330395464,
+      "ci_low": 0.02465921434604462,
+      "cp_mae": 179.46350981800907,
+      "n": 200,
+      "test_loss": 0.033352958164756336
+     },
+     "model_artifact": "artifacts/R3507/model.json",
+     "model_hash": "sha256:1a537538eeed6e35c32976778974993f75fdd5c798025b3b69be00225cae0dff",
+     "param_count": 24641
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.03399409836161957,
+      "ci_low": 0.01948705637955628,
+      "cp_mae": 157.71727440320478,
+      "n": 200,
+      "test_loss": 0.025744177886270706
+     },
+     "SF-DEEP": {
+      "ci_high": 0.045225809246338254,
+      "ci_low": 0.025399483579096726,
+      "cp_mae": 188.8537769716329,
+      "n": 200,
+      "test_loss": 0.034584471371066725
+     },
+     "model_artifact": "artifacts/R3508/model.json",
+     "model_hash": "sha256:1e8540e6c089b74e7562e5b97052674f378ffed19e0a6a35a6a0fe83cb9b81ff",
+     "param_count": 24641
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.031887720423648666,
+      "ci_low": 0.01866826292855896,
+      "cp_mae": 149.895900626697,
+      "n": 200,
+      "test_loss": 0.024474394070522675
+     },
+     "SF-DEEP": {
+      "ci_high": 0.045518845126189214,
+      "ci_low": 0.02496973556729086,
+      "cp_mae": 180.86134801699228,
+      "n": 200,
+      "test_loss": 0.034076982715591876
+     },
+     "model_artifact": "artifacts/R3491/model.json",
+     "model_hash": "sha256:c56d01cbe75aad13c498072b6743deeed252bc4665edd3782f2638d346385af8",
+     "param_count": 24641
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.0408963818247598,
+      "ci_low": 0.023433521272967096,
+      "cp_mae": 165.57957858456098,
+      "n": 200,
+      "test_loss": 0.030823908818316172
+     },
+     "SF-DEEP": {
+      "ci_high": 0.05228781558350305,
+      "ci_low": 0.02863830648656204,
+      "cp_mae": 185.58922988767594,
+      "n": 200,
+      "test_loss": 0.038879082637414034
+     },
+     "model_artifact": "artifacts/R3492/model.json",
+     "model_hash": "sha256:fd21a96ef46539a6f7ccc386cd32c2f179e9815c2d8c469955662ab79edfca70",
+     "param_count": 24641
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.03321479775089264,
+      "ci_low": 0.01895302196501584,
+      "cp_mae": 153.70619555589397,
+      "n": 200,
+      "test_loss": 0.025362246523837454
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04532303776309054,
+      "ci_low": 0.024937177122129235,
+      "cp_mae": 180.70075224528978,
+      "n": 200,
+      "test_loss": 0.03450015991708542
+     },
+     "model_artifact": "artifacts/R3493/model.json",
+     "model_hash": "sha256:f76a41f4925f110a22810494a7de8a4af01c7d8d159a48524f26301a027ffa25",
+     "param_count": 24641
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.0339871467179259,
+      "ci_low": 0.02186225659263629,
+      "cp_mae": 166.93835121455712,
+      "n": 200,
+      "test_loss": 0.02717204247160686
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04718557776658731,
+      "ci_low": 0.02868030070256762,
+      "cp_mae": 201.43907093729808,
+      "n": 200,
+      "test_loss": 0.03711040703474277
+     },
+     "model_artifact": "artifacts/R3494/model.json",
+     "model_hash": "sha256:51b0ffcde858c1e3ed86fe751460c33285ee5b9118802c72b02fc5334900f1b9",
+     "param_count": 24641
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.02772746747038845,
+      "ci_low": 0.017100776890700855,
+      "cp_mae": 151.87177461442246,
+      "n": 200,
+      "test_loss": 0.021948284938043527
+     },
+     "SF-DEEP": {
+      "ci_high": 0.043159037424428844,
+      "ci_low": 0.022831947315879213,
+      "cp_mae": 181.2596998473534,
+      "n": 200,
+      "test_loss": 0.03139490381699569
+     },
+     "model_artifact": "artifacts/R3495/model.json",
+     "model_hash": "sha256:bbd6f9dac9c6c4fb2be7c69106a6cce1d34e873ad6ad0c526f859a4487c36971",
+     "param_count": 24641
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.03367058103708793,
+      "ci_low": 0.020249482076016425,
+      "cp_mae": 164.6903337619318,
+      "n": 200,
+      "test_loss": 0.02613803339571712
+     },
+     "SF-DEEP": {
+      "ci_high": 0.048806553220075634,
+      "ci_low": 0.026923519150252123,
+      "cp_mae": 195.04126097348987,
+      "n": 200,
+      "test_loss": 0.036753672013982025
+     },
+     "model_artifact": "artifacts/R3496/model.json",
+     "model_hash": "sha256:2087090f2415460340f34899d2e24f5ffbf918dccbbd7e6b68e32937cbd78019",
+     "param_count": 24641
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.03289832052562161,
+      "ci_low": 0.020421087751036408,
+      "cp_mae": 161.53458448313904,
+      "n": 200,
+      "test_loss": 0.025862967017775896
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04621423744605125,
+      "ci_low": 0.026722291950127625,
+      "cp_mae": 188.41886910103574,
+      "n": 200,
+      "test_loss": 0.03568491163129643
+     },
+     "model_artifact": "artifacts/R3497/model.json",
+     "model_hash": "sha256:6e4e46ab2fa3759e9ef986be700784dd924d7b6a7a0208e9fd55a3cdd5ce9b4c",
+     "param_count": 24641
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.026256374362611783,
+      "ci_low": 0.017034210946267146,
+      "cp_mae": 155.44167889786848,
+      "n": 200,
+      "test_loss": 0.021452045673510126
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03669207419711506,
+      "ci_low": 0.021437946123367937,
+      "cp_mae": 175.54110248598542,
+      "n": 200,
+      "test_loss": 0.02851269652324774
+     },
+     "model_artifact": "artifacts/R3498/model.json",
+     "model_hash": "sha256:b31634f852a34ccd2345032ccc3ef810a0717e5cc99d6179fc38177e7f9f6850",
+     "param_count": 24641
+    }
+   },
+   "4": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.023318850998516515,
+      "ci_low": 0.014682510124654729,
+      "cp_mae": 143.10927687487694,
+      "n": 200,
+      "test_loss": 0.018539260767759816
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036188112694653086,
+      "ci_low": 0.02044502539142234,
+      "cp_mae": 172.9327939728267,
+      "n": 200,
+      "test_loss": 0.027443268729366314
+     },
+     "model_artifact": "artifacts/R3449/model.json",
+     "model_hash": "sha256:75cb4274aa6258720005ed1f1ada3c311c900c8d0d0de9b5af89bfc8e2161dc5",
+     "param_count": 3081
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.024298638864644558,
+      "ci_low": 0.015175216816729979,
+      "cp_mae": 140.64466021015477,
+      "n": 200,
+      "test_loss": 0.019225999705792696
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04068702270124377,
+      "ci_low": 0.022481299155051364,
+      "cp_mae": 181.44468642488744,
+      "n": 200,
+      "test_loss": 0.030237459734086678
+     },
+     "model_artifact": "artifacts/R3450/model.json",
+     "model_hash": "sha256:aaaebca20ea43875d147ca040e888a330eb58f77697565cff39a68f07c2c8f14",
+     "param_count": 3081
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.02382013942082581,
+      "ci_low": 0.01466009013731332,
+      "cp_mae": 137.98913601784477,
+      "n": 200,
+      "test_loss": 0.01865065385701803
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0393646343778357,
+      "ci_low": 0.02160201474913778,
+      "cp_mae": 178.0455805256271,
+      "n": 200,
+      "test_loss": 0.028940103388765376
+     },
+     "model_artifact": "artifacts/R3459/model.json",
+     "model_hash": "sha256:c37bfc73543ea5b885a058f860dd5c499835c9d3a695c284266b07e0b7ee0642",
+     "param_count": 3081
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.023943655496542888,
+      "ci_low": 0.013924927057808189,
+      "cp_mae": 133.58549269076698,
+      "n": 200,
+      "test_loss": 0.018270776310226125
+     },
+     "SF-DEEP": {
+      "ci_high": 0.041040672993344504,
+      "ci_low": 0.022237315426644342,
+      "cp_mae": 176.52876203150677,
+      "n": 200,
+      "test_loss": 0.03053973400921344
+     },
+     "model_artifact": "artifacts/R3460/model.json",
+     "model_hash": "sha256:69f8e77570330a7d3f4947022aa6a855e9ecad4d2da62bd90176ba2d199b80ec",
+     "param_count": 3081
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.028324525386554025,
+      "ci_low": 0.0167200572022843,
+      "cp_mae": 148.01571136605372,
+      "n": 200,
+      "test_loss": 0.021922215957392032
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044692375503924894,
+      "ci_low": 0.02333484458726391,
+      "cp_mae": 181.37276832761637,
+      "n": 200,
+      "test_loss": 0.03261135222751224
+     },
+     "model_artifact": "artifacts/R3461/model.json",
+     "model_hash": "sha256:1ceb631f3475dfdb496a09f5c4a70959c47d268342bcf1a79717a075bf870713",
+     "param_count": 3081
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.024244796829718914,
+      "ci_low": 0.014529570305898626,
+      "cp_mae": 134.66417166112075,
+      "n": 200,
+      "test_loss": 0.01863411917312545
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040510948398205696,
+      "ci_low": 0.02135715222459916,
+      "cp_mae": 169.11033798980785,
+      "n": 200,
+      "test_loss": 0.029489888769420016
+     },
+     "model_artifact": "artifacts/R3462/model.json",
+     "model_hash": "sha256:6083841b05c9adbaffa32bc51a41aab3559b3a8c58b7ed21bb3285c0801ee33b",
+     "param_count": 3081
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.026729567887541873,
+      "ci_low": 0.015499109379813919,
+      "cp_mae": 140.86199531243076,
+      "n": 200,
+      "test_loss": 0.020487958112381407
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04413080353579212,
+      "ci_low": 0.024366856539392037,
+      "cp_mae": 183.75963535656294,
+      "n": 200,
+      "test_loss": 0.033124424924817306
+     },
+     "model_artifact": "artifacts/R3463/model.json",
+     "model_hash": "sha256:9787146a74f7f4767c39320c2d26791d83d864beecd5dfccb3bcfbb1427d8978",
+     "param_count": 3081
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.026994017622203253,
+      "ci_low": 0.014956982833783784,
+      "cp_mae": 134.3501909656957,
+      "n": 200,
+      "test_loss": 0.020029885344585788
+     },
+     "SF-DEEP": {
+      "ci_high": 0.043395828363123466,
+      "ci_low": 0.022133823983407998,
+      "cp_mae": 173.4628905155315,
+      "n": 200,
+      "test_loss": 0.03164512757740384
+     },
+     "model_artifact": "artifacts/R3464/model.json",
+     "model_hash": "sha256:e1b520af58fa9fc3ec9a4a00680ec211eddc57fb1cac3a42e11542132d353d40",
+     "param_count": 3081
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.02347234226511099,
+      "ci_low": 0.014282185526489716,
+      "cp_mae": 136.36210170399042,
+      "n": 200,
+      "test_loss": 0.01852327726915032
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0360560149337565,
+      "ci_low": 0.020242914540132557,
+      "cp_mae": 166.9610515874193,
+      "n": 200,
+      "test_loss": 0.027256505934503544
+     },
+     "model_artifact": "artifacts/R3465/model.json",
+     "model_hash": "sha256:d621548641743623db25be3997f14af732df178f9e4c2aba75a51e9cd808e5dd",
+     "param_count": 3081
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.022476741323040506,
+      "ci_low": 0.014587254833819894,
+      "cp_mae": 136.55410235254186,
+      "n": 200,
+      "test_loss": 0.018198203216356873
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04216045425960862,
+      "ci_low": 0.022811990742443427,
+      "cp_mae": 177.99785352157488,
+      "n": 200,
+      "test_loss": 0.031082310564388326
+     },
+     "model_artifact": "artifacts/R3466/model.json",
+     "model_hash": "sha256:ce77dcaba7961ad14144f17ed6eac96989a0c899314e96e128f5314ace57f51d",
+     "param_count": 3081
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.026052669476232464,
+      "ci_low": 0.017269531337242332,
+      "cp_mae": 149.49415249278013,
+      "n": 200,
+      "test_loss": 0.02124992536195994
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04151563289739613,
+      "ci_low": 0.02318534855719628,
+      "cp_mae": 181.66017009665782,
+      "n": 200,
+      "test_loss": 0.0311743038329026
+     },
+     "model_artifact": "artifacts/R3467/model.json",
+     "model_hash": "sha256:424d00edc5d71d43f9b1b1b544cac72c7447eccbc0b40c2046e975154cfd4b65",
+     "param_count": 3081
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.025183237479311785,
+      "ci_low": 0.01636269823462504,
+      "cp_mae": 148.28869987002483,
+      "n": 200,
+      "test_loss": 0.02039414632893005
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03897977392873697,
+      "ci_low": 0.021218071215913435,
+      "cp_mae": 175.55360924541034,
+      "n": 200,
+      "test_loss": 0.02892156276993613
+     },
+     "model_artifact": "artifacts/R3468/model.json",
+     "model_hash": "sha256:71a20571251f5e60222f5207d8ec8441d88e0f6f515632a88642ee6f89f7d718",
+     "param_count": 3081
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.02963092334367266,
+      "ci_low": 0.017642071052419574,
+      "cp_mae": 149.39508952473642,
+      "n": 200,
+      "test_loss": 0.023106045600444464
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04275502277877544,
+      "ci_low": 0.024645405881997456,
+      "cp_mae": 183.01312278144357,
+      "n": 200,
+      "test_loss": 0.032750346628369044
+     },
+     "model_artifact": "artifacts/R3451/model.json",
+     "model_hash": "sha256:f35cec6f2b4370d09812036c12a5fb048952db3682899f55f0d41e03f9f9f619",
+     "param_count": 3081
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.02433461965687152,
+      "ci_low": 0.01357395361813075,
+      "cp_mae": 133.05641404483322,
+      "n": 200,
+      "test_loss": 0.018245267424786837
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04161981034827714,
+      "ci_low": 0.0206227305654306,
+      "cp_mae": 176.37627519520697,
+      "n": 200,
+      "test_loss": 0.029858854043717766
+     },
+     "model_artifact": "artifacts/R3452/model.json",
+     "model_hash": "sha256:90fe2397d447624e94cf6d3bfd2e1119f08bec2afb2164124f3c96f3291cd24b",
+     "param_count": 3081
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.022268285779077572,
+      "ci_low": 0.013721379838968402,
+      "cp_mae": 136.28435933813492,
+      "n": 200,
+      "test_loss": 0.017427463930797464
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0388593610063611,
+      "ci_low": 0.020558828733953788,
+      "cp_mae": 171.52451844561824,
+      "n": 200,
+      "test_loss": 0.02825406947559876
+     },
+     "model_artifact": "artifacts/R3453/model.json",
+     "model_hash": "sha256:0feab74ec05693248d0364e771ad742f5a904d3fc4d75c4437fb3b1d583ba308",
+     "param_count": 3081
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.027183573400190796,
+      "ci_low": 0.016629801567940153,
+      "cp_mae": 151.50004251949068,
+      "n": 200,
+      "test_loss": 0.02145347704423282
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04503481648946967,
+      "ci_low": 0.0252511287318172,
+      "cp_mae": 194.08690123151635,
+      "n": 200,
+      "test_loss": 0.034332921113195254
+     },
+     "model_artifact": "artifacts/R3454/model.json",
+     "model_hash": "sha256:c86546af0aa4628c6b87d5eee776f6530dee7732bd38318d5fbfda6a2c8feb10",
+     "param_count": 3081
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.027050828626812445,
+      "ci_low": 0.015677326949021683,
+      "cp_mae": 138.102216902059,
+      "n": 200,
+      "test_loss": 0.02082798774764327
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040532525734493625,
+      "ci_low": 0.021004149559318168,
+      "cp_mae": 170.8506373019178,
+      "n": 200,
+      "test_loss": 0.029538248999744787
+     },
+     "model_artifact": "artifacts/R3455/model.json",
+     "model_hash": "sha256:44bf0bfb4da8937ee94317c5cbba1fa18ff23a488c6f42ad67c1b9e4b934da2c",
+     "param_count": 3081
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.029217476588904518,
+      "ci_low": 0.017116971947139313,
+      "cp_mae": 145.75738004697712,
+      "n": 200,
+      "test_loss": 0.02248977623728729
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0436035293730902,
+      "ci_low": 0.024537112489432678,
+      "cp_mae": 183.2904530923917,
+      "n": 200,
+      "test_loss": 0.033163298993454916
+     },
+     "model_artifact": "artifacts/R3456/model.json",
+     "model_hash": "sha256:2e22defa40312ac8b077ac9354861f719267f6feb9f10889517d5a97afe7c903",
+     "param_count": 3081
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.02351145177919768,
+      "ci_low": 0.014931903985363343,
+      "cp_mae": 143.9399945232431,
+      "n": 200,
+      "test_loss": 0.018722768277696103
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03414733621858402,
+      "ci_low": 0.020576595968548477,
+      "cp_mae": 176.32151439521056,
+      "n": 200,
+      "test_loss": 0.026427229400157515
+     },
+     "model_artifact": "artifacts/R3457/model.json",
+     "model_hash": "sha256:6ee938efeb973b9de4cc974f9fc3c39b8a0c4006ef6e5dd2fd69579225965222",
+     "param_count": 3081
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.022657122090481974,
+      "ci_low": 0.014767417654143444,
+      "cp_mae": 140.14828865639393,
+      "n": 200,
+      "test_loss": 0.01828377436080778
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03805558819074451,
+      "ci_low": 0.020864501791711718,
+      "cp_mae": 176.3974557050454,
+      "n": 200,
+      "test_loss": 0.028384405585688624
+     },
+     "model_artifact": "artifacts/R3458/model.json",
+     "model_hash": "sha256:a57d37e3e99a622e783abbd8e16d19f6a6f0151e94eb1c17523a98b788a0631c",
+     "param_count": 3081
+    }
+   }
+  },
+  "SF-32k": {
+   "1": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.02042308865759775,
+      "ci_low": 0.012676325902376608,
+      "cp_mae": 130.47033938455425,
+      "n": 200,
+      "test_loss": 0.016077147357172288
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037045235995170775,
+      "ci_low": 0.020076398360191115,
+      "cp_mae": 173.52641127845817,
+      "n": 200,
+      "test_loss": 0.027285336133319488
+     },
+     "model_artifact": "artifacts/R3349/model.json",
+     "model_hash": "sha256:a6d967744d7261b5fed24df2914028e7475b8a1e98aaea0e08d2cdf5e1de3211",
+     "param_count": 771
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.02130054981881054,
+      "ci_low": 0.013344479123144553,
+      "cp_mae": 138.36124635395615,
+      "n": 200,
+      "test_loss": 0.016837279303567713
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03851860991958199,
+      "ci_low": 0.020329257996143046,
+      "cp_mae": 177.9625867781082,
+      "n": 200,
+      "test_loss": 0.028011511519902256
+     },
+     "model_artifact": "artifacts/R3350/model.json",
+     "model_hash": "sha256:63d0563e1946396f32582141cba68cd9bf917aaaae09202e0bb512551792c177",
+     "param_count": 771
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.024636459734105064,
+      "ci_low": 0.015192134397163916,
+      "cp_mae": 144.69423520249643,
+      "n": 200,
+      "test_loss": 0.019408745190858768
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037733531385612765,
+      "ci_low": 0.02146259148911364,
+      "cp_mae": 177.30422435173278,
+      "n": 200,
+      "test_loss": 0.02866013625096742
+     },
+     "model_artifact": "artifacts/R3359/model.json",
+     "model_hash": "sha256:762a0ad96b692cc2e1be0f7f1d0c3241668e8b82f23399126cb1a00b277a5dec",
+     "param_count": 771
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.021864070458518296,
+      "ci_low": 0.013606814740944205,
+      "cp_mae": 136.71685849839213,
+      "n": 200,
+      "test_loss": 0.017232933875584965
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038856899976219716,
+      "ci_low": 0.022077218608838527,
+      "cp_mae": 182.32289612336876,
+      "n": 200,
+      "test_loss": 0.02938573139732665
+     },
+     "model_artifact": "artifacts/R3360/model.json",
+     "model_hash": "sha256:2cf73ce630955f971bc2563a963dc7e037c6e1f227977ba855ccd755a6947eae",
+     "param_count": 771
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.02077753016766878,
+      "ci_low": 0.012805994514888222,
+      "cp_mae": 133.56250282219327,
+      "n": 200,
+      "test_loss": 0.01635803536214278
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03471790248129359,
+      "ci_low": 0.019770782596945945,
+      "cp_mae": 172.61661464798547,
+      "n": 200,
+      "test_loss": 0.026403006925840217
+     },
+     "model_artifact": "artifacts/R3361/model.json",
+     "model_hash": "sha256:6b213ab10bdfb813cd8727e683cc29650926b7ba2332b036e3213266a2352686",
+     "param_count": 771
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.027794900862135295,
+      "ci_low": 0.016770820291781202,
+      "cp_mae": 148.18159402047667,
+      "n": 200,
+      "test_loss": 0.02174655850752354
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04039910272639505,
+      "ci_low": 0.02493755075295382,
+      "cp_mae": 190.4962097806039,
+      "n": 200,
+      "test_loss": 0.03207016540088742
+     },
+     "model_artifact": "artifacts/R3362/model.json",
+     "model_hash": "sha256:c7d2cc77d3a5d76b590dd4882aaa96a8e29b9101db2f0dcd7f3be04438cd6971",
+     "param_count": 771
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.02656069823127305,
+      "ci_low": 0.01612699174418713,
+      "cp_mae": 149.67152766044057,
+      "n": 200,
+      "test_loss": 0.020772797118299033
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03836373877148986,
+      "ci_low": 0.02238229664365873,
+      "cp_mae": 180.36262727139083,
+      "n": 200,
+      "test_loss": 0.02962983459300432
+     },
+     "model_artifact": "artifacts/R3363/model.json",
+     "model_hash": "sha256:af80d5f8ae4a28aac198b1af7825ed3da2fa379ad876097e58c1b43406b5c031",
+     "param_count": 771
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.03502080766186035,
+      "ci_low": 0.020813715296675014,
+      "cp_mae": 169.9481697119511,
+      "n": 200,
+      "test_loss": 0.0273975456602681
+     },
+     "SF-DEEP": {
+      "ci_high": 0.049950428423308664,
+      "ci_low": 0.030787301651756853,
+      "cp_mae": 211.6512952913831,
+      "n": 200,
+      "test_loss": 0.04009689107442041
+     },
+     "model_artifact": "artifacts/R3364/model.json",
+     "model_hash": "sha256:eb01aa64fce6a263ca695ac23d81cabdaeb13bfa7319aabd270bfff32184cbf3",
+     "param_count": 771
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.022548602633315065,
+      "ci_low": 0.014265391662432776,
+      "cp_mae": 142.22120151858294,
+      "n": 200,
+      "test_loss": 0.01804100254530439
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03665994365698006,
+      "ci_low": 0.02163008781372654,
+      "cp_mae": 180.42053465686965,
+      "n": 200,
+      "test_loss": 0.028372150850565592
+     },
+     "model_artifact": "artifacts/R3365/model.json",
+     "model_hash": "sha256:60f1e3de88069dca5912a7901ff7390adcf68f44da82186dd54c9ab80c39928b",
+     "param_count": 771
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.022958356245565255,
+      "ci_low": 0.014260403314237233,
+      "cp_mae": 141.99465753878513,
+      "n": 200,
+      "test_loss": 0.018262073188341835
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03707023018023753,
+      "ci_low": 0.020580727201079643,
+      "cp_mae": 175.1736080051591,
+      "n": 200,
+      "test_loss": 0.027981628794204957
+     },
+     "model_artifact": "artifacts/R3366/model.json",
+     "model_hash": "sha256:906f5c762b7435c95816a284d0592599929a0fe4f5c24f0db2805afe0856135e",
+     "param_count": 771
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.021173637597746205,
+      "ci_low": 0.013076543807135304,
+      "cp_mae": 136.98898336172658,
+      "n": 200,
+      "test_loss": 0.01676756361159794
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03469213131416184,
+      "ci_low": 0.01971103072626922,
+      "cp_mae": 173.7105379784116,
+      "n": 200,
+      "test_loss": 0.026357932701240382
+     },
+     "model_artifact": "artifacts/R3367/model.json",
+     "model_hash": "sha256:239bd60a3396307a02da536b5d82c06705a0d89c0d8089d07f73fef332c805bb",
+     "param_count": 771
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.021715613317324266,
+      "ci_low": 0.013524259689557607,
+      "cp_mae": 136.10306526446027,
+      "n": 200,
+      "test_loss": 0.017181053465979475
+     },
+     "SF-DEEP": {
+      "ci_high": 0.033275663343859174,
+      "ci_low": 0.020365257716428407,
+      "cp_mae": 174.20684091948823,
+      "n": 200,
+      "test_loss": 0.026271602351668512
+     },
+     "model_artifact": "artifacts/R3368/model.json",
+     "model_hash": "sha256:58f42b8314133947c2617f23491cf621b609a4fde018b524e2d9a4e514febc7c",
+     "param_count": 771
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.024213488146912668,
+      "ci_low": 0.01512364464849622,
+      "cp_mae": 141.4905940069798,
+      "n": 200,
+      "test_loss": 0.019182511376546488
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03906266530207908,
+      "ci_low": 0.02376897958408334,
+      "cp_mae": 187.88411789019807,
+      "n": 200,
+      "test_loss": 0.03069843133818595
+     },
+     "model_artifact": "artifacts/R3351/model.json",
+     "model_hash": "sha256:4ac11d153cf7474a190d50bc0f282eb78e6d902c2844ee993130433580776cca",
+     "param_count": 771
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.020322072005268265,
+      "ci_low": 0.012394867341001824,
+      "cp_mae": 132.58325225800806,
+      "n": 200,
+      "test_loss": 0.0159901906765961
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03455861439896237,
+      "ci_low": 0.01895126048643173,
+      "cp_mae": 168.5000075579368,
+      "n": 200,
+      "test_loss": 0.025476874997982176
+     },
+     "model_artifact": "artifacts/R3352/model.json",
+     "model_hash": "sha256:0c4fada2dc61982b87be6cee87819eb9a020b0151dcc11a2bdaa0485ac8fc50e",
+     "param_count": 771
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.022588367862888994,
+      "ci_low": 0.014134203326461786,
+      "cp_mae": 140.42603653185674,
+      "n": 200,
+      "test_loss": 0.017857213004498176
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038999074777376214,
+      "ci_low": 0.020347680988625532,
+      "cp_mae": 174.5974240402003,
+      "n": 200,
+      "test_loss": 0.028460330400793373
+     },
+     "model_artifact": "artifacts/R3353/model.json",
+     "model_hash": "sha256:f2e6c543e6db0d29e953726e80239e95491f325b139dc46b8b2085967bbf7c22",
+     "param_count": 771
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.028753561712348056,
+      "ci_low": 0.01756094286390943,
+      "cp_mae": 152.38479728615036,
+      "n": 200,
+      "test_loss": 0.022790807816114242
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0416263398039403,
+      "ci_low": 0.025628136214907383,
+      "cp_mae": 190.21645632527492,
+      "n": 200,
+      "test_loss": 0.03298879648204892
+     },
+     "model_artifact": "artifacts/R3354/model.json",
+     "model_hash": "sha256:ce439a9898c051bd647b51be1a9b1eeb5bf76f044b9421f8a2905f1446e27d9d",
+     "param_count": 771
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.022052375309971468,
+      "ci_low": 0.013804178532353493,
+      "cp_mae": 139.51774789365578,
+      "n": 200,
+      "test_loss": 0.017531807653974395
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037893399880334404,
+      "ci_low": 0.020805613575851405,
+      "cp_mae": 177.79558880770708,
+      "n": 200,
+      "test_loss": 0.028179406027471918
+     },
+     "model_artifact": "artifacts/R3355/model.json",
+     "model_hash": "sha256:6c51dadb2f826af14b321d65a983feebf88413c4e7c8de276c8004c672a488a2",
+     "param_count": 771
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.02441528525421782,
+      "ci_low": 0.015962041007228395,
+      "cp_mae": 150.6332291034271,
+      "n": 200,
+      "test_loss": 0.01982771960224995
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0373703820860676,
+      "ci_low": 0.02232257706135768,
+      "cp_mae": 180.9674739788169,
+      "n": 200,
+      "test_loss": 0.028935585754462676
+     },
+     "model_artifact": "artifacts/R3356/model.json",
+     "model_hash": "sha256:eef0512c4bbb377cc48f5c126e845ac08167879c36d928979697be35abc0effb",
+     "param_count": 771
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.020483714210564916,
+      "ci_low": 0.012544823290500797,
+      "cp_mae": 132.41834880266106,
+      "n": 200,
+      "test_loss": 0.016156675968728225
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03692965697799929,
+      "ci_low": 0.020002444274420245,
+      "cp_mae": 174.7230919623928,
+      "n": 200,
+      "test_loss": 0.027228118553498826
+     },
+     "model_artifact": "artifacts/R3357/model.json",
+     "model_hash": "sha256:b83dba4bec814ef5db8525916151a6debb03805a2570622e22f07084e0d49e8d",
+     "param_count": 771
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.027325364013922587,
+      "ci_low": 0.01635298665179705,
+      "cp_mae": 145.3069728613569,
+      "n": 200,
+      "test_loss": 0.02136720469677525
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03970628419114891,
+      "ci_low": 0.02430229111311346,
+      "cp_mae": 185.6021633896056,
+      "n": 200,
+      "test_loss": 0.03139597132391729
+     },
+     "model_artifact": "artifacts/R3358/model.json",
+     "model_hash": "sha256:9d9c428ed87a6ffe5c0195a43ea0bb5b50edc068d77ff784714dea42e5d51da8",
+     "param_count": 771
+    }
+   },
+   "16": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.02633019604018907,
+      "ci_low": 0.015459817603138585,
+      "cp_mae": 137.01060353666813,
+      "n": 200,
+      "test_loss": 0.020187117692245692
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03915489474554813,
+      "ci_low": 0.02086261959400093,
+      "cp_mae": 169.27137305945897,
+      "n": 200,
+      "test_loss": 0.028823379167520615
+     },
+     "model_artifact": "artifacts/R3389/model.json",
+     "model_hash": "sha256:1e32cb47f7cd2948d515655698a504452c0016b356e77fb073a3fcf370d0bdfc",
+     "param_count": 12321
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.031532955126985666,
+      "ci_low": 0.019034333853844065,
+      "cp_mae": 155.1042735483948,
+      "n": 200,
+      "test_loss": 0.02479699281613006
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04346013026869648,
+      "ci_low": 0.02457300701007058,
+      "cp_mae": 179.6356525192796,
+      "n": 200,
+      "test_loss": 0.03293784871133929
+     },
+     "model_artifact": "artifacts/R3390/model.json",
+     "model_hash": "sha256:933623648268b75f118b6a091bfea0ad0831baa615699635fab20e62a34907fe",
+     "param_count": 12321
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.0310024479563723,
+      "ci_low": 0.01986775462472993,
+      "cp_mae": 158.57497327643304,
+      "n": 200,
+      "test_loss": 0.024939815688763058
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04220936052209633,
+      "ci_low": 0.025093137578056944,
+      "cp_mae": 181.7457846410533,
+      "n": 200,
+      "test_loss": 0.03293833521028726
+     },
+     "model_artifact": "artifacts/R3399/model.json",
+     "model_hash": "sha256:170e67371df2e7364347d74cf2131634037e8802bf91ae02578fc34a00d6f0c3",
+     "param_count": 12321
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.025445466778423843,
+      "ci_low": 0.015981717714864417,
+      "cp_mae": 146.93098982290488,
+      "n": 200,
+      "test_loss": 0.020322763597051284
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04192298035699905,
+      "ci_low": 0.022483574918926108,
+      "cp_mae": 176.6747949290077,
+      "n": 200,
+      "test_loss": 0.03126824294278061
+     },
+     "model_artifact": "artifacts/R3400/model.json",
+     "model_hash": "sha256:b6f6965b6bbb9afe94eb29fedcbed73ab19d22cad62ce4b5ed9d605e8d0cc360",
+     "param_count": 12321
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.02509039896971775,
+      "ci_low": 0.015377238970336597,
+      "cp_mae": 137.03591624600077,
+      "n": 200,
+      "test_loss": 0.019698339046696486
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04091868225485344,
+      "ci_low": 0.022070951091408747,
+      "cp_mae": 173.4428417898097,
+      "n": 200,
+      "test_loss": 0.030159171638177638
+     },
+     "model_artifact": "artifacts/R3401/model.json",
+     "model_hash": "sha256:41af145860d51ba5c1be75e3e4d6ac1b0431d76f2eb549008829d8443ec78199",
+     "param_count": 12321
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.02455569582619822,
+      "ci_low": 0.015649960572594556,
+      "cp_mae": 143.99350011666363,
+      "n": 200,
+      "test_loss": 0.019915049679457654
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03624490496547718,
+      "ci_low": 0.021192909858385765,
+      "cp_mae": 169.57503918230526,
+      "n": 200,
+      "test_loss": 0.027845111318803933
+     },
+     "model_artifact": "artifacts/R3402/model.json",
+     "model_hash": "sha256:7966350168d1de585b3be4b603a6914b3cbb16850842e2629253ef08521c8fe6",
+     "param_count": 12321
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.039048177660370775,
+      "ci_low": 0.022481922039054268,
+      "cp_mae": 163.9927230111519,
+      "n": 200,
+      "test_loss": 0.029790742286309558
+     },
+     "SF-DEEP": {
+      "ci_high": 0.05262380255466564,
+      "ci_low": 0.030179979576057628,
+      "cp_mae": 196.20902656470594,
+      "n": 200,
+      "test_loss": 0.040775829272999345
+     },
+     "model_artifact": "artifacts/R3403/model.json",
+     "model_hash": "sha256:c55399a7e7ae6d48af1fac01e645420931837089d4b65ed0719bdcdeb21738b3",
+     "param_count": 12321
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.02472150800784764,
+      "ci_low": 0.015713405605403873,
+      "cp_mae": 141.43934120059063,
+      "n": 200,
+      "test_loss": 0.01979604237629405
+     },
+     "SF-DEEP": {
+      "ci_high": 0.036733848802161254,
+      "ci_low": 0.020211867043593425,
+      "cp_mae": 168.73423968025077,
+      "n": 200,
+      "test_loss": 0.027486365327218223
+     },
+     "model_artifact": "artifacts/R3404/model.json",
+     "model_hash": "sha256:901d688178857cb1f6195383c20743cb2b7fab1d419b341e4a0238c491d06e62",
+     "param_count": 12321
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.03193784849292845,
+      "ci_low": 0.019526898458383662,
+      "cp_mae": 156.87385898593868,
+      "n": 200,
+      "test_loss": 0.025431298248565257
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04724795721406878,
+      "ci_low": 0.0260057912387849,
+      "cp_mae": 187.77634579548067,
+      "n": 200,
+      "test_loss": 0.03539645516567881
+     },
+     "model_artifact": "artifacts/R3405/model.json",
+     "model_hash": "sha256:c21cfba9c2df5fe27b1c1e21e02df763ff8526e044a3b0ffbb72fa35285e9bc3",
+     "param_count": 12321
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.027331413726793947,
+      "ci_low": 0.01709040757006832,
+      "cp_mae": 145.04044251766544,
+      "n": 200,
+      "test_loss": 0.021890711927323378
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03918680681061013,
+      "ci_low": 0.023603940183897304,
+      "cp_mae": 175.68511227666056,
+      "n": 200,
+      "test_loss": 0.031207239726705964
+     },
+     "model_artifact": "artifacts/R3406/model.json",
+     "model_hash": "sha256:93c7fc6efae6759be822583cc7d461052f9fcdec450943801742a0f24157a1f5",
+     "param_count": 12321
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.02867182914466126,
+      "ci_low": 0.017144628837983136,
+      "cp_mae": 149.1296354162927,
+      "n": 200,
+      "test_loss": 0.022160431877801506
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04425149367377113,
+      "ci_low": 0.023546491238364053,
+      "cp_mae": 180.74095847302817,
+      "n": 200,
+      "test_loss": 0.03270625157192271
+     },
+     "model_artifact": "artifacts/R3407/model.json",
+     "model_hash": "sha256:bfb5fe66a948d666e8b9e5431db6874c7402a178ad45ac6cf81c43a26f2c2d6d",
+     "param_count": 12321
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.027322772234394124,
+      "ci_low": 0.01812652927519477,
+      "cp_mae": 154.8115635845969,
+      "n": 200,
+      "test_loss": 0.022492343497772557
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03805603022111262,
+      "ci_low": 0.023339509929744862,
+      "cp_mae": 178.84163942934072,
+      "n": 200,
+      "test_loss": 0.030010047077768
+     },
+     "model_artifact": "artifacts/R3408/model.json",
+     "model_hash": "sha256:4f9ba59230e7d9f237ed337500716adf758c22955c714a15e738275a0c88e793",
+     "param_count": 12321
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.02820082459073168,
+      "ci_low": 0.016473559278797956,
+      "cp_mae": 144.774745160564,
+      "n": 200,
+      "test_loss": 0.02179787606989895
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04023971631810534,
+      "ci_low": 0.02170917045397373,
+      "cp_mae": 170.78553506334956,
+      "n": 200,
+      "test_loss": 0.029896607168220866
+     },
+     "model_artifact": "artifacts/R3391/model.json",
+     "model_hash": "sha256:f5edef1122f3c6d97daa9e844da3586b4816dbf0470d61faf6ca4ea2fb970003",
+     "param_count": 12321
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.025609114062086134,
+      "ci_low": 0.015832074209711593,
+      "cp_mae": 145.33449102866106,
+      "n": 200,
+      "test_loss": 0.02016969167679329
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04004175922052058,
+      "ci_low": 0.022364246490871428,
+      "cp_mae": 176.29960217844257,
+      "n": 200,
+      "test_loss": 0.030381372716623934
+     },
+     "model_artifact": "artifacts/R3392/model.json",
+     "model_hash": "sha256:322136464aeb8eb9b7421c4575d859d71e7cfd8c7be1346819060fc1dc94bc87",
+     "param_count": 12321
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.026862027787989733,
+      "ci_low": 0.015011826908485293,
+      "cp_mae": 141.60855784110316,
+      "n": 200,
+      "test_loss": 0.02036683254497851
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03676607330036955,
+      "ci_low": 0.018893030965337232,
+      "cp_mae": 164.5955864930542,
+      "n": 200,
+      "test_loss": 0.027204082592144452
+     },
+     "model_artifact": "artifacts/R3393/model.json",
+     "model_hash": "sha256:300040358fb40ddd241e7b5e67044b0d628b617dfae194eea377ba28eeb85e06",
+     "param_count": 12321
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.029998753525621296,
+      "ci_low": 0.01860325260614762,
+      "cp_mae": 158.0723414609463,
+      "n": 200,
+      "test_loss": 0.023622490225666485
+     },
+     "SF-DEEP": {
+      "ci_high": 0.042724313536574486,
+      "ci_low": 0.023889113519590378,
+      "cp_mae": 187.74717166666372,
+      "n": 200,
+      "test_loss": 0.03275080086499663
+     },
+     "model_artifact": "artifacts/R3394/model.json",
+     "model_hash": "sha256:0d0fca4064e6153e56a43e7b00e15c669eb4f6cca2a7666a4a1f891fe2446d65",
+     "param_count": 12321
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.030179991115978952,
+      "ci_low": 0.019319644772513567,
+      "cp_mae": 155.77694692206916,
+      "n": 200,
+      "test_loss": 0.024142503641946117
+     },
+     "SF-DEEP": {
+      "ci_high": 0.044241314489833775,
+      "ci_low": 0.02549968480136382,
+      "cp_mae": 186.33113679294456,
+      "n": 200,
+      "test_loss": 0.033784392675398775
+     },
+     "model_artifact": "artifacts/R3395/model.json",
+     "model_hash": "sha256:b68e7e6a753888e270733626983977540bf770b75fd2e52d42888ad77d9f9f8c",
+     "param_count": 12321
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.025547920156094993,
+      "ci_low": 0.015957181040321712,
+      "cp_mae": 141.31924463748547,
+      "n": 200,
+      "test_loss": 0.02025109877528025
+     },
+     "SF-DEEP": {
+      "ci_high": 0.0413685445282415,
+      "ci_low": 0.022537068339345778,
+      "cp_mae": 172.82452689506093,
+      "n": 200,
+      "test_loss": 0.03056960273747666
+     },
+     "model_artifact": "artifacts/R3396/model.json",
+     "model_hash": "sha256:d95045c4205dcfe45a31b9ad8f22fa9c34a3c64ddfaf5ca99cfc610216509a1f",
+     "param_count": 12321
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.028591847573837308,
+      "ci_low": 0.018967132713510703,
+      "cp_mae": 161.9901561176744,
+      "n": 200,
+      "test_loss": 0.023581234013133043
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04171703707447641,
+      "ci_low": 0.02325627517776487,
+      "cp_mae": 185.94536946805144,
+      "n": 200,
+      "test_loss": 0.031281509610739236
+     },
+     "model_artifact": "artifacts/R3397/model.json",
+     "model_hash": "sha256:f91cc4ff3d6c4ddf8813e0575fa4e0f3c1a5f0f363be1e24b8376ef6ae96313e",
+     "param_count": 12321
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.027706391505677833,
+      "ci_low": 0.01682273712935739,
+      "cp_mae": 143.47412129435565,
+      "n": 200,
+      "test_loss": 0.021527789626861353
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04488399969200671,
+      "ci_low": 0.025238341749928225,
+      "cp_mae": 183.6141003360498,
+      "n": 200,
+      "test_loss": 0.033751098527339256
+     },
+     "model_artifact": "artifacts/R3398/model.json",
+     "model_hash": "sha256:0cd2040c2f199707230b829aae19d0639e53de3175346fc9f2d69f60d8c4b67b",
+     "param_count": 12321
+    }
+   },
+   "32": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.023911583144413016,
+      "ci_low": 0.015974441615169137,
+      "cp_mae": 147.83447916934583,
+      "n": 200,
+      "test_loss": 0.019694672699127266
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037134536420089424,
+      "ci_low": 0.0206410490942344,
+      "cp_mae": 170.75450162277448,
+      "n": 200,
+      "test_loss": 0.028039602859542833
+     },
+     "model_artifact": "artifacts/R3409/model.json",
+     "model_hash": "sha256:521790f410ed2faba56c427770a9b91ef7a03043a439f5e05191e5b63e41489f",
+     "param_count": 24641
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.022103431547584495,
+      "ci_low": 0.01353169715241057,
+      "cp_mae": 132.63249989796674,
+      "n": 200,
+      "test_loss": 0.017302091921424352
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03762808835712661,
+      "ci_low": 0.018924290086009554,
+      "cp_mae": 161.4397581829323,
+      "n": 200,
+      "test_loss": 0.027230947585753458
+     },
+     "model_artifact": "artifacts/R3410/model.json",
+     "model_hash": "sha256:47300970d4e0b80c9d67dec81646877831684a55e26ab224316db85cf021a846",
+     "param_count": 24641
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.03153965190688217,
+      "ci_low": 0.020201817895014504,
+      "cp_mae": 161.28501259420003,
+      "n": 200,
+      "test_loss": 0.02527255479156075
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04764285151057891,
+      "ci_low": 0.02880693963089596,
+      "cp_mae": 194.73277071841025,
+      "n": 200,
+      "test_loss": 0.037429841885394576
+     },
+     "model_artifact": "artifacts/R3419/model.json",
+     "model_hash": "sha256:d87f766f37032366e61888c7a7df36871e438b3896b5fe3e3d7fe83e0ee1b999",
+     "param_count": 24641
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.033014162666718416,
+      "ci_low": 0.020474297284547992,
+      "cp_mae": 163.30060316761336,
+      "n": 200,
+      "test_loss": 0.026035085559552515
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04409064070257253,
+      "ci_low": 0.02640236942358205,
+      "cp_mae": 187.91370020524516,
+      "n": 200,
+      "test_loss": 0.03427683353881
+     },
+     "model_artifact": "artifacts/R3420/model.json",
+     "model_hash": "sha256:6d7d250ded0bf9c643ab9f956f6e5843ae3d0d60ff05df9fbd2369a2d21063b4",
+     "param_count": 24641
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.026849701982862306,
+      "ci_low": 0.016100627588485794,
+      "cp_mae": 145.39490665815924,
+      "n": 200,
+      "test_loss": 0.02091428841135323
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04018635864453508,
+      "ci_low": 0.021696394678556937,
+      "cp_mae": 175.15867698391256,
+      "n": 200,
+      "test_loss": 0.029596207052876213
+     },
+     "model_artifact": "artifacts/R3421/model.json",
+     "model_hash": "sha256:c8c56e8d855da2b623b9455b6d9df76e82342e27ba8edb129aec6ee6f1f8265c",
+     "param_count": 24641
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.026079761133615396,
+      "ci_low": 0.017166081697011008,
+      "cp_mae": 153.32569663080656,
+      "n": 200,
+      "test_loss": 0.021357843347964655
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04457489390818683,
+      "ci_low": 0.0257754127295082,
+      "cp_mae": 188.4523318097875,
+      "n": 200,
+      "test_loss": 0.03374707202093768
+     },
+     "model_artifact": "artifacts/R3422/model.json",
+     "model_hash": "sha256:2e6b12b4df887f8fad7672db40d87702ac86e7a493862d6b2222dc782da94b0e",
+     "param_count": 24641
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.030935754150298925,
+      "ci_low": 0.018315623872611684,
+      "cp_mae": 152.34295609357125,
+      "n": 200,
+      "test_loss": 0.02383357281515406
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04167503972404837,
+      "ci_low": 0.023237591830042762,
+      "cp_mae": 176.29529016199456,
+      "n": 200,
+      "test_loss": 0.03156221502616827
+     },
+     "model_artifact": "artifacts/R3423/model.json",
+     "model_hash": "sha256:7d391bae44ba07d263c585ccba4897d6524655a25ae1cb201bd9f50a852e0d24",
+     "param_count": 24641
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.031093080224686563,
+      "ci_low": 0.018409652939811432,
+      "cp_mae": 151.81445946657715,
+      "n": 200,
+      "test_loss": 0.023917186114316723
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03967438788322906,
+      "ci_low": 0.02272111554420241,
+      "cp_mae": 168.88280348533618,
+      "n": 200,
+      "test_loss": 0.029938818736480664
+     },
+     "model_artifact": "artifacts/R3424/model.json",
+     "model_hash": "sha256:6bbc8e54bf1fb737caa04d4037151da0926840a02adb28b7265cfb6b107fe011",
+     "param_count": 24641
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.031899833330748986,
+      "ci_low": 0.02038343477559238,
+      "cp_mae": 160.6312985976308,
+      "n": 200,
+      "test_loss": 0.025579106432397785
+     },
+     "SF-DEEP": {
+      "ci_high": 0.043609744472164515,
+      "ci_low": 0.02570007671996078,
+      "cp_mae": 181.36230491926912,
+      "n": 200,
+      "test_loss": 0.033567473368852206
+     },
+     "model_artifact": "artifacts/R3425/model.json",
+     "model_hash": "sha256:eb54dac95479edd6e13c04b8eb44769862baf4be324f3025c5acd8a05a63cad7",
+     "param_count": 24641
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.03373574957011869,
+      "ci_low": 0.020403775864329295,
+      "cp_mae": 157.61106951008972,
+      "n": 200,
+      "test_loss": 0.026334953306099432
+     },
+     "SF-DEEP": {
+      "ci_high": 0.05067278454263937,
+      "ci_low": 0.026892308967855764,
+      "cp_mae": 196.55719768803607,
+      "n": 200,
+      "test_loss": 0.037874077190601756
+     },
+     "model_artifact": "artifacts/R3426/model.json",
+     "model_hash": "sha256:f7c217afb550d940002f604dcd3486d042dc2b6f50816793121fa00ba5a993f4",
+     "param_count": 24641
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.028887527229206376,
+      "ci_low": 0.018625275811608916,
+      "cp_mae": 151.30242368516986,
+      "n": 200,
+      "test_loss": 0.023290502869390037
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04487474948360868,
+      "ci_low": 0.024355873834353895,
+      "cp_mae": 181.95037827546213,
+      "n": 200,
+      "test_loss": 0.03338411213173883
+     },
+     "model_artifact": "artifacts/R3427/model.json",
+     "model_hash": "sha256:3444962e2193fd004b92fd960df6e65e13c06832c1c64ca3103a06d598c77a01",
+     "param_count": 24641
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.03213752859811036,
+      "ci_low": 0.018490543831717828,
+      "cp_mae": 151.10687847798488,
+      "n": 200,
+      "test_loss": 0.024389871037537342
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04560569740180503,
+      "ci_low": 0.02520744713170615,
+      "cp_mae": 185.52193968248775,
+      "n": 200,
+      "test_loss": 0.034632805389486224
+     },
+     "model_artifact": "artifacts/R3428/model.json",
+     "model_hash": "sha256:b1493814083c2c8472a95f63f7b40ef4c454ab68c4892e275e7852c3e83e7eab",
+     "param_count": 24641
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.03205694483644552,
+      "ci_low": 0.019375775397045825,
+      "cp_mae": 152.8557744797755,
+      "n": 200,
+      "test_loss": 0.02495858265724898
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04431161821238255,
+      "ci_low": 0.024752859438832632,
+      "cp_mae": 180.44323324248282,
+      "n": 200,
+      "test_loss": 0.03392638071753987
+     },
+     "model_artifact": "artifacts/R3411/model.json",
+     "model_hash": "sha256:22c61e036645a27df5077b41a02b79bcbb9c92587e4fcf495c4199fcafcec1f4",
+     "param_count": 24641
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.03451027045079619,
+      "ci_low": 0.019784364724625362,
+      "cp_mae": 154.8791877612106,
+      "n": 200,
+      "test_loss": 0.02629432792441947
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04630294087021989,
+      "ci_low": 0.024748766407843757,
+      "cp_mae": 176.67493899786868,
+      "n": 200,
+      "test_loss": 0.03401805220348877
+     },
+     "model_artifact": "artifacts/R3412/model.json",
+     "model_hash": "sha256:c27ea3d01ebcb6c9a170c5777c2941fdd1d7a7f2f6d99cb57e72c06c9ee3f172",
+     "param_count": 24641
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.032547557130104425,
+      "ci_low": 0.018872080936337143,
+      "cp_mae": 154.33712579543337,
+      "n": 200,
+      "test_loss": 0.02511762977476211
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04575174897890576,
+      "ci_low": 0.025277014550505204,
+      "cp_mae": 182.56983438273505,
+      "n": 200,
+      "test_loss": 0.03486019198407655
+     },
+     "model_artifact": "artifacts/R3413/model.json",
+     "model_hash": "sha256:8343ba2738fa9d3aae50e6813a1c4e8c8e575f9f93ecbc37bf89a295b2b59a34",
+     "param_count": 24641
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.02994937209214025,
+      "ci_low": 0.019446855486448086,
+      "cp_mae": 157.0681871525716,
+      "n": 200,
+      "test_loss": 0.02438731956360883
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04388543864908908,
+      "ci_low": 0.025719195487753473,
+      "cp_mae": 190.96809231161737,
+      "n": 200,
+      "test_loss": 0.03383694656149069
+     },
+     "model_artifact": "artifacts/R3414/model.json",
+     "model_hash": "sha256:709c45d4ed39b8766b3db67d4350e174bbe858a4f1241e5059ee136ff1d0a4d9",
+     "param_count": 24641
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.03009372030349558,
+      "ci_low": 0.017218618851957933,
+      "cp_mae": 152.1726945878388,
+      "n": 200,
+      "test_loss": 0.022824103557003927
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04326662496532576,
+      "ci_low": 0.023167468245605373,
+      "cp_mae": 180.44314617861346,
+      "n": 200,
+      "test_loss": 0.03215404934342998
+     },
+     "model_artifact": "artifacts/R3415/model.json",
+     "model_hash": "sha256:0fba152e1157a7bca7ed26adfc73128d02b6079d5a3cdabbf504cfc3967180bb",
+     "param_count": 24641
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.03463638802085814,
+      "ci_low": 0.021035230581699906,
+      "cp_mae": 161.6991362027142,
+      "n": 200,
+      "test_loss": 0.02733411213611988
+     },
+     "SF-DEEP": {
+      "ci_high": 0.051767967144635704,
+      "ci_low": 0.028159825571105048,
+      "cp_mae": 196.33660924257944,
+      "n": 200,
+      "test_loss": 0.03871466029091628
+     },
+     "model_artifact": "artifacts/R3416/model.json",
+     "model_hash": "sha256:07cf2532d77cb1b9e5e137e3e316235fab77dd67b702dfe93b82626583299882",
+     "param_count": 24641
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.026971098179460407,
+      "ci_low": 0.01772568268286386,
+      "cp_mae": 151.8605647928362,
+      "n": 200,
+      "test_loss": 0.02194367261572692
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037756606921313086,
+      "ci_low": 0.021135638377800966,
+      "cp_mae": 168.7107509540499,
+      "n": 200,
+      "test_loss": 0.028454238691757734
+     },
+     "model_artifact": "artifacts/R3417/model.json",
+     "model_hash": "sha256:f6950263457525f1c1247182d80c9a6ac4d659450c8d622793e61b9a7488a251",
+     "param_count": 24641
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.02889225061064167,
+      "ci_low": 0.017929944853815185,
+      "cp_mae": 154.72249898633817,
+      "n": 200,
+      "test_loss": 0.023282104509250282
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03866023615882023,
+      "ci_low": 0.022749678660663086,
+      "cp_mae": 175.72509741597167,
+      "n": 200,
+      "test_loss": 0.030104047234075813
+     },
+     "model_artifact": "artifacts/R3418/model.json",
+     "model_hash": "sha256:6b04486dd32042c276953356fe55496ea1c4feb24b04f0079b6d8cac4b08699a",
+     "param_count": 24641
+    }
+   },
+   "4": {
+    "0": {
+     "CVS-DEEP": {
+      "ci_high": 0.021291481023317172,
+      "ci_low": 0.013095385657252701,
+      "cp_mae": 135.69858334109082,
+      "n": 200,
+      "test_loss": 0.01679099011316443
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03470575590184093,
+      "ci_low": 0.019261317850336603,
+      "cp_mae": 167.50321081642755,
+      "n": 200,
+      "test_loss": 0.026028793393379317
+     },
+     "model_artifact": "artifacts/R3369/model.json",
+     "model_hash": "sha256:bedbb761007c5ccfb122c71ff981c412248817e7a647d0ce20b2e6f9604c5ab6",
+     "param_count": 3081
+    },
+    "1": {
+     "CVS-DEEP": {
+      "ci_high": 0.02209377307909139,
+      "ci_low": 0.014127805467921008,
+      "cp_mae": 137.30169298275695,
+      "n": 200,
+      "test_loss": 0.017761854856862245
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03842306006024551,
+      "ci_low": 0.021578328591573825,
+      "cp_mae": 178.3821172146487,
+      "n": 200,
+      "test_loss": 0.02886310313947014
+     },
+     "model_artifact": "artifacts/R3370/model.json",
+     "model_hash": "sha256:ec4d84cbdc1b60c78fded7cf9131937510bf8ca96c5cd0b7064e04e59cf9abd6",
+     "param_count": 3081
+    },
+    "10": {
+     "CVS-DEEP": {
+      "ci_high": 0.024304226228537482,
+      "ci_low": 0.014471085542106717,
+      "cp_mae": 136.9888870847674,
+      "n": 200,
+      "test_loss": 0.018934166724530077
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03855260920792193,
+      "ci_low": 0.02117568025208151,
+      "cp_mae": 174.02342223342868,
+      "n": 200,
+      "test_loss": 0.02868184051819932
+     },
+     "model_artifact": "artifacts/R3379/model.json",
+     "model_hash": "sha256:331c1288b12a2cfc927353a1c56d75600cd2dc3d300add2fab7250aeaa18a86a",
+     "param_count": 3081
+    },
+    "11": {
+     "CVS-DEEP": {
+      "ci_high": 0.022884819738981245,
+      "ci_low": 0.013507959085502572,
+      "cp_mae": 133.2099998429685,
+      "n": 200,
+      "test_loss": 0.017752252090202494
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03969678869500622,
+      "ci_low": 0.02215377473781906,
+      "cp_mae": 175.62690803542355,
+      "n": 200,
+      "test_loss": 0.029590464706556983
+     },
+     "model_artifact": "artifacts/R3380/model.json",
+     "model_hash": "sha256:9375df8a68a9a912d201ba73972ec44d8acc84f3d22c184ea6c92e7a2dc035a3",
+     "param_count": 3081
+    },
+    "12": {
+     "CVS-DEEP": {
+      "ci_high": 0.024279965661104765,
+      "ci_low": 0.014161074929644765,
+      "cp_mae": 140.38921130674055,
+      "n": 200,
+      "test_loss": 0.01870300519837877
+     },
+     "SF-DEEP": {
+      "ci_high": 0.039188696412194836,
+      "ci_low": 0.019856965719738624,
+      "cp_mae": 171.41933387314666,
+      "n": 200,
+      "test_loss": 0.028251145296495937
+     },
+     "model_artifact": "artifacts/R3381/model.json",
+     "model_hash": "sha256:92cbad813e6af7d7106972414f94ce817b91709d3fe283501fa52cb397337c3b",
+     "param_count": 3081
+    },
+    "13": {
+     "CVS-DEEP": {
+      "ci_high": 0.023715169405588137,
+      "ci_low": 0.014102125609642312,
+      "cp_mae": 134.21257045177518,
+      "n": 200,
+      "test_loss": 0.018272920880408695
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038785509056670116,
+      "ci_low": 0.0205588518347099,
+      "cp_mae": 168.3724295607721,
+      "n": 200,
+      "test_loss": 0.028435882096321797
+     },
+     "model_artifact": "artifacts/R3382/model.json",
+     "model_hash": "sha256:ae033be626148b477e4e161300b6fec938641c6c66e617c81da143a50a7ca6e4",
+     "param_count": 3081
+    },
+    "14": {
+     "CVS-DEEP": {
+      "ci_high": 0.025059142606967597,
+      "ci_low": 0.014671869276252147,
+      "cp_mae": 138.49738570413504,
+      "n": 200,
+      "test_loss": 0.019236708685556984
+     },
+     "SF-DEEP": {
+      "ci_high": 0.041172241154649104,
+      "ci_low": 0.02289973048444753,
+      "cp_mae": 180.01415492442516,
+      "n": 200,
+      "test_loss": 0.03095219972676234
+     },
+     "model_artifact": "artifacts/R3383/model.json",
+     "model_hash": "sha256:a28f2dfaa379b5a052c8733f293f18e43492109b69da23c1152986e6e98b45e2",
+     "param_count": 3081
+    },
+    "15": {
+     "CVS-DEEP": {
+      "ci_high": 0.022035437538609377,
+      "ci_low": 0.012990249589548867,
+      "cp_mae": 130.5899699532812,
+      "n": 200,
+      "test_loss": 0.016993071346204487
+     },
+     "SF-DEEP": {
+      "ci_high": 0.038343538017066144,
+      "ci_low": 0.020630577543428386,
+      "cp_mae": 171.79234610683778,
+      "n": 200,
+      "test_loss": 0.028217972802809844
+     },
+     "model_artifact": "artifacts/R3384/model.json",
+     "model_hash": "sha256:bb55b266d080f091357d5e5f15db8ec740549e819afbfb29f6514e2d5c7b4d64",
+     "param_count": 3081
+    },
+    "16": {
+     "CVS-DEEP": {
+      "ci_high": 0.021578313179513687,
+      "ci_low": 0.013347759743538848,
+      "cp_mae": 130.7583966597415,
+      "n": 200,
+      "test_loss": 0.01705103443024761
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03515958824238347,
+      "ci_low": 0.020084873759772467,
+      "cp_mae": 167.3349029917182,
+      "n": 200,
+      "test_loss": 0.0267045599775289
+     },
+     "model_artifact": "artifacts/R3385/model.json",
+     "model_hash": "sha256:77579b2a0c27c59e426eaaa16d50d22df7fe62a9e8fe5c102c8ee562875a9be5",
+     "param_count": 3081
+    },
+    "17": {
+     "CVS-DEEP": {
+      "ci_high": 0.02154518822345776,
+      "ci_low": 0.014330969395738625,
+      "cp_mae": 139.39233758971758,
+      "n": 200,
+      "test_loss": 0.01761649035436178
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03805500972964955,
+      "ci_low": 0.022370488780485514,
+      "cp_mae": 179.0110292235895,
+      "n": 200,
+      "test_loss": 0.02912964058199397
+     },
+     "model_artifact": "artifacts/R3386/model.json",
+     "model_hash": "sha256:d453744deed6874cb54403604b6b335a75195b7f49a0023673ea6a2f17d303bc",
+     "param_count": 3081
+    },
+    "18": {
+     "CVS-DEEP": {
+      "ci_high": 0.02540321779815283,
+      "ci_low": 0.016501478679129874,
+      "cp_mae": 148.65457379810047,
+      "n": 200,
+      "test_loss": 0.020618246485565078
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04059277456159967,
+      "ci_low": 0.022322963377161057,
+      "cp_mae": 178.38984163006018,
+      "n": 200,
+      "test_loss": 0.03044984581895422
+     },
+     "model_artifact": "artifacts/R3387/model.json",
+     "model_hash": "sha256:ca24e7b2fc033f69654e186528bf01600a255c963fd06d97fd19e296375878f2",
+     "param_count": 3081
+    },
+    "19": {
+     "CVS-DEEP": {
+      "ci_high": 0.026509084848743463,
+      "ci_low": 0.01742071999328042,
+      "cp_mae": 153.04145908483898,
+      "n": 200,
+      "test_loss": 0.021506348811484482
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03855810962624435,
+      "ci_low": 0.021153214055496618,
+      "cp_mae": 170.25540668031755,
+      "n": 200,
+      "test_loss": 0.02870684648533019
+     },
+     "model_artifact": "artifacts/R3388/model.json",
+     "model_hash": "sha256:99dc19c51dbdd7471419e2ff7c798a2667ee502051ba9e4666ea0c697dafc706",
+     "param_count": 3081
+    },
+    "2": {
+     "CVS-DEEP": {
+      "ci_high": 0.028757437763514884,
+      "ci_low": 0.01667660733435305,
+      "cp_mae": 145.19831061348563,
+      "n": 200,
+      "test_loss": 0.02229434237272605
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040853822630304314,
+      "ci_low": 0.022687812276857164,
+      "cp_mae": 174.57946228979455,
+      "n": 200,
+      "test_loss": 0.03099054304767777
+     },
+     "model_artifact": "artifacts/R3371/model.json",
+     "model_hash": "sha256:579044354afc0d8997373d273c46ff8243da8ae56aacf6f472de5d6f1c9d25ac",
+     "param_count": 3081
+    },
+    "3": {
+     "CVS-DEEP": {
+      "ci_high": 0.023868167069639172,
+      "ci_low": 0.013767185744101015,
+      "cp_mae": 133.23105889132833,
+      "n": 200,
+      "test_loss": 0.018109094248721286
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040782029297080344,
+      "ci_low": 0.02071676685377222,
+      "cp_mae": 175.97829596397264,
+      "n": 200,
+      "test_loss": 0.029410599020713413
+     },
+     "model_artifact": "artifacts/R3372/model.json",
+     "model_hash": "sha256:059d0c30191c56fe5c0e0a0874b2838b70ec734e582d8af3954776a8a7a43375",
+     "param_count": 3081
+    },
+    "4": {
+     "CVS-DEEP": {
+      "ci_high": 0.021193859401979008,
+      "ci_low": 0.012779347949695211,
+      "cp_mae": 132.92314528529838,
+      "n": 200,
+      "test_loss": 0.016426111238721206
+     },
+     "SF-DEEP": {
+      "ci_high": 0.037215937130982896,
+      "ci_low": 0.019434051267892844,
+      "cp_mae": 169.45067001513505,
+      "n": 200,
+      "test_loss": 0.026887709621228065
+     },
+     "model_artifact": "artifacts/R3373/model.json",
+     "model_hash": "sha256:70025d8c39842f5fffe0e5c6a1213780335a34829ea954ea2bec4212760da0e2",
+     "param_count": 3081
+    },
+    "5": {
+     "CVS-DEEP": {
+      "ci_high": 0.023413590360832924,
+      "ci_low": 0.014709381267834575,
+      "cp_mae": 143.51945814711854,
+      "n": 200,
+      "test_loss": 0.01871574303014441
+     },
+     "SF-DEEP": {
+      "ci_high": 0.03913683331184974,
+      "ci_low": 0.02176831210517556,
+      "cp_mae": 180.2830995662388,
+      "n": 200,
+      "test_loss": 0.029609202303049288
+     },
+     "model_artifact": "artifacts/R3374/model.json",
+     "model_hash": "sha256:0c35c5cabad4fdd93c0c74a884b3467f5e7b7ec030c356c9ac7f57180342782b",
+     "param_count": 3081
+    },
+    "6": {
+     "CVS-DEEP": {
+      "ci_high": 0.025540510195261545,
+      "ci_low": 0.01524532773026896,
+      "cp_mae": 134.76845748213347,
+      "n": 200,
+      "test_loss": 0.01997951271648111
+     },
+     "SF-DEEP": {
+      "ci_high": 0.040327658853454317,
+      "ci_low": 0.021358606317300216,
+      "cp_mae": 169.600320253859,
+      "n": 200,
+      "test_loss": 0.02950396697792273
+     },
+     "model_artifact": "artifacts/R3375/model.json",
+     "model_hash": "sha256:8cb366eb9a7fe8ac73bfdf9f4df3f0640d2afc3d2270c537e037268081774c37",
+     "param_count": 3081
+    },
+    "7": {
+     "CVS-DEEP": {
+      "ci_high": 0.02890112480755593,
+      "ci_low": 0.01715060204621199,
+      "cp_mae": 147.99031627461812,
+      "n": 200,
+      "test_loss": 0.022283215878827686
+     },
+     "SF-DEEP": {
+      "ci_high": 0.04340575759202179,
+      "ci_low": 0.02426490429545602,
+      "cp_mae": 184.467191947627,
+      "n": 200,
+      "test_loss": 0.03303365983807328
+     },
+     "model_artifact": "artifacts/R3376/model.json",
+     "model_hash": "sha256:6235a5e07f6b73983243404910889565af64e9f966ce319fd9c618f06226b615",
+     "param_count": 3081
+    },
+    "8": {
+     "CVS-DEEP": {
+      "ci_high": 0.021768659201999392,
+      "ci_low": 0.014192329609531186,
+      "cp_mae": 141.91910250818637,
+      "n": 200,
+      "test_loss": 0.017525306457024464
+     },
+     "SF-DEEP": {
+      "ci_high": 0.032975838217077995,
+      "ci_low": 0.020183091511473475,
+      "cp_mae": 175.73338511420178,
+      "n": 200,
+      "test_loss": 0.025673597398304455
+     },
+     "model_artifact": "artifacts/R3377/model.json",
+     "model_hash": "sha256:50a00942fc8aa1435c4ec6768a939ed6b1a52ce2df21610b32273428573fc4d1",
+     "param_count": 3081
+    },
+    "9": {
+     "CVS-DEEP": {
+      "ci_high": 0.02488745394175914,
+      "ci_low": 0.016361523834947742,
+      "cp_mae": 142.7701629726701,
+      "n": 200,
+      "test_loss": 0.020239936090662908
+     },
+     "SF-DEEP": {
+      "ci_high": 0.042109259591253737,
+      "ci_low": 0.022362382115840414,
+      "cp_mae": 173.85437983848243,
+      "n": 200,
+      "test_loss": 0.03066795867925233
+     },
+     "model_artifact": "artifacts/R3378/model.json",
+     "model_hash": "sha256:f886f823060a2e658c4405e36cdb3a086a30b437721a67c25c5ad58883eb55da",
+     "param_count": 3081
+    }
+   }
+  }
+ },
+ "validation": "every recomputed CVS-DEEP test_loss equals the run's recorded metric exactly (240 cells)",
+ "why": "the lab's Run carries one exam; every stored model is scored here on both frozen static instruments with the lab's own nnue.evaluate"
+}

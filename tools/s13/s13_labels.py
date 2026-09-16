@@ -152,10 +152,26 @@ def _read_registered(normalization: str, family: str, authority: str, budget_key
 
 
 def _cp(value: dict):
+    """The stm cp of either label shape: flat (search_shallow/oracle_cp) or the legacy
+    `targets` wrapper (the imported 400k deep labels). A string "None" means the row carries no
+    finite cp; a mate sentinel is excluded from cp statistics but counted separately."""
     cp = value.get("scoreCpStm")
+    if cp is None and isinstance(value.get("targets"), dict):
+        cp = value["targets"].get("scoreCpStm")
     if isinstance(cp, str):
-        cp = int(cp)
+        try:
+            cp = int(cp)
+        except ValueError:
+            return None
     return None if cp is None or abs(cp) >= MATE_CP_LIMIT else cp
+
+
+def _move(value: dict):
+    """The best move of either shape; None where the label never recorded one."""
+    move = value.get("bestMove")
+    if move is None and isinstance(value.get("targets"), dict):
+        move = value["targets"].get("bestMove")
+    return move if isinstance(move, str) and move else None
 
 
 def _describe(cvs: dict[str, dict], sf: dict[str, dict], label: str) -> dict:
@@ -165,7 +181,8 @@ def _describe(cvs: dict[str, dict], sf: dict[str, dict], label: str) -> dict:
     sign_disagree = sum(1 for a, b in usable
                         if (_cp(a["value"]) > 0) != (_cp(b["value"]) > 0)
                         and _cp(a["value"]) != 0 and _cp(b["value"]) != 0)
-    moves = sum(1 for a, b in usable if a["value"].get("bestMove") != b["value"].get("bestMove"))
+    comparable_moves = [(a, b) for a, b in usable if _move(a["value"]) and _move(b["value"])]
+    moves = sum(1 for a, b in comparable_moves if _move(a["value"]) != _move(b["value"]))
     n = max(len(usable), 1)
     return {"positions": len(pairs), "non_mate_pairs": len(usable),
             "mate_rows_cvs": sum(1 for a, _ in pairs if _cp(a["value"]) is None),
@@ -174,7 +191,8 @@ def _describe(cvs: dict[str, dict], sf: dict[str, dict], label: str) -> dict:
             "median_abs_cp": sorted(diffs)[len(diffs) // 2] if diffs else None,
             "p90_abs_cp": sorted(diffs)[int(0.9 * (len(diffs) - 1))] if diffs else None,
             "sign_disagreement_rate": sign_disagree / n,
-            "best_move_disagreement_rate": moves / n,
+            "best_move_pairs": len(comparable_moves),
+            "best_move_disagreement_rate": (moves / len(comparable_moves)) if comparable_moves else None,
             "note": f"{label}: descriptive evidence, never a selection mechanism"}
 
 

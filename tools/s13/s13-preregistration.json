@@ -1,0 +1,255 @@
+{
+ "analysis": {
+  "dose": [
+   "SF-1M - SF-32k",
+   "SF-1M - CVS-4k"
+  ],
+  "interaction": "teacher x exam: all six (teacher, exam) cells per width; the key patterns are 'each student best matches its own authority' (worldview disagreement) versus 'SF-trained improves on both exams' (generic quality)",
+  "mates": "|cp| >= 100k sentinel rows are counted and reported per exam split",
+  "no_pooling": "widths are reported, never pooled; no single winner is declared",
+  "primary": "per width, paired by seed: d = test_loss(SF-32k) - test_loss(CVS-4k), on each exam separately, with separate one-sided 95% exact-t bounds at that width's df"
+ },
+ "calibration": {
+  "amendment": "tools/s13/s13-calibration-amendment.json",
+  "attempt_1": "tools/s13/s13-calibration.json (rule failed: no converged rung)",
+  "chosen": {
+   "dose": "SF-1M",
+   "exam": 4000000,
+   "primary": "SF-32k"
+  }
+ },
+ "disagreement_before_training": {
+  "CVS-400k vs SF-DEEP (exam identities)": {
+   "best_move_disagreement_rate": null,
+   "best_move_pairs": 0,
+   "mate_rows_cvs": 1,
+   "mate_rows_sf": 1,
+   "mean_abs_cp": 68.98492462311557,
+   "median_abs_cp": 53,
+   "non_mate_pairs": 199,
+   "note": "exam ids: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 158,
+   "positions": 200,
+   "sign_disagreement_rate": 0.06532663316582915
+  },
+  "CVS-4k vs SF-1M": {
+   "best_move_disagreement_rate": 0.6345823306978343,
+   "best_move_pairs": 17454,
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 132.6368740689813,
+   "median_abs_cp": 96,
+   "non_mate_pairs": 17454,
+   "note": "SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 278,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10284175547152515
+  },
+  "CVS-4k vs SF-32k": {
+   "best_move_disagreement_rate": 0.6349672840190751,
+   "best_move_pairs": 18034,
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 910,
+   "mean_abs_cp": 106.63319285793501,
+   "median_abs_cp": 77,
+   "non_mate_pairs": 18034,
+   "note": "SF-32k: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 230,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10358212265720305
+  },
+  "SF-32k vs SF-1M": {
+   "best_move_disagreement_rate": 0.29855620488140255,
+   "best_move_pairs": 17454,
+   "mate_rows_cvs": 910,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 46.87739200183339,
+   "median_abs_cp": 24,
+   "non_mate_pairs": 17454,
+   "note": "SF-32k vs SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 102,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.015698407241892975
+  }
+ },
+ "economics": {
+  "CVS-4k": {
+   "mean_wall_ms_per_label": 7.5,
+   "realized_nodes": 74570561
+  },
+  "SF-1M": {
+   "mean_wall_ms_per_label": 1562.15,
+   "realized_nodes": 18489830782
+  },
+  "SF-32k": {
+   "mean_wall_ms_per_label": 41.9,
+   "realized_nodes": 599554132
+  }
+ },
+ "exams": {
+  "CVS-DEEP": {
+   "nodes": 400000,
+   "protocol": "E0004",
+   "role": "the in-lab exam X#### binds; keeps every run comparable to S7-S12"
+  },
+  "SF-DEEP": {
+   "dataset": "D0040",
+   "identities": 200,
+   "nodes": 4000000,
+   "protocol": "E0005",
+   "role": "second frozen instrument over the SAME held-out identities"
+  },
+  "rule": "the two losses are never averaged and neither exam is called ground truth"
+ },
+ "id": "s13-teacher-authority",
+ "issue": "Mnehmos/chess-vision-studio-lab#40 (slice of #20)",
+ "lattice": {
+  "cell_list": "explicit (scale, node_budget) pairs; each scale value is the arm's realized teacher spend / the 37,285,491 reference unit",
+  "cells": 240,
+  "conditions": [
+   "CVS-4k",
+   "SF-32k",
+   "SF-1M"
+  ],
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "widths": [
+   1,
+   4,
+   16,
+   32
+  ]
+ },
+ "population": {
+  "identities": "the 18,953 rows of D0036 (S12's 4k arm; N0014, order-preserving filtered extension) \u2014 identical for every arm; a teacher-specific missing row fails closed, it never shrinks a dataset",
+  "normalization": "N0014",
+  "rows": 18953
+ },
+ "question": "If the student architecture, positions, optimizer, student compute and evaluation questions are held fixed, does changing the teacher from CVS to Stockfish change what the student learns?",
+ "scope_exclusions": [
+  "no games",
+  "no playing-strength claim",
+  "no GEO/HYBRID inputs",
+  "no outcome or blended targets",
+  "no per-arm optimizer tuning",
+  "no post-hoc teacher-budget tuning",
+  "no Stockfish-as-truth language",
+  "sealed S7-S12 experiments are immutable"
+ ],
+ "secondary_question": "Does a student become better according to the teacher that trained it while becoming worse according to the other authority, revealing teacher-worldview disagreement rather than a generic quality gain?",
+ "status": "materialized before the lattice is frozen and before any student exists",
+ "stop_conditions": [
+  "a training row lacks a teacher label",
+  "the dual-exam pass cannot reproduce the in-lab CVS metrics exactly",
+  "membership or the explicit cell list fails",
+  "the SF binary or net identity drifts from the pin"
+ ],
+ "student": {
+  "divergence_declaration": "S13 teacher arm: same student, same positions, same student compute as its paired arms; the only change is which authority produced the supervision and at what price",
+  "family": "RAW-768",
+  "recipe": "T0004-derived; identical optimizer/LR/init/K/LAMBDA for every arm",
+  "regime": "fixed updates: MAX_UPDATES 760 x BATCH 256 = 194560 presentations for every cell",
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "widths": [
+   1,
+   4,
+   16,
+   32
+  ]
+ },
+ "teachers": {
+  "CVS-4k": {
+   "authority": "legacy.cvs.search.shallow",
+   "budget": {
+    "nodeBudget": 4000
+   },
+   "dataset": "D0036",
+   "measured_cost_ms_per_label": 7.5,
+   "producer": "36e9b1592858939cf88233bf99d367e3ea9c43a044f342f69792d49a17d09838",
+   "realized_nodes": 74570561,
+   "realized_nodes_mean_per_label": 3939.0,
+   "spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43"
+  },
+  "SF-1M": {
+   "authority": "oracle.stockfish.18",
+   "budget": {
+    "nodes": 1000000
+   },
+   "mean_depth": 28.569144726428533,
+   "mean_realized_nodes": 975562.2213897536,
+   "mean_wall_ms": 1562.15,
+   "producer": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "realized_nodes": 18489830782,
+   "role": "DOSE condition: bounds whether an effect is authority or budget",
+   "spec_hash": "sha256:cb5b13445366dc68ba130235af1525cc0f6fe31c2ff67e364e17e5974aefe9fe"
+  },
+  "SF-32k": {
+   "authority": "oracle.stockfish.18",
+   "budget": {
+    "nodes": 32000
+   },
+   "mean_depth": 18.447369809528833,
+   "mean_realized_nodes": 31633.732496174747,
+   "mean_wall_ms": 41.9,
+   "producer": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "realized_nodes": 599554132,
+   "role": "PRIMARY Stockfish condition (cheapest calibrated rung; more expensive per label than CVS-4k, so a CVS win cannot be a spending artifact)",
+   "spec_hash": "sha256:6dabf35b55b1bb7caeef9f85592ad29d4e640187b71e5652b49cd6ec03b96803"
+  },
+  "pinned_identity": {
+   "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "netSelection": "per position: the small net when |simple_eval| > 962",
+   "nets": [
+    "nn-c288c895ea92.nnue",
+    "nn-37f18f62d772.nnue"
+   ],
+   "options": {
+    "Hash": 16,
+    "MultiPV": 1,
+    "Threads": 1
+   }
+  }
+ },
+ "version": 1
+}

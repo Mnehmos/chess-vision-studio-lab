@@ -1,0 +1,750 @@
+{
+ "cells": {
+  "exams": [
+   "CVS-DEEP (E0004/D0010)",
+   "SF-DEEP (E0005/D0040)"
+  ],
+  "expected": 240,
+  "scored": 240,
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "widths": [
+   1,
+   4,
+   16,
+   32
+  ]
+ },
+ "decision": "INCONCLUSIVE",
+ "decision_rule": "WORLDVIEW_DISAGREEMENT iff at every width the CVS-trained student is strictly better on CVS-DEEP and strictly worse on SF-DEEP (own-authority pattern); GENERIC_SF_GAIN iff the SF-trained student is strictly better on both exams at every width; otherwise INCONCLUSIVE",
+ "economics": {
+  "CVS-4k": {
+   "authority": "legacy.cvs.search.shallow",
+   "dataset_id": "D0036",
+   "ms_per_label": 7.5,
+   "realized_nodes": 74570561,
+   "rows": 18953,
+   "spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43",
+   "unit_multiples": 1.9999887087446429
+  },
+  "SF-1M": {
+   "authority": "oracle.stockfish.18",
+   "dataset_id": "D0042",
+   "ms_per_label": 1562.15,
+   "realized_nodes": 18489830782,
+   "rows": 18953,
+   "spec_hash": "sha256:cb5b13445366dc68ba130235af1525cc0f6fe31c2ff67e364e17e5974aefe9fe",
+   "unit_multiples": 495.8988144208695
+  },
+  "SF-32k": {
+   "authority": "oracle.stockfish.18",
+   "dataset_id": "D0041",
+   "ms_per_label": 41.9,
+   "realized_nodes": 599554132,
+   "rows": 18953,
+   "spec_hash": "sha256:6dabf35b55b1bb7caeef9f85592ad29d4e640187b71e5652b49cd6ec03b96803",
+   "unit_multiples": 16.08009217311903
+  }
+ },
+ "evidence": {
+  "calibration": [
+   "tools/s13/s13-calibration.json",
+   "tools/s13/s13-calibration-amendment.json"
+  ],
+  "disagreement": "tools/s13/s13-disagreement.json",
+  "dual_exam": "tools/s13/s13-dual-exam.json",
+  "preregistration": "tools/s13/s13-preregistration.json",
+  "result": "tools/s13/s13-result.json",
+  "state": "tools/s13/s13-state.json"
+ },
+ "experiment": "X0009",
+ "observed_pattern": "CVS_BETTER_ON_BOTH_EXAMS",
+ "observed_pattern_note": "the preregistered decision rule enumerated only two clean patterns (worldview disagreement; generic SF gain). The realized pattern is a third one it did not name. The registered verdict vocabulary is kept verbatim (decision above) and the observed pattern is reported beside it, never substituted for it.",
+ "per_width": {
+  "1": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.003766513990437932,
+      "mean_a": 0.020037750180426153,
+      "mean_b": 0.01627123618998822,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0032214102135662845,
+       0.00431161776730958
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0031066946234470593,
+       0.0044263333574288055
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0011984068813199696,
+      "mean_a": 0.020037750180426153,
+      "mean_b": 0.018839343299106182,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0010597672371995264,
+       0.001337046525440413
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0010305909055283904,
+       0.0013662228571115489
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.003969424081527799,
+      "mean_a": 0.030207889018062355,
+      "mean_b": 0.026238464936534558,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0034413787976301864,
+       0.004497469365425412
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.00333025312042496,
+       0.004608595042630639
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.001013416874476918,
+      "mean_a": 0.030207889018062355,
+      "mean_b": 0.029194472143585438,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0008870977743041495,
+       0.0011397359746496865
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.000860514267209755,
+       0.001166319481744081
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    }
+   },
+   "interaction": {
+    "exam_effect": {
+     "CVS-4k": {
+      "bounds": [
+       0.00959567425264512,
+       0.010338783240447553
+      ],
+      "mean": 0.009967228746546337,
+      "n": 20,
+      "se": 0.00021487909513110635
+     },
+     "SF-1M": {
+      "bounds": [
+       0.009762371916511577,
+       0.010577905758760827
+      ],
+      "mean": 0.010170138837636202,
+      "n": 20,
+      "se": 0.0002358216317495325
+     },
+     "SF-32k": {
+      "bounds": [
+       0.009951336886712516,
+       0.010758920802245995
+      ],
+      "mean": 0.010355128844479256,
+      "n": 20,
+      "se": 0.00023352281275113086
+     }
+    },
+    "interaction_cvs_minus_sf": {
+     "bounds": [
+      -0.0005488143658845198,
+      -0.00022698582998131623
+     ],
+     "mean": -0.000387900097932918,
+     "n": 20,
+     "se": 9.306067577887345e-05
+    },
+    "reading": "positive interaction = the CVS-trained student is relatively worse on the SF exam than the SF-trained student is (each student best matches its own authority); near-zero with a common exam offset = generic quality"
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.01627123618998822,
+     "SF-DEEP": 0.026238464936534558
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.020037750180426153,
+     "SF-DEEP": 0.030207889018062355
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.018839343299106182,
+     "SF-DEEP": 0.029194472143585438
+    }
+   },
+   "primary": {
+    "CVS-DEEP": {
+     "d": 0.0025681071091179625,
+     "mean_a": 0.018839343299106182,
+     "mean_b": 0.01627123618998822,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0020470643302715206,
+      0.0030891498879644045
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0019374123109885855,
+      0.0031988019072473396
+     ],
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "d": 0.002956007207050881,
+     "mean_a": 0.029194472143585438,
+     "mean_b": 0.026238464936534558,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0024196190778519155,
+      0.0034923953362498462
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0023067376718063737,
+      0.003605276742295388
+     ],
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "16": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.005627530295028456,
+      "mean_a": 0.023618243697262342,
+      "mean_b": 0.017990713402233887,
+      "n": 20,
+      "one_sided_bounds": [
+       0.00462365331881147,
+       0.006631407271245442
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.004412390171095378,
+       0.006842670418961534
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0012741854318139146,
+      "mean_a": 0.023618243697262342,
+      "mean_b": 0.022344058265448427,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0005118801097288749,
+       0.0020364907538989543
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.00035145505199789056,
+       0.002196915811629939
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.0035293721778796596,
+      "mean_a": 0.032820635165769024,
+      "mean_b": 0.029291262987889363,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0019392051491071616,
+       0.005119539206652157
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0016045588728684163,
+       0.005454185482890903
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0012619479645619102,
+      "mean_a": 0.032820635165769024,
+      "mean_b": 0.03155868720120711,
+      "n": 20,
+      "one_sided_bounds": [
+       0.00028144876895244567,
+       0.0022424471601713747
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       7.510541084680103e-05,
+       0.0024487905182770196
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    }
+   },
+   "interaction": {
+    "exam_effect": {
+     "CVS-4k": {
+      "bounds": [
+       0.010798571445035647,
+       0.011802527726275304
+      ],
+      "mean": 0.011300549585655476,
+      "n": 20,
+      "se": 0.0002903062953146825
+     },
+     "SF-1M": {
+      "bounds": [
+       0.008566415140145884,
+       0.009838367796867474
+      ],
+      "mean": 0.009202391468506679,
+      "n": 20,
+      "se": 0.0003678007404192594
+     },
+     "SF-32k": {
+      "bounds": [
+       0.008650170844849352,
+       0.009779087026668017
+      ],
+      "mean": 0.009214628935758685,
+      "n": 20,
+      "se": 0.0003264399860718027
+     }
+    },
+    "interaction_cvs_minus_sf": {
+     "bounds": [
+      0.0015242991485591986,
+      0.0026475421512343845
+     ],
+     "mean": 0.0020859206498967916,
+     "n": 20,
+     "se": 0.0003247995166105569
+    },
+    "reading": "positive interaction = the CVS-trained student is relatively worse on the SF exam than the SF-trained student is (each student best matches its own authority); near-zero with a common exam offset = generic quality"
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.017990713402233887,
+     "SF-DEEP": 0.029291262987889363
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.023618243697262342,
+     "SF-DEEP": 0.032820635165769024
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.022344058265448427,
+     "SF-DEEP": 0.03155868720120711
+    }
+   },
+   "primary": {
+    "CVS-DEEP": {
+     "d": 0.004353344863214541,
+     "mean_a": 0.022344058265448427,
+     "mean_b": 0.017990713402233887,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0033600031981233522,
+      0.00534668652830573
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.003150957177648279,
+      0.005555732548780803
+     ],
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "d": 0.0022674242133177494,
+     "mean_a": 0.03155868720120711,
+     "mean_b": 0.029291262987889363,
+     "n": 20,
+     "one_sided_bounds": [
+      0.000932588645673236,
+      0.0036022597809622628
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0006516761729450792,
+      0.0038831722536904196
+     ],
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "32": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.0061651420446389,
+      "mean_a": 0.025205115161605448,
+      "mean_b": 0.01903997311696655,
+      "n": 20,
+      "one_sided_bounds": [
+       0.004882384524798096,
+       0.007447899564479705
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.004612431733949865,
+       0.007717852355327936
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0015019360594045212,
+      "mean_a": 0.025205115161605448,
+      "mean_b": 0.023703179102200926,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0007173403553285926,
+       0.0022865317634804495
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0005522243480343108,
+       0.0024516477707747317
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.0040342132374617526,
+      "mean_a": 0.034348105680486345,
+      "mean_b": 0.03031389244302459,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0028029215151022828,
+       0.005265504959821222
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.002543799559738097,
+       0.005524626915185408
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.001480676989815425,
+      "mean_a": 0.034348105680486345,
+      "mean_b": 0.03286742869067092,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0005255333889373242,
+       0.0024358205906935258
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0003245260459830059,
+       0.002636827933647844
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    }
+   },
+   "interaction": {
+    "exam_effect": {
+     "CVS-4k": {
+      "bounds": [
+       0.010899601214604844,
+       0.011648237437511243
+      ],
+      "mean": 0.011273919326058044,
+      "n": 20,
+      "se": 0.00021647736307996935
+     },
+     "SF-1M": {
+      "bounds": [
+       0.00849044417622945,
+       0.009795536861532344
+      ],
+      "mean": 0.009142990518880897,
+      "n": 20,
+      "se": 0.0003773835869075374
+     },
+     "SF-32k": {
+      "bounds": [
+       0.008461968892657264,
+       0.009866530284282717
+      ],
+      "mean": 0.00916424958846999,
+      "n": 20,
+      "se": 0.00040614618561013184
+     }
+    },
+    "interaction_cvs_minus_sf": {
+     "bounds": [
+      0.0015272291749453104,
+      0.0026921103002307935
+     ],
+     "mean": 0.002109669737588052,
+     "n": 20,
+     "se": 0.00033683969141172276
+    },
+    "reading": "positive interaction = the CVS-trained student is relatively worse on the SF exam than the SF-trained student is (each student best matches its own authority); near-zero with a common exam offset = generic quality"
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.01903997311696655,
+     "SF-DEEP": 0.03031389244302459
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.025205115161605448,
+     "SF-DEEP": 0.034348105680486345
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.023703179102200926,
+     "SF-DEEP": 0.03286742869067092
+    }
+   },
+   "primary": {
+    "CVS-DEEP": {
+     "d": 0.0046632059852343795,
+     "mean_a": 0.023703179102200926,
+     "mean_b": 0.01903997311696655,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0036996513635144113,
+      0.005626760606954348
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.003496873944364845,
+      0.005829538026103914
+     ],
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "d": 0.002553536247646328,
+     "mean_a": 0.03286742869067092,
+     "mean_b": 0.03031389244302459,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0014785988853941174,
+      0.003628473609898538
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0012523812749426644,
+      0.0038546912203499912
+     ],
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "4": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.0034730803686868227,
+      "mean_a": 0.019734149101418727,
+      "mean_b": 0.016261068732731906,
+      "n": 20,
+      "one_sided_bounds": [
+       0.002738491643578184,
+       0.004207669093795462
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.002583899467425257,
+       0.004362261269948388
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0008936315009049148,
+      "mean_a": 0.019734149101418727,
+      "mean_b": 0.018840517600513813,
+      "n": 20,
+      "one_sided_bounds": [
+       0.00040617210288089743,
+       0.0013810908989289321
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0003035876136953554,
+       0.001483675388114474
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": {
+      "d": 0.0033198621017447973,
+      "mean_a": 0.030258770835112123,
+      "mean_b": 0.026938908733367326,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0025635043326911263,
+       0.004076219870798468
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.002404330921132316,
+       0.004235393282357279
+      ],
+      "verdict": "SF-1M_worse"
+     },
+     "SF-1M - SF-32k": {
+      "d": 0.0012692942636109098,
+      "mean_a": 0.030258770835112123,
+      "mean_b": 0.028989476571501215,
+      "n": 20,
+      "one_sided_bounds": [
+       0.0006599587587392055,
+       0.001878629768482614
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "two_sided_ci": [
+       0.0005317257781806927,
+       0.0020068627490411267
+      ],
+      "verdict": "SF-1M_worse"
+     }
+    }
+   },
+   "interaction": {
+    "exam_effect": {
+     "CVS-4k": {
+      "bounds": [
+       0.010182857380289956,
+       0.011172822620980887
+      ],
+      "mean": 0.010677840000635421,
+      "n": 20,
+      "se": 0.0002862606140183982
+     },
+     "SF-1M": {
+      "bounds": [
+       0.009936788823311189,
+       0.011112454644075606
+      ],
+      "mean": 0.010524621733693397,
+      "n": 20,
+      "se": 0.00033995821863157385
+     },
+     "SF-32k": {
+      "bounds": [
+       0.009675014798133213,
+       0.01062290314384159
+      ],
+      "mean": 0.010148958970987401,
+      "n": 20,
+      "se": 0.00027409356279416803
+     }
+    },
+    "interaction_cvs_minus_sf": {
+     "bounds": [
+      5.877180961120788e-05,
+      0.000998990249684834
+     ],
+     "mean": 0.0005288810296480209,
+     "n": 20,
+     "se": 0.0002718757153322367
+    },
+    "reading": "positive interaction = the CVS-trained student is relatively worse on the SF exam than the SF-trained student is (each student best matches its own authority); near-zero with a common exam offset = generic quality"
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.016261068732731906,
+     "SF-DEEP": 0.026938908733367326
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.019734149101418727,
+     "SF-DEEP": 0.030258770835112123
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.018840517600513813,
+     "SF-DEEP": 0.028989476571501215
+    }
+   },
+   "primary": {
+    "CVS-DEEP": {
+     "d": 0.0025794488677819078,
+     "mean_a": 0.018840517600513813,
+     "mean_b": 0.016261068732731906,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0019176802343155723,
+      0.0032412175012482432
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0017784128461016038,
+      0.003380484889462212
+     ],
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "d": 0.002050567838133887,
+     "mean_a": 0.028989476571501215,
+     "mean_b": 0.026938908733367326,
+     "n": 20,
+     "one_sided_bounds": [
+      0.0013723789152742384,
+      0.0027287567609935357
+     ],
+     "t_one_sided": 1.7291328115213664,
+     "two_sided_ci": [
+      0.0012296559223339688,
+      0.0028714797539338053
+     ],
+     "verdict": "SF-32k_worse"
+    }
+   }
+  }
+ },
+ "preregistration_hash": "sha256:d2da7de839df74a192bb76be41b8eef75aceffd738e7c611f0ca8b111bab440a",
+ "question": "does changing the teacher from CVS to Stockfish change what the student learns, under two independent frozen static exams?",
+ "scope": {
+  "losses_never_averaged": true,
+  "no_playing_strength_claim": true,
+  "no_stockfish_as_truth": true
+ },
+ "widths_cvs_better_on_both_exams": [
+  "1",
+  "4",
+  "16",
+  "32"
+ ],
+ "widths_dose_arm_worse_than_primary": [
+  "1",
+  "4",
+  "16",
+  "32"
+ ],
+ "widths_own_authority": [],
+ "widths_sf_better_on_both": []
+}

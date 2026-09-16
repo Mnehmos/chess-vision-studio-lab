@@ -30,6 +30,7 @@ from s13_common import (AUTHORITY, CVS_ARM_DATASET, EXAM_PROTOCOL_CVS, FAMILY, L
                         SF_NETS, SF_OPTIONS, SF_SHA256, write_json)
 
 from cvslab.hashing import read_jsonl
+from cvslab.schemas import Ablation, Experiment, Run
 from cvslab.service import LabService
 from cvslab.store import LabError, Store
 from cvslab.targets import TargetSpec
@@ -109,7 +110,7 @@ def step_preregister() -> int:
     if "preregistration" in st:
         print("[cached] preregister")
         return 0
-    labels, exam = st["labels"], st["exam"]
+    labels, exam, cvs_cost = st["labels"], st["exam"], st["cvs_cost"]
     disagreement = (json.loads((S13 / "s13-disagreement.json").read_text(encoding="utf-8"))
                     if (S13 / "s13-disagreement.json").is_file() else {})
     prereg = {
@@ -132,8 +133,9 @@ def step_preregister() -> int:
             "CVS-4k": {"authority": "legacy.cvs.search.shallow", "producer": CVS_PRODUCER,
                        "budget": {"nodeBudget": 4_000}, "dataset": CVS_ARM_DATASET,
                        "spec_hash": CVS_SPEC.spec_hash(),
-                       "measured_cost_ms_per_label": labels["cost_cvs_4k"],
-                       "realized_nodes": labels["unit_cvs"]},
+                       "measured_cost_ms_per_label": cvs_cost["mean_wall_ms"],
+                       "realized_nodes": cvs_cost["realized_nodes_total"],
+                       "realized_nodes_mean_per_label": cvs_cost["mean_realized_nodes"]},
             "SF-32k": {"authority": AUTHORITY, "producer": SF_SHA256, "budget": {"nodes": 32_000},
                        "role": "PRIMARY Stockfish condition (cheapest calibrated rung; more expensive "
                                "per label than CVS-4k, so a CVS win cannot be a spending artifact)",
@@ -174,9 +176,11 @@ def step_preregister() -> int:
             "dose": ["SF-1M - SF-32k", "SF-1M - CVS-4k"],
             "no_pooling": "widths are reported, never pooled; no single winner is declared",
             "mates": "|cp| >= 100k sentinel rows are counted and reported per exam split"},
-        "economics": {label: {"mean_wall_ms_per_label": labels[label]["mean_wall_ms"],
-                              "realized_nodes": labels[label]["realized_nodes"]}
-                      for label in labels if label.startswith("SF")},
+        "economics": {"CVS-4k": {"mean_wall_ms_per_label": cvs_cost["mean_wall_ms"],
+                                 "realized_nodes": cvs_cost["realized_nodes_total"]},
+                      **{label: {"mean_wall_ms_per_label": labels[label]["mean_wall_ms"],
+                                 "realized_nodes": labels[label]["realized_nodes"]}
+                         for label in labels if label.startswith("SF")}},
         "calibration": {"attempt_1": "tools/s13/s13-calibration.json (rule failed: no converged rung)",
                         "amendment": "tools/s13/s13-calibration-amendment.json",
                         "chosen": {"primary": "SF-32k", "dose": "SF-1M", "exam": EXAM_BUDGET}},
@@ -194,6 +198,10 @@ def step_preregister() -> int:
     save(preregistration={"file": "tools/s13/s13-preregistration.json", "hash": digest})
     print(f"preregistration {digest}", flush=True)
     return 0
+
+
+def labels_cost_cvs(st: dict) -> float:
+    return float(st["cvs_cost"]["mean_wall_ms"])
 
 
 def step_experiment() -> int:
@@ -225,7 +233,7 @@ def step_experiment() -> int:
     for label, budget in ARMS:
         if label == "CVS-4k":
             dataset, spec, realized = service.store.get(CVS_ARM_DATASET), CVS_SPEC, cvs_realized
-            price = labels["cost_cvs_4k"]
+            price = labels_cost_cvs(st)
         else:
             spec = SF_SPECS[label]
             dataset = service.freeze_dataset(
@@ -245,7 +253,7 @@ def step_experiment() -> int:
             params={**base, "EPOCHS": 1, "BATCH": BATCH, "MAX_UPDATES": MAX_UPDATES},
             target_spec=spec, description=f"S13 {label}: same student compute, teacher {label}")
         baseline = service.register_baseline(
-            name=f"S13_{label}", dataset_id=dataset.id, training_recipe_id=recipe.id,
+            name=f"S13_{label.upper().replace(chr(45), chr(95))}", dataset_id=dataset.id, training_recipe_id=recipe.id,
             eval_protocol_id=EXAM_PROTOCOL_CVS, model_config={"INPUT": "RAW", "H": 16},
             supervision_divergence=DECLARATION, experiment_id=xid,
             notes=f"S13 {label}: {split.count} rows, authority {spec.authority}, "
@@ -315,6 +323,16 @@ def step_experiment() -> int:
 def step_run() -> int:
     st = state()
     service = svc()
+    queued = st.get("queued")
+    if not queued:
+        experiment = service.store.get_as(st["xid"], Experiment)
+        queued = {ablation_id: [run.id for run in service.queue_runs(ablation_id, seeds=SEEDS)]
+                  for arm in experiment.arms for ablation_id in arm.ablations}
+        total = sum(len(ids) for ids in queued.values())
+        if total != len(ARMS) * len(WIDTHS) * len(SEEDS):
+            raise LabError(f"queued {total} runs, expected 240")
+        save(queued=queued)
+        print(f"queued {total} runs", flush=True)
     counts: dict[str, int] = {}
     done = 0
     for run in service.store.list("R", verify=True, kind=Run):

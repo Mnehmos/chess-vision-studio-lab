@@ -1,0 +1,89 @@
+{
+ "authority_cvs": "legacy.cvs.search.shallow/deep (producer 36e9b159\u2026)",
+ "authority_sf": "oracle.stockfish.18 (producer c86215fa1977d53b\u2026)",
+ "blocks": {
+  "CVS-400k vs SF-DEEP (exam identities)": {
+   "best_move_disagreement_rate": null,
+   "best_move_pairs": 0,
+   "mate_rows_cvs": 1,
+   "mate_rows_sf": 1,
+   "mean_abs_cp": 68.98492462311557,
+   "median_abs_cp": 53,
+   "non_mate_pairs": 199,
+   "note": "exam ids: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 158,
+   "positions": 200,
+   "sign_disagreement_rate": 0.06532663316582915
+  },
+  "CVS-4k vs SF-1M": {
+   "best_move_disagreement_rate": 0.6345823306978343,
+   "best_move_pairs": 17454,
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 132.6368740689813,
+   "median_abs_cp": 96,
+   "non_mate_pairs": 17454,
+   "note": "SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 278,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10284175547152515
+  },
+  "CVS-4k vs SF-32k": {
+   "best_move_disagreement_rate": 0.6349672840190751,
+   "best_move_pairs": 18034,
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 910,
+   "mean_abs_cp": 106.63319285793501,
+   "median_abs_cp": 77,
+   "non_mate_pairs": 18034,
+   "note": "SF-32k: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 230,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10358212265720305
+  },
+  "SF-32k vs SF-1M": {
+   "best_move_disagreement_rate": 0.29855620488140255,
+   "best_move_pairs": 17454,
+   "mate_rows_cvs": 910,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 46.87739200183339,
+   "median_abs_cp": 24,
+   "non_mate_pairs": 17454,
+   "note": "SF-32k vs SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 102,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.015698407241892975
+  }
+ },
+ "id": "s13-teacher-disagreement",
+ "matcher": "|cp| >= 100000 treated as a mate sentinel and excluded from cp statistics; mate rows counted and reported",
+ "purpose": "characterize the authorities on the frozen positions BEFORE training; no label value was used to select or filter a position",
+ "teacher_identity": {
+  "author": "the Stockfish developers (see AUTHORS file)",
+  "binary": "F:\\tools\\stockfish\\stockfish\\stockfish-windows-x86-64-avx2.exe",
+  "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+  "expected": {
+   "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "nets": [
+    "nn-c288c895ea92.nnue",
+    "nn-37f18f62d772.nnue"
+   ],
+   "options": {
+    "Hash": 16,
+    "MultiPV": 1,
+    "Threads": 1
+   }
+  },
+  "name": "Stockfish 18",
+  "netSelection": "per position: the small net is used when |simple_eval| > 962 (Eval::use_smallnet), deterministically, with no option to disable",
+  "nets": [
+   "nn-c288c895ea92.nnue",
+   "nn-37f18f62d772.nnue"
+  ],
+  "options": {
+   "Hash": 16,
+   "MultiPV": 1,
+   "Threads": 1
+  }
+ }
+}
