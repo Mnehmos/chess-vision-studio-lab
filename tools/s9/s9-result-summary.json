@@ -1,4 +1,5 @@
 {
+ "bounds_note": "separate one-sided 95% lower and upper bounds (t=1.729, df=19); the pair is not a single 95% interval",
  "decision": "INCONCLUSIVE",
  "equivalence_all_widths": false,
  "equivalence_by_width": {
@@ -18,6 +19,12 @@
  "mean_test_loss": {
   "SAME-2K": 0.019842,
   "SAME-8K": 0.018866
+ },
+ "point_estimates_vs_margin": {
+  "1": "above",
+  "16": "above",
+  "32": "below",
+  "4": "below"
  },
  "primary": {
   "1": {
@@ -77,23 +84,23 @@
  "teacher_disagreement": {
   "abs_cp": {
    "max": 927,
-   "mean": 57.6,
-   "median": 34,
-   "p90": 135,
+   "mean": 57.7,
+   "median": 35,
+   "p90": 136,
    "p99": 386
   },
-  "compared_positions": 9570,
-  "mate_sentinel_rows_excluded": 200,
-  "move_disagreement_rate": 0.5247,
+  "compared_positions": 9299,
+  "mate_sentinel_rows_excluded": 196,
+  "move_disagreement_rate": 0.5232,
   "note": "the same positions carry both targets, so this is a direct teacher comparison; analysis only, never a selection mechanism",
   "rate_above_cp": {
-   "0": 0.9092,
-   "10": 0.758,
-   "100": 0.1653,
-   "25": 0.583,
-   "50": 0.3669
+   "0": 0.9095,
+   "10": 0.7583,
+   "100": 0.166,
+   "25": 0.5828,
+   "50": 0.3677
   },
-  "shared_positions": 9770,
-  "sign_disagreement_rate": 0.0793
+  "shared_positions": 9495,
+  "sign_disagreement_rate": 0.08
  }
 }

@@ -16,7 +16,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 
 from cvslab.data import read_jsonl
 from cvslab.funnel.campaign import paired_effect
-from cvslab.schemas import Run, RunStatus, TERMINAL_RUN_STATUSES
+from cvslab.schemas import Dataset, Run, RunStatus, TERMINAL_RUN_STATUSES
 from cvslab.service import LabService
 from cvslab.store import Store
 
@@ -87,10 +87,21 @@ def main() -> int:
                            and cells[str(width)]["two_sided_ci"][1] < DELTA) for width in WIDTHS}
 
     # teacher disagreement on the same positions (analysis only)
+    # teacher disagreement on THE FROZEN POSITIONS ONLY (analysis only): X0003's 9,495 ids read
+    # from its own dataset split. Intersecting the two label streams would have used the whole 2k
+    # stream (38,989 positions) and silently widened the population to 9,770.
+    dataset_2k: Dataset = service.store.get_as(st["datasets"]["2k"], Dataset)
+    split_2k = next(entry for entry in dataset_2k.splits if entry.name == "train")
+    frozen_ids = [row["record_id"] for row in read_jsonl(service.store.abs(split_2k.path))]
+    if len(frozen_ids) != 9_495:
+        print(f"STOP: the frozen 2k dataset holds {len(frozen_ids)} rows, not 9,495")
+        return 3
     stream_2k = {row["record_id"]: row for row in read_jsonl(S8_LABELS / "labels-2000.jsonl")}
     stream_8k = {row["record_id"]: row for row in read_jsonl(S8_LABELS / "labels-8000.jsonl")}
-    shared = [rid for rid in (stream_8k.keys() & stream_2k.keys())]
-    shared = [rid for rid in shared if rid in set(stream_8k) and rid in set(stream_2k)]
+    shared = [rid for rid in frozen_ids if rid in stream_2k and rid in stream_8k]
+    if len(shared) != len(frozen_ids):
+        print(f"STOP: {len(frozen_ids) - len(shared)} frozen positions lack a 2k or 8k observation")
+        return 3
     diffs, signs, moves, mate_rows = [], 0, 0, 0
     for rid in shared:
         a = stream_2k[rid]["row"]["value"].get("scoreCpStm")
@@ -127,7 +138,8 @@ def main() -> int:
         "design": "same 9,495 positions, same order, same student compute (760 updates x 256), same exam; "
                   "only the teacher depth differs",
         "primary": {"quantity": "test_loss(2k) - test_loss(8k), positive = 2k worse",
-                    "margin_delta": DELTA, "interval": "one-sided 95% (t=1.729, df=19)",
+                    "margin_delta": DELTA,
+                    "interval": "separate one-sided 95% bounds (t=1.729, df=19) — a lower and an upper bound computed independently, not a single interval",
                     "cells": cells, "decision": decision,
                     "upper_bounds": upper, "lower_bounds": lower},
         "secondary_equivalence": {"rule": "two-sided 95% CI inside [-0.001, +0.001]",
@@ -144,6 +156,9 @@ def main() -> int:
     summary = {
         "experiment": experiment.id, "decision": decision,
         "margin_delta": DELTA,
+        "bounds_note": "separate one-sided 95% lower and upper bounds (t=1.729, df=19); the pair is not a single 95% interval",
+        "point_estimates_vs_margin": {str(width): ("above" if cells[str(width)]["d"] > DELTA else "below")
+                                      for width in WIDTHS},
         "primary": {width: {"d": round(cells[str(width)]["d"], 6),
                             "one_sided_ci": [round(cells[str(width)]["one_sided_ci"][0], 6),
                                              round(cells[str(width)]["one_sided_ci"][1], 6)],

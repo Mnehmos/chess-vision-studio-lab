@@ -32,10 +32,15 @@ thought when producing each target.
 | H16 | +0.001056 | [+0.000348, +0.001763] | no |
 | H32 | +0.000769 | [−0.000061, +0.001599] | no |
 
-**Decision: INCONCLUSIVE.** The point estimate is positive (2k slightly worse) at every width and
-every interval's upper bound exceeds the preregistered margin. `FLOOR_CROSSED` is *not* supported
-either — the estimates sit well below the margin. The secondary equivalence test also fails at
-every width (each two-sided CI crosses +0.001).
+Each bound above is computed **separately**: a one-sided 95 % lower bound and a one-sided 95 %
+upper bound (t = 1.729, df = 19), not a single 95 % interval.
+
+**Decision: INCONCLUSIVE.** The point estimate is positive (2k slightly worse) at every width, and
+every width's **upper** bound exceeds the preregistered margin — so non-inferiority is not
+established. `FLOOR_CROSSED` is *not* supported either: two of the four point estimates sit above
+the margin (+0.001155 at H1 and +0.001056 at H16) and two below (+0.000927 at H4 and +0.000769 at
+H32), i.e. the estimates straddle the margin rather than lying clearly on one side of it. The
+secondary equivalence test fails at every width (each two-sided CI crosses +0.001).
 
 Mean `test_loss`: 8k 0.018866, 2k 0.019842 — the penalty is **0.00098 absolute, ~5 % relative**.
 For scale: the 16k→8k improvements that S8 treated as meaningful were 0.003–0.007, three to seven
@@ -58,15 +63,15 @@ effects S8 measured.
 
 ## Secondary: the teachers disagree far more than the students do
 
-On the same positions (200 mate-sentinel rows excluded, 9,570 compared):
+On the frozen **9,495** positions of X0003 (the earlier draft intersected the two label streams and
+silently used 9,770; 196 mate-sentinel rows excluded, 9,299 compared):
 
 | statistic | value |
 |---|---|
-| median \|Δcp\| | 34 |
-| p90 / p99 \|Δcp\| | 135 / 386 |
-| rate > 25 cp / > 50 cp / > 100 cp | 58.3 % / 36.7 % / 16.5 % |
-| sign disagreement | 7.9 % |
-| different best move | 52.5 % |
+| median \|Δcp\| | 35 |
+| rate > 25 cp / > 50 cp | 58.3 % / 36.8 % |
+| sign disagreement | 8.0 % |
+| different best move | 52.3 % |
 
 The teachers disagree substantially per position — over a third differ by more than 50 cp and half
 give a different best move — while students trained on them differ by ~5 % in mean `test_loss`.
