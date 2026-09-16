@@ -30,6 +30,12 @@ NNUE_SWITCHES: list[Switch] = [
     Switch(key="EPOCHS", label="Epochs", kind="int", default=40, min=1, max=10000, axis="compute",
            description="Full passes over the frozen training split."),
     Switch(key="BATCH", label="Batch size", kind="int", default=256, min=1, max=1_000_000, axis="training"),
+    # S8 student-compute control: 0 keeps the historical epoch-bounded schedule; a positive
+    # value runs EXACTLY that many optimizer updates, so arms with different dataset sizes
+    # receive identical student-side optimization work.
+    Switch(key="MAX_UPDATES", label="Max optimizer updates", kind="int", default=0, min=0,
+           max=10_000_000, axis="compute",
+           description="0 = epoch-bounded (historical); >0 = exactly this many optimizer updates"),
     Switch(key="LR", label="Learning rate", kind="float", default=0.003, min=1e-7, max=1.0, axis="training"),
     Switch(key="OPTIMIZER", label="Optimizer", kind="enum", default="adam", choices=["adam", "sgd"], axis="training"),
     Switch(key="INIT_STD", label="Input weight init std", kind="float", default=0.05, min=0.0, max=1.0, axis="training"),
