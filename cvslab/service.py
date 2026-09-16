@@ -644,7 +644,14 @@ class LabService:
                      f"ex/s={entry['examples_per_second']}")
 
             nnue.train(model, train_split, val_split, cfg, rng, on_epoch=on_epoch)
-            compute.train_examples_seen = int(cfg["EPOCHS"]) * len(train_split)
+            max_updates = int(cfg.get("MAX_UPDATES", 0) or 0)
+            updates = max_updates if max_updates > 0 else int(cfg["EPOCHS"]) * max(
+                len(train_split) // int(cfg["BATCH"]), 1)
+            compute.train_examples_seen = updates * int(cfg["BATCH"])
+            emit(f"student compute: {updates} optimizer updates x batch {int(cfg['BATCH'])} = "
+                 f"{compute.train_examples_seen} sample presentations "
+                 f"({compute.train_examples_seen / max(len(train_split), 1):.2f} effective passes "
+                 f"over {len(train_split)} rows)")
 
             payload = nnue.serialize(model, cfg, {
                 "run_id": run.id, "ablation_id": ablation.id, "display_label": run.display_label, "seed": run.seed,

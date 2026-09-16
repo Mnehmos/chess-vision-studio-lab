@@ -1,0 +1,80 @@
+{
+  "id": "s8-lower-supervision-frontier",
+  "version": 1,
+  "status": "materialized before generation; X0002 binds the hash of this file",
+  "question": "With teacher compute AND student optimizer work both held fixed, how cheap can the teacher label become before performance starts to degrade?",
+  "hypothesis": "The advantage of broad, shallow supervision survives equalized student optimization work.",
+
+  "reuses": {
+    "universe": "the S7-S clean universe (79,483 candidates, universe hash sha256:10e3ccf2f156a3cb5…, order hash sha256:bbdb9a3b4f26d7390…, order seed 20260920)",
+    "instrument": {"dataset": "D0010", "protocol": "E0004", "records": 200,
+                   "target_spec": "search_deep_cp @ nodeBudget 400000, value.targets.scoreCpStm, stm"},
+    "invariants": ["re-verify source/normalization/universe/order hashes",
+                   "re-verify the 575-record N0010 leakage join gives zero collisions",
+                   "re-verify the instrument is component-disjoint from the universe"]
+  },
+
+  "scale": {"name": "2x", "nodes": 74570982,
+            "note": "one teacher scale only; at 2x the frontier needs ~4,700 / ~9,500 / ~19,000 / ~38,000 positions for 16k/8k/4k/2k, all well inside the 79,483-candidate universe"},
+
+  "depths": [16000, 8000, 4000, 2000],
+  "nesting_required": "16k subset 8k subset 4k subset 2k (one frozen order, closest-prefix at each depth)",
+
+  "label_streams": {
+    "16k": "REUSE the S7-S 2x/16k arm if its provenance, TargetSpec, record order and realized-node evidence reproduce exactly; do not repurchase",
+    "8k": "buy along the frozen order until the 2x crossing resolves",
+    "4k": "buy along the frozen order until the 2x crossing resolves",
+    "2k": "buy along the frozen order until the 2x crossing resolves",
+    "expected_new_nodes": 223712946,
+    "expected_new_note": "3 x 2x; calibration and closest-prefix probe labels are extra",
+    "calibration": {"budgets": [8000, 4000, 2000], "sample": 64,
+                    "may_inspect": ["node counts", "runtime"],
+                    "must_not_inspect": ["centipawn values", "best moves", "losses", "any target information"]},
+    "headroom_rule": "universe >= 1.15 x the calibration-predicted 2k prefix; if the 2k arm approaches the universe limit, STOP rather than truncate"
+  },
+
+  "regimes": {
+    "fixed_epochs": {"EPOCHS": 40, "BATCH": 256, "note": "the historical regime: wider datasets receive more optimizer work"},
+    "fixed_updates": {"MAX_UPDATES": 760, "BATCH": 256, "note": "exactly 760 optimizer updates = 194,560 sample presentations for every arm; deterministic sampler (shuffle, walk without replacement, drop the tail partial batch, reshuffle on exhaustion, stop at exactly 760)"},
+    "everything_else_identical": {"representation": "RAW-768", "widths": [1, 4, 16, 32], "seeds": [0, 1, 2, 3, 4],
+                                  "optimizer": "adam", "LR": 0.003, "INIT_STD": 0.05, "K": 256.0, "LAMBDA": 1.0},
+    "no_retuning": "no optimizer, capacity, representation or teacher changes"
+  },
+
+  "matrix": {"arms": 8, "arms_note": "4 depths x 2 regimes; carried as the experiment's categorical axis (both regimes freeze the same 2x teacher target)",
+             "widths": 4, "seeds": 5, "expected_cells": 160},
+
+  "analysis": {
+    "primary_branch": "fixed_updates (matched student compute)",
+    "primary_contrast": "2k - 16k test_loss per width, paired over five seeds, 95% CI (t=2.776)",
+    "primary_sign": "negative favours 2k",
+    "decision": {"LOWER_FRONTIER_EXTENDS": "upper CI bound < 0 at every width",
+                 "TWO_K_TOO_SHALLOW": "lower CI bound > 0 at every width",
+                 "INCONCLUSIVE": "otherwise"},
+    "adjacent_descriptive": ["8k - 16k", "4k - 8k", "2k - 4k"],
+    "fixed_epochs_branch": "the same five contrasts, reported separately",
+    "between_regimes": "compare the magnitude and direction of the depth effect (2k - 16k and each adjacent step) between fixed epochs and fixed updates",
+    "no_pooling": "widths are reported, never pooled into a synthetic winner",
+    "student_compute_recorded": ["optimizer updates", "sample presentations", "effective passes", "cpu seconds", "wall seconds"]
+  },
+
+  "interpretation_map": {
+    "2k beats 16k under equal updates": "the breadth result survives the control; the useful supervision depth drops another 8x",
+    "4k improves over 8k but 2k is worse": "an approximate supervision floor near 4k",
+    "shallow advantage strong at fixed epochs but gone under fixed updates": "part of the earlier result was extra student-training work, not label breadth",
+    "16k best under equal student compute": "S7-S remains valid as a statement about the complete fixed-epoch system, not as evidence that cheaper labels are intrinsically superior"
+  },
+
+  "scope_exclusions": ["no GEO", "no HYBRID", "no Stockfish", "no priority selection", "no additional teacher scales",
+                        "no widths beyond H1/H4/H16/H32", "no 1k arm", "no game matches", "no optimizer tuning",
+                        "no new source population"],
+
+  "firewall": {"no_outcome_inspection": "the complete 160-cell matrix and its X0002 must be frozen before any training outcome is inspected",
+               "no_target_values": "prefix membership is decided by realized node counts only"},
+  "stop_conditions": ["the 16k S7-S observations do not reproduce exactly (provenance, spec, order or node evidence)",
+                       "the universe/order/instrument invariants fail on re-verification",
+                       "the 1.15x headroom rule fails for the 2k prefix",
+                       "nesting fails",
+                       "a TargetSpec cannot provide strict one-observation cardinality",
+                       "X0002 cannot truthfully seal the intended 160-cell design"]
+}

@@ -76,3 +76,57 @@ def test_evaluate_metrics_shapes():
     assert set(per_position) == {"test_loss", "cp_mae", "sign_agreement"}
     for values in per_position.values():
         assert values.shape == (32,)
+
+
+def test_fixed_update_regime_runs_exactly_the_declared_updates(lab):
+    """S8 control: equal student optimizer work per arm, deterministic from the seed."""
+    from cvslab.data import _load_canonical
+    from cvslab.targets import TargetSpec
+
+    spec = TargetSpec(family="search_shallow_cp", authority="legacy.cvs.search.shallow", producer="a" * 64,
+                      budget={"nodeBudget": 16000}, value_path=("scoreCpStm",))
+    source = lab.create_fixture_source(n_games=6, seed=71)
+    normalization = lab.normalize([source.id], name="n")
+    evaluated = sorted(r["record_id"] for r in _load_canonical(lab.store, lab.store.get(normalization.id)))
+    lab.register_labels(normalization.id, family="search_shallow_cp", producer="a" * 64,
+                        authority="legacy.cvs.search.shallow", pov="stm",
+                        rows=[{"record_id": r, "value": {"scoreCpStm": 20 + i, "bestMove": "e2e4", "nodes": 16000},
+                               "budget": {"nodeBudget": 16000, "nodes": 16000}} for i, r in enumerate(evaluated)])
+    dataset = lab.freeze_dataset(normalization.id, name="d-fixed", required_labels=["search_shallow_cp"],
+                                 target_spec=spec, fractions=(1.0, 0.0, 0.0))
+    exam = lab.freeze_dataset(normalization.id, name="d-fixed-exam", required_labels=["search_shallow_cp"],
+                              target_spec=spec, fractions=(0.0, 0.0, 1.0))
+    protocol = lab.create_eval_protocol(name="e-fixed", dataset_id=exam.id, split="test", k=256.0, lam=1.0,
+                                        target_spec=spec)
+
+    counter = {"n": 0}
+
+    def run_with(max_updates: int, epochs: int, seed: int):
+        counter["n"] += 1
+        recipe = lab.create_training_recipe(name=f"t-u{max_updates}-e{epochs}-s{seed}-{counter['n']}",
+                                            params={"K": 256.0, "LAMBDA": 1.0, "EPOCHS": epochs, "BATCH": 16,
+                                                    "MAX_UPDATES": max_updates},
+                                            target_spec=spec)
+        baseline = lab.register_baseline(name=f"FIXED{max_updates}_{epochs}_{seed}_{counter['n']}",
+                                         dataset_id=dataset.id,
+                                         training_recipe_id=recipe.id, eval_protocol_id=protocol.id,
+                                         model_config={"INPUT": "RAW", "H": 4}, supervision_divergence="same spec")
+        [queued] = lab.queue_runs(baseline.id, seeds=(seed,))
+        return lab.execute_run(queued.id)
+
+    # 10 updates at batch 16 = 160 presentations, whatever the dataset size or epoch count
+    first = run_with(max_updates=10, epochs=99, seed=0)
+    assert first.status.value == "COMPLETED", [c.detail for c in first.integrity if c.status == "fail"]
+    assert first.compute.train_examples_seen == 160
+    assert max(log.epoch for log in first.training_curve) == 10        # the log index is the update count
+    assert len(first.training_curve) <= 21                             # ~20 checkpoints + the final one
+
+    # deterministic: the same seed reproduces the same curve exactly
+    again = run_with(max_updates=10, epochs=99, seed=0)
+    assert [log.train_loss for log in again.training_curve] == [log.train_loss for log in first.training_curve]
+
+    # and the epoch-bounded regime is untouched: 3 epochs x floor(rows/16) updates
+    epoch_bounded = run_with(max_updates=0, epochs=3, seed=0)
+    rows = dataset.splits[0].count
+    assert epoch_bounded.compute.train_examples_seen == 3 * max(rows // 16, 1) * 16
+    assert len(epoch_bounded.training_curve) == 3

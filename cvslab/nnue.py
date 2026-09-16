@@ -173,11 +173,54 @@ def train(model: RawNnue, train_split: EncodedSplit, val_split: EncodedSplit, cf
           on_epoch: Optional[Callable[[dict], None]] = None) -> None:
     k, lam = float(cfg["K"]), float(cfg["LAMBDA"])
     epochs, batch, lr, optimizer = int(cfg["EPOCHS"]), int(cfg["BATCH"]), float(cfg["LR"]), str(cfg["OPTIMIZER"])
+    max_updates = int(cfg.get("MAX_UPDATES", 0) or 0)
     t_train, t_val = targets(train_split, lam, k), targets(val_split, lam, k)
     order = np.arange(len(train_split))
     moments = {name: (np.zeros_like(v), np.zeros_like(v)) for name, v in model.params.items()}
     beta1, beta2, eps, step = 0.9, 0.999, 1e-8, 0
     started = time.perf_counter()
+
+    if max_updates > 0:
+        # fixed-update regime: equal student optimizer work per arm. Deterministic sampler:
+        # shuffle, walk without replacement, drop the tail partial batch, reshuffle on
+        # exhaustion; stop after exactly max_updates updates.
+        checkpoint_every = max(1, max_updates // 20)
+        updates = 0
+        passes = 0
+        while updates < max_updates:
+            rng.shuffle(order)
+            passes += 1
+            for start in range(0, len(order) - batch + 1, batch):
+                if updates >= max_updates:
+                    break
+                idx = order[start:start + batch]
+                loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k)
+                updates += 1
+                step += 1          # Adam's bias-correction counter advances here too
+                for name, grad in grads.items():
+                    param = model.params[name]
+                    if optimizer == "sgd":
+                        param -= lr * grad
+                        continue
+                    m, v = moments[name]
+                    m *= beta1
+                    m += (1.0 - beta1) * grad
+                    v *= beta2
+                    v += (1.0 - beta2) * grad * grad
+                    param -= lr * (m / (1.0 - beta1 ** step)) / (np.sqrt(v / (1.0 - beta2 ** step)) + eps)
+                if on_epoch and (updates % checkpoint_every == 0 or updates == max_updates):
+                    val_loss = (float(np.mean(per_position_loss(model.predict_cp(val_split.X), t_val, k)))
+                                if len(val_split) else math.nan)
+                    on_epoch({
+                        "epoch": updates,             # in this regime the log index IS the update count
+                        "train_loss": _finite_or_none(loss),
+                        "val_loss": _finite_or_none(val_loss),
+                        "examples_per_second": round(batch / max(time.perf_counter() - started, 1e-9) *
+                                                     updates, 1),
+                        "elapsed_seconds": round(time.perf_counter() - started, 4),
+                    })
+        return
+
     for epoch in range(epochs):
         rng.shuffle(order)
         epoch_start, total = time.perf_counter(), 0.0

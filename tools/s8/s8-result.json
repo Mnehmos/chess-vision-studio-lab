@@ -1,0 +1,1201 @@
+{
+ "adjacent_matched": {
+  "2k-4k": {
+   "1": {
+    "a": "2k-updates",
+    "b": "4k-updates",
+    "ci_high": 0.003085829418302595,
+    "ci_low": -0.0021587150282948797,
+    "differences": [
+     -0.0005682099178420438,
+     0.004183313591340561,
+     -0.0006492815250246434,
+     0.00015875768110310863,
+     -0.0008067938545576955
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0004635571950038574
+   },
+   "16": {
+    "a": "2k-updates",
+    "b": "4k-updates",
+    "ci_high": 0.003921610571241083,
+    "ci_low": -0.0017244549006788681,
+    "differences": [
+     -0.0003942367325833144,
+     0.0037398410887345343,
+     0.0012049546977076324,
+     -0.001839686476496221,
+     0.0027820165990429073
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0010985778352811076
+   },
+   "32": {
+    "a": "2k-updates",
+    "b": "4k-updates",
+    "ci_high": 0.0031263184366436903,
+    "ci_low": -0.00582616125370405,
+    "differences": [
+     0.004761345143174896,
+     -0.0020309557424324706,
+     -0.004831483190051297,
+     -0.0020323576572510993,
+     -0.002616155596090927
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0013499214085301795
+   },
+   "4": {
+    "a": "2k-updates",
+    "b": "4k-updates",
+    "ci_high": 0.0024655117772630305,
+    "ci_low": -0.0027639280707024197,
+    "differences": [
+     -0.000259594000797796,
+     0.0034472319633920365,
+     -0.001998788365010405,
+     -0.0008313385025823239,
+     -0.001103551828599985
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0001492081467196947
+   }
+  },
+  "4k-8k": {
+   "1": {
+    "a": "4k-updates",
+    "b": "8k-updates",
+    "ci_high": 0.0026800561350428286,
+    "ci_low": 0.0001939368471330224,
+    "differences": [
+     0.0030970166943259797,
+     0.0004514305024269395,
+     0.0009490959025514334,
+     0.0012257634150043117,
+     0.001461675941130964
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0014369964910879256
+   },
+   "16": {
+    "a": "4k-updates",
+    "b": "8k-updates",
+    "ci_high": 0.0007668910272796243,
+    "ci_low": -0.003935700744926357,
+    "differences": [
+     -0.0030257656784605617,
+     -0.0024929005363232212,
+     -0.0005037245547345644,
+     -0.003126087895396871,
+     0.0012264543707983869
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0015844048588233664
+   },
+   "32": {
+    "a": "4k-updates",
+    "b": "8k-updates",
+    "ci_high": -0.00036588054838424585,
+    "ci_low": -0.00674756988755824,
+    "differences": [
+     -0.007410284637679801,
+     -0.0049013079854579936,
+     -0.0013156763113985719,
+     -0.0025094035510550144,
+     -0.0016469536042648322
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0035567252179712428
+   },
+   "4": {
+    "a": "4k-updates",
+    "b": "8k-updates",
+    "ci_high": 0.0029937766161205644,
+    "ci_low": -0.003770169763237456,
+    "differences": [
+     0.0002791055227865033,
+     -0.000210683510548388,
+     -0.00442442318364843,
+     0.0031854034060971263,
+     -0.000770385102479041
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0003881965735584459
+   }
+  },
+  "8k-16k": {
+   "1": {
+    "a": "8k-updates",
+    "b": "16k-updates",
+    "ci_high": -0.0003813420146949269,
+    "ci_low": -0.006206026018058095,
+    "differences": [
+     -0.0030313983673163035,
+     -0.006395578261957947,
+     -0.004869713054077667,
+     -0.0012973952046997882,
+     -0.0008743351938308493
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0032936840163765107
+   },
+   "16": {
+    "a": "8k-updates",
+    "b": "16k-updates",
+    "ci_high": -0.001640705469839002,
+    "ci_low": -0.01050964750821871,
+    "differences": [
+     -0.007130721624424217,
+     -0.007087594129957991,
+     -0.002305940395079909,
+     -0.0028489084519357673,
+     -0.011002717843746398
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.006075176489028856
+   },
+   "32": {
+    "a": "8k-updates",
+    "b": "16k-updates",
+    "ci_high": -0.0015588265381922448,
+    "ci_low": -0.009197138063690482,
+    "differences": [
+     -0.0037883616376484415,
+     -0.0015835459715071235,
+     -0.009040078384586973,
+     -0.004501571006959609,
+     -0.007976354504004673
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.005377982300941364
+   },
+   "4": {
+    "a": "8k-updates",
+    "b": "16k-updates",
+    "ci_high": -0.0035375337649772294,
+    "ci_low": -0.010856238290934073,
+    "differences": [
+     -0.004016432408198732,
+     -0.007035214856157561,
+     -0.009408102186656515,
+     -0.010851288382762855,
+     -0.00467339230600259
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.007196886027955651
+   }
+  }
+ },
+ "arms": [
+  {
+   "arm_id": "16k-epochs",
+   "node_budget": 16000,
+   "prefix_size": 4772,
+   "realized_nodes": 74573451
+  },
+  {
+   "arm_id": "16k-updates",
+   "node_budget": 16000,
+   "prefix_size": 4772,
+   "realized_nodes": 74573451
+  },
+  {
+   "arm_id": "8k-epochs",
+   "node_budget": 8000,
+   "prefix_size": 9495,
+   "realized_nodes": 74568086
+  },
+  {
+   "arm_id": "8k-updates",
+   "node_budget": 8000,
+   "prefix_size": 9495,
+   "realized_nodes": 74568086
+  },
+  {
+   "arm_id": "4k-epochs",
+   "node_budget": 4000,
+   "prefix_size": 18961,
+   "realized_nodes": 74572232
+  },
+  {
+   "arm_id": "4k-updates",
+   "node_budget": 4000,
+   "prefix_size": 18961,
+   "realized_nodes": 74572232
+  },
+  {
+   "arm_id": "2k-epochs",
+   "node_budget": 2000,
+   "prefix_size": 37898,
+   "realized_nodes": 74570294
+  },
+  {
+   "arm_id": "2k-updates",
+   "node_budget": 2000,
+   "prefix_size": 37898,
+   "realized_nodes": 74570294
+  }
+ ],
+ "between_regimes_2k_minus_16k": {
+  "1": {
+   "difference": 0.0012558937402968942,
+   "fixed_epochs": -0.0026490240705816224,
+   "matched_student_updates": -0.0013931303302847282
+  },
+  "16": {
+   "difference": -0.0029023423812612427,
+   "fixed_epochs": -0.0036586611313098724,
+   "matched_student_updates": -0.006561003512571115
+  },
+  "32": {
+   "difference": -0.004451046891577328,
+   "fixed_epochs": -0.0058335820358654585,
+   "matched_student_updates": -0.010284628927442786
+  },
+  "4": {
+   "difference": 0.0031744400303110633,
+   "fixed_epochs": -0.010908730778544854,
+   "matched_student_updates": -0.0077342907482337905
+  }
+ },
+ "cells": {
+  "expected": 160,
+  "invalid_runs": []
+ },
+ "decision": "INCONCLUSIVE",
+ "experiment": "X0002",
+ "fixed_epochs_branch": {
+  "2k-16k": {
+   "1": {
+    "a": "2k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0013774148323102693,
+    "ci_low": -0.006675462973473514,
+    "differences": [
+     0.0005167243210879163,
+     -0.006168633052615476,
+     -0.006142140799190454,
+     -0.0005455397856009275,
+     -0.0009055310365891703
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0026490240705816224
+   },
+   "16": {
+    "a": "2k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0009301906949337113,
+    "ci_low": -0.008247512957553455,
+    "differences": [
+     -0.0009408958116966133,
+     -0.008681511733787325,
+     0.0004310857908580608,
+     -0.005914317739270293,
+     -0.0031876661626531917
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0036586611313098724
+   },
+   "32": {
+    "a": "2k-epochs",
+    "b": "16k-epochs",
+    "ci_high": -0.0021821910954348865,
+    "ci_low": -0.009484972976296031,
+    "differences": [
+     -0.005358799670595105,
+     -0.00236588282184275,
+     -0.0037644885766376784,
+     -0.008866753752828128,
+     -0.008811985357423634
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0058335820358654585
+   },
+   "4": {
+    "a": "2k-epochs",
+    "b": "16k-epochs",
+    "ci_high": -0.0015597427365693986,
+    "ci_low": -0.02025771882052031,
+    "differences": [
+     -0.004668175849721127,
+     -0.006603936362357269,
+     -0.023679216398402914,
+     -0.011175226795985234,
+     -0.008417098486257721
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.010908730778544854
+   }
+  },
+  "2k-4k": {
+   "1": {
+    "a": "2k-epochs",
+    "b": "4k-epochs",
+    "ci_high": 0.0021242415890478303,
+    "ci_low": -0.002905307529509061,
+    "differences": [
+     0.002360752779456375,
+     -0.002045431772731988,
+     0.00045289577327530146,
+     -0.00268557632574953,
+     -3.530530540323505e-05
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0003905329702306153
+   },
+   "16": {
+    "a": "2k-epochs",
+    "b": "4k-epochs",
+    "ci_high": 0.00038767563080366893,
+    "ci_low": -0.005782423988745157,
+    "differences": [
+     -0.0006481188821445098,
+     -0.003694006019678838,
+     -0.006618897380913306,
+     -0.0013486320283725567,
+     -0.0011772165837445094
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0026973741789707443
+   },
+   "32": {
+    "a": "2k-epochs",
+    "b": "4k-epochs",
+    "ci_high": -0.0019457227174984589,
+    "ci_low": -0.005168418398249725,
+    "differences": [
+     -0.00313029207369488,
+     -0.0020332877822828756,
+     -0.003031232346408848,
+     -0.005463013934021731,
+     -0.004127526652962125
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.003557070557874092
+   },
+   "4": {
+    "a": "2k-epochs",
+    "b": "4k-epochs",
+    "ci_high": 0.0006251807963696516,
+    "ci_low": -0.006974019141305741,
+    "differences": [
+     -0.004374127069100245,
+     0.000678287995057052,
+     -0.002693531497751138,
+     -0.007573677626450252,
+     -0.0019090476640956384
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0031744191724680446
+   }
+  },
+  "4k-16k": {
+   "1": {
+    "a": "4k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0018462769537438977,
+    "ci_low": -0.006363259154445912,
+    "differences": [
+     -0.0018440284583684588,
+     -0.004123201279883488,
+     -0.006595036572465756,
+     0.0021400365401486026,
+     -0.0008702257311859352
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.002258491100351007
+   },
+   "16": {
+    "a": "4k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.00508664252810252,
+    "ci_low": -0.007009216432780776,
+    "differences": [
+     -0.0002927769295521035,
+     -0.004987505714108487,
+     0.007049983171771367,
+     -0.004565685710897736,
+     -0.0020104495789086824
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0009612869523391285
+   },
+   "32": {
+    "a": "4k-epochs",
+    "b": "16k-epochs",
+    "ci_high": -1.858008746265542e-05,
+    "ci_low": -0.004534442868520078,
+    "differences": [
+     -0.002228507596900225,
+     -0.00033259503955987424,
+     -0.0007332562302288306,
+     -0.003403739818806397,
+     -0.004684458704461509
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.002276511477991367
+   },
+   "4": {
+    "a": "4k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0020753086274335527,
+    "ci_low": -0.01754393183958717,
+    "differences": [
+     -0.00029404878062088205,
+     -0.007282224357414321,
+     -0.020985684900651776,
+     -0.0036015491695349823,
+     -0.006508050822162083
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.007734311606076809
+   }
+  },
+  "4k-8k": {
+   "1": {
+    "a": "4k-epochs",
+    "b": "8k-epochs",
+    "ci_high": 0.004285805014947358,
+    "ci_low": -0.0005113435657544733,
+    "differences": [
+     8.305181841175222e-05,
+     0.0042823894336093404,
+     0.00045878163282049404,
+     0.0036379379887437387,
+     0.0009739927493968865
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0018872307245964425
+   },
+   "16": {
+    "a": "4k-epochs",
+    "b": "8k-epochs",
+    "ci_high": 0.004761159767596634,
+    "ci_low": -0.0037150355954118025,
+    "differences": [
+     -0.002729075412968577,
+     -0.00022948486544031865,
+     0.005079672604092297,
+     -0.0024508676443614555,
+     0.002945065749140132
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0005230620860924157
+   },
+   "32": {
+    "a": "4k-epochs",
+    "b": "8k-epochs",
+    "ci_high": 0.004610717162557856,
+    "ci_low": -0.0024419916593297944,
+    "differences": [
+     -0.0013263394137791075,
+     -0.001173417146261336,
+     0.0041099189661436,
+     -0.0004244772238335172,
+     0.004236128575800517
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": 0.0010843627516140312
+   },
+   "4": {
+    "a": "4k-epochs",
+    "b": "8k-epochs",
+    "ci_high": 0.002610815815937981,
+    "ci_low": -0.006617501590321347,
+    "differences": [
+     -0.0018803873138549879,
+     -0.0023480929631047587,
+     -0.0061117281136392684,
+     0.003960927818073813,
+     -0.0036374338634332128
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.002003342887191683
+   }
+  },
+  "8k-16k": {
+   "1": {
+    "a": "8k-epochs",
+    "b": "16k-epochs",
+    "ci_high": -3.60346198504842e-05,
+    "ci_low": -0.008255409030044415,
+    "differences": [
+     -0.001927080276780211,
+     -0.008405590713492828,
+     -0.00705381820528625,
+     -0.0014979014485951361,
+     -0.0018442184805828217
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0041457218249474495
+   },
+   "16": {
+    "a": "8k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0029254544753493793,
+    "ci_low": -0.005894152552212468,
+    "differences": [
+     0.0024362984834164735,
+     -0.004758020848668169,
+     0.00197031056767907,
+     -0.002114818066536281,
+     -0.004955515328048814
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0014843490384315442
+   },
+   "32": {
+    "a": "8k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0013236099503329333,
+    "ci_low": -0.00804535840954373,
+    "differences": [
+     -0.0009021681831211173,
+     0.0008408221067014617,
+     -0.00484317519637243,
+     -0.00297926259497288,
+     -0.008920587280262026
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.0033608742296053983
+   },
+   "4": {
+    "a": "8k-epochs",
+    "b": "16k-epochs",
+    "ci_high": 0.0018538690273831445,
+    "ci_low": -0.013315806465153398,
+    "differences": [
+     0.0015863385332341058,
+     -0.004934131394309562,
+     -0.014873956787012508,
+     -0.007562476987608795,
+     -0.00287061695872887
+    ],
+    "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+    "n": 5,
+    "seeds": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "width_estimate": -0.005730968718885126
+   }
+  }
+ },
+ "mean_test_loss_by_arm": {
+  "16k-epochs": 0.0235223830513974,
+  "16k-updates": 0.023176846914899157,
+  "2k-epochs": 0.01775988354732195,
+  "2k-updates": 0.016683583535266052,
+  "4k-epochs": 0.020214732767207824,
+  "4k-updates": 0.01666783216650728,
+  "8k-epochs": 0.01984190459843002,
+  "8k-updates": 0.01769091470632356
+ },
+ "preregistration_hash": "sha256:a7eca1e81d757c1ac8f9982277c62415830e59cff588cee34515d588066ff949",
+ "primary_2k_minus_16k": {
+  "1": {
+   "a": "2k-updates",
+   "b": "16k-updates",
+   "ci_high": 0.0009777751316652197,
+   "ci_low": -0.003764035792234676,
+   "differences": [
+    -0.0005025915908323676,
+    -0.001760834168190447,
+    -0.004569898676550877,
+    8.712589140763213e-05,
+    -0.00021945310725758095
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "width_estimate": -0.0013931303302847282
+  },
+  "16": {
+   "a": "2k-updates",
+   "b": "16k-updates",
+   "ci_high": -0.0025019148789795255,
+   "ci_low": -0.010620092146162705,
+   "differences": [
+    -0.010550724035468093,
+    -0.005840653577546678,
+    -0.0016047102521068411,
+    -0.00781468282382886,
+    -0.006994246873905104
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "width_estimate": -0.006561003512571115
+  },
+  "32": {
+   "a": "2k-updates",
+   "b": "16k-updates",
+   "ci_high": -0.006014259134946357,
+   "ci_low": -0.014554998719939215,
+   "differences": [
+    -0.006437301132153347,
+    -0.008515809699397588,
+    -0.015187237886036842,
+    -0.009043332215265723,
+    -0.012239463704360432
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "width_estimate": -0.010284628927442786
+  },
+  "4": {
+   "a": "2k-updates",
+   "b": "16k-updates",
+   "ci_high": -0.0016204761663497292,
+   "ci_low": -0.013848105330117853,
+   "differences": [
+    -0.003996920886210025,
+    -0.0037986664033139127,
+    -0.01583131373531535,
+    -0.008497223479248053,
+    -0.006547329237081616
+   ],
+   "method": "95% CI from the five paired differences (Student t, df=4, t=2.776)",
+   "n": 5,
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "width_estimate": -0.0077342907482337905
+  }
+ },
+ "primary_branch": "fixed_updates (equal student optimizer work per arm)",
+ "student_compute": {
+  "16k-epochs/H1": {
+   "cpu_seconds": 0.8594,
+   "epochs": 40,
+   "examples_seen": 184320,
+   "rows": 4772,
+   "updates": null,
+   "wall_seconds": 0.8705
+  },
+  "16k-epochs/H16": {
+   "cpu_seconds": 1.2656,
+   "epochs": 40,
+   "examples_seen": 184320,
+   "rows": 4772,
+   "updates": null,
+   "wall_seconds": 1.0241
+  },
+  "16k-epochs/H32": {
+   "cpu_seconds": 1.5781,
+   "epochs": 40,
+   "examples_seen": 184320,
+   "rows": 4772,
+   "updates": null,
+   "wall_seconds": 1.1104
+  },
+  "16k-epochs/H4": {
+   "cpu_seconds": 1.1406,
+   "epochs": 40,
+   "examples_seen": 184320,
+   "rows": 4772,
+   "updates": null,
+   "wall_seconds": 0.9535
+  },
+  "16k-updates/H1": {
+   "cpu_seconds": 0.875,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 4772,
+   "updates": 760,
+   "wall_seconds": 0.8807
+  },
+  "16k-updates/H16": {
+   "cpu_seconds": 1.6875,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 4772,
+   "updates": 760,
+   "wall_seconds": 1.0341
+  },
+  "16k-updates/H32": {
+   "cpu_seconds": 1.7188,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 4772,
+   "updates": 760,
+   "wall_seconds": 1.1131
+  },
+  "16k-updates/H4": {
+   "cpu_seconds": 1.0781,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 4772,
+   "updates": 760,
+   "wall_seconds": 0.9503
+  },
+  "2k-epochs/H1": {
+   "cpu_seconds": 8.0625,
+   "epochs": 40,
+   "examples_seen": 1515520,
+   "rows": 37898,
+   "updates": null,
+   "wall_seconds": 8.0969
+  },
+  "2k-epochs/H16": {
+   "cpu_seconds": 12.375,
+   "epochs": 40,
+   "examples_seen": 1515520,
+   "rows": 37898,
+   "updates": null,
+   "wall_seconds": 9.3785
+  },
+  "2k-epochs/H32": {
+   "cpu_seconds": 15.2969,
+   "epochs": 40,
+   "examples_seen": 1515520,
+   "rows": 37898,
+   "updates": null,
+   "wall_seconds": 9.9059
+  },
+  "2k-epochs/H4": {
+   "cpu_seconds": 9.9844,
+   "epochs": 40,
+   "examples_seen": 1515520,
+   "rows": 37898,
+   "updates": null,
+   "wall_seconds": 8.8405
+  },
+  "2k-updates/H1": {
+   "cpu_seconds": 5.6406,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 37898,
+   "updates": 760,
+   "wall_seconds": 5.6432
+  },
+  "2k-updates/H16": {
+   "cpu_seconds": 6.2812,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 37898,
+   "updates": 760,
+   "wall_seconds": 5.7577
+  },
+  "2k-updates/H32": {
+   "cpu_seconds": 6.0781,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 37898,
+   "updates": 760,
+   "wall_seconds": 5.7977
+  },
+  "2k-updates/H4": {
+   "cpu_seconds": 5.8438,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 37898,
+   "updates": 760,
+   "wall_seconds": 5.6747
+  },
+  "4k-epochs/H1": {
+   "cpu_seconds": 4.625,
+   "epochs": 40,
+   "examples_seen": 757760,
+   "rows": 18961,
+   "updates": null,
+   "wall_seconds": 4.6319
+  },
+  "4k-epochs/H16": {
+   "cpu_seconds": 6.4219,
+   "epochs": 40,
+   "examples_seen": 757760,
+   "rows": 18961,
+   "updates": null,
+   "wall_seconds": 5.1283
+  },
+  "4k-epochs/H32": {
+   "cpu_seconds": 8.1094,
+   "epochs": 40,
+   "examples_seen": 757760,
+   "rows": 18961,
+   "updates": null,
+   "wall_seconds": 5.5238
+  },
+  "4k-epochs/H4": {
+   "cpu_seconds": 5.5469,
+   "epochs": 40,
+   "examples_seen": 757760,
+   "rows": 18961,
+   "updates": null,
+   "wall_seconds": 5.0409
+  },
+  "4k-updates/H1": {
+   "cpu_seconds": 3.4844,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 18961,
+   "updates": 760,
+   "wall_seconds": 3.4846
+  },
+  "4k-updates/H16": {
+   "cpu_seconds": 3.9844,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 18961,
+   "updates": 760,
+   "wall_seconds": 3.6449
+  },
+  "4k-updates/H32": {
+   "cpu_seconds": 4.1406,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 18961,
+   "updates": 760,
+   "wall_seconds": 3.8833
+  },
+  "4k-updates/H4": {
+   "cpu_seconds": 3.8438,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 18961,
+   "updates": 760,
+   "wall_seconds": 3.703
+  },
+  "8k-epochs/H1": {
+   "cpu_seconds": 2.4844,
+   "epochs": 40,
+   "examples_seen": 378880,
+   "rows": 9495,
+   "updates": null,
+   "wall_seconds": 2.5158
+  },
+  "8k-epochs/H16": {
+   "cpu_seconds": 3.3125,
+   "epochs": 40,
+   "examples_seen": 378880,
+   "rows": 9495,
+   "updates": null,
+   "wall_seconds": 2.8133
+  },
+  "8k-epochs/H32": {
+   "cpu_seconds": 4.5,
+   "epochs": 40,
+   "examples_seen": 378880,
+   "rows": 9495,
+   "updates": null,
+   "wall_seconds": 3.0491
+  },
+  "8k-epochs/H4": {
+   "cpu_seconds": 2.9375,
+   "epochs": 40,
+   "examples_seen": 378880,
+   "rows": 9495,
+   "updates": null,
+   "wall_seconds": 2.693
+  },
+  "8k-updates/H1": {
+   "cpu_seconds": 2.2344,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 9495,
+   "updates": 760,
+   "wall_seconds": 2.242
+  },
+  "8k-updates/H16": {
+   "cpu_seconds": 2.7031,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 9495,
+   "updates": 760,
+   "wall_seconds": 2.2952
+  },
+  "8k-updates/H32": {
+   "cpu_seconds": 2.9062,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 9495,
+   "updates": 760,
+   "wall_seconds": 2.4784
+  },
+  "8k-updates/H4": {
+   "cpu_seconds": 2.6094,
+   "epochs": 1,
+   "examples_seen": 194560,
+   "rows": 9495,
+   "updates": 760,
+   "wall_seconds": 2.3587
+  }
+ },
+ "unit": "paired seed difference over five seeds, 95% CI (t=2.776); negative favours the first term"
+}
