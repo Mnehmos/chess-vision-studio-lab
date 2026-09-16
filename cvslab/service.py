@@ -841,10 +841,19 @@ class LabService:
                           eval_protocol_id: str, widths: Sequence[int], seeds: Sequence[int],
                           source_id: str, normalization_id: str, candidate_universe_hash: str,
                           order_seed: int, order_hash: str, analysis: Mapping[str, object],
+                          declared_cells: Optional[Sequence[Sequence[object]]] = None,
                           family: str = DEFAULT_FAMILY, generation: Optional[str] = None,
                           notes: str = "", experiment_id: Optional[str] = None) -> "Experiment":
         """Freeze one study. Every arm is verified against its frozen D####/T#### BEFORE the X
-        exists, and the exam is taken from the protocol rather than trusted from the caller."""
+        exists, and the exam is taken from the protocol rather than trusted from the caller.
+
+        The lattice is the full product of the declared scales and supervision depths UNLESS
+        `declared_cells` names it explicitly as (scale, node_budget) pairs. An explicit cell list
+        exists for designs whose conditions are not a grid — S13 compares teachers over the same
+        positions with honestly unequal teacher spend, where a product would force either a false
+        scale value or cells nobody runs. A declared cell list is still exhaustive: missing and
+        undeclared cells are both refused, and every declared cell must lie inside the declared axes.
+        """
         from .schemas import Experiment, ExperimentArm
 
         generation = self._generation(generation)
@@ -860,8 +869,19 @@ class LabService:
         # Arms may partition a condition: several width-specific arms can share one
         # (scale, supervision depth) cell, which is what a targeted precision design needs.
         # What must hold is that the SET of cells is exactly the declared lattice.
-        cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
-        lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
+        arm_cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
+        if declared_cells is None:
+            lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
+        else:
+            cell_list = [(str(scale), int(budget)) for scale, budget in declared_cells]
+            lattice = set(cell_list)
+            if len(lattice) != len(cell_list):
+                raise LabError("the declared cell list repeats a (scale, node_budget) pair")
+            outside = sorted(lattice - {(scale, budget)
+                                        for scale in declared_scales for budget in declared_budgets})
+            if outside:
+                raise LabError(f"declared cells {outside} lie outside the declared scales "
+                               f"{sorted(declared_scales)} and budgets {sorted(declared_budgets)}")
         for arm in arms:
             if str(arm["scale"]) not in numeric_scale:
                 raise LabError(f"arm {arm['arm_id']} names scale {arm['scale']!r}, which the design does "
@@ -871,8 +891,8 @@ class LabService:
             if int(arm["scale_nodes"]) != numeric_scale[str(arm["scale"])]:
                 raise LabError(f"arm {arm['arm_id']} declares scale_nodes {arm['scale_nodes']} for scale "
                                f"{arm['scale']!r}, but the design freezes {numeric_scale[str(arm['scale'])]}")
-        missing_cells = sorted(lattice - cells)
-        undeclared_cells = sorted(cells - lattice)
+        missing_cells = sorted(lattice - arm_cells)
+        undeclared_cells = sorted(arm_cells - lattice)
         if missing_cells or undeclared_cells:
             raise LabError(f"the design must be exactly the declared lattice: missing {missing_cells}, "
                            f"not declared {undeclared_cells}")

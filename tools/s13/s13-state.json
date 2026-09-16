@@ -1,0 +1,25 @@
+{
+ "exam_labels": {
+  "labels": 200,
+  "node_budget": 4000000,
+  "realized_nodes": 796072268,
+  "mean_realized_nodes": 3980361.34,
+  "mean_wall_ms": 7271.6,
+  "mean_depth": 25.24,
+  "registration": {
+   "path": "canonical/N0006/labels/labels-0002-c86215fa1977d53b82ed8545.jsonl",
+   "file_hash": "sha256:fbfa49f35d16761fe3c3e7eef93c117f5d1fbd691614bffaa36ffc91ad086b87",
+   "rows": 200
+  },
+  "normalization": "N0006"
+ },
+ "exam": {
+  "dataset_id": "D0040",
+  "dataset_manifest_hash": "sha256:cd1da279beb3f97cdeffbd39f336e485ec1f2c7eba21626193b24f97189ea6b7",
+  "protocol_id": "E0005",
+  "protocol_hash": "sha256:2993ef2cadaf8bdbe6ae95e1a9079afe44435ea7b3398bff5ca62513f1a43e5f",
+  "spec_hash": "sha256:feeccd243977d35d89ea1cbecdf9b8f55cf64886f348cb68f8a28782c42adad6",
+  "identities": 200,
+  "nodes": 4000000
+ }
+}
