@@ -134,8 +134,10 @@ def test_the_design_must_be_exactly_the_declared_lattice(lab):
     # arms may PARTITION one cell: two arms of the same (scale, depth) split the width ladder.
     # The cell is then incomplete, so the coverage rule refuses it.
     half_a = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="P", widths=(1, 4))
+    half_a = dict(half_a, arm_id="2x-D16000-partition")     # a distinct id for the same cell
+    # alone in its cell it presents only half the ladder, so the cell is incomplete and refused
     with pytest.raises(LabError, match="presents widths"):
-        make_experiment(lab, [first, second, half_a], protocol, xid)
+        make_experiment(lab, [half_a, second], protocol, xid)
 
 
 def test_the_scale_name_must_carry_its_numeric_target(lab):
