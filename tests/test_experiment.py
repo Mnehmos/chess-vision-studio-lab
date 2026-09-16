@@ -133,11 +133,26 @@ def test_the_design_must_be_exactly_the_declared_lattice(lab):
         make_experiment(lab, [first, dict(second, scale="9x")], protocol, xid)
     # arms may PARTITION one cell: two arms of the same (scale, depth) split the width ladder.
     # The cell is then incomplete, so the coverage rule refuses it.
-    half_a = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="P", widths=(1, 4))
-    half_a = dict(half_a, arm_id="2x-D16000-partition")     # a distinct id for the same cell
-    # alone in its cell it presents only half the ladder, so the cell is incomplete and refused
+    # A fresh experiment, because the earlier arms already claim the previous id (the binding
+    # guard fires before coverage and would mask the case under test).
+    xid2 = lab.store.next_id("X")
+    half_a = dict(arm_material(lab, normalization, recipe, protocol, xid2, scale="2x", suffix="P",
+                               widths=(1, 4)), arm_id="2x-D16000-partition")
+    partner = arm_material(lab, normalization, recipe, protocol, xid2, scale="5x", suffix="Q")
     with pytest.raises(LabError, match="presents widths"):
-        make_experiment(lab, [half_a, second], protocol, xid)
+        make_experiment(lab, [half_a, partner], protocol, xid2)
+    # A refused attempt leaves its ablations claiming that id (fail closed), so a corrected retry
+    # needs a fresh experiment identity - the same rule the S11 freeze script follows.
+    with pytest.raises(LabError, match="unlisted members"):
+        make_experiment(lab, [full_a := dict(
+            arm_material(lab, normalization, recipe, protocol, xid2, scale="2x", suffix="R"),
+            arm_id="2x-D16000-full"), partner], protocol, xid2)
+    xid3 = lab.store.next_id("X")
+    full_b = dict(arm_material(lab, normalization, recipe, protocol, xid3, scale="2x", suffix="S"),
+                  arm_id="2x-D16000-full")
+    partner_b = arm_material(lab, normalization, recipe, protocol, xid3, scale="5x", suffix="T")
+    accepted = make_experiment(lab, [full_b, partner_b], protocol, xid3)
+    assert len(accepted.arms) == 2 and {arm.node_budget for arm in accepted.arms} == {16000}
 
 
 def test_the_scale_name_must_carry_its_numeric_target(lab):
