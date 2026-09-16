@@ -307,11 +307,22 @@ def split_identity(universe: Universe) -> dict:
 # Pre-registered statistics (declared before results were seen)
 # ---------------------------------------------------------------------------
 
-_T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262, 10: 2.228}
+# Two-sided 95% and one-sided 95% Student-t critical values by degrees of freedom. S9 uses
+# twenty seeds (df=19), so the table extends far enough to cover it without silently falling
+# back to the normal approximation.
+_T95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306,
+        9: 2.262, 10: 2.228, 11: 2.201, 12: 2.179, 13: 2.160, 14: 2.145, 15: 2.131, 16: 2.120,
+        17: 2.110, 18: 2.101, 19: 2.093, 20: 2.086, 21: 2.080, 22: 2.074, 23: 2.069, 24: 2.064,
+        25: 2.060, 26: 2.056, 27: 2.052, 28: 2.048, 29: 2.045, 30: 2.042}
+_T95_ONE_SIDED = {1: 6.314, 2: 2.920, 3: 2.353, 4: 2.132, 5: 2.015, 6: 1.943, 7: 1.895, 8: 1.860,
+                  9: 1.833, 10: 1.812, 11: 1.796, 12: 1.782, 13: 1.771, 14: 1.761, 15: 1.753,
+                  16: 1.746, 17: 1.740, 18: 1.734, 19: 1.729, 20: 1.725, 21: 1.721, 22: 1.717,
+                  23: 1.714, 24: 1.711, 25: 1.708, 26: 1.706, 27: 1.703, 28: 1.701, 29: 1.699,
+                  30: 1.697}
 
 
 def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int, float],
-                  *, seeds: tuple[int, ...] = DEFAULT_SEEDS) -> dict:
+                  *, seeds: tuple[int, ...] = DEFAULT_SEEDS, one_sided: bool = False) -> dict:
     """Per-width primary estimate: paired differences over the PREREGISTERED seed set.
 
     Seeds are not intersected silently: a missing seed means a failed cell, which must
@@ -329,10 +340,12 @@ def paired_effect(priority_by_seed: dict[int, float], uniform_by_seed: dict[int,
     mean = sum(differences) / n
     variance = sum((value - mean) ** 2 for value in differences) / (n - 1)
     standard_error = math.sqrt(variance / n)
-    critical = _T95.get(n - 1, 1.96)
+    critical = (_T95_ONE_SIDED if one_sided else _T95).get(n - 1, 1.645 if one_sided else 1.96)
     return {"width_estimate": mean, "ci_low": mean - critical * standard_error,
             "ci_high": mean + critical * standard_error, "n": n, "seeds": shared,
-            "differences": differences, "method": PREREGISTRATION["uncertainty"]}
+            "differences": differences, "critical": critical,
+            "method": (f"{'one-sided' if one_sided else 'two-sided'} 95% CI over {n} paired seeds, "
+                       f"Student t = {critical} (df={n - 1})")}
 
 
 def interaction_effects(effects_by_width: dict[int, dict]) -> dict:
