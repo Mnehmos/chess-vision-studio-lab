@@ -5,7 +5,14 @@ COMPLETED, 0 INVALID. Preregistration:
 `tools/s7/s7-scaling-preregistration.json`, hash
 `sha256:c1e68acab2d0453d7d4a94b9836e0aed81fdc55ff60d563da99836766eb9a3f3`.
 
-**Teaching statement.** *We increased the teacher's total thinking budget from 2× to 20×. At
+**Teaching statement.** *Within this RAW-768, fixed-epoch, static-evaluation regime: spending
+the same teacher-search budget on roughly 25× more 16k-supervised positions was substantially
+better than spending it on 400k-supervised positions, and the relationship persisted from 2×
+through 20× total teacher compute. Wider datasets also received more student optimizer work
+under fixed epochs, so this does not yet isolate teacher allocation from student-training
+compute.*
+
+*We increased the teacher's total thinking budget from 2× to 20×. At
 every scale we spent exactly that budget in four different ways: a few very deep lessons
 through many shallow lessons. Because the datasets and scales are nested, we can see both how
 more supervision helps and whether the best allocation of that supervision changes as compute
@@ -68,7 +75,8 @@ shallower.
 
 ## The scaling: more total supervision helps, but modestly
 
-Paired 20× − 2× per depth and width (negative = more supervision improved `test_loss`):
+Paired 20× − 2× per depth and width (negative = more supervision improved `test_loss`). This
+contrast has **sixteen** cells — 4 depths × 4 widths — not one per (scale, depth, width):
 
 | depth | H1 | H4 | H16 | H32 |
 |---|---|---|---|---|
@@ -77,16 +85,24 @@ Paired 20× − 2× per depth and width (negative = more supervision improved `t
 | 64k | −0.0232 | −0.0260 | −0.0139 | −0.0198 |
 | 16k | −0.0031 | −0.0123 | −0.0053 | −0.0074 |
 
-A tenfold budget increase helps in 32 of 32 cells (28 with CIs entirely below zero), but the
-effect is **smaller than the depth-allocation effect**: moving from 400k to 16k at a fixed
-budget buys ~2–3× more than multiplying the budget tenfold at a fixed depth.
+The point estimate is negative in **16 of 16** cells, and **14 of 16** CIs lie entirely below
+zero. The two unresolved cells are **400k/H4** (−0.0011 [−0.0111, +0.0088]) and **16k/H1**
+(−0.0031 [−0.0064, +0.0003]).
+
+Descriptively, across the sixteen frontier effects (mean |effect| 0.02744, range 0.0139–0.0404)
+and the sixteen scaling effects (mean 0.01794, range 0.0011–0.0370), the allocation effect is
+about **1.5×** the scaling effect on average, with substantial variation between cells. That is
+a description of two distributions, not a uniform rule.
 
 ## The interaction: the optimal allocation does not move
 
-The best depth is **16k at every scale and every width** (2×, 5×, 10×, 20× × H1, H4, H16, H32
-= 16 of 16 cells). Over a tenfold range of total supervision, the winning allocation does not
-shift deeper — coverage continues to dominate label precision, and the preference for breadth
-is already saturated at 2×.
+The best depth is **16k at every observed width and every observed scale**, from 2× through 20×
+(16 of 16 scale × width cells). Within this regime, and across a tenfold range of total
+supervision, the selected allocation does not shift deeper.
+
+What this does **not** say: depths below 16k were not measured — 8k, 4k and 2k were out of scope
+by design — so the finding is that *16k is the best of the four tested depths at every scale*.
+It is not a claim that 16k is the optimum, and not a claim that breadth is saturated.
 
 ## Student-side compute (reported, not hidden)
 
