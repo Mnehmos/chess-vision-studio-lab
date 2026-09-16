@@ -1,0 +1,106 @@
+{
+ "bounds_note": "separate one-sided 95% lower and upper bounds (t=1.729, df=19); the pair is not a single 95% interval",
+ "decision": "INCONCLUSIVE",
+ "equivalence_all_widths": false,
+ "equivalence_by_width": {
+  "1": false,
+  "16": false,
+  "32": false,
+  "4": false
+ },
+ "evidence": {
+  "preregistration": "tools/s9/s9-preregistration.json",
+  "result": "tools/s9/s9-result.json",
+  "state": "tools/s9/s9-state.json"
+ },
+ "experiment": "X0003",
+ "invalid_runs": [],
+ "margin_delta": 0.001,
+ "mean_test_loss": {
+  "SAME-2K": 0.019842,
+  "SAME-8K": 0.018866
+ },
+ "point_estimates_vs_margin": {
+  "1": "above",
+  "16": "above",
+  "32": "below",
+  "4": "below"
+ },
+ "primary": {
+  "1": {
+   "d": 0.001155,
+   "n": 20,
+   "one_sided_ci": [
+    0.000768,
+    0.001541
+   ],
+   "two_sided_ci": [
+    0.000687,
+    0.001622
+   ]
+  },
+  "4": {
+   "d": 0.000927,
+   "n": 20,
+   "one_sided_ci": [
+    0.000179,
+    0.001674
+   ],
+   "two_sided_ci": [
+    2.2e-05,
+    0.001831
+   ]
+  },
+  "16": {
+   "d": 0.001056,
+   "n": 20,
+   "one_sided_ci": [
+    0.000348,
+    0.001763
+   ],
+   "two_sided_ci": [
+    0.000199,
+    0.001912
+   ]
+  },
+  "32": {
+   "d": 0.000769,
+   "n": 20,
+   "one_sided_ci": [
+    -6.1e-05,
+    0.001599
+   ],
+   "two_sided_ci": [
+    -0.000236,
+    0.001773
+   ]
+  }
+ },
+ "realized": {
+  "2k": 18690779,
+  "8k": 74568086,
+  "ratio": 3.99
+ },
+ "teacher_disagreement": {
+  "abs_cp": {
+   "max": 927,
+   "mean": 57.7,
+   "median": 35,
+   "p90": 136,
+   "p99": 386
+  },
+  "compared_positions": 9299,
+  "mate_sentinel_rows_excluded": 196,
+  "move_disagreement_rate": 0.5232,
+  "note": "the same positions carry both targets, so this is a direct teacher comparison; analysis only, never a selection mechanism",
+  "rate_above_cp": {
+   "0": 0.9095,
+   "10": 0.7583,
+   "100": 0.166,
+   "25": 0.5828,
+   "50": 0.3677
+  },
+  "shared_positions": 9495,
+  "sign_disagreement_rate": 0.08
+ }
+}

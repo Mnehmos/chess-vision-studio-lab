@@ -1,0 +1,67 @@
+{
+  "id": "s9-same-positions-cheaper-labels",
+  "version": 1,
+  "status": "materialized before the freeze; X0003 binds the hash of this file",
+  "question": "If we train on the exact same chess positions, can 2k labels replace 8k labels without materially hurting the student?",
+  "why": "S8 removed the student-compute confound and showed that cheaper labels are not worse; S9 removes breadth as a variable entirely, so the only thing that changes is how hard the teacher thought when producing each target.",
+
+  "positions": {
+    "source": "the S8 8k arm's 9,495 positions",
+    "record_ids": "frozen from the S8 state (arm 8k), verified against its dataset split",
+    "why_zero_new_compute": "the 2k stream already contains the 8k prefix, so both targets exist for these positions: no new teacher labeling is required",
+    "no_new_pool": true
+  },
+
+  "datasets": {
+    "SAME-9495-8K": "the 9,495 positions with their 8k targets (reused from S8 if it reproduces exactly: same ids, same order, same spec)",
+    "SAME-9495-2K": "the SAME 9,495 ids in the SAME order, with their 2k targets",
+    "identical_requirements": ["record ids and their order", "row count", "RAW-768 input", "evaluation instrument E0004/D0010"]
+  },
+
+  "training": {
+    "regime": "fixed updates (the S8 control): MAX_UPDATES 760, BATCH 256 = 194,560 sample presentations for every arm",
+    "identical": {"widths": [1, 4, 16, 32], "optimizer": "adam", "LR": 0.003, "INIT_STD": 0.05,
+                  "K": 256.0, "LAMBDA": 1.0, "representation": "RAW-768",
+                  "data_order_rng": "the same training seed drives the sampler in both arms"},
+    "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "seed_note": "twenty seeds because this is an equivalence / non-inferiority question where narrow intervals matter",
+    "matrix": {"arms": 2, "widths": 4, "seeds": 20, "expected_cells": 160}
+  },
+
+  "primary_analysis": {
+    "quantity": "d = test_loss(2k) - test_loss(8k), paired by seed, per width",
+    "sign": "positive means 2k is worse",
+    "margin": {"delta": 0.001, "absolute": true,
+               "why": "the 16k-to-8k improvements we treated as meaningful were 0.003-0.007, so a degradation below 0.001 is economically negligible relative to effects already taken seriously"},
+    "interval": "one-sided 95% bounds, Student t = 1.729 (df=19)",
+    "decision": {
+      "2K_NONINFERIOR": "upper bound < +0.001 at all four widths",
+      "FLOOR_CROSSED": "lower bound > +0.001 at every width (2k has crossed the useful-label floor)",
+      "INCONCLUSIVE": "any width's upper bound exceeds +0.001 (or the decisive conditions are otherwise unmet)"
+    },
+    "secondary_equivalence": "does the entire two-sided 95% CI (t = 2.093, df=19) lie inside [-0.001, +0.001]? That separates 'not materially worse' from 'practically indistinguishable'",
+    "no_pooling": "widths are reported, never pooled"
+  },
+
+  "economics": {
+    "statement_source": "realized node totals over the same 9,495 positions, not nominal depth x rows",
+    "expected_ratio": "8k is roughly 4x the 2k cost on the same positions",
+    "note": "the labels already exist, so this measures the counterfactual economics from frozen observations rather than spending the compute again"
+  },
+
+  "secondary_disagreement_analysis": {
+    "purpose": "record how much the 2k and 8k teachers actually disagree on these positions; analysis only, never a selection mechanism",
+    "measures": ["absolute cp difference (mean, median, p90, p99)", "sign disagreement rate",
+                  "move disagreement if both values carry moves", "error by disagreement bucket"],
+    "hypothesis_to_look_for": "if the teachers disagree substantially per position while students trained on them perform essentially identically, the network may only need the teacher to place a position in roughly the right part of evaluation space",
+    "bucket_error_caveat": "the trainer records aggregate losses only, so per-bucket student error is computed as IN-SAMPLE fit on the training positions and is labelled as such"
+  },
+
+  "scope_exclusions": ["no new pool", "no new labels", "no GEO", "no wider models", "no 1k or 512 arm",
+                        "no Stockfish", "no search changes", "no games", "no optimizer tuning"],
+  "firewall": {"no_outcome_inspection": "the complete 160-cell matrix and its X0003 must be frozen before any training outcome is inspected"},
+  "stop_conditions": ["the 9,495 ids do not reproduce from the S8 evidence",
+                       "the two datasets do not contain exactly the same ids in the same order",
+                       "either TargetSpec cannot provide strict one-observation cardinality",
+                       "X0003 cannot truthfully seal the intended 160-cell design"]
+}

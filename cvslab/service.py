@@ -8,6 +8,7 @@ accepted from a caller.
 from __future__ import annotations
 
 import json
+import math
 import logging
 import os
 import platform
@@ -644,14 +645,26 @@ class LabService:
                      f"ex/s={entry['examples_per_second']}")
 
             nnue.train(model, train_split, val_split, cfg, rng, on_epoch=on_epoch)
+            # Two regimes, one definition each (the S8 patch briefly redefined the historical
+            # one by counting only full batches; see the S9 repair note):
+            #   epoch-bounded: every sample in every epoch counts, partial tail batch included
+            #   fixed-update:  exactly MAX_UPDATES batches of BATCH samples
             max_updates = int(cfg.get("MAX_UPDATES", 0) or 0)
-            updates = max_updates if max_updates > 0 else int(cfg["EPOCHS"]) * max(
-                len(train_split) // int(cfg["BATCH"]), 1)
-            compute.train_examples_seen = updates * int(cfg["BATCH"])
-            emit(f"student compute: {updates} optimizer updates x batch {int(cfg['BATCH'])} = "
-                 f"{compute.train_examples_seen} sample presentations "
-                 f"({compute.train_examples_seen / max(len(train_split), 1):.2f} effective passes "
-                 f"over {len(train_split)} rows)")
+            batch = int(cfg["BATCH"])
+            if max_updates > 0:
+                updates = max_updates
+                compute.train_examples_seen = updates * batch
+                regime = (f"fixed updates: {updates} optimizer updates x batch {batch} = "
+                          f"{compute.train_examples_seen} sample presentations")
+            else:
+                epochs = int(cfg["EPOCHS"])
+                updates = epochs * math.ceil(len(train_split) / batch)
+                compute.train_examples_seen = epochs * len(train_split)
+                regime = (f"fixed epochs: {epochs} passes over {len(train_split)} rows = "
+                          f"{compute.train_examples_seen} sample presentations "
+                          f"({updates} full batches incl. partial tails)")
+            emit(f"student compute: {regime}; "
+                 f"{compute.train_examples_seen / max(len(train_split), 1):.2f} effective passes")
 
             payload = nnue.serialize(model, cfg, {
                 "run_id": run.id, "ablation_id": ablation.id, "display_label": run.display_label, "seed": run.seed,
