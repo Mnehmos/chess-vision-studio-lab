@@ -495,11 +495,12 @@ class LabService:
             problems = self.verify_experiment_arm(arm, dataset, recipe)
             if problems:
                 raise LabError(f"{ablation.id}: " + "; ".join(problems))
-            allowed = {int(value) for value in experiment.seeds}
+            allowed = {int(value) for value in (arm.seeds or experiment.seeds)}
             outside = [int(seed) for seed in seeds if int(seed) not in allowed]
             if outside:
-                raise LabError(f"seeds {outside} are outside {experiment.id}'s frozen seed list "
-                               f"{sorted(allowed)}; an experiment's cells are its design")
+                raise LabError(f"seeds {outside} are outside arm {arm.arm_id}'s frozen seed list "
+                               f"[{min(allowed)}..{max(allowed)}] ({len(allowed)} seeds); "
+                               "an experiment's cells are its design")
         runs = []
         for seed in seeds:
             runs.append(self.store.create(Run(
@@ -873,6 +874,7 @@ class LabService:
                            f"not declared {undeclared_cells}")
 
         frozen_arms: list[ExperimentArm] = []
+        per_budget: dict = {}
         seen: set[str] = set()
         for arm in arms:
             arm_id = str(arm["arm_id"])
@@ -897,7 +899,8 @@ class LabService:
                 training_recipe_id=str(arm["training_recipe_id"]), recipe_hash=str(arm["recipe_hash"]),
                 train_target_spec_hash=str(arm["train_target_spec_hash"]),
                 record_ids_hash=str(arm["record_ids_hash"]),
-                ablations=[str(a) for a in arm.get("ablations") or []])
+                ablations=[str(a) for a in arm.get("ablations") or []],
+                seeds=[int(s) for s in arm.get("seeds") or []])
             problems = self.verify_experiment_arm(entry, dataset, recipe)
             if problems:
                 raise LabError(f"arm {arm_id} does not match its frozen identities: " + "; ".join(problems))
@@ -913,13 +916,14 @@ class LabService:
                     raise LabError(f"{ablation_id} carries no H; an arm must cover the declared widths")
                 arm_widths.setdefault(int(ablation.effective_config["H"]), []).append(ablation_id)
             covered = set(arm_widths)
-            if covered != declared_widths:
-                raise LabError(f"arm {arm_id} covers widths {sorted(covered)} but the design declares "
-                               f"{sorted(declared_widths)}")
+            if not covered or not covered <= declared_widths:
+                raise LabError(f"arm {arm_id} covers widths {sorted(covered)}, which are not a subset of "
+                               f"the declared widths {sorted(declared_widths)}")
             duplicated = {width: ids for width, ids in arm_widths.items() if len(ids) > 1}
             if duplicated:
                 raise LabError(f"arm {arm_id} lists more than one ablation for width(s) "
                                f"{sorted(duplicated)}: {duplicated}")
+            per_budget.setdefault(int(entry.node_budget), []).append((arm_id, covered))
             frozen_arms.append(entry)
 
         # The X<->A binding must be REAL: take the id before creation so ablations can carry it,
@@ -938,7 +942,25 @@ class LabService:
                 raise LabError(f"{ablation.id} claims {xid} but no arm lists it; refusing an "
                                "experiment with unlisted members")
 
-        run_count = sum(len(arm.ablations) for arm in frozen_arms) * len(list(seeds))
+        # Every supervision depth in the design must present the full width ladder among its arms.
+        # The union, not a per-arm requirement: one arm may carry all four widths (S7-S/S9/S10), or
+        # several arms may carry one width each (S11's targeted precision design). Multiple arms of
+        # the same depth covering the same width is legitimate (two scales at one depth).
+        for budget, entries in sorted(per_budget.items()):
+            covered_here = {width for _arm_id, covered in entries for width in covered}
+            if covered_here != declared_widths:
+                raise LabError(f"supervision depth {budget} presents widths {sorted(covered_here)} but the "
+                               f"design declares {sorted(declared_widths)}")
+
+        declared_seeds = {int(value) for value in seeds}
+        for entry in frozen_arms:
+            outside = [int(value) for value in entry.seeds if int(value) not in declared_seeds]
+            if outside:
+                raise LabError(f"arm {entry.arm_id} declares seeds {outside} outside the experiment's "
+                               f"seed list {sorted(declared_seeds)}")
+        # the expected matrix size follows the furniture: an arm with its own seed subset
+        # contributes only that subset, so a targeted precision design seals a truthful count
+        run_count = sum(len(arm.ablations) * len(arm.seeds or declared_seeds) for arm in frozen_arms)
         experiment = Experiment(
             id=xid, name=name, family=family, generation=generation,
             preregistration_hash=preregistration_hash, reference_unit_nodes=int(reference_unit_nodes),
@@ -976,12 +998,18 @@ class LabService:
         study cannot masquerade as a complete one.
         """
         keys: dict = {}
+        declared = {int(value) for value in experiment.seeds}
         for arm in experiment.arms:
             if not arm.ablations:
                 raise LabError(f"arm {arm.arm_id} lists no ablations; expected membership cannot "
                                "be derived from this design")
+            arm_seeds = [int(value) for value in (arm.seeds or experiment.seeds)]
+            outside = [seed for seed in arm_seeds if seed not in declared]
+            if outside:
+                raise LabError(f"arm {arm.arm_id} declares seeds {outside} outside the experiment's "
+                               f"seed list {sorted(declared)}")
             for ablation_id in arm.ablations:
-                for seed in experiment.seeds:
+                for seed in arm_seeds:
                     key = (ablation_id, int(seed))
                     if key in keys:
                         raise LabError(f"cell {key} is claimed by two arms "

@@ -1,0 +1,106 @@
+{
+ "cells": {
+  "expected": 1040,
+  "invalid_runs": []
+ },
+ "decision": "INCONCLUSIVE",
+ "determinism_vs_x0004": {
+  "mismatches": [],
+  "note": "seed 0..19 of each 4k width must equal X0004's stored value exactly",
+  "seeds_compared": 80
+ },
+ "equivalence_all_widths": false,
+ "equivalence_by_width": {
+  "1": true,
+  "16": false,
+  "32": true,
+  "4": true
+ },
+ "experiment": "X0006",
+ "margin_delta": 0.001,
+ "mean_test_loss": {
+  "4K-H1": 0.015462774957814415,
+  "4K-H16": 0.021961361401876867,
+  "4K-H32": 0.022905987643673426,
+  "4K-H4": 0.017623632671047978,
+  "8K-H1": 0.014781647341088956,
+  "8K-H16": 0.021082922457134782,
+  "8K-H32": 0.02218389447331576,
+  "8K-H4": 0.017367860828826704
+ },
+ "point_estimates_vs_margin": {
+  "1": "below",
+  "16": "below",
+  "32": "below",
+  "4": "below"
+ },
+ "preregistration_hash": "sha256:a31c5f55f7b1509260a124d5177163e9dde9bf0b5f93ca183d4f5806dad53c8c",
+ "primary_4k_minus_8k": {
+  "1": {
+   "critical_one_sided": 1.645,
+   "critical_two_sided": 1.96,
+   "d": 0.0006811276167254587,
+   "n": 40,
+   "one_sided_bounds": [
+    0.0005093150933373312,
+    0.0008529401401135862
+   ],
+   "stderr": 0.00010444530297150603,
+   "two_sided_ci": [
+    0.00047641482290130687,
+    0.0008858404105496105
+   ]
+  },
+  "16": {
+   "critical_one_sided": 1.645,
+   "critical_two_sided": 1.96,
+   "d": 0.0008784389447420856,
+   "n": 40,
+   "one_sided_bounds": [
+    0.00026344511167046027,
+    0.0014934327778137108
+   ],
+   "stderr": 0.00037385643347819176,
+   "two_sided_ci": [
+    0.00014568033512482993,
+    0.0016111975543593414
+   ]
+  },
+  "32": {
+   "critical_one_sided": 1.645,
+   "critical_two_sided": 1.96,
+   "d": 0.0007220931703576681,
+   "n": 400,
+   "one_sided_bounds": [
+    0.0004968071805293693,
+    0.000947379160185967
+   ],
+   "stderr": 0.00013695196950048563,
+   "two_sided_ci": [
+    0.00045366731013671627,
+    0.00099051903057862
+   ]
+  },
+  "4": {
+   "critical_one_sided": 1.645,
+   "critical_two_sided": 1.96,
+   "d": 0.00025577184222127147,
+   "n": 40,
+   "one_sided_bounds": [
+    -0.0002559062556976153,
+    0.0007674499401401582
+   ],
+   "stderr": 0.0003110505154522108,
+   "two_sided_ci": [
+    -0.00035388716806506165,
+    0.0008654308525076046
+   ]
+  }
+ },
+ "targeted_seeds": {
+  "h1": 40,
+  "h16": 40,
+  "h32": 400,
+  "h4": 40
+ }
+}

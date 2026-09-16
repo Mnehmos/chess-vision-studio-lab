@@ -143,15 +143,21 @@ def test_the_scale_name_must_carry_its_numeric_target(lab):
         make_experiment(lab, [dict(first, scale_nodes=SCALES["2x"] * 10), partner], protocol, xid)
 
 
-def test_every_arm_must_cover_the_declared_widths(lab):
-    """3. an arm without H1/H4/H16/H32 is not the frozen ladder."""
+def test_the_design_must_present_the_declared_width_ladder(lab):
+    """3. no declared width may vanish from the design.
+
+    One arm may carry all four widths (S7-S/S9/S10) or the widths may be distributed across arms
+    of the same supervision depth (S11's targeted design, one width per arm). What is forbidden is
+    a design in which a declared width is missing at that depth.
+    """
     normalization, train, exam, recipe, protocol = build_lab(lab)
     xid = lab.store.next_id("X")
     short = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="A",
-                         widths=(1, 16, 32))                       # H4 missing
-    partner = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="B")
-    with pytest.raises(LabError, match="covers widths"):
-        make_experiment(lab, [short, partner], protocol, xid)
+                         widths=(1, 16, 32))                       # H4 missing at this depth
+    partner = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="B",
+                           widths=(1, 16, 32))                     # and here too
+    with pytest.raises(LabError, match="presents widths"):
+        make_experiment(lab, [short, partner], protocol, xid, widths=(1, 4, 16, 32))
 
 
 def test_seeds_outside_the_frozen_list_are_refused(lab):
@@ -279,3 +285,38 @@ def test_historical_identities_need_no_experiment(lab):
     finished = lab.execute_run(run.id)
     assert finished.status.value == "COMPLETED"
     assert "experiment_contract" not in {c.name for c in finished.integrity}
+
+
+def test_an_arm_may_declare_its_own_seed_subset(lab):
+    """A precision study spends extra seeds only where uncertainty limits."""
+    normalization, train, exam, recipe, protocol = build_lab(lab)
+    xid = lab.store.next_id("X")
+    first = arm_material(lab, normalization, recipe, protocol, xid, scale="2x", suffix="A")
+    second = arm_material(lab, normalization, recipe, protocol, xid, scale="5x", suffix="B")
+    decision = {"primary": "2k-16k", "margin": 0.001}
+    experiment = lab.create_experiment(
+        name="S-precision", preregistration_hash="sha256:" + "p" * 64, reference_unit_nodes=1,
+        scales=dict(SCALES), node_budgets=[16000],
+        arms=[dict(first, seeds=[0, 1, 2]), dict(second, seeds=[0])],
+        eval_protocol_id=protocol.id, widths=list(WIDTHS), seeds=[0, 1, 2],
+        source_id="S0001", normalization_id="N0001", candidate_universe_hash="sha256:" + "u" * 64,
+        order_seed=1, order_hash="sha256:" + "o" * 64, analysis=decision, experiment_id=xid)
+    expected = lab.expected_membership(experiment)
+    assert len(expected) == 4 * 3 + 4 * 1          # arm A: 4 widths x 3 seeds; arm B: 4 widths x 1
+    with pytest.raises(LabError, match="outside arm"):
+        lab.queue_runs(first["ablations"][0], seeds=(0, 1, 2, 9))
+    [run] = lab.queue_runs(second["ablations"][0], seeds=(0,))
+    assert run.seed == 0
+    # a seed outside the experiment's own declared list is refused at creation: fresh ablations
+    # bound to the new experiment, so the binding check does not fire first
+    other_xid = lab.store.next_id("X")
+    bad_first = arm_material(lab, normalization, recipe, protocol, other_xid, scale="2x", suffix="C")
+    bad_second = arm_material(lab, normalization, recipe, protocol, other_xid, scale="5x", suffix="D")
+    with pytest.raises(LabError, match="outside the experiment's seed list"):
+        lab.create_experiment(
+            name="S-bad", preregistration_hash="sha256:" + "p" * 64, reference_unit_nodes=1,
+            scales=dict(SCALES), node_budgets=[16000],
+            arms=[dict(bad_first, seeds=[0, 7]), dict(bad_second, seeds=[0])],
+            eval_protocol_id=protocol.id, widths=list(WIDTHS), seeds=[0, 1, 2],
+            source_id="S0001", normalization_id="N0001", candidate_universe_hash="sha256:" + "u" * 64,
+            order_seed=1, order_hash="sha256:" + "o" * 64, analysis=decision, experiment_id=other_xid)

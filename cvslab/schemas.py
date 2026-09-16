@@ -403,6 +403,10 @@ class ExperimentArm(LabModel):
     train_target_spec_hash: str
     record_ids_hash: str
     ablations: list[str] = []
+    # Optional per-arm seed subset. Empty means the experiment's full seed list. A precision
+    # study can therefore spend extra seeds only where uncertainty actually limits (a width with
+    # higher variance), instead of repeating a balanced matrix.
+    seeds: list[int] = []
 
 
 class Experiment(LabModel):
