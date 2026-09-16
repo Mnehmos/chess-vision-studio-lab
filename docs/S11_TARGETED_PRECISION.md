@@ -95,15 +95,17 @@ with exact Student-t criticals at each width's own df (`tools/s11/s11_confirmato
 | H32 | 380 | +0.000725 | [+0.000496, +0.000954] | **yes** |
 | H16 | 20 | **+0.001544** | [+0.000570, +0.002518] | **no** |
 
-**This changes H16's status from unresolved to real.** On fresh seeds its tax is **+0.0015**, above
-the +0.001 margin and larger than the +0.000878 the all-seed precision estimate showed — the earlier
-number was partly carried by the very seeds used to size the study. H16 is not a precision problem
-that more compute would fix; it is a width where 4k supervision costs more than the tolerance.
+**Fresh data moved H16's estimated penalty above the margin, but H16 remains statistically
+unresolved around it.** The point estimate (+0.001544) is above +0.001, yet the interval
+[+0.000570, +0.002518] still includes values below the margin, so H16 is *neither* proven
+non-inferior *nor* proven materially worse than δ — it is unresolved, with its fresh estimate lying
+above the margin, and larger than the +0.000878 the all-seed precision estimate showed (the earlier
+number was partly carried by the very seeds used to size the study).
 
-**Conclusion.** 4k supervision has a small, measurable quality tax that is **inside the 0.001 margin
-at three of four widths** (H1, H4, H32) and **outside it at H16**. There is no all-width
-non-inferiority result, and spending ~1,000 further seeds on H16 is not the right next move: on fresh
-data that width's tax is already above the margin, so the honest statement is the per-width one.
+**Conclusion.** 4k is non-inferior to 8k at H1, H4 and H32 under δ = 0.001. H16 remains unresolved,
+with its fresh estimate lying above the margin. Therefore 4k is not established as globally
+non-inferior across widths — and that is enough evidence to move on to the 1k/512 frontier rather
+than spend another ~1,000 seeds on H16.
 
 **Precision estimates (all seeds, secondary):** H1 +0.000681 [+0.000505, +0.000857], H4 +0.000256
 [−0.000268, +0.000780], H16 +0.000878 [+0.000249, +0.001508], H32 +0.000722 [+0.000496, +0.000948].
