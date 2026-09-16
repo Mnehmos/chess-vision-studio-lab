@@ -1,0 +1,164 @@
+{
+ "appended": 103736,
+ "arms": {
+  "1k": {
+   "dataset_id": "D0038",
+   "depth": 1000,
+   "prefix_size": 75627,
+   "realized_nodes": 74571388,
+   "record_ids_hash": "sha256:ee46054220c520ea16c1831293902fbf4847693d40033e9e2f09b661f178da83"
+  },
+  "2k": {
+   "dataset_id": "D0037",
+   "depth": 2000,
+   "prefix_size": 37898,
+   "realized_nodes": 74571153,
+   "record_ids_hash": "sha256:0ae52357e6f7732606e2c24c7efc37dd821e8bc013251354d22fb5bedfc07716"
+  },
+  "4k": {
+   "dataset_id": "D0036",
+   "depth": 4000,
+   "prefix_size": 18953,
+   "realized_nodes": 74570561,
+   "record_ids_hash": "sha256:7d5a8a785148b975a06d630da9a3efd5c5aca6aa74b1705e1ac78fb800d15f2a"
+  },
+  "512": {
+   "dataset_id": "D0039",
+   "depth": 512,
+   "prefix_size": 147513,
+   "realized_nodes": 74571000,
+   "record_ids_hash": "sha256:c878f83d29ce2fe9ee33e027342ee80cd6903ac5a454c59dbe70c39c8a990157"
+  }
+ },
+ "base_source": "S0011",
+ "calibration": {
+  "means": {
+   "1000": 985.59375,
+   "512": 505.21875
+  },
+  "predicted": {
+   "1000": 75660,
+   "512": 147601
+  }
+ },
+ "deviation": "tools/s12/s12-preregistration-deviation.json",
+ "exam_dataset": "D0010",
+ "exam_source": "N0010",
+ "excluded_ids": [
+  "pos_6958d0fd08bc07b789e1",
+  "pos_b0102eb066ac5a5003e4",
+  "pos_e2d802b0d8f3b58860cf",
+  "pos_39ba235cfa8b908de700",
+  "pos_ec64f9cf8b7a2370f17a",
+  "pos_a06c0d21c680c7cbc956",
+  "pos_76281139263085751d9d",
+  "pos_11f3d01a2662d310be2f",
+  "pos_1485290552d4b4e5b87c",
+  "pos_4581de4a64ccfad01bf5",
+  "pos_98d1b6f9b1263794e16d",
+  "pos_f1f2e969060d2d319e21",
+  "pos_14bad24ba98800b5b68b",
+  "pos_150fed9477ac0ba71e1c",
+  "pos_6ff7dd8b2e3b90c40db9",
+  "pos_307df89fb8594e0bde77",
+  "pos_712a8a8b81da9a55db2b",
+  "pos_305cf6ec5fcfe5f505fb",
+  "pos_0f5913ccde50fac6e40e",
+  "pos_d4be29f46a466352b6b4",
+  "pos_d9d3a37e5e2e8e74d870",
+  "pos_be7dc48cde41222b17ff",
+  "pos_014b1d6d0d4e22842a04",
+  "pos_bda966720f8464d3c7f6",
+  "pos_b735550aeabd9f014633",
+  "pos_d6113b3e4b2cdc5dcf84",
+  "pos_212f83b13c1960d44574",
+  "pos_c477ae7c897cac4f508f",
+  "pos_9415302185d22ee12d2e",
+  "pos_73b3ba4ee0d3abe4b685",
+  "pos_708cf276385f0ccc3257",
+  "pos_7c6a1f1ace8c3f6027d7",
+  "pos_40d1a4fbfa695af8d9af",
+  "pos_b6587e6fdd889c864c0d",
+  "pos_18ab0403676acdabfc52",
+  "pos_bf0a68ccc3ffe05eb79c"
+ ],
+ "excluded_inside_old_2k_prefix": 16,
+ "excluded_inside_old_4k_prefix": 7,
+ "excluded_positions": [
+  2425,
+  11546,
+  12876,
+  15911,
+  16986,
+  17945,
+  18752,
+  21524,
+  24003,
+  24406,
+  29939,
+  33098,
+  34180,
+  35071,
+  37536,
+  37543,
+  38350,
+  39165,
+  40593,
+  42398,
+  43015,
+  44590,
+  45197,
+  49880,
+  52876,
+  57525,
+  59057,
+  59073,
+  59640,
+  60324,
+  61727,
+  64006,
+  64073,
+  69675,
+  77220,
+  77459
+ ],
+ "experiment": "X0008",
+ "extension_source": "S0012",
+ "id": "s12-universe-attestation",
+ "kind": "recorded facts of the EXECUTED universe (the repaired union pipeline), against which tools/s12/s12_run.py fails closed; derived from the S7-S order, the N0014 corpus and the frozen S12 order, not from a rerun",
+ "labels": {
+  "1000": {
+   "labels": 77929,
+   "realized_nodes": 76840566
+  },
+  "512": {
+   "labels": 152029,
+   "realized_nodes": 76845415
+  }
+ },
+ "normalization": "N0014",
+ "normalization_source_ids": [
+  "S0011",
+  "S0012"
+ ],
+ "note": "7/16 of the exclusions lie inside the old 4k/2k prefixes, so the carried arms are not row-identical to S8\u2019s; the realized-node targets are met at 1.0000 in all four arms.",
+ "old": 79483,
+ "old_excluded": 36,
+ "old_kept": 79447,
+ "order_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
+ "order_kind": "append-only over the leakage-clean union: kept S7-S order (36 records dropped as instrument-adjacent via bridges created by the new games) ++ hash order of the new clean records; N0013 superseded (extension games only, missing old positions)",
+ "order_seed": 20260920,
+ "pool": {
+  "config_sha256": "sha256:c8c457feacfd49c7a4157a8852a6644681aa8c4b941ddcbdca7c8120cbf1b996",
+  "games_rows": 11200,
+  "games_sha256": "sha256:ee21807f0511db43c3bee11cc2ab46dd564204817176613c35c2e86e2866a70a",
+  "manifest_sha256": "sha256:c20c5c8e61bc1385193a5729caaf9bb6a8f1b389a844755f01ca4313a7c7fb6d",
+  "opening_source_sha256": "sha256:4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3",
+  "positions_rows": 357329,
+  "positions_sha256": "sha256:491a87d0a064d1d1d0d4b7a4c1375db9c569a9d4e521fb23752381315241918d"
+ },
+ "records": 183482,
+ "removed": 299,
+ "total": 183183,
+ "universe_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff"
+}

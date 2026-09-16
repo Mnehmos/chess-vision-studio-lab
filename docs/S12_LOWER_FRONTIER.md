@@ -1,29 +1,38 @@
-# S12 — The lower economic frontier: 4k / 2k / 1k / 512 (sealed)
+# S12 — The lower economic frontier: 4k / 2k / 1k / 512 (sealed, deviated)
 
 Experiment **X0008**, sealed with `record_hash sha256:c1e3853f55d9e72e378d282168617c51868f153d1d4ff91dc96bf53e4d957cac`,
 **320/320 cells COMPLETED**, 0 INVALID, 0 duplicates. Preregistration:
 `tools/s12/s12-preregistration.json`, hash `sha256:7295062363f0d61ae4ad62de094c21a66828f2ba37a1240c5eb667d9f6e3a3bf`.
+**Status: deviated-but-sealed** — v1's append-only population assumption was superseded by the
+stronger union leakage invariant and its stop condition fired
+(`tools/s12/s12-preregistration-deviation.json`); the lattice, depths, budget, student compute,
+exam and decision rule were unchanged and X0008 was frozen before any outcome was read.
 
-**Answer.** The quality penalty does **not** accelerate as teacher search keeps halving. At one
+**Answer.** The quality penalty does **not** accelerate as teacher search keeps halving: at one
 fixed teacher budget (74,570,982 nodes ≈ the S7-S 2× scale), the 512-node arm buys **7.8× the
-coverage** of the 4k arm — 147,513 rows against 18,953 — and is **not worse**: at H32 it is
-*strictly better* (−0.002601, one-sided `[−0.003485, −0.001717]`), at H4 and H16 the point estimates
-favour 512 with upper bounds of `+0.000063` and `+0.000172` (unresolved, but one to two seed-widths
-from resolved), and at H1 a small adverse `+0.000867 [−0.000363, +0.002096]` straddles zero. Under
-the preregistered rule the decision is **INCONCLUSIVE** — neither global verdict fires — but the
-*bend where the savings stop paying was not found*: the curve is flat-to-favourable all the way
-down to 512 nodes per label.
+coverage** of the 4k arm — 147,513 rows against 18,953 — and is **not worse**.
+**No positive/adverse acceleration was established, and the savings-stopping bend was not found
+down to 512 nodes.** At H32 the 512 arm is *strictly better* (−0.002601, one-sided
+`[−0.003485, −0.001717]`); at H4 and H16 the point estimates favour 512 with upper bounds of
+`+0.000063` and `+0.000172` (unresolved, but one to two seed-widths from resolved); at H1 a small
+adverse `+0.000867 [−0.000363, +0.002096]` straddles zero. Under the preregistered rule the decision
+is **INCONCLUSIVE** — neither global verdict fires — and the curve is flat-to-favourable all the way
+down to 512 nodes per label. **This is deviated-but-sealed evidence**: the realized population is
+not the append-only extension v1 described, because the stronger union leakage join removed 36 old
+records that the new games bridged to the exam (see *Preregistration deviation* below).
 
-## Design — one teacher budget, four label depths, an append-only population
+## Design — one teacher budget, four label depths, a filtered-extended population
 
 * **Question.** How far can teacher search keep halving (4k → 2k → 1k → 512) before the quality
   penalty accelerates enough that the compute savings stop being worth it?
-* **Population.** The S7-S universe (79,483 records) extended **append-only** by 11,200 new
-  EPD-start games (357,329 raw positions, seed 20260920) → normalization **N0014**: 183,482
-  records, 299 removed by the leakage join against the full 575-record N0010 exam source, then 36
-  old records excluded as exam-bridged by the new games' transpositions → **183,183 candidates**,
-  order hash `sha256:41375c2d…`. N0013 (extension games only, missing the old positions) was
-  discarded before any run.
+* **Population.** The S7-S universe (79,483 records) extended by 11,200 new EPD-start games
+  (357,329 raw positions, seed 20260920), normalized **together with the old source** as **N0014**:
+  183,482 records, 299 removed by the leakage join over the union against the full 575-record N0010
+  exam source — of which **36 are old records** that the new games bridged to the exam — giving
+  **183,183 candidates** and the order `kept S7-S subsequence ++ hash order of the new clean
+  records`, hash `sha256:41375c2d…`. This is an **order-preserving filtered extension**, not an
+  append-only extension: v1's "old prefixes preserved exactly" assumption is what the deviation
+  section below records. The extension-only normalization N0013 was discarded before any run.
 * **The one budget.** Every arm spends the same **74,570,982 teacher nodes** and buys as many rows
   as its label depth allows: 4k → 18,953 rows, 2k → 37,898, 1k → 75,627, 512 → 147,513. Realized
   nodes are 1.0000 of target in all four arms (worst deviation 0.0006 %).
@@ -69,24 +78,28 @@ Mean `test_loss` (lower is better; bold = best arm at that width):
 | 1k | 0.018310 | 0.016496 | 0.017259 | 0.017102 |
 | 512 | 0.017138 | **0.015413** | **0.017148** | **0.016439** |
 
-## Does the per-halving tax accelerate? No
+## Does the per-halving tax accelerate? No positive/adverse acceleration was established
 
 The preregistration asked whether the per-halving tax grows — that bend is where savings stop
 paying. Across the three halvings below 4k:
 
-* **H32 and H16**: every halving is at or below zero (−0.0017 / −0.0002 / −0.0007 and
-  −0.0005 / −0.0003 / −0.0001). The tax does not merely fail to accelerate; there is no positive
-  tax to accelerate.
+* **H32**: every halving is at or below zero (−0.0017 / −0.0002 / −0.0007), and the sequence is not
+  monotone in either direction.
+* **H16**: every halving is at or below zero (−0.0005 / −0.0003 / −0.0001), and the sequence *is*
+  strictly increasing — it becomes less favourable at each step (`−0.000458 → −0.000273 →
+  −0.000111`) while staying negative throughout. Under the preregistration's own definition of
+  acceleration this is an accelerating sequence, which is why the claim here is the narrower one:
+  no positive/adverse acceleration was established.
 * **H4**: −0.0001 / +0.0004 / −0.0011 — the middle step is the only positive one.
 * **H1**: +0.0010 / +0.0010 / −0.0012 — the smallest model pays about +0.001 for each of the first
   two halvings (unresolved; it is also the noisiest arm, se ≈ 0.0007) and then *gains* 0.0012 going
   to 512.
-* **No width** shows a positive, growing penalty. The single width whose tax sequence is strictly
-  increasing (H16) increases from −0.00046 to −0.00011 — still negative at every step.
+* **No width** shows a positive tax that grows; the only strictly increasing sequence (H16) is
+  negative at every step.
 
 So the economic reading is the opposite of "the tax eats the savings": at the widest model the
 cheap-label arm wins the same teacher budget outright, and the two near-unresolved widths lean the
-same way.
+same way. What is *not* established is any bend where halving further stops paying.
 
 ## Economics — same teacher budget, 7.8× the coverage
 
@@ -137,6 +150,36 @@ A targeted extension (S11's pattern: extra seeds only where variance limits the 
 seeds on two widths would convert the decision to SHALLOWER_FRONTIER *if* the H4/H16 estimates
 hold. That is a projection, not a result.
 
+## Preregistration deviation — recorded, not hidden
+
+S12 v1 (hash `sha256:72950623…`, bound by X0008) specified an **append-only** extension: "the old
+order's prefixes are preserved exactly", with *"the old order's prefix does not reproduce"* listed
+as a stop condition. **That stop condition fired.** The new games created transposition bridges
+between the two populations, so the collision check had to run over the **union** (N0014) — an
+extension-only normalization cannot see those bridges (N0013, built first, was discarded before any
+run) — and the union leakage join removed 36 old records that are now connected to the exam.
+
+Under the preregistered text that is a stop; the study continued under the **stronger** leakage
+invariant, and the realized order is an **order-preserving filtered extension** (`kept S7-S
+subsequence ++ hash order of the new clean records`), not `old ++ new`. The consequences:
+
+* **X0008 is deviated-but-sealed evidence.** The preregistered confirmatory decision
+  (**INCONCLUSIVE**) is a decision taken under a deviated setup, not a pristine preregistered test.
+* The deviation touches the **carried 4k/2k arms' row membership** — 7 of the exclusions lie inside
+  the old 4k prefix, 16 inside the old 2k prefix — and nothing else: the 1k and 512 arms are built
+  entirely from evidence purchased after the repair.
+* The lattice (4 × 4 × 20), depths, teacher budget, equal student compute, exam, seeds and the
+  decision rule were all unchanged, and X0008 was still frozen **before any outcome was read**.
+* No exact cross-experiment value reproduction against S8 is claimed for the carried arms.
+
+Recorded in full at `tools/s12/s12-preregistration-deviation.json`; the facts are attested at
+`tools/s12/s12-universe-attestation.json`. The executable pipeline has been brought into sync:
+`tools/s12/s12_run.py` now encodes the *executed* procedure (union normalization → full leakage
+join → filtered extension) and its `verify` step recomputes the universe and all four arms from
+stored evidence, failing closed on any drift — it reproduces the sealed universe in ~10 s
+(183,183 records, 36 exclusions at positions 2,425 … 77,459, order hash `sha256:41375c2d…`, and all
+four prefix sizes, realized node totals and record-id hashes).
+
 ## Errata — one parenthetical in the sealed provenance text
 
 The sealed result's `provenance.prefix_reproduction` says "8 of them lay inside the old 4k prefix
@@ -149,7 +192,8 @@ with 18,953 rows (7 excluded + 1 displaced by the node target), and the 2k arm r
 37,898 rows with 16 replacements from just beyond the old boundary. The consequence the sealed text
 states is unchanged: the carried arms are not row-identical to S8's, and **no exact
 cross-experiment value reproduction is claimed**. Full record: `tools/s12/s12-result-errata.json`.
-The sealed result is not rewritten (`update_experiment` refuses a SEALED study; the repository's
+This is a wording correction only — the *protocol* deviation is the separate record above. The
+sealed result is not rewritten (`update_experiment` refuses a SEALED study; the repository's
 precedent is to correct additively), and `tools/s12/s12_analyse.py` deliberately still emits the
 sealed wording so a re-run reproduces the sealed result byte-for-byte.
 
@@ -158,6 +202,9 @@ sealed wording so a re-run reproduces the sealed result byte-for-byte.
 * No margin/equivalence test: S12's decision rule is sign-based by preregistration. "512 not shown
   globally non-inferior" is not "512 is equivalent to 4k at a +0.001 margin" — that test was never
   preregistered here.
+* No pristine-preregistration claim: the global verdict comes from a deviated setup (see
+  *Preregistration deviation*). The 1k/512 arms and the exam-side contract are unaffected by the
+  deviation; the carried 4k/2k arms are the filtered prefixes.
 * No 8k arm: 8k/4k/2k belongs to S9–S11 on a different population.
 * Label depth and row count are deliberately confounded (one budget, more rows as labels cheapen).
   S12 measures the *economic* trade, not a mechanism.
@@ -165,23 +212,32 @@ sealed wording so a re-run reproduces the sealed result byte-for-byte.
 
 ## What follows
 
-1. **Targeted seed extension at 512** (H4/H16 only, ~30 seeds) — the cheapest path to a
+1. **A clean confirmatory successor, not a rewrite.** X0008 is deviated-but-sealed; a pristine
+   preregistered test of the same question needs its own preregistration over the now-frozen N0014
+   universe (and, if the carried arms are to be used again, an explicit statement that they are the
+   filtered prefixes).
+2. **Targeted seed extension at 512** (H4/H16 only, ~30 seeds) — the cheapest path to a
    non-INCONCLUSIVE verdict, exactly S11's targeted-precision pattern.
-2. **The universe, not the budget, is now the binding constraint**: the 512 arm already spends
+3. **The universe, not the budget, is now the binding constraint**: the 512 arm already spends
    80.5 % of the 183,183 candidates. The next halving (256) would want ~295,000 rows for the same
    budget, which this universe cannot supply — the natural successor question is whether the
    *population* must grow again, or whether 512 is simply where the frontier is.
-3. Not attempted: 256, GEO/Stockfish routing, new scales, wider models.
+4. Not attempted: 256, GEO/Stockfish routing, new scales, wider models.
 
 ## Evidence bundle
 
 | artifact | path |
 |---|---|
-| preregistration + hash | `tools/s12/s12-preregistration.json` / `.hash` |
-| driver (extend → calibrate → labels → arms → experiment → run) | `tools/s12/s12_run.py` |
+| preregistration + hash (v1, as frozen) | `tools/s12/s12-preregistration.json` / `.hash` |
+| preregistration deviation (protocol) | `tools/s12/s12-preregistration-deviation.json` |
+| universe attestation (executed facts) | `tools/s12/s12-universe-attestation.json` |
+| driver (`extend` \| `verify` \| `calibrate` \| `labels` \| `arms` \| `experiment` \| `run`) | `tools/s12/s12_run.py` |
 | analysis + seal | `tools/s12/s12_analyse.py` |
 | state (universe, calibration, labels, arms, queue) | `tools/s12/s12-state.json` |
 | result (full) | `tools/s12/s12-result.json` |
 | result (summary) | `tools/s12/s12-result-summary.json` |
-| errata | `tools/s12/s12-result-errata.json` |
+| errata (sealed wording) | `tools/s12/s12-result-errata.json` |
 | sealed lattice | `labstore/X/X0008.json` (`SEALED`, membership 320/320) |
+
+`python tools/s12/s12_run.py verify` reproduces the sealed universe and all four arms from stored
+evidence in ~10 s and fails closed on any drift.

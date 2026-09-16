@@ -1,0 +1,53 @@
+{
+ "id": "s12-preregistration-deviation",
+ "experiment": "X0008",
+ "preregistration": "tools/s12/s12-preregistration.json",
+ "preregistration_hash": "sha256:7295062363f0d61ae4ad62de094c21a66828f2ba37a1240c5eb667d9f6e3a3bf",
+ "kind": "protocol deviation, recorded after execution and before the result was read",
+ "deviation": "the realized population is not an append-only extension of the S7-S order",
+ "preregistration_said": [
+  "population.extension: 'append-only: new EPD-start games are normalized, leakage-joined against the full 575-record N0010 source, and the new clean records are hashed (seed 20260920) and APPENDED after the old order'",
+  "population.why_append: 'the old order's prefixes are preserved exactly, so the already-purchased 4k and 2k observations along it remain valid'",
+  "stop_conditions includes: 'the old order's prefix does not reproduce'"
+ ],
+ "what_happened": [
+  "the leakage check was run over the UNION of the old and new sources (N0014), because the new games created transposition bridges between the two populations; an extension-only normalization (N0013, built first and discarded) cannot see those bridges",
+  "the union join removed 299 of 183,482 records; 36 of them are old-order records that the new games connected to the exam's component",
+  "the stop condition as written therefore fired: the old order's prefix cannot reproduce once 36 of its records are removed",
+  "the study continued under the STRONGER leakage invariant rather than under v1's weaker append-only assumption, and the realized order is a filtered extension: kept S7-S subsequence ++ hash order of the new clean records"
+ ],
+ "realized": {
+  "normalization": "N0014 (union of S0011 and S0012; not the extension-only N0013, which was discarded before any run)",
+  "records": 183482,
+  "removed": 299,
+  "old_excluded": 36,
+  "excluded_inside_old_4k_prefix": 7,
+  "excluded_inside_old_2k_prefix": 16,
+  "total": 183183,
+  "order_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
+  "carried_arms": "the 4k and 2k arms are NOT row-identical to S8's (18,953 vs 18,961 rows at 4k; 37,898 vs 37,898 with 16 rows different at 2k)",
+  "full_record": "tools/s12/s12-universe-attestation.json"
+ },
+ "what_did_not_change": [
+  "the lattice: 4 arms x 4 widths x 20 seeds = 320 cells, frozen as X0008 before any outcome was inspected",
+  "depths 4k/2k/1k/512, the 2x teacher budget (74,570,982 nodes), strict node-count prefix selection",
+  "equal student compute (MAX_UPDATES 760 x BATCH 256), optimizer, LR, init, RAW-768",
+  "the exam (E0004/D0010), the seeds, and the preregistered decision rule"
+ ],
+ "consequences_for_interpretation": [
+  "X0008 is DEVIATED-BUT-SEALED evidence: the global preregistered decision (INCONCLUSIVE) is a decision taken under a deviated setup, not a pristine preregistered test",
+  "the deviation touches the carried 4k/2k arms' row membership (7 / 16 records) and nothing else; the 1k and 512 arms are built entirely from evidence purchased after the repair",
+  "the direction and size of the result do not depend on the 36 removed records: they are 0.16% of the union corpus and were removed for exam-adjacency, never for their values",
+  "no exact cross-experiment value reproduction against S8 (X0002) is claimed for the carried arms"
+ ],
+ "mitigation": {
+  "executable_pipeline": "tools/s12/s12_run.py now encodes the EXECUTED procedure (union normalization, full leakage join, order-preserving filtered extension) and its `verify` step recomputes the universe and all four arms from stored evidence, failing closed on any drift; verified at commit time in 10.5s",
+  "clean_confirmatory_route": "a pristine confirmatory test requires a NEW experiment on the frozen N0014 universe with its own preregistration, not a rewrite of X0008"
+ },
+ "evidence": {
+  "state": "tools/s12/s12-state.json",
+  "attestation": "tools/s12/s12-universe-attestation.json",
+  "wording_errata": "tools/s12/s12-result-errata.json",
+  "doc": "docs/S12_LOWER_FRONTIER.md"
+ }
+}

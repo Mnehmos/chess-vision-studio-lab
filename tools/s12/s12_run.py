@@ -1,12 +1,22 @@
-"""S12: extend the population append-only, then freeze the 4k/2k/1k/512 frontier.
+"""S12: extend the population leakage-safely, then freeze the 4k/2k/1k/512 frontier.
 
-    python tools/s12/s12_run.py extend    # generate new games, snapshot S####, normalize N####,
-                                          # leakage-join, build the append-only order, carry labels
+    python tools/s12/s12_run.py extend    # generate/reuse new games, snapshot S####, normalize the
+                                          # UNION (old + new), full leakage join, build the
+                                          # order-preserving filtered extension, carry labels
+    python tools/s12/s12_run.py verify    # read-only: recompute the universe and the arms from the
+                                          # stored evidence and fail closed on any drift
     python tools/s12/s12_run.py calibrate # cost-only calibration at 1k and 512
     python tools/s12/s12_run.py labels    # buy the 1k and 512 streams to the 2x crossing
     python tools/s12/s12_run.py arms      # four nested prefixes + nesting assertions + D####
     python tools/s12/s12_run.py experiment
     python tools/s12/s12_run.py run
+
+The executed universe is NOT an append-only extension of the S7-S order. The new games created
+transposition bridges to the exam, so the collision check necessarily ran over the union and
+removed 36 old records; the order is `kept S7-S subsequence ++ hash order of the new clean
+records`. That is a preregistration deviation (see tools/s12/s12-preregistration-deviation.json)
+and every fact of it is recorded in tools/s12/s12-universe-attestation.json, against which this
+script fails closed.
 """
 from __future__ import annotations
 
@@ -29,7 +39,7 @@ from cvslab.funnel.providers import AnalyzeSearchProvider, AnalyzeTransport
 from cvslab.hashing import hash_obj, sha256_file
 from cvslab.schemas import Ablation, Dataset, Run, TERMINAL_RUN_STATUSES, TrainingRecipe
 from cvslab.service import LabService
-from cvslab.store import Store
+from cvslab.store import LabError, Store
 from cvslab.targets import TargetSpec
 
 LAB = pathlib.Path(r"F:\Github\chess-vision-studio-lab")
@@ -41,6 +51,8 @@ OUT = pathlib.Path(r"F:\Github\_parity_tmp\s12")
 BATCHES = OUT / "batches"
 POOL = OUT / "pool"
 STATE = S12 / "s12-state.json"
+ATTESTATION = S12 / "s12-universe-attestation.json"
+DEVIATION = S12 / "s12-preregistration-deviation.json"
 ENGINE = r"F:\Github\chess-vision-studio-rust-engine"
 EPD = ENGINE + r"\benchmarks\suites\openings-inv1-20260910.epd"
 EPD_SHA = "sha256:4d96e552fd257e66fe39d78420e1e48cfed6753795dd0a3e20cd222a3757e6b3"
@@ -49,6 +61,9 @@ SCALE = 74_570_982
 DEPTHS = (4_000, 2_000, 1_000, 512)
 LABEL = {4_000: "4k", 2_000: "2k", 1_000: "1k", 512: "512"}
 OLD_4K_ROWS, OLD_2K_ROWS = 18_961, 37_898
+BASE_SOURCE = "S0011"          # the S7-S pool snapshot the union normalizes together with S0012
+EXAM_SOURCE = "N0010"          # the full 575-record evaluation source the leakage join runs against
+EXAM_DATASET = "D0010"
 WIDTHS = (1, 4, 16, 32)
 SEEDS = tuple(range(20))
 BATCH, MAX_UPDATES = 256, 760
@@ -141,61 +156,23 @@ def _buy(jobs: list[tuple[str, str, int]], workers: int) -> list[dict]:
     return results
 
 
-def step_extend() -> int:
-    st = state()
-    if "universe" in st:
-        print("[cached] extend")
-        return 0
-    service = svc()
-    s7 = json.loads(S7_STATE.read_text(encoding="utf-8"))
-    old_order = s7["order"]
-    old_ids = set(old_order)
+def attestation() -> dict:
+    return json.loads(ATTESTATION.read_text(encoding="utf-8"))
 
-    # generate fresh games until the projected universe comfortably covers a ~150k 512-prefix
-    OUT.mkdir(parents=True, exist_ok=True)
-    BATCHES.mkdir(parents=True, exist_ok=True)
-    target_new = 100_000                      # ~179k total, ~1.15x a ~150k 512-prefix
-    # S7-S generated games 0..2599 with this same seed; the extension must start PAST them or
-    # per-game determinism regenerates the identical pool
-    batch, workers, made = 200, 8, 2600
-    new_ids: set[str] = set()
-    while len(new_ids) < target_new:
-        starts = [made + index * batch for index in range(workers)]
-        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-            list(pool.map(lambda start: _worker(start, batch), starts))
-        made += workers * batch
-        for done in sorted(BATCHES.glob("b*/done.json")):
-            meta = json.loads(done.read_text(encoding="utf-8"))
-            with open(done.parent / "positions.jsonl", "r", encoding="utf-8") as handle:
-                for line in handle:
-                    if line.strip():
-                        rid = record_id(json.loads(line)["fen"])
-                        if rid not in old_ids:
-                            new_ids.add(rid)
-        print(f"[{time.strftime('%H:%M:%S')}] {made} games generated, {len(new_ids)} new unique", flush=True)
 
-    positions, games = [], []
-    for done in sorted(BATCHES.glob("b*/done.json")):
-        with open(done.parent / "positions.jsonl", "r", encoding="utf-8") as handle:
-            positions.extend(json.loads(line) for line in handle if line.strip())
-        with open(done.parent / "games.jsonl", "r", encoding="utf-8") as handle:
-            games.extend(json.loads(line) for line in handle if line.strip())
-    POOL.mkdir(parents=True, exist_ok=True)
-    identity = engine_identity(ENGINE, args=DEFAULT_ENGINE_ARGS)
-    manifest = write_pool(POOL, {"games": games, "positions": positions,
-                                 "report": {"games": len(games), "rawPositions": len(positions)}},
-                          {"config": _config(made).canonical(), "engine": identity}, opening_lines=None)
-    source = snapshot_source(service.store, POOL, name="s12-extension", license="engine self-play corpus",
-                             generated={"games": games, "positions": positions}, manifest=manifest)
-    normalization = service.normalize([source.id], name="s12-extension-canonical")
-    records = _load_canonical(service.store, service.store.get(normalization.id))
-    print(f"source {source.id}: {len(positions)} rows; normalization {normalization.id}: {len(records)} records",
-          flush=True)
+def _exam_ids(service: LabService) -> list[str]:
+    d10: Dataset = service.store.get_as(EXAM_DATASET, Dataset)
+    split = next(entry for entry in d10.splits if entry.name == "test")
+    return sorted(row["record_id"] for row in read_jsonl(service.store.abs(split.path)))
 
-    # leakage join against the FULL 575-record evaluation source
-    eval_records = _load_canonical(service.store, service.store.get("N0010"))
-    d10: Dataset = service.store.get_as("D0010", Dataset)
-    instrument_ids = sorted(row["record_id"] for row in read_jsonl(service.store.abs(d10.splits[2].path)))
+
+def _leakage_clean(rows: list[dict], eval_records: list[dict],
+                   instrument_ids: list[str]) -> tuple[list[str], int]:
+    """The executed union leakage join: joint transposition components over corpus ∪ exam source.
+
+    A record survives only if its component touches neither the exam's own records nor the
+    instrument ids. Deterministic; no label value is ever read.
+    """
     parent: dict = {}
 
     def find(node):
@@ -210,38 +187,219 @@ def step_extend() -> int:
         if ra != rb:
             parent[max(ra, rb)] = min(ra, rb)
 
-    component_of = {record["record_id"]: record["group"] for record in records}
+    component_of = {record["record_id"]: record["group"] for record in rows}
     for record in eval_records:
         if record["record_id"] in component_of:
             union(component_of[record["record_id"]], record["group"])
         component_of.setdefault(record["record_id"], record["group"])
-    for record in records:
+    for record in rows:
         find(record["group"])
     protected = {find(component_of[rid]) for rid in instrument_ids}
     population = {find(component_of[record["record_id"]]) for record in eval_records}
-    clean = [record["record_id"] for record in records
+    clean = [record["record_id"] for record in rows
              if find(component_of[record["record_id"]]) not in protected
              and find(component_of[record["record_id"]]) not in population]
-    removed = len(records) - len(clean)
-    if removed / max(len(records), 1) > 0.05:
-        print(f"STOP: leakage removal {removed}/{len(records)} exceeds tolerance")
-        return 3
+    return clean, len(rows) - len(clean)
 
-    fresh = sorted(rid for rid in clean if rid not in old_ids)
-    new_order = sorted(fresh, key=lambda rid: hashlib.sha256(f"{SEED}:{rid}".encode()).hexdigest())
-    order = list(old_order) + new_order              # append-only: old prefixes preserved exactly
-    if order[: len(old_order)] != old_order:
-        print("STOP: the old order's prefix does not reproduce")
-        return 3
+
+def compose_universe(service: LabService, normalization_id: str, old_order: list[str]) -> dict:
+    """The executed universe, recomputed from the union normalization and the S7-S order.
+
+    Order = `kept S7-S subsequence ++ hash order of the new clean records`: the old order is
+    preserved only up to the records the union leakage graph removes, and no new record ever
+    enters the old segment.
+    """
+    rows = read_jsonl(service.store.abs(service.store.get(normalization_id).path))
+    eval_records = read_jsonl(service.store.abs(service.store.get(EXAM_SOURCE).path))
+    clean, removed = _leakage_clean(rows, eval_records, _exam_ids(service))
+    if removed / max(len(rows), 1) > 0.05:      # preregistered tolerance: stop, never truncate
+        raise LabError(f"leakage removal {removed}/{len(rows)} exceeds the 5% tolerance")
+    clean_set, old_ids = set(clean), set(old_order)
+    kept_old = [rid for rid in old_order if rid in clean_set]
+    excluded_old = [rid for rid in old_order if rid not in clean_set]
+    positions = {rid: index for index, rid in enumerate(old_order)}
+    new_order = sorted((rid for rid in clean if rid not in old_ids),
+                       key=lambda rid: hashlib.sha256(f"{SEED}:{rid}".encode()).hexdigest())
+    order = kept_old + new_order
+    if order[:len(kept_old)] != kept_old:
+        raise LabError("the old segment is not the filtered S7-S subsequence")
+    if any(rid in old_ids for rid in order[len(kept_old):]):
+        raise LabError("an old record appears in the new segment")
+    if set(kept_old) & set(new_order):
+        raise LabError("the old and new segments overlap")
+    return {"normalization": normalization_id, "records": len(rows), "removed": removed,
+            "clean": len(clean), "old": len(old_order), "old_kept": len(kept_old),
+            "old_excluded": len(excluded_old), "excluded_ids": excluded_old,
+            "excluded_positions": sorted(positions[rid] for rid in excluded_old),
+            "excluded_inside_old_4k_prefix": sum(1 for rid in excluded_old if positions[rid] < OLD_4K_ROWS),
+            "excluded_inside_old_2k_prefix": sum(1 for rid in excluded_old if positions[rid] < OLD_2K_ROWS),
+            "appended": len(new_order), "total": len(order), "order": order,
+            "universe_hash": hash_obj(order), "order_hash": hash_obj(order)}
+
+
+UNIVERSE_FIELDS = ("normalization", "records", "removed", "old", "old_kept", "old_excluded",
+                   "excluded_ids", "excluded_positions", "excluded_inside_old_4k_prefix",
+                   "excluded_inside_old_2k_prefix", "appended", "total", "universe_hash", "order_hash")
+
+
+def assert_universe(facts: dict, recorded: dict, *, complete: bool = False) -> None:
+    """Fail closed: every recorded fact of the executed universe must equal the recomputation.
+
+    `complete=True` is for the attestation (the authoritative record); the state carries a
+    subset of the same fields and is compared field-by-field on what it does record.
+    """
+    missing = [field for field in UNIVERSE_FIELDS if field not in recorded]
+    if complete and missing:
+        raise LabError(f"the attestation is missing {missing}")
+    mismatches = [f"{field}: recomputed {facts[field]!r} != recorded {recorded[field]!r}"
+                  for field in UNIVERSE_FIELDS if field in recorded and facts[field] != recorded[field]]
+    if mismatches:
+        raise LabError("the recomputed universe does not match the recorded execution: "
+                       + "; ".join(mismatches))
+
+
+def step_extend() -> int:
+    st = state()
+    service = svc()
+    recorded = attestation()
+    if "universe" in st:
+        print("[cached] extend; verifying the stored universe against the attestation")
+        return step_verify()
+    s7 = json.loads(S7_STATE.read_text(encoding="utf-8"))
+    old_order = s7["order"]
+    old_ids = set(old_order)
+    if len(old_order) != recorded["old"]:
+        raise LabError(f"the S7-S order has {len(old_order)} records, recorded {recorded['old']}")
+
+    manifest_path = POOL / "pool-manifest.json"
+    if manifest_path.is_file():                       # reuse the executed pool, byte-for-byte
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if sha256_file(POOL / "games.jsonl") != manifest["gamesFile"]["sha256"]:
+            raise LabError("the stored extension pool does not match its own manifest")
+        if manifest["manifestSha256"] != recorded["pool"]["manifest_sha256"]:
+            raise LabError("the stored extension pool is not the pool the executed universe used")
+        print(f"[reuse] extension pool {manifest['gamesFile']['rows']} games from {POOL}", flush=True)
+    else:                                             # or regenerate it from the frozen config
+        OUT.mkdir(parents=True, exist_ok=True)
+        BATCHES.mkdir(parents=True, exist_ok=True)
+        target_new = 100_000                      # ~179k total, ~1.15x a ~150k 512-prefix
+        # S7-S generated games 0..2599 with this same seed; the extension must start PAST them or
+        # per-game determinism regenerates the identical pool
+        batch, workers, made = 200, 8, 2600
+        new_ids: set[str] = set()
+        while len(new_ids) < target_new:
+            starts = [made + index * batch for index in range(workers)]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+                list(pool.map(lambda start: _worker(start, batch), starts))
+            made += workers * batch
+            for done in sorted(BATCHES.glob("b*/done.json")):
+                meta = json.loads(done.read_text(encoding="utf-8"))
+                with open(done.parent / "positions.jsonl", "r", encoding="utf-8") as handle:
+                    for line in handle:
+                        if line.strip():
+                            rid = record_id(json.loads(line)["fen"])
+                            if rid not in old_ids:
+                                new_ids.add(rid)
+            print(f"[{time.strftime('%H:%M:%S')}] {made} games generated, {len(new_ids)} new unique",
+                  flush=True)
+        positions, games = [], []
+        for done in sorted(BATCHES.glob("b*/done.json")):
+            with open(done.parent / "positions.jsonl", "r", encoding="utf-8") as handle:
+                positions.extend(json.loads(line) for line in handle if line.strip())
+            with open(done.parent / "games.jsonl", "r", encoding="utf-8") as handle:
+                games.extend(json.loads(line) for line in handle if line.strip())
+        POOL.mkdir(parents=True, exist_ok=True)
+        identity = engine_identity(ENGINE, args=DEFAULT_ENGINE_ARGS)
+        manifest = write_pool(POOL, {"games": games, "positions": positions,
+                                     "report": {"games": len(games), "rawPositions": len(positions)}},
+                              {"config": _config(made).canonical(), "engine": identity},
+                              opening_lines=None)
+        if manifest["manifestSha256"] != recorded["pool"]["manifest_sha256"]:
+            raise LabError("the regenerated extension pool is not the pool the executed universe used")
+
+    source = snapshot_source(service.store, POOL, name="s12-extension", license="engine self-play corpus",
+                             generated={"games": len(read_jsonl(POOL / "games.jsonl")),
+                                        "positions": len(read_jsonl(POOL / "positions.jsonl"))},
+                             manifest=manifest)
+    # the UNION normalization: old and new sources normalized together, so the leakage graph sees
+    # every transposition between them (an extension-only normalization cannot)
+    normalization = service.normalize([BASE_SOURCE, source.id], name="s12-union-canonical")
+    print(f"source {source.id}: union normalization {normalization.id}", flush=True)
+
+    facts = compose_universe(service, normalization.id, old_order)
+    assert_universe(facts, recorded)
     carried = service.copy_label_sets(s7["universe"]["normalization"], normalization.id)
-    print(f"labels carried into {normalization.id}: {carried}", flush=True)
-    save(universe={"source": source.id, "normalization": normalization.id,
-                   "records": len(records), "removed": removed, "old": len(old_order),
-                   "appended": len(new_order), "total": len(order),
-                   "universe_hash": hash_obj(order), "order_hash": hash_obj(order),
-                   "order_kind": "append-only: S7-S order ++ hash order of the new clean records"},
-         order=order)
+    print(f"leakage join removed {facts['removed']} of {facts['records']} union records "
+          f"({facts['old_excluded']} of them old: {facts['excluded_inside_old_4k_prefix']} inside the "
+          f"old 4k prefix, {facts['excluded_inside_old_2k_prefix']} inside the old 2k prefix); "
+          f"labels carried into {normalization.id}: {carried}", flush=True)
+    save(universe={"source": source.id, "base_source": BASE_SOURCE,
+                   "normalization": normalization.id, "records": facts["records"],
+                   "removed": facts["removed"], "old": facts["old"], "old_kept": facts["old_kept"],
+                   "old_dropped_as_instrument_adjacent": facts["old_excluded"],
+                   "appended": facts["appended"], "total": facts["total"],
+                   "universe_hash": facts["universe_hash"], "order_hash": facts["order_hash"],
+                   "order_kind": ("order-preserving filtered extension: kept S7-S subsequence "
+                                  "(36 exam-bridged records removed) ++ hash order of the new clean "
+                                  "records; see s12-preregistration-deviation.json")},
+         order=facts["order"])
     return 0
+
+
+def step_verify() -> int:
+    """Read-only reproduction check: recompute the universe and every arm from stored evidence."""
+    st = state()
+    service = svc()
+    recorded = attestation()
+    s7 = json.loads(S7_STATE.read_text(encoding="utf-8"))
+    facts = compose_universe(service, recorded["normalization"], s7["order"])
+    assert_universe(facts, recorded, complete=True)
+    assert_universe(facts, st["universe"])
+    if st["universe"]["old_dropped_as_instrument_adjacent"] != facts["old_excluded"]:
+        raise LabError(f"state records {st['universe']['old_dropped_as_instrument_adjacent']} old "
+                       f"exclusions, recomputed {facts['old_excluded']}")
+    print(f"universe reproduces: {facts['total']} records, {facts['old_excluded']} old exclusions "
+          f"({facts['excluded_inside_old_4k_prefix']} inside 4k, "
+          f"{facts['excluded_inside_old_2k_prefix']} inside 2k), order hash {facts['order_hash']}",
+          flush=True)
+
+    order = facts["order"]
+    if "arms" not in st:
+        print("verify: universe OK; no arms recorded yet", flush=True)
+        return 0
+    streams = {}
+    for depth in (4_000, 2_000):
+        streams[depth] = _stream_nodes(depth)
+    for depth in (1_000, 512):
+        path = OUT / f"labels-{depth}.jsonl"
+        if not path.is_file():
+            raise LabError(f"cannot verify depth {depth}: {path} is missing")
+        streams[depth] = {row["record_id"]: int(row["budget_nodes"]) for row in read_jsonl(path)}
+    for arm in st["arms"]:
+        depth, stream = arm["depth"], streams[arm["depth"]]
+        cumulative, total, prefix = [], 0, []
+        for rid in order:
+            nodes = stream.get(rid)
+            if nodes is None:
+                break
+            total += nodes
+            cumulative.append(total)
+            prefix.append(rid)
+        best = min(range(len(cumulative)), key=lambda index: abs(cumulative[index] - SCALE))
+        prefix, realized = prefix[:best + 1], cumulative[best]
+        if (len(prefix), realized, hash_obj(sorted(prefix))) != (
+                arm["prefix_size"], arm["realized_nodes"], arm["record_ids_hash"]):
+            raise LabError(f"{arm['arm_id']}: recomputed ({len(prefix)}, {realized}, "
+                           f"{hash_obj(sorted(prefix))}) != recorded ({arm['prefix_size']}, "
+                           f"{arm['realized_nodes']}, {arm['record_ids_hash']})")
+        print(f"  {arm['arm_id']}: {len(prefix)} rows, {realized:,} nodes, record-ids hash matches",
+              flush=True)
+    sizes = [arm["prefix_size"] for arm in st["arms"]]
+    if sizes != sorted(sizes):
+        raise LabError(f"nesting failed on the recomputed prefixes: {sizes}")
+    print("verify: OK", flush=True)
+    return 0
+
 
 
 def _stream_nodes(depth: int) -> dict:
@@ -365,15 +523,18 @@ def step_arms() -> int:
     if sizes != sorted(sizes):
         print(f"STOP: nesting failed: {sizes}")
         return 3
-    # the carried streams were purchased along the pre-S12 order; 36 of its records were later
-    # dropped as instrument-adjacent, so the prefixes reproduce up to those removals
+    # the carried streams were purchased along the pre-S12 order; records that the union leakage
+    # graph later removed are no longer in the order, so the carried prefixes hold only up to
+    # those exclusions (7 inside the old 4k prefix, 16 inside the old 2k prefix)
     for arm, old_rows in ((arms[0], OLD_4K_ROWS), (arms[1], OLD_2K_ROWS)):
         if arm["prefix_size"] > old_rows:
             print(f"STOP: {arm['arm_id']} prefix {arm['prefix_size']} exceeds the purchased {old_rows}")
             return 3
         print(f"{arm['arm_id']}: {old_rows - arm['prefix_size']} purchased rows fell outside the "
-              f"leakage-clean prefix", flush=True)
-    save(arms=arms, nesting="4k subset 2k subset 1k subset 512 asserted; 4k/2k prefixes reproduce S8")
+              f"filtered leakage-clean prefix", flush=True)
+    save(arms=arms, nesting="4k subset 2k subset 1k subset 512 asserted within X0008; the carried "
+                            "4k/2k prefixes are the filtered old prefixes (7/16 records removed as "
+                            "exam-bridged), not row-identical to S8's")
     return 0
 
 
@@ -475,11 +636,12 @@ def step_run() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("step", choices=["extend", "calibrate", "labels", "arms", "experiment", "run"])
+    parser.add_argument("step", choices=["extend", "verify", "calibrate", "labels", "arms", "experiment", "run"])
     args = parser.parse_args()
     S12.mkdir(parents=True, exist_ok=True)
-    return {"extend": step_extend, "calibrate": step_calibrate, "labels": step_labels,
-            "arms": step_arms, "experiment": step_experiment, "run": step_run}[args.step]()
+    return {"extend": step_extend, "verify": step_verify, "calibrate": step_calibrate,
+            "labels": step_labels, "arms": step_arms, "experiment": step_experiment,
+            "run": step_run}[args.step]()
 
 
 if __name__ == "__main__":

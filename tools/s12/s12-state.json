@@ -12,7 +12,7 @@
   "total": 183183,
   "universe_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
   "order_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
-  "order_kind": "append-only over the leakage-clean union: kept S7-S order (36 records dropped as instrument-adjacent via bridges created by the new games) ++ hash order of the new clean records; N0013 superseded (extension games only, missing old positions)"
+  "order_kind": "order-preserving filtered extension: kept S7-S subsequence (36 exam-bridged records removed) ++ hash order of the new clean records; v1 append-only superseded (s12-preregistration-deviation.json)"
  },
  "order": [
   "pos_1b9e4a01b492b3678002",
@@ -183633,6 +183633,8 @@
    "record_hash": "sha256:c1e3853f55d9e72e378d282168617c51868f153d1d4ff91dc96bf53e4d957cac",
    "membership": "320/320 COMPLETED, 0 invalid"
   },
-  "doc": "docs/S12_LOWER_FRONTIER.md"
+  "doc": "docs/S12_LOWER_FRONTIER.md",
+  "attestation": "tools/s12/s12-universe-attestation.json",
+  "deviation": "tools/s12/s12-preregistration-deviation.json"
  }
 }
