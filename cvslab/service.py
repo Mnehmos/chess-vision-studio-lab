@@ -834,11 +834,18 @@ class LabService:
 
         declared_scales = {str(key) for key in scales}
         declared_budgets = {int(budget) for budget in node_budgets}
+        numeric_scale = {str(key): int(value) for key, value in scales.items()}
         declared_widths = {int(width) for width in widths}
         cells = {(str(arm["scale"]), int(arm["node_budget"])) for arm in arms}
         if len(cells) != len(list(arms)):
             raise LabError("the design names the same (scale, node budget) cell more than once")
         lattice = {(scale, budget) for scale in declared_scales for budget in declared_budgets}
+        for arm in arms:
+            # the scale NAME must carry its frozen numeric target: a cell called "20x" with a
+            # 2x budget would otherwise pass every check and quietly misspend the study
+            if int(arm["scale_nodes"]) != numeric_scale[str(arm["scale"])]:
+                raise LabError(f"arm {arm['arm_id']} declares scale_nodes {arm['scale_nodes']} for scale "
+                               f"{arm['scale']!r}, but the design freezes {numeric_scale[str(arm['scale'])]}")
         missing_cells = sorted(lattice - cells)
         undeclared_cells = sorted(cells - lattice)
         if missing_cells or undeclared_cells:
