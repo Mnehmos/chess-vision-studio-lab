@@ -1,0 +1,136 @@
+{
+ "decision": "INCONCLUSIVE",
+ "equivalence_all_widths": false,
+ "evidence": {
+  "preregistration": "tools/s10/s10-preregistration.json",
+  "result": "tools/s10/s10-result.json",
+  "state": "tools/s10/s10-state.json"
+ },
+ "experiment": "X0004",
+ "invalid_runs": [],
+ "margin_delta": 0.001,
+ "mean_test_loss": {
+  "SAME-2K": 0.019842,
+  "SAME-4K": 0.019356,
+  "SAME-8K": 0.018866
+ },
+ "point_estimates_vs_margin": {
+  "1": "below",
+  "16": "below",
+  "32": "below",
+  "4": "below"
+ },
+ "primary_4k_minus_8k": {
+  "1": {
+   "d": 0.000732,
+   "one_sided_bounds": [
+    0.000438,
+    0.001026
+   ],
+   "two_sided_ci": [
+    0.000376,
+    0.001088
+   ]
+  },
+  "4": {
+   "d": 0.000344,
+   "one_sided_bounds": [
+    -0.000399,
+    0.001088
+   ],
+   "two_sided_ci": [
+    -0.000556,
+    0.001245
+   ]
+  },
+  "16": {
+   "d": 0.000213,
+   "one_sided_bounds": [
+    -0.00058,
+    0.001005
+   ],
+   "two_sided_ci": [
+    -0.000746,
+    0.001172
+   ]
+  },
+  "32": {
+   "d": 0.000671,
+   "one_sided_bounds": [
+    -0.00061,
+    0.001952
+   ],
+   "two_sided_ci": [
+    -0.00088,
+    0.002222
+   ]
+  }
+ },
+ "realized_teacher_nodes": {
+  "2K": 18690779,
+  "4K": 37334303,
+  "8K": 74553268
+ },
+ "three_point_curve": {
+  "2k-4k": {
+   "1": {
+    "d": 0.000423,
+    "one_sided_bounds": [
+     0.000143,
+     0.000703
+    ]
+   },
+   "16": {
+    "d": 0.000843,
+    "one_sided_bounds": [
+     3.2e-05,
+     0.001654
+    ]
+   },
+   "32": {
+    "d": 9.8e-05,
+    "one_sided_bounds": [
+     -0.001042,
+     0.001238
+    ]
+   },
+   "4": {
+    "d": 0.000582,
+    "one_sided_bounds": [
+     -4.6e-05,
+     0.00121
+    ]
+   }
+  },
+  "2k-8k": {
+   "1": {
+    "d": 0.001155,
+    "one_sided_bounds": [
+     0.000768,
+     0.001541
+    ]
+   },
+   "16": {
+    "d": 0.001056,
+    "one_sided_bounds": [
+     0.000348,
+     0.001763
+    ]
+   },
+   "32": {
+    "d": 0.000769,
+    "one_sided_bounds": [
+     -6.1e-05,
+     0.001599
+    ]
+   },
+   "4": {
+    "d": 0.000927,
+    "one_sided_bounds": [
+     0.000179,
+     0.001674
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "s10-is-4k-the-economic-sweet-spot",
+  "version": 1,
+  "status": "materialized before the freeze; X0004 binds the hash of this file",
+  "question": "Between 8k (quality reference) and 2k (cheaper, but with a measurable ~5% relative tax), is 4k the operating point that is roughly 2x cheaper than 8k with no meaningful loss?",
+  "context": "S9 established the tradeoff: 2k is 3.99x cheaper on the same positions and trains slightly worse (d = +0.0008..+0.0012, mean +0.00098, not non-inferior at delta=0.001). The 4k labels for these positions already exist, so the sweet-spot question costs no new teacher compute.",
+
+  "positions": {"source": "the same frozen 9,495 ids as S9/S8 (identical order)",
+                "no_new_labels": true,
+                "depths": [8000, 4000, 2000]},
+
+  "training": {
+    "regime": "fixed updates: MAX_UPDATES 760, BATCH 256 = 194,560 sample presentations for every arm",
+    "identical": {"widths": [1, 4, 16, 32], "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                  "optimizer": "adam", "LR": 0.003, "INIT_STD": 0.05, "K": 256.0, "LAMBDA": 1.0,
+                  "representation": "RAW-768", "instrument": "E0004/D0010"},
+    "matrix": {"arms": 3, "widths": 4, "seeds": 20, "expected_cells": 240}
+  },
+
+  "primary_analysis": {
+    "quantity": "d = test_loss(4k) - test_loss(8k), paired by seed, per width; positive = 4k worse",
+    "margin": {"delta": 0.001, "why": "identical to S9 so the three depths sit on one scale"},
+    "bounds": "separate one-sided 95% lower and upper bounds (t=1.729, df=19)",
+    "decision": {"4K_NONINFERIOR": "upper bound < +0.001 at all four widths",
+                 "4K_TAXED": "lower bound > +0.001 at every width",
+                 "INCONCLUSIVE": "otherwise"},
+    "secondary_equivalence": "two-sided 95% CI inside [-0.001, +0.001] at every width"
+  },
+
+  "secondary_analysis": {
+    "three_point_curve": ["4k-8k (primary)", "2k-4k", "2k-8k"],
+    "economics": "realized teacher nodes over the same 9,495 positions for 8k, 4k and 2k, so the curve is a cost/quality tradeoff rather than a single comparison",
+    "no_pooling": "widths are reported, never pooled"
+  },
+
+  "scope_exclusions": ["no new pool", "no new labels", "no 1k or 512 arm yet", "no GEO", "no Stockfish",
+                        "no games", "no optimizer tuning", "no wider models"],
+  "stop_conditions": ["the 9,495 ids do not reproduce", "the 4k observations do not exist for all 9,495 positions",
+                       "a TargetSpec cannot provide strict one-observation cardinality",
+                       "X0004 cannot truthfully seal the intended 240-cell design"]
+}
