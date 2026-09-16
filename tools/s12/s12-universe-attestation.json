@@ -122,6 +122,15 @@
   77220,
   77459
  ],
+ "executed_identifiers": {
+  "experiment": "X0008",
+  "normalization": "N0014",
+  "note": "informational only; not part of the fail-closed comparison",
+  "sources": [
+   "S0011",
+   "S0012"
+  ]
+ },
  "experiment": "X0008",
  "extension_source": "S0012",
  "id": "s12-universe-attestation",
@@ -136,17 +145,25 @@
    "realized_nodes": 76845415
   }
  },
- "normalization": "N0014",
+ "normalization_duplicates": 256756,
+ "normalization_output_hash": "sha256:94cbb8e414bd9677939375edd27969673f4b623f5bec2350a7727dbb2821b8f7",
+ "normalization_recipe_hash": "sha256:31780b3acdff15fbf56aa3fea6fe66268691d5b5d018a89e6890d43319590519",
+ "normalization_records": 183482,
+ "normalization_rejected": 0,
+ "normalization_source_hashes": [
+  "sha256:30e37f02cfe8baaac356d85c68e77ef542d555913fc0ae8271eccebbe083bc00",
+  "sha256:94946e00dab2de2b5c9649f3374cfbf25598540dee015059bbdd4c218b1c95d0"
+ ],
  "normalization_source_ids": [
   "S0011",
   "S0012"
  ],
- "note": "7/16 of the exclusions lie inside the old 4k/2k prefixes, so the carried arms are not row-identical to S8\u2019s; the realized-node targets are met at 1.0000 in all four arms.",
+ "note": "7/16 of the exclusions lie inside the old 4k/2k prefixes, so the carried arms are not row-identical to S8's; the realized-node targets are met at 1.0000 in all four arms. The removal was value-blind (no label value was read to select it), small (0.16% of the union corpus), and its effect on the result was not separately measured.",
  "old": 79483,
  "old_excluded": 36,
  "old_kept": 79447,
  "order_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
- "order_kind": "append-only over the leakage-clean union: kept S7-S order (36 records dropped as instrument-adjacent via bridges created by the new games) ++ hash order of the new clean records; N0013 superseded (extension games only, missing old positions)",
+ "order_kind": "order-preserving filtered extension: kept S7-S subsequence (36 exam-bridged records removed) ++ hash order of the new clean records; v1's append-only form was superseded (see the deviation record)",
  "order_seed": 20260920,
  "pool": {
   "config_sha256": "sha256:c8c457feacfd49c7a4157a8852a6644681aa8c4b941ddcbdca7c8120cbf1b996",
@@ -159,6 +176,18 @@
  },
  "records": 183482,
  "removed": 299,
+ "replay_note": "The comparison is CONTENT, never store identifiers: a clean replay necessarily allocates fresh N####/S#### ids, so executed_identifiers is recorded for traceability and deliberately NOT compared. What is compared: the canonical corpus hash, the normalization recipe, the source byte hashes, the join outcome (records/removed), the exact excluded ids and their positions, and the order hash.",
+ "replay_proof": {
+  "fresh_normalization": "N0015",
+  "fresh_normalization_id_differs_from_executed": true,
+  "fresh_output_hash": "sha256:94cbb8e414bd9677939375edd27969673f4b623f5bec2350a7727dbb2821b8f7",
+  "fresh_output_hash_equals_executed": true,
+  "fresh_records": 183482,
+  "regression_test": "tests/test_s12_universe_attestation.py (20 cases: fresh id passes; 15 content drifts fail closed)",
+  "result": "PASS in 77s (normalization 74s)",
+  "what": "the clean-replay path was executed end to end: service.normalize([S0011, S0012]) was run again, allocating a FRESH normalization id (N0015), and compose_universe + assert_universe(complete=True) passed against this attestation",
+  "why_it_matters": "before the content-based comparison this replay would have failed on the id alone; the store allocates ids monotonically, so an id comparison can never be part of a reproducibility gate"
+ },
  "total": 183183,
  "universe_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff"
 }

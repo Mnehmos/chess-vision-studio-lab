@@ -37,7 +37,7 @@ from cvslab.funnel.pool import (DEFAULT_ENGINE_ARGS, AnalyzeTeacher, PoolConfig,
                                 engine_identity, snapshot_source, write_pool)
 from cvslab.funnel.providers import AnalyzeSearchProvider, AnalyzeTransport
 from cvslab.hashing import hash_obj, sha256_file
-from cvslab.schemas import Ablation, Dataset, Run, TERMINAL_RUN_STATUSES, TrainingRecipe
+from cvslab.schemas import Ablation, Dataset, Normalization, Run, TERMINAL_RUN_STATUSES, TrainingRecipe
 from cvslab.service import LabService
 from cvslab.store import LabError, Store
 from cvslab.targets import TargetSpec
@@ -160,6 +160,15 @@ def attestation() -> dict:
     return json.loads(ATTESTATION.read_text(encoding="utf-8"))
 
 
+def executed_normalization_id(recorded: dict) -> str:
+    """The N#### the executed universe used — read for what it identifies, never compared.
+
+    `verify` needs it to load the sealed corpus; a clean `extend` replay allocates its own and
+    compares on content, not on this id.
+    """
+    return recorded["executed_identifiers"]["normalization"]
+
+
 def _exam_ids(service: LabService) -> list[str]:
     d10: Dataset = service.store.get_as(EXAM_DATASET, Dataset)
     split = next(entry for entry in d10.splits if entry.name == "test")
@@ -207,9 +216,12 @@ def compose_universe(service: LabService, normalization_id: str, old_order: list
 
     Order = `kept S7-S subsequence ++ hash order of the new clean records`: the old order is
     preserved only up to the records the union leakage graph removes, and no new record ever
-    enters the old segment.
+    enters the old segment. The returned facts are content facts (corpus hash, join outcome,
+    exclusions, order hash) so that a clean replay — which necessarily gets a fresh N#### —
+    still compares equal to the executed universe.
     """
     rows = read_jsonl(service.store.abs(service.store.get(normalization_id).path))
+    normalization = service.store.get_as(normalization_id, Normalization)
     eval_records = read_jsonl(service.store.abs(service.store.get(EXAM_SOURCE).path))
     clean, removed = _leakage_clean(rows, eval_records, _exam_ids(service))
     if removed / max(len(rows), 1) > 0.05:      # preregistered tolerance: stop, never truncate
@@ -227,7 +239,14 @@ def compose_universe(service: LabService, normalization_id: str, old_order: list
         raise LabError("an old record appears in the new segment")
     if set(kept_old) & set(new_order):
         raise LabError("the old and new segments overlap")
-    return {"normalization": normalization_id, "records": len(rows), "removed": removed,
+    return {"normalization_id_at_execution": normalization_id,
+            "normalization_output_hash": normalization.output_hash,
+            "normalization_recipe_hash": normalization.recipe_hash,
+            "normalization_records": normalization.record_count,
+            "normalization_duplicates": normalization.duplicate_count,
+            "normalization_rejected": normalization.rejected_count,
+            "normalization_source_hashes": sorted(normalization.source_hashes.values()),
+            "records": len(rows), "removed": removed,
             "clean": len(clean), "old": len(old_order), "old_kept": len(kept_old),
             "old_excluded": len(excluded_old), "excluded_ids": excluded_old,
             "excluded_positions": sorted(positions[rid] for rid in excluded_old),
@@ -237,7 +256,9 @@ def compose_universe(service: LabService, normalization_id: str, old_order: list
             "universe_hash": hash_obj(order), "order_hash": hash_obj(order)}
 
 
-UNIVERSE_FIELDS = ("normalization", "records", "removed", "old", "old_kept", "old_excluded",
+UNIVERSE_FIELDS = ("normalization_output_hash", "normalization_recipe_hash", "normalization_records",
+                   "normalization_duplicates", "normalization_rejected", "normalization_source_hashes",
+                   "records", "removed", "old", "old_kept", "old_excluded",
                    "excluded_ids", "excluded_positions", "excluded_inside_old_4k_prefix",
                    "excluded_inside_old_2k_prefix", "appended", "total", "universe_hash", "order_hash")
 
@@ -245,8 +266,13 @@ UNIVERSE_FIELDS = ("normalization", "records", "removed", "old", "old_kept", "ol
 def assert_universe(facts: dict, recorded: dict, *, complete: bool = False) -> None:
     """Fail closed: every recorded fact of the executed universe must equal the recomputation.
 
-    `complete=True` is for the attestation (the authoritative record); the state carries a
-    subset of the same fields and is compared field-by-field on what it does record.
+    The comparison is CONTENT, never store identifiers: `store.next_id` allocates a fresh N#### /
+    S#### on a clean replay, so the executed ids are recorded for traceability in
+    `normalization_id_at_execution` and are deliberately not compared. What is compared — the
+    canonical corpus hash, the recipe, the source byte hashes, the join outcome, the exact
+    exclusions and the order hash — is what makes the replay the same universe or not.
+    `complete=True` is for the attestation (the authoritative record); the state carries a subset of
+    the same fields and is compared field-by-field on what it does record.
     """
     missing = [field for field in UNIVERSE_FIELDS if field not in recorded]
     if complete and missing:
@@ -352,7 +378,7 @@ def step_verify() -> int:
     service = svc()
     recorded = attestation()
     s7 = json.loads(S7_STATE.read_text(encoding="utf-8"))
-    facts = compose_universe(service, recorded["normalization"], s7["order"])
+    facts = compose_universe(service, executed_normalization_id(recorded), s7["order"])
     assert_universe(facts, recorded, complete=True)
     assert_universe(facts, st["universe"])
     if st["universe"]["old_dropped_as_instrument_adjacent"] != facts["old_excluded"]:
@@ -587,7 +613,7 @@ def step_experiment() -> int:
         widths=list(WIDTHS), seeds=list(SEEDS), source_id=st["universe"]["source"],
         normalization_id=st["universe"]["normalization"], candidate_universe_hash=st["universe"]["universe_hash"],
         order_seed=SEED, order_hash=st["universe"]["order_hash"],
-        analysis={"design": "one teacher budget, four label depths along one append-only order; "
+        analysis={"design": "one teacher budget, four label depths along one frozen order; "
                             "equal student compute (760 x 256)",
                   "primary": "d = test_loss(512) - test_loss(4k) per width, paired over twenty seeds",
                   "bounds": "separate one-sided 95% (exact Student-t per df)",
@@ -595,7 +621,8 @@ def step_experiment() -> int:
                                "FRONTIER_EXHAUSTED if lower > 0 at every width", "INCONCLUSIVE otherwise"],
                   "adjacent": ["2k-4k", "1k-2k", "512-1k"],
                   "acceleration": "does the per-halving tax grow? that bend is where savings stop paying",
-                  "order_kind": "append-only: S7-S order ++ hash order of the new clean records"},
+                  "order_kind": ("order-preserving filtered extension: kept S7-S subsequence ++ hash order "
+                                 "of the new clean records (see s12-preregistration-deviation.json)")},
         experiment_id=xid, notes="4 depths x 4 widths x 20 seeds = 320 cells")
     expected = service.expected_membership(experiment)
     if len(expected) != 320:

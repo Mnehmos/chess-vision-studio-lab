@@ -8,18 +8,19 @@ stronger union leakage invariant and its stop condition fired
 (`tools/s12/s12-preregistration-deviation.json`); the lattice, depths, budget, student compute,
 exam and decision rule were unchanged and X0008 was frozen before any outcome was read.
 
-**Answer.** The quality penalty does **not** accelerate as teacher search keeps halving: at one
-fixed teacher budget (74,570,982 nodes ≈ the S7-S 2× scale), the 512-node arm buys **7.8× the
-coverage** of the 4k arm — 147,513 rows against 18,953 — and is **not worse**.
-**No positive/adverse acceleration was established, and the savings-stopping bend was not found
-down to 512 nodes.** At H32 the 512 arm is *strictly better* (−0.002601, one-sided
-`[−0.003485, −0.001717]`); at H4 and H16 the point estimates favour 512 with upper bounds of
-`+0.000063` and `+0.000172` (unresolved, but one to two seed-widths from resolved); at H1 a small
-adverse `+0.000867 [−0.000363, +0.002096]` straddles zero. Under the preregistered rule the decision
-is **INCONCLUSIVE** — neither global verdict fires — and the curve is flat-to-favourable all the way
-down to 512 nodes per label. **This is deviated-but-sealed evidence**: the realized population is
-not the append-only extension v1 described, because the stronger union leakage join removed 36 old
-records that the new games bridged to the exam (see *Preregistration deviation* below).
+**Answer.** **No positive/adverse acceleration was established, and the savings-stopping bend was not
+found down to 512 nodes.** At one fixed teacher budget (74,570,982 nodes ≈ the S7-S 2× scale), the
+512-node arm buys **7.8× the coverage** of the 4k arm — 147,513 rows against 18,953 — and is **not
+worse**: at H32 it is *strictly better* (−0.002601, one-sided `[−0.003485, −0.001717]`); at H4 and
+H16 the point estimates favour 512 with upper bounds of `+0.000063` and `+0.000172` (unresolved, but
+one to two seed-widths from resolved); at H1 a small adverse `+0.000867 [−0.000363, +0.002096]`
+straddles zero. Under the preregistered rule the decision is **INCONCLUSIVE** — neither global
+verdict fires — and the curve is flat-to-favourable all the way down to 512 nodes per label. (The
+one width whose per-halving tax sequence is strictly increasing, H16, is negative at every step; see
+*Does the per-halving tax accelerate?*.) **This is deviated-but-sealed evidence**: the realized
+population is not the append-only extension v1 described, because the stronger union leakage join
+removed 36 old records that the new games bridged to the exam (see *Preregistration deviation*
+below).
 
 ## Design — one teacher budget, four label depths, a filtered-extended population
 
@@ -165,20 +166,26 @@ subsequence ++ hash order of the new clean records`), not `old ++ new`. The cons
 
 * **X0008 is deviated-but-sealed evidence.** The preregistered confirmatory decision
   (**INCONCLUSIVE**) is a decision taken under a deviated setup, not a pristine preregistered test.
-* The deviation touches the **carried 4k/2k arms' row membership** — 7 of the exclusions lie inside
-  the old 4k prefix, 16 inside the old 2k prefix — and nothing else: the 1k and 512 arms are built
-  entirely from evidence purchased after the repair.
-* The lattice (4 × 4 × 20), depths, teacher budget, equal student compute, exam, seeds and the
-  decision rule were all unchanged, and X0008 was still frozen **before any outcome was read**.
+* The only rows the deviation removes from the study lie in the **carried 4k/2k arms** — 7 of the
+  exclusions fall inside the old 4k prefix, 16 inside the old 2k prefix; the 1k and 512 arms are
+  built entirely from evidence purchased after the repair. The removal was **value-blind** (no label
+  value was ever read to select it) and **small** (36 of 183,482 union records, 0.16 %), and its
+  effect on the measured contrast was **not separately measured**.
 * No exact cross-experiment value reproduction against S8 is claimed for the carried arms.
 
 Recorded in full at `tools/s12/s12-preregistration-deviation.json`; the facts are attested at
-`tools/s12/s12-universe-attestation.json`. The executable pipeline has been brought into sync:
-`tools/s12/s12_run.py` now encodes the *executed* procedure (union normalization → full leakage
-join → filtered extension) and its `verify` step recomputes the universe and all four arms from
-stored evidence, failing closed on any drift — it reproduces the sealed universe in ~10 s
-(183,183 records, 36 exclusions at positions 2,425 … 77,459, order hash `sha256:41375c2d…`, and all
-four prefix sizes, realized node totals and record-id hashes).
+`tools/s12/s12-universe-attestation.json`. The lattice (4 × 4 × 20), depths, teacher budget, equal
+student compute, exam, seeds and the decision rule were all unchanged, and X0008 was still frozen
+**before any outcome was read** — the deviation is in the population's provenance, not in the
+question or the test. The executable pipeline has been brought into sync: `tools/s12/s12_run.py`
+now encodes the *executed* procedure (union normalization → full leakage join → filtered extension)
+and its `verify` step recomputes the universe and all four arms from stored evidence, failing
+closed on any drift. The comparison is **content, never store identifiers**, because a clean replay
+necessarily allocates a fresh `N####`; a replay that produces a new normalization id but the same
+corpus hash, join outcome, exclusions and order hash passes, and any content drift fails. It
+reproduces the sealed universe in ~10 s (183,183 records, 36 exclusions at positions
+2,425 … 77,459, order hash `sha256:41375c2d…`, and all four prefix sizes, realized node totals and
+record-id hashes).
 
 ## Errata — one parenthetical in the sealed provenance text
 
