@@ -1,0 +1,53 @@
+{
+  "id": "s12-lower-economic-frontier",
+  "version": 1,
+  "status": "materialized before generation; X0008 binds the hash of this file",
+  "question": "How far can we keep halving teacher search (4k -> 2k -> 1k -> 512) before the quality penalty accelerates enough that the compute savings stop being worth it?",
+  "context": "S7-S showed breadth beats depth; S8 removed the student-compute confound; S9-S11 located a small per-halving tax (8k->4k ~+0.0005, ->2k ~+0.001). S12 extends the curve downward where the tax is expected to accelerate past the margin.",
+
+  "scale": {"name": "2x", "nodes": 74570982,
+            "note": "one teacher budget; each arm spends it all, buying more rows as labels get cheaper"},
+  "depths": [4000, 2000, 1000, 512],
+  "nesting": "4k subset 2k subset 1k subset 512 (closest-prefix at each depth along ONE frozen order)",
+
+  "population": {
+    "base": "the S7-S universe (79,483 records, order sha256:bbdb9a3b...) is EXTENDED, not replaced",
+    "extension": "append-only: new EPD-start games are normalized, leakage-joined against the full 575-record N0010 source, and the new clean records are hashed (seed 20260920) and APPENDED after the old order",
+    "why_append": "the old order's prefixes are preserved exactly, so the already-purchased 4k and 2k observations along it remain valid; the order is frozen and hash-recorded either way",
+    "adequacy": "extend until >= 1.15 x the calibration-predicted 512 prefix; stop rather than truncate"
+  },
+
+  "labels": {
+    "reuse": "4k and 2k streams are carried into the new normalization by record identity (EPD ids survive); re-verify coverage over their prefixes",
+    "buy": "1k and 512 streams along the extended order until the 2x crossing resolves",
+    "calibration": {"budgets": [1000, 512], "sample": 64, "cost_only": true,
+                    "must_not_inspect": ["centipawn values", "best moves", "losses", "any target information"]}
+  },
+
+  "training": {
+    "regime": "fixed updates: MAX_UPDATES 760, BATCH 256 = 194,560 sample presentations for every arm (equal student compute, the S8 control)",
+    "identical": {"widths": [1, 4, 16, 32], "seeds": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+                  "optimizer": "adam", "LR": 0.003, "INIT_STD": 0.05, "K": 256.0, "LAMBDA": 1.0,
+                  "representation": "RAW-768", "instrument": "E0004/D0010"},
+    "matrix": {"arms": 4, "widths": 4, "seeds": 20, "expected_cells": 320}
+  },
+
+  "analysis": {
+    "primary": "d = test_loss(512) - test_loss(4k), paired by seed, per width; positive = 512 worse",
+    "bounds": "separate one-sided 95% lower and upper bounds (exact Student-t per df)",
+    "decision": {"shallower_frontier": "upper < 0 at every width", "frontier_exhausted": "lower > 0 at every width",
+                 "inconclusive": "otherwise"},
+    "adjacent_descriptive": ["2k-4k", "1k-2k", "512-1k"],
+    "acceleration": "does the per-halving tax grow (2k-4k vs 1k-2k vs 512-1k)? that bend is where savings stop paying",
+    "economics": "realized node totals and rows per arm, reported separately from quality",
+    "no_pooling": "widths reported, never pooled"
+  },
+
+  "scope_exclusions": ["no new teacher scales", "no 8k arm (S9-S11 own that comparison)", "no GEO", "no Stockfish",
+                        "no games", "no optimizer tuning", "no wider models"],
+  "firewall": {"no_outcome_inspection": "the complete lattice and its X#### must be frozen before any outcome is inspected",
+               "no_target_values": "prefix membership is decided by realized node counts only"},
+  "stop_conditions": ["the old order's prefix does not reproduce", "the carried labels do not cover their prefixes",
+                       "leakage removal exceeds tolerance", "the universe cannot reach 1.15x the 512 prefix",
+                       "nesting fails", "X#### cannot truthfully seal the design"]
+}

@@ -1,0 +1,29 @@
+{
+ "id": "s12-result-errata-1",
+ "experiment": "X0008",
+ "sealed_result_record_hash": "sha256:c1e3853f55d9e72e378d282168617c51868f153d1d4ff91dc96bf53e4d957cac",
+ "artifact": "tools/s12/s12-result.json",
+ "artifact_matches_sealed_result_exactly": true,
+ "what_is_corrected": "one parenthetical in result.provenance.prefix_reproduction; no data, table, bound or verdict is affected",
+ "sealed_wording": "the append-only order preserves the S7-S order minus 36 records that the new games bridged to the exam by transposition; 8 of them lay inside the old 4k prefix and 32 inside the old 2k prefix, so X0008's 4k/2k arms are NOT row-identical to S8/S9/X0002/X0003's arms (18,953 vs 18,961 rows at 4k).",
+ "sealed_wording_is_wrong_because": "8 and 32 were symmetric set differences (records excluded PLUS records displaced by the node-target landing point), not counts of excluded records lying inside those prefixes; and S9/X0003 has no 4k arm (its comparison is 2k vs 8k), so the relevant prior 4k arms are S8/X0002's only",
+ "corrected_accounting": {
+  "method": "positional comparison of tools/s8/s8-state.json['order'] (the S7-S order, 79,483 records) against tools/s12/s12-state.json['order'] (append-only, 183,183 records); membership by record id, prefixes taken as contiguous slices",
+  "records_excluded_from_the_universe": 36,
+  "excluded_positions_in_the_old_order": [2425, 11546, 12876, 15911, 16986, 17945, 18752, 21524, 24003, 24406, 29939, 33098, 34180, 35071, 37536, 37543, 38350, 39165, 40593, 42398, 43015, 44590, 45197, 49880, 52876, 57525, 59057, 59073, 59640, 60324, 61727, 64006, 64073, 69675, 77220, 77459],
+  "inside_the_old_4k_prefix_18961": 7,
+  "inside_the_old_2k_prefix_37898": 16,
+  "row_deltas": {
+   "4k": {"old_rows": 18961, "new_rows": 18953, "excluded_inside_the_old_prefix": 7,
+          "displaced_by_the_node_target": 1,
+          "note": "the new 4k prefix is a strict subset of the old one: 18,961 - 7 excluded = 18,954 rows would land past the closest node target, so the walker stops one row earlier"},
+   "2k": {"old_rows": 37898, "new_rows": 37898, "excluded_inside_the_old_prefix": 16,
+          "taken_beyond_the_old_prefix": 16,
+          "note": "the same row count is reached with 16 replacement rows from just beyond the old boundary"}
+  },
+  "unchanged": "the cell count (320/320), membership, every paired estimate and bound, the economics table, and the conclusion that the carried arms are not row-identical to S8's and that no exact cross-experiment value reproduction is claimed"
+ },
+ "why_not_resealed": "Store.update_experiment refuses a SEALED study ('a finished study is immutable'); the repository's precedent (X0006 preserved and superseded by X0007; the S6 provenance repairs attested as separate artifacts) is to correct additively, never to rewrite sealed evidence",
+ "script_note": "tools/s12/s12_analyse.py deliberately still writes the sealed wording, so re-running `report` reproduces the sealed result byte-for-byte; this errata is the single place the correction lives",
+ "doc": "docs/S12_LOWER_FRONTIER.md"
+}
