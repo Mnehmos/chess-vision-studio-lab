@@ -1,0 +1,89 @@
+{
+ "artifact": "tools/s12/s12-result.json",
+ "artifact_matches_sealed_result_exactly": true,
+ "corrected_accounting": {
+  "excluded_positions_in_the_old_order": [
+   2425,
+   11546,
+   12876,
+   15911,
+   16986,
+   17945,
+   18752,
+   21524,
+   24003,
+   24406,
+   29939,
+   33098,
+   34180,
+   35071,
+   37536,
+   37543,
+   38350,
+   39165,
+   40593,
+   42398,
+   43015,
+   44590,
+   45197,
+   49880,
+   52876,
+   57525,
+   59057,
+   59073,
+   59640,
+   60324,
+   61727,
+   64006,
+   64073,
+   69675,
+   77220,
+   77459
+  ],
+  "inside_the_old_2k_prefix_37898": 16,
+  "inside_the_old_4k_prefix_18961": 7,
+  "method": "positional comparison of tools/s8/s8-state.json['order'] (the S7-S order, 79,483 records) against tools/s12/s12-state.json['order'] (the order-preserving filtered extension, 183,183 records); membership by record id, prefixes taken as contiguous slices",
+  "records_excluded_from_the_universe": 36,
+  "row_deltas": {
+   "2k": {
+    "excluded_inside_the_old_prefix": 16,
+    "new_rows": 37898,
+    "note": "the same row count is reached with 16 replacement rows from just beyond the old boundary",
+    "old_rows": 37898,
+    "taken_beyond_the_old_prefix": 16
+   },
+   "4k": {
+    "displaced_by_the_node_target": 1,
+    "excluded_inside_the_old_prefix": 7,
+    "new_rows": 18953,
+    "note": "the new 4k prefix is a strict subset of the old one: 18,961 - 7 excluded = 18,954 rows would land past the closest node target, so the walker stops one row earlier",
+    "old_rows": 18961
+   }
+  },
+  "unchanged": "the cell count (320/320), membership, every paired estimate and bound, the economics table, and the conclusion that the carried arms are not row-identical to S8's and that no exact cross-experiment value reproduction is claimed"
+ },
+ "doc": "docs/S12_LOWER_FRONTIER.md",
+ "experiment": "X0008",
+ "id": "s12-result-errata-1",
+ "script_note": "tools/s12/s12_analyse.py computes the same tables, bounds, decision and economics it computed at seal time, so a re-run reproduces the sealed result in every computed field. The embedded provenance.universe block is copied from s12-state.json, whose order_kind has since been corrected to the filtered-extension wording; a re-run therefore differs from the sealed artifact in exactly that embedded metadata string and nowhere else. The committed artifact itself is byte-for-byte the sealed result (verified: artifact_matches_sealed_result_exactly).",
+ "sealed_result_record_hash": "sha256:c1e3853f55d9e72e378d282168617c51868f153d1d4ff91dc96bf53e4d957cac",
+ "sealed_wording": "the append-only order preserves the S7-S order minus 36 records that the new games bridged to the exam by transposition; 8 of them lay inside the old 4k prefix and 32 inside the old 2k prefix, so X0008's 4k/2k arms are NOT row-identical to S8/S9/X0002/X0003's arms (18,953 vs 18,961 rows at 4k).",
+ "sealed_wording_is_wrong_because": "8 and 32 were symmetric set differences (records excluded PLUS records displaced by the node-target landing point), not counts of excluded records lying inside those prefixes; and S9/X0003 has no 4k arm (its comparison is 2k vs 8k), so the relevant prior 4k arms are S8/X0002's only",
+ "superseded_language_inventory": {
+  "corrected_elsewhere": [
+   "tools/s12/s12-state.json (universe.order_kind)",
+   "tools/s12/s12-universe-attestation.json (order_kind, note)",
+   "tools/s12/s12-preregistration-deviation.json",
+   "tools/s12/s12_run.py (experiment analysis.order_kind)",
+   "docs/S12_LOWER_FRONTIER.md"
+  ],
+  "note": "the committed s12-result.json is left byte-identical to the sealed result; this errata, not a rewrite, is the correction",
+  "principle": "append-only language survives ONLY where it is a verbatim quote of frozen evidence; all editable metadata and prose now say order-preserving filtered extension",
+  "survives_as_frozen_evidence": [
+   "tools/s12/s12-result.json (and the sealed X0008 result it mirrors): provenance.universe.order_kind and the prefix_reproduction sentence",
+   "tools/s12/s12-preregistration.json (v1, hash-bound by X0008): population.extension / population.why_append"
+  ]
+ },
+ "what_is_corrected": "one parenthetical in result.provenance.prefix_reproduction; no data, table, bound or verdict is affected. The result also embeds provenance.universe.order_kind with the superseded append-only phrasing; that is the protocol deviation, recorded separately in s12-preregistration-deviation.json, and it is not a wording error.",
+ "why_not_resealed": "Store.update_experiment refuses a SEALED study ('a finished study is immutable'); the repository's precedent (X0006 preserved and superseded by X0007; the S6 provenance repairs attested as separate artifacts) is to correct additively, never to rewrite sealed evidence"
+}

@@ -1,0 +1,596 @@
+{
+ "acceleration": {
+  "1": {
+   "512_step_tax_exceeds_2k_step": false,
+   "tax_accelerates_monotonically": false
+  },
+  "16": {
+   "512_step_tax_exceeds_2k_step": true,
+   "tax_accelerates_monotonically": true
+  },
+  "32": {
+   "512_step_tax_exceeds_2k_step": true,
+   "tax_accelerates_monotonically": false
+  },
+  "4": {
+   "512_step_tax_exceeds_2k_step": false,
+   "tax_accelerates_monotonically": false
+  }
+ },
+ "adjacent_contrasts": {
+  "1k-2k": {
+   "1": {
+    "d": 0.001021884137638215,
+    "df": 19,
+    "mean_a": 0.018309884901603218,
+    "mean_b": 0.017288000763965004,
+    "n": 20,
+    "one_sided_bounds": [
+     0.00028313847948325437,
+     0.0017606297957931758
+    ],
+    "stderr": 0.00042723476949406804,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     0.00012767148820754242,
+     0.0019160967870688879
+    ],
+    "verdict": "a_worse"
+   },
+   "16": {
+    "d": -0.00027338511600906955,
+    "df": 19,
+    "mean_a": 0.01725920770523197,
+    "mean_b": 0.017532592821241037,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.001174320139795417,
+     0.0006275499077772778
+    ],
+    "stderr": 0.0005210328655979094,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0013639194368427845,
+     0.0008171492048246453
+    ],
+    "verdict": "unresolved"
+   },
+   "32": {
+    "d": -0.00022540126006274087,
+    "df": 19,
+    "mean_a": 0.017101752475091474,
+    "mean_b": 0.017327153735154217,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.00118966500479044,
+     0.0007388624846649584
+    ],
+    "stderr": 0.0005576574212823467,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0013925916569259996,
+     0.0009417891368005178
+    ],
+    "verdict": "unresolved"
+   },
+   "4": {
+    "d": 0.00035755791427210463,
+    "df": 19,
+    "mean_a": 0.0164962345569263,
+    "mean_b": 0.016138676642654195,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.00041699520557257196,
+     0.0011321110341167813
+    ],
+    "stderr": 0.0004479431045919434,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0005799977786451691,
+     0.0012951136071893783
+    ],
+    "verdict": "unresolved"
+   }
+  },
+  "2k-4k": {
+   "1": {
+    "d": 0.0010167645739767835,
+    "df": 19,
+    "mean_a": 0.017288000763965004,
+    "mean_b": 0.01627123618998822,
+    "n": 20,
+    "one_sided_bounds": [
+     0.0004631826131753355,
+     0.0015703465347782315
+    ],
+    "stderr": 0.00032015005273908513,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     0.0003466828125737902,
+     0.0016868463353797768
+    ],
+    "verdict": "a_worse"
+   },
+   "16": {
+    "d": -0.0004581205809928478,
+    "df": 19,
+    "mean_a": 0.017532592821241037,
+    "mean_b": 0.017990713402233887,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0015235300264640431,
+     0.0006072888644783475
+    ],
+    "stderr": 0.0006161524657749115,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0017477425130427286,
+     0.000831501351057033
+    ],
+    "verdict": "unresolved"
+   },
+   "32": {
+    "d": -0.0017128193818123322,
+    "df": 19,
+    "mean_a": 0.017327153735154217,
+    "mean_b": 0.01903997311696655,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0024459324516404833,
+     -0.0009797063119841812
+    ],
+    "stderr": 0.0004239773052384137,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.002600214080199545,
+     -0.0008254246834251192
+    ],
+    "verdict": "a_better"
+   },
+   "4": {
+    "d": -0.00012239209007771108,
+    "df": 19,
+    "mean_a": 0.016138676642654195,
+    "mean_b": 0.016261068732731906,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0009755839940662842,
+     0.0007307998139108621
+    ],
+    "stderr": 0.0004934218460858988,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0011551358829060506,
+     0.0009103517027506284
+    ],
+    "verdict": "unresolved"
+   }
+  },
+  "512-1k": {
+   "1": {
+    "d": -0.0011719303400142972,
+    "df": 19,
+    "mean_a": 0.01713795456158892,
+    "mean_b": 0.018309884901603218,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0023680243411781515,
+     2.4163661149557416e-05
+    ],
+    "stderr": 0.0006917305560302675,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0026197390329548804,
+     0.00027587835292628587
+    ],
+    "verdict": "unresolved"
+   },
+   "16": {
+    "d": -0.00011089988714833403,
+    "df": 19,
+    "mean_a": 0.017148307818083634,
+    "mean_b": 0.01725920770523197,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0009876023098781615,
+     0.0007658025355814934
+    ],
+    "stderr": 0.0005070185568675123,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0011721019227034233,
+     0.0009503021484067553
+    ],
+    "verdict": "unresolved"
+   },
+   "32": {
+    "d": -0.0006626741023686418,
+    "df": 19,
+    "mean_a": 0.01643907837272283,
+    "mean_b": 0.017101752475091474,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0015644370680702154,
+     0.00023908886333293188
+    ],
+    "stderr": 0.0005215116847549514,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.001754210603215757,
+     0.00042886239847847343
+    ],
+    "verdict": "unresolved"
+   },
+   "4": {
+    "d": -0.0010836127084901475,
+    "df": 19,
+    "mean_a": 0.01541262184843615,
+    "mean_b": 0.0164962345569263,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0020289552108002876,
+     -0.00013827020618000754
+    ],
+    "stderr": 0.000546714801784593,
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.00222789993952637,
+     6.067452254607535e-05
+    ],
+    "verdict": "a_better"
+   }
+  }
+ },
+ "arm_seeds": {
+  "1k": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "2k": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "4k": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "512": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ]
+ },
+ "cells": {
+  "analysed": 320,
+  "duplicate_cells": {},
+  "expected": 320,
+  "invalid_runs": []
+ },
+ "decision": "INCONCLUSIVE",
+ "decision_rule": "SHALLOWER_FRONTIER iff the one-sided 95% upper bound of test_loss(512)-test_loss(4k) is below zero at every width; FRONTIER_EXHAUSTED iff the lower bound is above zero at every width; otherwise INCONCLUSIVE",
+ "economics": {
+  "arms": {
+   "1k": {
+    "fraction_of_target": 1.0000054444770488,
+    "nodes_per_row": 986.0418633556799,
+    "realized_nodes": 74571388,
+    "rows": 75627
+   },
+   "2k": {
+    "fraction_of_target": 1.0000022931171806,
+    "nodes_per_row": 1967.6804316850494,
+    "realized_nodes": 74571153,
+    "rows": 37898
+   },
+   "4k": {
+    "fraction_of_target": 0.9999943543723214,
+    "nodes_per_row": 3934.499076663325,
+    "realized_nodes": 74570561,
+    "rows": 18953
+   },
+   "512": {
+    "fraction_of_target": 1.0000002413807558,
+    "nodes_per_row": 505.5215472534624,
+    "realized_nodes": 74571000,
+    "rows": 147513
+   }
+  },
+  "coverage_ratio_512_over_4k": 7.783095024534375,
+  "equal_teacher_budget_nodes": 74570982,
+  "labels_bought": {
+   "1000": {
+    "labels": 77929,
+    "realized_nodes": 76840566
+   },
+   "512": {
+    "labels": 152029,
+    "realized_nodes": 76845415
+   }
+  },
+  "note": "teacher cost is held equal BY DESIGN: every arm spends the same node budget and buys more rows as labels get cheaper; student compute is also equal (MAX_UPDATES 760 x batch 256 = 194,560 presentations, the S8 control)",
+  "per_row_cost_ratio_4k_over_512": 7.7830492053993785
+ },
+ "evidence": {
+  "preregistration": "tools/s12/s12-preregistration.json",
+  "result": "tools/s12/s12-result.json",
+  "state": "tools/s12/s12-state.json"
+ },
+ "experiment": "X0008",
+ "first_halving_that_resolves_per_width": {
+  "1k-2k": [
+   "1"
+  ],
+  "2k-4k": [
+   "1",
+   "32"
+  ],
+  "512-1k": [
+   "4"
+  ]
+ },
+ "instrument_contract": {
+  "datasets_by_arm": {
+   "1k": [
+    "D0038"
+   ],
+   "2k": [
+    "D0037"
+   ],
+   "4k": [
+    "D0036"
+   ],
+   "512": [
+    "D0039"
+   ]
+  },
+  "eval_spec_hashes_seen": [
+   "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8"
+  ],
+  "exam_identity": [
+   "E0004",
+   "sha256:785d4584032edc1febd5b76aa0920e78f996239b27258de0b07bf6538aca43e1",
+   "D0010",
+   "sha256:9aa36820416b0198029bc740d2fe0745ffe250ff3798d191002ed27771705cff",
+   "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8"
+  ],
+  "runs_comparable": 320,
+  "shared_exam_hash": "sha256:80e8e3ded1690301b456988fe1db5f6e1cf390e80a391edcaf8edd997088e7e8",
+  "supervision_divergence": [
+   "S12 frontier arm: same student compute as its paired arms, one teacher budget, differing only in label depth and how many rows that budget buys"
+  ],
+  "train_spec_by_arm": {
+   "1k": [
+    "sha256:5ebd6caa33f634a9aecaffbe51ec141c9af9a624d60a8b14923fd04572e97326"
+   ],
+   "2k": [
+    "sha256:0c2d52a25a5e2168c62b6efbade4001218b71f66388c02541e26810e0da68ff8"
+   ],
+   "4k": [
+    "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43"
+   ],
+   "512": [
+    "sha256:3a7842e10cdf4c7ddb9eecd00adb58a5cfba0e2e67e0c0fc04037c8add03cad3"
+   ]
+  }
+ },
+ "mean_test_loss": {
+  "1k": {
+   "1": 0.018309884901603218,
+   "16": 0.01725920770523197,
+   "32": 0.017101752475091474,
+   "4": 0.0164962345569263
+  },
+  "2k": {
+   "1": 0.017288000763965004,
+   "16": 0.017532592821241037,
+   "32": 0.017327153735154217,
+   "4": 0.016138676642654195
+  },
+  "4k": {
+   "1": 0.01627123618998822,
+   "16": 0.017990713402233887,
+   "32": 0.01903997311696655,
+   "4": 0.016261068732731906
+  },
+  "512": {
+   "1": 0.01713795456158892,
+   "16": 0.017148307818083634,
+   "32": 0.01643907837272283,
+   "4": 0.01541262184843615
+  }
+ },
+ "per_halving_tax_by_width": {
+  "1": {
+   "1k-2k": 0.001021884137638215,
+   "2k-4k": 0.0010167645739767835,
+   "512-1k": -0.0011719303400142972
+  },
+  "16": {
+   "1k-2k": -0.00027338511600906955,
+   "2k-4k": -0.0004581205809928478,
+   "512-1k": -0.00011089988714833403
+  },
+  "32": {
+   "1k-2k": -0.00022540126006274087,
+   "2k-4k": -0.0017128193818123322,
+   "512-1k": -0.0006626741023686418
+  },
+  "4": {
+   "1k-2k": 0.00035755791427210463,
+   "2k-4k": -0.00012239209007771108,
+   "512-1k": -0.0010836127084901475
+  }
+ },
+ "preregistration_hash": "sha256:7295062363f0d61ae4ad62de094c21a66828f2ba37a1240c5eb667d9f6e3a3bf",
+ "primary_512_minus_4k": {
+  "1": {
+   "d": 0.0008667183716007012,
+   "df": 19,
+   "mean_a": 0.01713795456158892,
+   "mean_b": 0.01627123618998822,
+   "n": 20,
+   "one_sided_bounds": [
+    -0.0003628564684327704,
+    0.002096293211634173
+   ],
+   "stderr": 0.0007110933479722927,
+   "t_one_sided": 1.7291328115213664,
+   "two_sided_ci": [
+    -0.0006216171106350435,
+    0.002355053853836446
+   ],
+   "verdict": "unresolved"
+  },
+  "16": {
+   "d": -0.0008424055841502513,
+   "df": 19,
+   "mean_a": 0.017148307818083634,
+   "mean_b": 0.017990713402233887,
+   "n": 20,
+   "one_sided_bounds": [
+    -0.001856362952239999,
+    0.00017155178393949636
+   ],
+   "stderr": 0.0005863964649410728,
+   "t_one_sided": 1.7291328115213664,
+   "two_sided_ci": [
+    -0.0020697474906919144,
+    0.00038493632239141164
+   ],
+   "verdict": "unresolved"
+  },
+  "32": {
+   "d": -0.002600894744243715,
+   "df": 19,
+   "mean_a": 0.01643907837272283,
+   "mean_b": 0.01903997311696655,
+   "n": 20,
+   "one_sided_bounds": [
+    -0.0034852556354953235,
+    -0.0017165338529921068
+   ],
+   "stderr": 0.0005114476374278672,
+   "t_one_sided": 1.7291328115213664,
+   "two_sided_ci": [
+    -0.0036713669519505394,
+    -0.001530422536536891
+   ],
+   "verdict": "a_better"
+  },
+  "4": {
+   "d": -0.0008484468842957539,
+   "df": 19,
+   "mean_a": 0.01541262184843615,
+   "mean_b": 0.016261068732731906,
+   "n": 20,
+   "one_sided_bounds": [
+    -0.0017601878559486384,
+    6.329408735713062e-05
+   ],
+   "stderr": 0.0005272822108156603,
+   "t_one_sided": 1.7291328115213664,
+   "two_sided_ci": [
+    -0.001952061234994523,
+    0.0002551674664030151
+   ],
+   "verdict": "unresolved"
+  }
+ },
+ "provenance": {
+  "nesting": "4k subset 2k subset 1k subset 512 asserted; 4k/2k prefixes reproduce S8",
+  "prefix_reproduction": "the append-only order preserves the S7-S order minus 36 records that the new games bridged to the exam by transposition; 8 of them lay inside the old 4k prefix and 32 inside the old 2k prefix, so X0008's 4k/2k arms are NOT row-identical to S8/S9/X0002/X0003's arms (18,953 vs 18,961 rows at 4k). Exact cross-experiment value reproduction is therefore not claimed; the realized-node targets, which are what the preregistration fixed, are met at 1.0000 in all four arms.",
+  "universe": {
+   "appended": 103736,
+   "base_source": "S0011",
+   "normalization": "N0014",
+   "old": 79483,
+   "old_dropped_as_instrument_adjacent": 36,
+   "old_kept": 79447,
+   "order_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff",
+   "order_kind": "append-only over the leakage-clean union: kept S7-S order (36 records dropped as instrument-adjacent via bridges created by the new games) ++ hash order of the new clean records; N0013 superseded (extension games only, missing old positions)",
+   "records": 183482,
+   "removed": 299,
+   "source": "S0012",
+   "total": 183183,
+   "universe_hash": "sha256:41375c2d93708eeccc9daeb76286124f907fe601bfa68fe1e776933c495681ff"
+  }
+ },
+ "question": "how far can teacher search be halved (4k -> 2k -> 1k -> 512) before the quality penalty accelerates enough that the savings stop paying?",
+ "widths_unresolved_512_vs_4k": [
+  "1",
+  "4",
+  "16"
+ ],
+ "widths_with_512_worse": []
+}
