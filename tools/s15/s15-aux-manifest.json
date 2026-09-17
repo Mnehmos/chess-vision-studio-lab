@@ -1,0 +1,419 @@
+{
+ "authority": "deterministic.cvs.geometry.v1",
+ "bucket_logits": 84,
+ "families": [
+  "KING_DANGER",
+  "KING_ZONE_PRESSURE",
+  "KING_OPEN_FILE",
+  "KING_SHIELD",
+  "KING_CENTRAL_EXPOSURE",
+  "ENEMY_QUEEN_NEAR_KING",
+  "OPEN_CENTER_KING",
+  "KING_ESCAPE_DEFICIT",
+  "HANGING_MATERIAL",
+  "MOBILITY_KNIGHT",
+  "MOBILITY_BISHOP",
+  "MOBILITY_ROOK",
+  "MOBILITY_QUEEN",
+  "PASSED_PAWN",
+  "CONNECTED_PASSED_PAWN",
+  "ROOK_OPEN_FILE",
+  "ROOK_SEMI_OPEN_FILE",
+  "ROOK_SEVENTH",
+  "DOUBLED_PAWN",
+  "ISOLATED_PAWN",
+  "BISHOP_PAIR"
+ ],
+ "inference": "auxiliary heads are TRAINING-ONLY; the deployed evaluator is RAW-768 -> score and predict_cp never consults them",
+ "missingness": "none: the registry emits every family for every position",
+ "never_depends_on": [
+  "teacher search",
+  "the target score",
+  "game outcome",
+  "best move",
+  "evaluation split membership"
+ ],
+ "registry_hash": "sha256:a91c902a51cd2fef28d87e3124a458c221359f95c8d00a219491fc16c3ee63ec",
+ "registry_version": 1,
+ "targets": [
+  {
+   "column": 0,
+   "derivation": "position only",
+   "family": "KING_DANGER",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 20.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 0,
+   "derivation": "position only",
+   "family": "KING_DANGER",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 2.0/8.0/20.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 1,
+   "derivation": "position only",
+   "family": "KING_ZONE_PRESSURE",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 6.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 1,
+   "derivation": "position only",
+   "family": "KING_ZONE_PRESSURE",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/3.0/6.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 2,
+   "derivation": "position only",
+   "family": "KING_OPEN_FILE",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 2,
+   "derivation": "position only",
+   "family": "KING_OPEN_FILE",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 3,
+   "derivation": "position only",
+   "family": "KING_SHIELD",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 3,
+   "derivation": "position only",
+   "family": "KING_SHIELD",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 4,
+   "derivation": "position only",
+   "family": "KING_CENTRAL_EXPOSURE",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 4.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 4,
+   "derivation": "position only",
+   "family": "KING_CENTRAL_EXPOSURE",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/4.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 5,
+   "derivation": "position only",
+   "family": "ENEMY_QUEEN_NEAR_KING",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 5,
+   "derivation": "position only",
+   "family": "ENEMY_QUEEN_NEAR_KING",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 6,
+   "derivation": "position only",
+   "family": "OPEN_CENTER_KING",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 6,
+   "derivation": "position only",
+   "family": "OPEN_CENTER_KING",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 7,
+   "derivation": "position only",
+   "family": "KING_ESCAPE_DEFICIT",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 7,
+   "derivation": "position only",
+   "family": "KING_ESCAPE_DEFICIT",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 8,
+   "derivation": "position only",
+   "family": "HANGING_MATERIAL",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 6.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 8,
+   "derivation": "position only",
+   "family": "HANGING_MATERIAL",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/3.0/6.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 9,
+   "derivation": "position only",
+   "family": "MOBILITY_KNIGHT",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 9.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 9,
+   "derivation": "position only",
+   "family": "MOBILITY_KNIGHT",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 2.0/5.0/9.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 10,
+   "derivation": "position only",
+   "family": "MOBILITY_BISHOP",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 11.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 10,
+   "derivation": "position only",
+   "family": "MOBILITY_BISHOP",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 2.0/6.0/11.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 11,
+   "derivation": "position only",
+   "family": "MOBILITY_ROOK",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 12.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 11,
+   "derivation": "position only",
+   "family": "MOBILITY_ROOK",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 2.0/6.0/12.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 12,
+   "derivation": "position only",
+   "family": "MOBILITY_QUEEN",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 16.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 12,
+   "derivation": "position only",
+   "family": "MOBILITY_QUEEN",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 3.0/9.0/16.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 13,
+   "derivation": "position only",
+   "family": "PASSED_PAWN",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 13,
+   "derivation": "position only",
+   "family": "PASSED_PAWN",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 14,
+   "derivation": "position only",
+   "family": "CONNECTED_PASSED_PAWN",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 14,
+   "derivation": "position only",
+   "family": "CONNECTED_PASSED_PAWN",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 15,
+   "derivation": "position only",
+   "family": "ROOK_OPEN_FILE",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 15,
+   "derivation": "position only",
+   "family": "ROOK_OPEN_FILE",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 16,
+   "derivation": "position only",
+   "family": "ROOK_SEMI_OPEN_FILE",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 16,
+   "derivation": "position only",
+   "family": "ROOK_SEMI_OPEN_FILE",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 17,
+   "derivation": "position only",
+   "family": "ROOK_SEVENTH",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 17,
+   "derivation": "position only",
+   "family": "ROOK_SEVENTH",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 18,
+   "derivation": "position only",
+   "family": "DOUBLED_PAWN",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 18,
+   "derivation": "position only",
+   "family": "DOUBLED_PAWN",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 19,
+   "derivation": "position only",
+   "family": "ISOLATED_PAWN",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 3.0 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 19,
+   "derivation": "position only",
+   "family": "ISOLATED_PAWN",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 1.0/2.0/3.0), sign-independent",
+   "type": "ordinal(0-3)"
+  },
+  {
+   "column": 20,
+   "derivation": "position only",
+   "family": "BISHOP_PAIR",
+   "kind": "value",
+   "loss": "mean squared error, averaged with the other families",
+   "range": "White-POV delta / 1.5 (the family's own bucket-3 threshold), sign-flipped for black to move",
+   "type": "continuous"
+  },
+  {
+   "column": 20,
+   "derivation": "position only",
+   "family": "BISHOP_PAIR",
+   "kind": "bucket",
+   "loss": "cross-entropy over 4 classes, averaged with the other families",
+   "range": "the registry's 0-3 magnitude bucket (thresholds 0.5/1.0/1.5), sign-independent",
+   "type": "ordinal(0-3)"
+  }
+ ],
+ "value_targets": 21
+}

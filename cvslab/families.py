@@ -32,6 +32,23 @@ NNUE_SWITCHES: list[Switch] = [
         "H is ignored).",
     ),
     Switch(
+        key="AUX", label="Auxiliary supervision", kind="enum", default="none",
+        choices=["none", "geo", "geo-no-king", "geo-no-mobility", "geo-no-pawns", "geo-no-rooks",
+                 "geo-no-hanging", "geo-no-bishop"],
+        axis="signal",
+        description="TRAINING-ONLY auxiliary heads predicting deterministic geometry facts from the "
+        "shared hidden layer (the deployed evaluator is RAW-768 -> score either way). 'geo' "
+        "supervises all 21 registry families; 'geo-no-<group>' removes one named group. Auxiliary "
+        "parameters are counted separately from persistent inference parameters.",
+    ),
+    Switch(
+        key="AUX_WEIGHT", label="Auxiliary weight", kind="float", default=0.0, min=0.0, max=1000.0,
+        axis="signal",
+        description="Weight of the auxiliary geometry loss relative to the score loss "
+        "(total = score + AUX_WEIGHT * aux). Ignored when AUX=none. Frozen before training from the "
+        "gradient-scale calibration; never tuned per seed or per width after outcomes.",
+    ),
+    Switch(
         key="H", label="Hidden width", kind="int", default=1, min=1, max=4096, axis="capacity",
         description="Neurons in the single clipped-ReLU hidden layer. Learned parameters = inputs*H + 2H + 1.",
     ),
@@ -144,7 +161,26 @@ def parameter_shapes(family: str, config: Mapping[str, ConfigValue]) -> dict[str
     inputs, hidden = INPUT_DIMS[str(config["INPUT"])], int(config["H"])
     if str(config.get("ARCH", "crelu1")) == "linear":
         return {"w": [inputs], "b": []}
-    return {"w1": [inputs, hidden], "b1": [hidden], "w2": [hidden], "b2": []}
+    shapes = {"w1": [inputs, hidden], "b1": [hidden], "w2": [hidden], "b2": []}
+    mode = str(config.get("AUX", "none"))
+    if mode != "none":
+        from .nnue import aux_dimensions
+        values_dim, bucket_logits = aux_dimensions(mode)
+        if values_dim:
+            shapes["wv"] = [hidden, values_dim]
+            shapes["bv"] = [values_dim]
+        if bucket_logits:
+            shapes["wb"] = [hidden, bucket_logits]
+            shapes["bb"] = [bucket_logits]
+    return shapes
+
+
+INFERENCE_PARAM_NAMES = ("w", "b", "w1", "b1", "w2", "b2")
+
+
+def inference_parameter_shapes(shapes: Mapping[str, list[int]]) -> dict[str, list[int]]:
+    """The DEPLOYED subset: training-only auxiliary heads are excluded from the inference model."""
+    return {name: list(shape) for name, shape in shapes.items() if name in INFERENCE_PARAM_NAMES}
 
 
 def count_parameters(shapes: Mapping[str, list[int]]) -> int:

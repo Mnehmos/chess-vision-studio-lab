@@ -1,0 +1,31 @@
+{
+ "defect": {
+  "consequence": "paired RAW-SCORE and AUX-GEO runs at one seed had identical persistent starting weights but DIFFERENT minibatch orders, so the comparison was 'score-only loss + order A' versus 'auxiliary loss + order B' rather than 'same examples in the same order + different loss'",
+  "does_not_invalidate": [
+   "the measurements themselves: both arms trained and were examined exactly as recorded",
+   "the parametric accounting, throughput and gap numbers"
+  ],
+  "invalidates": [
+   "the causal attribution of the S15 primary contrasts to the auxiliary loss alone"
+  ],
+  "what": "one generator served the persistent weights, the auxiliary-head weights AND the minibatch sampler: np.random.default_rng(run.seed) was handed to RawNnue.initialize, the auxiliary draws advanced it, and the same object was then given to nnue.train for shuffling",
+  "why_it_matters": "the measured effects are 0.001-0.002; a different stochastic training path is a plausible contributor at that scale"
+ },
+ "doc": "docs/S15_AUXILIARY_GEOMETRY.md",
+ "experiment": "X0013",
+ "id": "s15-x0013-supersession",
+ "preserved_not_rewritten": "X0013 stays sealed and byte-identical; this record and the replacement experiment are additive",
+ "repair": {
+  "sampler": "the fixed-update sampler is now nnue.batch_stream, shared by train and by the regression test, so the tested sampler IS the training sampler",
+  "streams": "np.random.SeedSequence(seed).spawn(3) -> (persistent init, auxiliary init, minibatch sampling); the sampler stream is never touched by any initialisation draw",
+  "tests": [
+   "tests/test_nnue_aux.py::test_paired_aux_and_control_arms_share_init_and_batch_order (identical persistent weights and identical first 20 batches across paired arms)",
+   "tests/test_nnue_aux.py::test_the_sampler_stream_is_independent_of_other_draws"
+  ]
+ },
+ "replacement": {
+  "design": "unchanged: 2 arms x 4 widths x 20 seeds, same teacher/exam contract, same auxiliary manifest and AUX_WEIGHT",
+  "experiment": "frozen by tools/s15/s15_replace.py under tools/s15/s15-preregistration-v2.json"
+ },
+ "sealed_record_hash": "sha256:bcc02f68a7f626b23d137286bfc455841cd42f129147df7834f1cfb6a9211ce4"
+}

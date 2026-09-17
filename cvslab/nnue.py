@@ -38,6 +38,74 @@ def input_dim(kind: str) -> int:
         raise ValueError(f"unknown input representation {kind!r}; known: {sorted(INPUT_DIMS)}") from None
 
 
+AUX_FAMILIES: tuple[str, ...] = tuple(name for name, _thresholds in GEOMETRY_FAMILIES)
+AUX_BUCKET_CLASSES = 4            # the registry's own 0-3 magnitude bucket
+
+# Named-group removals for the family ablation. The keys are the AUX switch's values, so every
+# ablation arm is an explicit, hashable configuration; the sets reuse S14's group vocabulary.
+AUX_SKIP_GROUPS: dict[str, tuple[str, ...]] = {
+    "geo-no-king": ("KING_DANGER", "KING_ZONE_PRESSURE", "KING_OPEN_FILE", "KING_SHIELD",
+                    "KING_CENTRAL_EXPOSURE", "ENEMY_QUEEN_NEAR_KING", "OPEN_CENTER_KING",
+                    "KING_ESCAPE_DEFICIT"),
+    "geo-no-mobility": ("MOBILITY_KNIGHT", "MOBILITY_BISHOP", "MOBILITY_ROOK", "MOBILITY_QUEEN"),
+    "geo-no-pawns": ("PASSED_PAWN", "CONNECTED_PASSED_PAWN", "DOUBLED_PAWN", "ISOLATED_PAWN"),
+    "geo-no-rooks": ("ROOK_OPEN_FILE", "ROOK_SEMI_OPEN_FILE", "ROOK_SEVENTH"),
+    "geo-no-hanging": ("HANGING_MATERIAL",),
+    "geo-no-bishop": ("BISHOP_PAIR",),
+}
+AUX_MODES: tuple[str, ...] = ("none", "geo", *sorted(AUX_SKIP_GROUPS))
+
+
+def aux_families(mode: str) -> tuple[str, ...]:
+    """The families an auxiliary mode supervises, in registry order (never reordered)."""
+    if mode == "none":
+        return ()
+    if mode == "geo":
+        return AUX_FAMILIES
+    if mode not in AUX_SKIP_GROUPS:
+        raise ValueError(f"unknown auxiliary mode {mode!r}; known: {AUX_MODES}")
+    skipped = set(AUX_SKIP_GROUPS[mode])
+    return tuple(name for name in AUX_FAMILIES if name not in skipped)
+
+
+def aux_dimensions(mode: str) -> tuple[int, int]:
+    """(continuous value targets, bucket logits) for one auxiliary mode."""
+    count = len(aux_families(mode))
+    return count, count * AUX_BUCKET_CLASSES
+
+
+def aux_targets_for_fen(fen: str) -> tuple[np.ndarray, np.ndarray]:
+    """(values, buckets) for every supervised family: the S14 normalization, stm-POV signed.
+
+    values = White-POV delta / the family's own bucket-3 threshold, sign-flipped for black to move;
+    buckets = the registry's 0-3 magnitude. Derived from the position only — no teacher, score,
+    move, outcome or split information enters an auxiliary target.
+    """
+    import chess
+
+    board = chess.Board(fen)
+    geometry = extract_geometry(board)
+    sign = 1.0 if board.turn else -1.0
+    values = np.empty(len(AUX_FAMILIES), dtype=np.float64)
+    buckets = np.empty(len(AUX_FAMILIES), dtype=np.int64)
+    for index, (name, (_t0, _t1, t2)) in enumerate(GEOMETRY_FAMILIES):
+        entry = geometry[name]
+        values[index] = sign * float(entry["value"]) / t2
+        buckets[index] = int(entry["bucket"])
+    return values, buckets
+
+
+def encode_aux(records: list[dict], mode: str = "geo") -> tuple[np.ndarray, np.ndarray]:
+    """Auxiliary targets for a split, restricted to the mode's families (registry order)."""
+    keep = [index for index, name in enumerate(AUX_FAMILIES) if name in aux_families(mode)]
+    if not records:
+        return np.zeros((0, len(keep))), np.zeros((0, len(keep)), dtype=np.int64)
+    pairs = [aux_targets_for_fen(record["fen"]) for record in records]
+    values = np.stack([pair[0][keep] for pair in pairs])
+    buckets = np.stack([pair[1][keep] for pair in pairs])
+    return values, buckets
+
+
 def geo_columns() -> list[tuple[str, str]]:
     """The named GEO columns in order: (family, kind) with kind in {value, bucket}."""
     return [(name, kind) for name, _thresholds in GEOMETRY_FAMILIES for kind in ("value", "bucket")]
@@ -167,6 +235,37 @@ def targets(split: EncodedSplit, lam: float, k: float) -> np.ndarray:
     return np.where(has_result, blended, eval_target)
 
 
+def run_rng_streams(seed: int):
+    """(persistent-init, auxiliary-init, minibatch-sampling) - INDEPENDENT streams from one seed.
+
+    Splitting them is what makes a paired RAW/AUX comparison causal: auxiliary draws cannot advance
+    the sampler's stream, so both arms of a seed see the same examples in the same order and the
+    only difference between them is the loss.
+    """
+    persistent, auxiliary, sampling = np.random.SeedSequence(int(seed)).spawn(3)
+    return (np.random.default_rng(persistent), np.random.default_rng(auxiliary),
+            np.random.default_rng(sampling))
+
+
+def initialize_for_run(seed: int, inputs: int, hidden: int, init_std: float, out_scale: float,
+                       aux_dimensions: tuple = (0, 0)) -> "RawNnue":
+    """The model a run starts from: persistent weights from the persistent stream, training-only
+    heads from the auxiliary stream (never from the sampler's)."""
+    persistent, auxiliary, _sampling = run_rng_streams(seed)
+    return RawNnue.initialize(inputs, hidden, init_std, out_scale, persistent,
+                              aux_dimensions=aux_dimensions, aux_rng=auxiliary)
+
+
+def batch_stream(n_rows: int, batch: int, rng: np.random.Generator):
+    """Minibatch indices for the fixed-update regime: shuffle, walk without replacement, drop the
+    tail partial batch, reshuffle on exhaustion. Shared by `train` and its regression test."""
+    order = np.arange(n_rows)
+    while True:
+        rng.shuffle(order)
+        for start in range(0, n_rows - batch + 1, batch):
+            yield order[start:start + batch]
+
+
 class RawNnue:
     def __init__(self, params: dict[str, np.ndarray], out_scale: float):
         self.params = params
@@ -177,19 +276,41 @@ class RawNnue:
         return int(self.params["b1"].shape[0])
 
     @classmethod
-    def initialize(cls, inputs: int, hidden: int, init_std: float, out_scale: float, rng: np.random.Generator) -> "RawNnue":
+    def initialize(cls, inputs: int, hidden: int, init_std: float, out_scale: float,
+                   rng: np.random.Generator, aux_dimensions: tuple[int, int] = (0, 0),
+                   aux_rng: Optional[np.random.Generator] = None) -> "RawNnue":
+        """Persistent weights from `rng`; training-only heads from `aux_rng` when given.
+
+        Persistent draws come first and never depend on whether auxiliary heads exist, so two arms
+        of one seed start from identical persistent weights; the auxiliary stream is separate so its
+        draw count cannot shift anything else.
+        """
         bound = 1.0 / math.sqrt(hidden)
-        return cls(
-            {
-                "w1": rng.normal(0.0, init_std, size=(inputs, hidden)),
-                "b1": np.zeros(hidden),
-                "w2": rng.uniform(-bound, bound, size=hidden),
-                "b2": np.array(rng.uniform(-bound, bound)),
-            },
-            out_scale,
-        )
+        params = {
+            "w1": rng.normal(0.0, init_std, size=(inputs, hidden)),
+            "b1": np.zeros(hidden),
+            "w2": rng.uniform(-bound, bound, size=hidden),
+            "b2": np.array(rng.uniform(-bound, bound)),
+        }
+        values_dim, bucket_logits = aux_dimensions
+        if values_dim or bucket_logits:
+            # TRAINING-ONLY heads: they read the shared hidden layer and never touch predict_cp
+            aux_rng = aux_rng if aux_rng is not None else rng
+            aux_bound = 1.0 / math.sqrt(hidden)
+            if values_dim:
+                params["wv"] = aux_rng.uniform(-aux_bound, aux_bound, size=(hidden, values_dim))
+                params["bv"] = np.zeros(values_dim)
+            if bucket_logits:
+                params["wb"] = aux_rng.uniform(-aux_bound, aux_bound, size=(hidden, bucket_logits))
+                params["bb"] = np.zeros(bucket_logits)
+        return cls(params, out_scale)
+
+    @property
+    def aux_enabled(self) -> bool:
+        return "wv" in self.params or "wb" in self.params
 
     def predict_cp(self, X: np.ndarray, batch: int = 8192) -> np.ndarray:
+        """The DEPLOYED evaluator: RAW-768 -> score. Auxiliary heads are never consulted here."""
         p = self.params
         out = np.empty(X.shape[0])
         for start in range(0, X.shape[0], batch):
@@ -198,16 +319,57 @@ class RawNnue:
             out[start:start + batch] = (h @ p["w2"] + p["b2"]) * self.out_scale
         return out
 
-    def loss_and_grads(self, X: np.ndarray, t: np.ndarray, k: float) -> tuple[float, dict[str, np.ndarray]]:
+    def loss_and_grads(self, X: np.ndarray, t: np.ndarray, k: float,
+                       aux: Optional[tuple[np.ndarray, np.ndarray]] = None,
+                       aux_weight: float = 0.0) -> tuple[float, dict[str, np.ndarray]]:
+        """Score loss plus, when auxiliary heads exist and targets are supplied, the geometry loss.
+
+        The auxiliary objectives enter the shared trunk through the same hidden activation as the
+        score head, so they shape the representation; they are weighted by `aux_weight` and the
+        returned loss is the weighted total the optimizer actually descends.
+        """
         p = self.params
         z = X @ p["w1"] + p["b1"]
         h = np.clip(z, 0.0, 1.0)
-        prob = sigmoid((h @ p["w2"] + p["b2"]) * self.out_scale / k)
+        y = h @ p["w2"] + p["b2"]
+        prob = sigmoid(y * self.out_scale / k)
         diff = prob - t
         g_y = 2.0 * diff / len(t) * prob * (1.0 - prob) * self.out_scale / k
-        g_z = np.outer(g_y, p["w2"]) * ((z > 0.0) & (z < 1.0))
-        grads = {"w1": X.T @ g_z, "b1": g_z.sum(axis=0), "w2": h.T @ g_y, "b2": np.array(g_y.sum())}
-        return float(np.mean(diff ** 2)), grads
+        grads = {"w2": h.T @ g_y, "b2": np.array(g_y.sum())}
+        loss = float(np.mean(diff ** 2))
+        if aux is not None and self.aux_enabled:
+            values, buckets = aux
+            g_h_aux = np.zeros_like(h)
+            if "wv" in p:
+                predicted = h @ p["wv"] + p["bv"]
+                residual = predicted - values
+                loss += aux_weight * float(np.mean(residual ** 2))
+                d_pred = aux_weight * 2.0 * residual / residual.size
+                grads["wv"] = h.T @ d_pred
+                grads["bv"] = d_pred.sum(axis=0)
+                g_h_aux += d_pred @ p["wv"].T
+            if "wb" in p:
+                classes = AUX_BUCKET_CLASSES
+                families = buckets.shape[1]
+                logits = (h @ p["wb"] + p["bb"]).reshape(len(h), families, classes)
+                shifted = logits - logits.max(axis=2, keepdims=True)
+                exp = np.exp(shifted)
+                soft = exp / exp.sum(axis=2, keepdims=True)
+                onehot = np.zeros_like(soft)
+                np.put_along_axis(onehot, buckets[:, :, None], 1.0, axis=2)
+                loss += aux_weight * float(-np.mean(np.log(np.clip(
+                    np.take_along_axis(soft, buckets[:, :, None], axis=2), 1e-12, 1.0))))
+                d_logits = (aux_weight * (soft - onehot) / (len(h) * families)).reshape(len(h), -1)
+                grads["wb"] = h.T @ d_logits
+                grads["bb"] = d_logits.sum(axis=0)
+                g_h_aux += d_logits @ p["wb"].T
+            hidden_grad = np.outer(g_y, p["w2"]) + g_h_aux
+        else:
+            hidden_grad = np.outer(g_y, p["w2"])
+        g_z = hidden_grad * ((z > 0.0) & (z < 1.0))
+        grads["w1"] = X.T @ g_z
+        grads["b1"] = g_z.sum(axis=0)
+        return loss, grads
 
     def all_finite(self) -> bool:
         return all(bool(np.all(np.isfinite(v))) for v in self.params.values())
@@ -267,7 +429,9 @@ def _finite_or_none(x: float) -> Optional[float]:
 
 
 def train(model: RawNnue, train_split: EncodedSplit, val_split: EncodedSplit, cfg: Mapping, rng: np.random.Generator,
-          on_epoch: Optional[Callable[[dict], None]] = None) -> None:
+          on_epoch: Optional[Callable[[dict], None]] = None,
+          aux: Optional[tuple[np.ndarray, np.ndarray]] = None,
+          aux_weight: float = 0.0) -> None:
     k, lam = float(cfg["K"]), float(cfg["LAMBDA"])
     epochs, batch, lr, optimizer = int(cfg["EPOCHS"]), int(cfg["BATCH"]), float(cfg["LR"]), str(cfg["OPTIMIZER"])
     max_updates = int(cfg.get("MAX_UPDATES", 0) or 0)
@@ -283,39 +447,39 @@ def train(model: RawNnue, train_split: EncodedSplit, val_split: EncodedSplit, cf
         # exhaustion; stop after exactly max_updates updates.
         checkpoint_every = max(1, max_updates // 20)
         updates = 0
-        passes = 0
-        while updates < max_updates:
-            rng.shuffle(order)
-            passes += 1
-            for start in range(0, len(order) - batch + 1, batch):
-                if updates >= max_updates:
-                    break
-                idx = order[start:start + batch]
-                loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k)
-                updates += 1
-                step += 1          # Adam's bias-correction counter advances here too
-                for name, grad in grads.items():
-                    param = model.params[name]
-                    if optimizer == "sgd":
-                        param -= lr * grad
-                        continue
-                    m, v = moments[name]
-                    m *= beta1
-                    m += (1.0 - beta1) * grad
-                    v *= beta2
-                    v += (1.0 - beta2) * grad * grad
-                    param -= lr * (m / (1.0 - beta1 ** step)) / (np.sqrt(v / (1.0 - beta2 ** step)) + eps)
-                if on_epoch and (updates % checkpoint_every == 0 or updates == max_updates):
-                    val_loss = (float(np.mean(per_position_loss(model.predict_cp(val_split.X), t_val, k)))
-                                if len(val_split) else math.nan)
-                    on_epoch({
-                        "epoch": updates,             # in this regime the log index IS the update count
-                        "train_loss": _finite_or_none(loss),
-                        "val_loss": _finite_or_none(val_loss),
-                        "examples_per_second": round(batch / max(time.perf_counter() - started, 1e-9) *
-                                                     updates, 1),
-                        "elapsed_seconds": round(time.perf_counter() - started, 4),
-                    })
+        stream = batch_stream(len(train_split), batch, rng)
+        for idx in stream:
+            if updates >= max_updates:
+                break
+            batch_aux = None
+            if aux is not None:
+                batch_aux = (aux[0][idx], aux[1][idx])
+            loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k,
+                                               aux=batch_aux, aux_weight=aux_weight)
+            updates += 1
+            step += 1          # Adam's bias-correction counter advances here too
+            for name, grad in grads.items():
+                param = model.params[name]
+                if optimizer == "sgd":
+                    param -= lr * grad
+                    continue
+                m, v = moments[name]
+                m *= beta1
+                m += (1.0 - beta1) * grad
+                v *= beta2
+                v += (1.0 - beta2) * grad * grad
+                param -= lr * (m / (1.0 - beta1 ** step)) / (np.sqrt(v / (1.0 - beta2 ** step)) + eps)
+            if on_epoch and (updates % checkpoint_every == 0 or updates == max_updates):
+                val_loss = (float(np.mean(per_position_loss(model.predict_cp(val_split.X), t_val, k)))
+                            if len(val_split) else math.nan)
+                on_epoch({
+                    "epoch": updates,             # in this regime the log index IS the update count
+                    "train_loss": _finite_or_none(loss),
+                    "val_loss": _finite_or_none(val_loss),
+                    "examples_per_second": round(batch / max(time.perf_counter() - started, 1e-9) *
+                                                 updates, 1),
+                    "elapsed_seconds": round(time.perf_counter() - started, 4),
+                })
         return
 
     for epoch in range(epochs):
@@ -323,7 +487,11 @@ def train(model: RawNnue, train_split: EncodedSplit, val_split: EncodedSplit, cf
         epoch_start, total = time.perf_counter(), 0.0
         for start in range(0, len(order), batch):
             idx = order[start:start + batch]
-            loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k)
+            batch_aux = None
+            if aux is not None:
+                batch_aux = (aux[0][idx], aux[1][idx])
+            loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k,
+                                               aux=batch_aux, aux_weight=aux_weight)
             total += loss * len(idx)
             step += 1
             for name, grad in grads.items():
@@ -380,7 +548,13 @@ def bootstrap_mean(values: np.ndarray, samples: int, seed: int) -> tuple[Optiona
 
 
 def _param_names(payload: dict) -> tuple[str, ...]:
-    return ("w", "b") if "w" in payload else ("w1", "b1", "w2", "b2")
+    if "w" in payload:
+        return ("w", "b")
+    names = ["w1", "b1", "w2", "b2"]
+    for extra in ("wv", "bv", "wb", "bb"):
+        if extra in payload:
+            names.append(extra)
+    return tuple(names)
 
 
 def serialize(model, cfg: Mapping, meta: dict) -> dict:
@@ -403,6 +577,12 @@ def serialize(model, cfg: Mapping, meta: dict) -> dict:
             "w1": model.params["w1"].tolist(), "b1": model.params["b1"].tolist(),
             "w2": model.params["w2"].tolist(), "b2": float(model.params["b2"]),
         }
+        if model.aux_enabled:
+            payload["auxEnabled"] = True
+            payload["auxMode"] = str(cfg.get("AUX", "geo"))
+            for extra in ("wv", "bv", "wb", "bb"):
+                if extra in model.params:
+                    payload[extra] = model.params[extra].tolist()
     payload.update({"note": "stm-POV, mirror+colorswap for black; produced by CVS Lab; UNPROMOTED",
                     "promotable": False, "cvslab": meta})
     return payload
@@ -437,6 +617,14 @@ def load_serialized(payload: dict):
         "b2": np.asarray(payload["b2"], dtype=np.float64),
     }
     expected = {"w1": (inputs, hidden), "b1": (hidden,), "w2": (hidden,), "b2": ()}
+    for extra, rows in (("wv", hidden), ("wb", hidden)):
+        if extra in payload:
+            params[extra] = np.asarray(payload[extra], dtype=np.float64)
+            expected[extra] = (rows, params[extra].shape[1])
+    for extra in ("bv", "bb"):
+        if extra in payload:
+            params[extra] = np.asarray(payload[extra], dtype=np.float64)
+            expected[extra] = (params[extra].shape[0],)
     for name, shape in expected.items():
         if params[name].shape != shape:
             raise ValueError(f"serialized {name} has shape {params[name].shape}, expected {shape}")
