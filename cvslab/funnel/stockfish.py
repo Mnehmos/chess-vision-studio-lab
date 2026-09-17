@@ -95,6 +95,7 @@ class StockfishTransport:
         self.timeout = timeout
         self._process: Optional[subprocess.Popen] = None
         self.identity: Optional[StockfishIdentity] = None
+        self.resets = 0                        # search-state clears actually performed
 
     # -- process ---------------------------------------------------------------
     def _start(self) -> None:
@@ -167,11 +168,43 @@ class StockfishTransport:
         except Exception:
             self._process.kill()
 
+    def _reset_search_state(self) -> None:
+        """Make the next search independent of every earlier one on this process.
+
+        Stockfish's `position` command does NOT clear the transposition table: it runs
+        `Engine::set_position` (src/uci.cpp, `UCIEngine::position`), while only `ucinewgame` and
+        `setoption name Clear Hash` reach `Engine::search_clear` (src/uci.cpp:135/281/350/410,
+        src/engine.cpp:99-100). A reused process would therefore make a label a function of the
+        positions that worker happened to see before it — a hidden treatment variable whose
+        partition depends on the worker count.
+
+        The protocol here is `ucinewgame` + `setoption name Clear Hash` + `isready`, and the
+        `readyok` is the sync point: the engine's own comment notes that a clear "may take a
+        while", so the next `go` must not race it.
+        """
+        self._send("ucinewgame")
+        self._send("setoption name Clear Hash")
+        self._send("isready")
+        for line in self._lines():
+            if line.startswith("readyok"):
+                self.resets += 1
+                return
+            if line.startswith("bestmove"):     # impossible, but never loop forever
+                break
+        raise RuntimeError("the engine never acknowledged the search-state reset")
+
     # -- query -----------------------------------------------------------------
-    def label(self, fen: str, *, node_budget: int, pv_plies: int = 8) -> OracleLabel:
-        """One cold search at ``go nodes <node_budget>``; the realized work is recorded."""
+    def label(self, fen: str, *, node_budget: int, pv_plies: int = 8, cold: bool = True) -> OracleLabel:
+        """One search at ``go nodes <node_budget>``; the realized work is recorded.
+
+        ``cold=True`` (the default, and the only mode any S13 label was bought in) clears the
+        search state first, so the label is a function of (pinned engine, options, position,
+        budget) alone.
+        """
         if self.identity is None:
             self._start()
+        if cold:
+            self._reset_search_state()
         self._send(f"position fen {fen}")
         wall_start = time.perf_counter()          # perf_counter: time.time() is ~15ms-grained on Windows
         self._send(f"go nodes {int(node_budget)}")
@@ -233,13 +266,18 @@ class StockfishProvider:
         assert self.transport.identity
         return self.transport.identity
 
-    def search(self, position: Position, *, node_budget: int, pv_plies: int = 8) -> OracleLabel:
-        return self.transport.label(position.fen, node_budget=node_budget, pv_plies=pv_plies)
+    def search(self, position: Position, *, node_budget: int, pv_plies: int = 8,
+               cold: bool = True) -> OracleLabel:
+        return self.transport.label(position.fen, node_budget=node_budget, pv_plies=pv_plies,
+                                    cold=cold)
 
-    def label_row(self, record_id: str, label: OracleLabel, *, node_budget: int) -> dict:
+    def label_row(self, record_id: str, label: OracleLabel, *, node_budget: int,
+                  cold: bool = True) -> dict:
         """The row `register_labels` stores: value + the budget contract of THIS teacher."""
         return {"record_id": record_id,
                 "value": {"scoreCpStm": label.score_cp_stm, "mate": label.mate,
                           "bestMove": label.best_move, "pv": list(label.pv),
                           "depth": label.reached_depth, "nodes": label.nodes},
-                "budget": {"nodes": int(node_budget)}}
+                "budget": {"nodes": int(node_budget)},
+                "note": ("cold per label: ucinewgame + Clear Hash + isready before every search"
+                         if cold else "WARM search state reused across labels")}

@@ -1,0 +1,32 @@
+{
+ "id": "s13-x0009-supersession",
+ "experiment": "X0009",
+ "sealed_result_record_hash": "sha256:72b8fd2efeace6f01ff3a04c734ab5013aa74aa3dead1c2d4e0fd9a551eae8c2",
+ "preserved_not_rewritten": "X0009 stays sealed and byte-identical; this record and the replacement experiment are additive",
+ "reason": "the Stockfish supervision it used was NOT cold per label",
+ "defect": {
+  "what": "StockfishTransport.label() sent `position fen ...` then `go nodes ...` and never cleared the search state, while one transport (one process) was reused across a whole worker chunk",
+  "why_position_does_not_clear": "Stockfish 18's `position` command runs Engine::set_position (src/uci.cpp UCIEngine::position) and never touches the transposition table; only `ucinewgame` and `setoption name Clear Hash` reach Engine::search_clear (src/uci.cpp:135/281/350/410, src/engine.cpp:99-100). Ordinary UCI `position` does not establish search independence.",
+  "consequence": "a label was a function of (position, budget, preceding positions in that worker); the two Stockfish arms even used different worker counts (8 for 32k, 12 for 1M), so the dose contrast mixed node budget with hidden search-state partition",
+  "measured": "on 8 identical positions at 32k nodes, 5 of 8 label cp values differ between warm and cold; at 1M nodes, 8 of 8 differ (both at the same pinned engine, options and budget)",
+  "invalidates": [
+   "the X0009 claim that the only treatment change between arms was authority and search price",
+   "the attribution of the SF-1M - SF-32k dose result to more teacher compute"
+  ]
+ },
+ "what_remains_valid": [
+  "the CVS-4k evidence (legacy analyze transport, untouched; its own coldness is a separate question about the analyze protocol, not affected by this Stockfish defect)",
+  "the dual-exam methodology and the sealed INCONCLUSIVE verdict vocabulary (the third observed pattern was reported beside it, never substituted)",
+  "the explicit-cell lattice capability and the calibration gate that refused to invent a converged budget"
+ ],
+ "replacement": {
+  "contract": "cold per label: ucinewgame + setoption name Clear Hash + isready (readyok is the sync point) before every search",
+  "authority": "oracle.stockfish.18.cold (a distinct authority string, because the label measurement protocol is distinct; the warm streams stay in the store and remain matchable by their own authority)",
+  "worker_count": "12 for every cold stream, so the partition cannot differ between arms",
+  "equality_proof": "tools/s13/s13-cold-worker-check.json: the same 64 positions labelled with 4 and with 12 workers are compared and must be identical, or the label step fails",
+  "regression_test": "tests/test_funnel_stockfish.py::test_every_label_is_preceded_by_a_search_state_reset (fake UCI engine writes a transcript; every labelled `go` must be preceded by the reset triplet)",
+  "experiment": "the replacement X#### (see tools/s13/s13-preregistration-v2.json and the S13 report)"
+ },
+ "executable_pipeline": "cvslab/funnel/stockfish.py (cold is the default; `cold=False` is opt-in, marked WARM in the label row note, and no S13 replacement label is bought that way)",
+ "doc": "docs/S13_TEACHER_AUTHORITY.md"
+}

@@ -36,7 +36,8 @@ CVS_ARM_BUDGET = {"nodeBudget": 4000}
 EXAM_DATASET = "D0010"             # the 200 held-out identities, shared by both exams
 EXAM_PROTOCOL_CVS = "E0004"        # CVS-DEEP, 400k nodes (existing, unchanged)
 
-AUTHORITY = "oracle.stockfish.18"  # never legacy.cvs.*: a Stockfish label is a different authority
+AUTHORITY = "oracle.stockfish.18"            # the WARM streams X0009 used (preserved, superseded)
+AUTHORITY_COLD = "oracle.stockfish.18.cold"  # cold per label: ucinewgame + Clear Hash + isready
 FAMILY = "oracle_cp"
 MATE_CP_LIMIT = 100_000            # |cp| at or above this is a mate sentinel, excluded from cp stats
 
@@ -92,13 +93,13 @@ def exam_fens() -> dict[str, str]:
     return record_fens(ids, normalization="N0006")
 
 
-def sf_provider() -> StockfishProvider:
+def sf_provider(cold: bool = True, authority: str = AUTHORITY_COLD) -> StockfishProvider:
     transport = StockfishTransport([SF_EXE], options=SF_OPTIONS)
     transport._start()
     identity = transport.identity
     assert identity.binary_sha256 == SF_SHA256, f"the pinned binary changed: {identity.binary_sha256}"
     assert identity.nets == SF_NETS, f"the pinned nets changed: {identity.nets}"
-    return StockfishProvider(transport, authority=AUTHORITY, family=FAMILY)
+    return StockfishProvider(transport, authority=authority, family=FAMILY)
 
 
 def identity_canonical() -> dict:
@@ -111,12 +112,13 @@ def identity_canonical() -> dict:
     return canonical
 
 
-def _worker(start: int, chunk: list[tuple[str, str]], budget: int) -> list[dict]:
-    provider = sf_provider()
+def _worker(start: int, chunk: list[tuple[str, str]], budget: int,
+            cold: bool = True) -> list[dict]:
+    provider = sf_provider(cold=cold)
     rows = []
     try:
         for rid, fen in chunk:
-            label = provider.search(Position(fen=fen), node_budget=budget)
+            label = provider.search(Position(fen=fen), node_budget=budget, cold=cold)
             rows.append({"record_id": rid,
                          "value": {"scoreCpStm": label.score_cp_stm, "mate": label.mate,
                                    "bestMove": label.best_move, "pv": list(label.pv),
@@ -128,13 +130,15 @@ def _worker(start: int, chunk: list[tuple[str, str]], budget: int) -> list[dict]
     return rows
 
 
-def buy(items: list[tuple[str, str]], budget: int, *, workers: int = 8, log: bool = True) -> list[dict]:
+def buy(items: list[tuple[str, str]], budget: int, *, workers: int = 8, log: bool = True,
+        cold: bool = True) -> list[dict]:
     """Label `items` (record_id, fen) at `budget` nodes, in worker processes, order preserved."""
     chunks = [items[index::workers] for index in range(workers)]
     rows: list[list[dict]] = [[] for _ in chunks]
     started = time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(_worker, index, chunk, budget) for index, chunk in enumerate(chunks)]
+        futures = [pool.submit(_worker, index, chunk, budget, cold)
+                   for index, chunk in enumerate(chunks)]
         for index, future in enumerate(concurrent.futures.as_completed(futures)):
             rows[index] = future.result()
             if log:

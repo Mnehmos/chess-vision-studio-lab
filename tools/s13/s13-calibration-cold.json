@@ -1,0 +1,202 @@
+{
+ "calibration_set": {
+  "count": 64,
+  "ids": [
+   "pos_1b9e4a01b492b3678002",
+   "pos_a17ebbca9db8e931e090",
+   "pos_f9d54d6f6e24d11798e6",
+   "pos_6090bb12e700cb8f881e",
+   "pos_ae3766030b31f86e47c4",
+   "pos_adfc7a078b10902a42da",
+   "pos_19f740b02b415c76ed81",
+   "pos_4f994d47adc649e6b981",
+   "pos_bd8c1e2f4164d370cbc7",
+   "pos_0c1d1e7e14c454e3ea00",
+   "pos_2643eab022111e8f2f88",
+   "pos_a970b145c3ba8e45dc4d",
+   "pos_ec31f0de73550ce4dbd1",
+   "pos_a0478eb66f01a2221ccc",
+   "pos_8a1fb1ae53acf25e5422",
+   "pos_4ae8207e831a9ac5217c",
+   "pos_847d89a05b305721e7e0",
+   "pos_9a3a1c5d370b9141b730",
+   "pos_336306d492d3701515ff",
+   "pos_d4dd4d7d7abc51d8efb6",
+   "pos_67f8150e20079107819a",
+   "pos_de5c4ef4d7720c786ded",
+   "pos_f1a59f1d7fa077554c34",
+   "pos_9f31c4a4e55ccb8139e0",
+   "pos_2460a97517a46a15e63f",
+   "pos_d742a5402cd6c90d7f39",
+   "pos_ce0420629bad979e4799",
+   "pos_e0db69ff9fd81981e42c",
+   "pos_3380101e807aa249e2b0",
+   "pos_24ce86916f46c20face9",
+   "pos_fcfaba6fb15c5ac949be",
+   "pos_0bc7a8f5c8dea3a5cb07",
+   "pos_ebaa9da1d7da461a758b",
+   "pos_9ffd8ed53c7863e02f4e",
+   "pos_21697cd3fae14c07aabc",
+   "pos_39edd81946b1e3e6492a",
+   "pos_1b2b02cdb76dbcfdbf23",
+   "pos_5c7c39172b1d32d7682b",
+   "pos_d9935d67a5a268d8dda7",
+   "pos_fc1e886f60515de985b8",
+   "pos_faa9da10c6bcbde28e23",
+   "pos_9b31cd1b12b4d7907223",
+   "pos_12ac767eb3a5111b3b75",
+   "pos_b74bfa0f1032cc0d2d5e",
+   "pos_79723625a0447a48d463",
+   "pos_5a9ce45b3ac89e196424",
+   "pos_bca12007660193e1aa4a",
+   "pos_a51337536064dc975e2d",
+   "pos_d9f3e3d15d98b4aabfd1",
+   "pos_c4b90ed274ebf7fc1399",
+   "pos_57706bfeb911ec1fe6ba",
+   "pos_8e925ff9723e9d15baff",
+   "pos_2ba27c8e2bbb14aa3ecf",
+   "pos_9c5a5f6932b6e2bd0f27",
+   "pos_5ca3e6b06cfcf7ffbf8d",
+   "pos_0b793c056f4624ba57b7",
+   "pos_68f31ddcf0528cfa2171",
+   "pos_e580905ee054aea5e267",
+   "pos_44dc0b2290f16291fd89",
+   "pos_40573806001c08385ba6",
+   "pos_767910ac20089bf62710",
+   "pos_9c7a8bdc9a9786e76e79",
+   "pos_2ef13c0c291264cf5d33",
+   "pos_fb461947788ba4c396e0"
+  ],
+  "source": "first 64 ids of the frozen S12 universe order"
+ },
+ "chosen_training_budget": 32000,
+ "comparisons": {
+  "1000000": {
+   "best_move_agreement": 0.9322033898305084,
+   "mate_rows": 5,
+   "mean_abs_cp": 13.0,
+   "mean_depth": 27.125,
+   "mean_nodes": 984294.84375,
+   "mean_wall_ms": 1114.975382814464,
+   "median_abs_cp": 7,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9661016949152542
+  },
+  "128000": {
+   "best_move_agreement": 0.864406779661017,
+   "mate_rows": 4,
+   "mean_abs_cp": 32.76271186440678,
+   "mean_depth": 21.1875,
+   "mean_nodes": 126166.15625,
+   "mean_wall_ms": 160.392668750319,
+   "median_abs_cp": 23,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9661016949152542
+  },
+  "32000": {
+   "best_move_agreement": 0.847457627118644,
+   "mate_rows": 2,
+   "mean_abs_cp": 42.86440677966102,
+   "mean_depth": 18.0,
+   "mean_nodes": 31619.59375,
+   "mean_wall_ms": 55.9981328124195,
+   "median_abs_cp": 27,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9830508474576272
+  },
+  "4000000": {
+   "best_move_agreement": 0.8983050847457628,
+   "mate_rows": 5,
+   "mean_abs_cp": 11.271186440677965,
+   "mean_depth": 34.703125,
+   "mean_nodes": 3912987.25,
+   "mean_wall_ms": 4646.11463281426,
+   "median_abs_cp": 7,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9830508474576272
+  },
+  "512000": {
+   "best_move_agreement": 0.9152542372881356,
+   "mate_rows": 4,
+   "mean_abs_cp": 22.949152542372882,
+   "mean_depth": 24.875,
+   "mean_nodes": 504124.328125,
+   "mean_wall_ms": 576.8606468723192,
+   "median_abs_cp": 17,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9830508474576272
+  }
+ },
+ "contract": "cold per label: ucinewgame + setoption name Clear Hash + isready before every search (readyok is the sync point)",
+ "determinism_across_worker_counts": {
+  "1000000": {
+   "deterministic": true,
+   "identical": 8,
+   "positions": 8,
+   "workers_compared": [
+    4,
+    12
+   ]
+  },
+  "32000": {
+   "deterministic": true,
+   "identical": 8,
+   "positions": 8,
+   "workers_compared": [
+    4,
+    12
+   ]
+  },
+  "4000000": {
+   "deterministic": true,
+   "identical": 8,
+   "positions": 8,
+   "workers_compared": [
+    4,
+    12
+   ]
+  }
+ },
+ "dose_budget": 1000000,
+ "exam_budget": 4000000,
+ "id": "s13-calibration-cold",
+ "purpose": "choose the Stockfish TRAINING budget under the COLD contract on cost and stability; choose the SF-DEEP exam setting; inspect no student outcome",
+ "rule": {
+  "branch_taken": "amendment branch: no rung converged, cheapest rung",
+  "candidates": [
+   32000,
+   128000,
+   512000,
+   1000000,
+   4000000
+  ],
+  "mate_rows": "|cp| >= 100000 excluded from cp statistics and counted",
+  "qualifies": {
+   "best_move_agreement_min": 0.99,
+   "mean_abs_cp_max": 15.0,
+   "sign_agreement_min": 0.99
+  },
+  "reference_nodes": 2000000
+ },
+ "supersedes_measurements_in": "tools/s13/s13-calibration.json (warm contract)",
+ "teacher": {
+  "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+  "exe": "F:\\tools\\stockfish\\stockfish\\stockfish-windows-x86-64-avx2.exe",
+  "nets": [
+   "nn-c288c895ea92.nnue",
+   "nn-37f18f62d772.nnue"
+  ],
+  "options": {
+   "Hash": 16,
+   "MultiPV": 1,
+   "Threads": 1
+  },
+  "uciName": "Stockfish 18"
+ },
+ "wall_seconds": 112.5
+}

@@ -11,7 +11,10 @@ sys.stdout.reconfigure(line_buffering=True)   # a pipe would otherwise buffer an
 MATE_FEN_MARKER = "8/8/8/8/8/5K2/6Q1/6k1 w"  # any FEN containing this prefix mimes a mate score
 
 
-def main() -> int:
+def main(argv: list[str]) -> int:
+    transcript = None
+    if "--transcript" in argv:
+        transcript = open(argv[argv.index("--transcript") + 1], "a", encoding="utf-8")
     fen = ""
     nodes_requested = 0
     while True:
@@ -19,6 +22,9 @@ def main() -> int:
         if not raw:
             return 0
         line = raw.strip()
+        if transcript is not None:
+            transcript.write(line + "\n")
+            transcript.flush()
         if line == "uci":
             print("id name FakeFish 1.0")
             print("id author cvslab tests")
@@ -49,4 +55,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv[1:]))

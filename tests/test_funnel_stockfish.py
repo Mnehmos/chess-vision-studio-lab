@@ -98,3 +98,51 @@ def test_authority_and_budget_prevent_cross_teacher_matches(transport):
 def test_transport_refuses_a_missing_binary():
     with pytest.raises(FileNotFoundError):
         StockfishTransport([str(pathlib.Path("does-not-exist-stockfish"))])._start()
+
+
+def test_every_label_is_preceded_by_a_search_state_reset(tmp_path):
+    """The cold contract: no `go` may ever be sent without a reset first.
+
+    This is the regression test for the S13 warm-TT confound: the transport is reused across a
+    whole worker chunk, and Stockfish's `position` command does not clear the transposition table
+    (uci.cpp: position -> Engine::set_position; only ucinewgame / Clear Hash -> search_clear), so
+    without an explicit reset a label would depend on the positions that worker saw before it.
+    """
+    transcript = tmp_path / "uci-transcript.txt"
+    transport = StockfishTransport([sys.executable, FAKE, "--transcript", str(transcript)])
+    try:
+        transport._start()
+        provider = StockfishProvider(transport, authority="oracle.stockfish.test")
+        for fen in (START_FEN, START_FEN, MATE_FEN):
+            provider.search(Position(fen=fen), node_budget=2048)
+        assert transport.resets == 3, "three labels must mean three resets"
+
+        lines = [line for line in transcript.read_text(encoding="utf-8").splitlines() if line.strip()]
+        goes = [index for index, line in enumerate(lines) if line.startswith("go nodes ")]
+        # the first go is the 1-node identity probe inside _start(); it cannot affect a label
+        # because every label resets first, and it is the only go allowed to be warm
+        assert lines[goes[0]] == "go nodes 1", "the identity probe must be the first search"
+        labelled = goes[1:]
+        assert len(labelled) == 3, f"expected three labelled searches, saw {len(labelled)}"
+        for index in labelled:
+            assert lines[index - 4:index - 1] == ["ucinewgame", "setoption name Clear Hash", "isready"], \
+                f"a go without a full reset: {lines[max(0, index - 5):index + 1]}"
+            assert lines[index - 1].startswith("position fen "), lines[index - 1]
+    finally:
+        transport.close()
+
+
+def test_warm_mode_is_opt_in_and_visible(tmp_path):
+    """`cold=False` exists for cost experiments only; the default must be cold."""
+    transcript = tmp_path / "uci-transcript-warm.txt"
+    transport = StockfishTransport([sys.executable, FAKE, "--transcript", str(transcript)])
+    try:
+        transport._start()
+        provider = StockfishProvider(transport, authority="oracle.stockfish.test")
+        baseline_resets = transport.resets
+        label = provider.search(Position(fen=START_FEN), node_budget=1024, cold=False)
+        assert transport.resets == baseline_resets, "cold=False must not reset"
+        assert "WARM" in provider.label_row("pos_x", label, node_budget=1024, cold=False)["note"]
+        assert "cold per label" in provider.label_row("pos_x", label, node_budget=1024)["note"]
+    finally:
+        transport.close()
