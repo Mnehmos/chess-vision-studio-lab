@@ -1,9 +1,21 @@
 # S14 — Representation: RAW vs GEO vs HYBRID at matched learned-parameter budgets (sealed)
 
-Experiment **X0012**, sealed with `record_hash` recorded in `labstore/X/X0012.json`, **260/260 cells
-COMPLETED**, 0 INVALID, 33 cells carrying a recorded crash attempt replaced by its retry
-(`replaced_cells` in the membership: the crash stays immutable evidence, the retry counts).
-Preregistration: `tools/s14/s14-preregistration.json`, hash `sha256:39eb793bfaf8a0999df967b3ff1e59f408684f8bcc8013d1f048764196429df9`.
+Experiment **X0012**, sealed with `record_hash sha256:75676df8…` (`labstore/X/X0012.json`),
+**260/260 cells COMPLETED**. Preregistration: `tools/s14/s14-preregistration.json`, hash
+`sha256:39eb793b…`; two additive records accompany it: a **preregistration erratum**
+(`s14-preregistration-erratum.json`, `sha256:ced9cef3…` — the file's cell count said 280 while its
+own ladder and the frozen membership say 260) and a **deviation record**
+(`s14-deviation.json`, `sha256:d3aa2165…`).
+
+**Status: deviated-but-sealed.** A preregistered stop condition ("a lattice cell cannot train or
+evaluate") fired: the new GEO encoder crashed on D0036's empty validation split, 33 cells recorded
+INVALID, and the study continued after an outcome-blind repair (a zero-row guard in the encoder,
+plus new Lab replacement semantics: a crashed cell may be replaced by one COMPLETED retry, the crash
+staying immutable beside it). Only run *statuses* had been observed before the fix — no loss,
+contrast or summary was read — and the full crash/retry audit is committed as
+`s14-replacements-ledger.json` (`sha256:68aead6e…`, 33 entries with run ids and reasons). The
+global frontier statements therefore rest on a deviated execution; a pristine replication needs its
+own preregistration.
 Issue [Mnehmos/chess-vision-studio-lab#41](https://github.com/Mnehmos/chess-vision-studio-lab/issues/41),
 the controlled slice of #18.
 
@@ -57,6 +69,10 @@ Budget mismatch is reported beside every comparison (largest: −359 params).
 
 Exam loss on E0004 (CVS-DEEP, 200 identities), mean over 20 seeds. Contrasts are paired by seed
 with separate one-sided 95 % exact-t bounds (df = 19); positive = the first family is **worse**.
+
+The frontier is the measurement. `loss / parameter count` is deliberately **not** reported as a
+score: it shrinks mechanically as the denominator grows. Exact counts and mismatches are reported
+beside every budget instead.
 
 | budget | RAW | GEO | HYBRID | GEO − RAW | HYBRID − RAW | HYBRID − GEO |
 |---|---:|---:|---:|---|---|---|
@@ -116,9 +132,11 @@ combinatorial ablations):
 | pawn_structure (4) | 8 | −0.00020 |
 | rook_files (3) | 6 | −0.00006 |
 
-The fitted evaluator actually *uses* the bishop pair, mobility and hanging-material columns; the
-eight king-safety families are nearly unused at this scale, and removing pawn-structure or
-rook-file columns minutely *helps* (small fitted noise). All six results are preserved as measured,
+Read narrowly: **this frozen sentinel** (HYBRID at the 12K budget, seed 0) is sensitive to the
+bishop-pair, mobility and hanging-material columns, nearly insensitive to the eight king-safety
+families at this scale, and minutely *helped* by removing pawn-structure or rook-file columns
+(small fitted noise). This is sentinel sensitivity at inference, **not** a general statement of
+feature importance across models, budgets or seeds, and all six results are preserved as measured,
 including the negative ones.
 
 ## Costs and artifacts (per model, 12K budget)
@@ -137,7 +155,7 @@ exam distribution better than the training rows.
 * One population (18,953 positions), one exam, one optimizer family, 20 seeds, python-measured
   inference. The 33 replaced cells are crashes from an encoding bug found and fixed mid-run
   (empty validation split), never silently dropped — each crash run remains in the store beside its
-  retry.
+  retry, and the deviated-but-sealed status above records the fired stop condition explicitly.
 * GEO's vocabulary is the frozen registry's; no feature was added, tuned or dropped for this study.
 
 ## Evidence bundle
@@ -152,4 +170,7 @@ exam distribution better than the training rows.
 | state / result / summary | `tools/s14/s14-state.json`, `s14-result.json`, `s14-result-summary.json` |
 | representations + linear arch | `cvslab/nnue.py`, `cvslab/families.py` |
 | tests | `tests/test_nnue_representation.py`, `tests/test_experiment.py` (replacement semantics) |
+| preregistration erratum (280 → 260; wording) | `tools/s14/s14-preregistration-erratum.json` / `.hash` |
+| deviation record (stop condition fired) | `tools/s14/s14-deviation.json` / `.hash` |
+| replacements ledger (33 crash/retry pairs) | `tools/s14/s14-replacements-ledger.json` / `.hash` |
 | sealed lattice | `labstore/X/X0012.json` (`SEALED`, 260/260, 33 replaced cells recorded) |

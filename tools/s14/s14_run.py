@@ -98,8 +98,8 @@ def step_preregister() -> int:
                     "divergence_declaration": DECLARATION},
         "lattice": {"arms": [f"S14-{family}" for family in FAMILIES],
                     "budgets": list(rows["targets"]) + ["linear-floor"],
-                    "cells": sum(len([r for r in rows["rows"] if r["input"] == f]) for f in FAMILIES)
-                             * len(SEEDS) + len(SEEDS)},
+                    "conditions": len(rows["rows"]),
+                    "cells": len(rows["rows"]) * len(SEEDS)},
         "analysis": {
             "primary": "per budget, paired by seed: test_loss differences GEO-RAW, HYBRID-RAW and "
                        "HYBRID-GEO with separate one-sided 95% exact-t bounds at each pair's df",

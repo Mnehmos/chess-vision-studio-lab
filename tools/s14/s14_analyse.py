@@ -1,5 +1,5 @@
-"""S14 analysis: the family-by-budget frontier, capability per parameter, inference cost, slices,
-and the named-group semantic ablation.
+"""S14 analysis: the family-by-budget frontier, inference cost, slices, and the named-group
+sentinel-sensitivity ablation.
 
     python tools/s14/s14_analyse.py report   # the full result artifact + summary
     python tools/s14/s14_analyse.py seal     # seal X#### with the result and membership
@@ -187,7 +187,8 @@ def _semantic_ablation(models, splits) -> dict:
         rows.append({"group": group, "families": members, "columns_zeroed": 2 * len(members),
                      "full_loss": base, "lesioned_loss": after, "effect": after - base})
     return {"sentinel": "HYBRID at the 12000 budget, seed 0 (preregistered)",
-            "reading": "input lesions at INFERENCE on the frozen weights; no retraining",
+            "reading": "input lesions at INFERENCE on the frozen weights of THIS sentinel; the "
+                       "table is sentinel sensitivity, not general feature importance",
             "base_loss": base, "groups": rows}
 
 
@@ -213,7 +214,9 @@ def step_report() -> int:
                  "contrasts": {"GEO-RAW": _paired(values, "GEO", "RAW", budget),
                                "HYBRID-RAW": _paired(values, "HYBRID", "RAW", budget),
                                "HYBRID-GEO": _paired(values, "HYBRID", "GEO", budget)}}
-        entry["capability_per_1000_params"] = {
+        # mechanical arithmetic only: loss/parameters shrinks as the denominator grows, so it is
+        # NOT an efficiency or capability score; the matched frontier above is the measurement
+        entry["loss_per_1000_parameters_mechanical"] = {
             family: entry["means"][family] / (entry["params"][family] / 1000.0) for family in FAMILIES}
         per_budget[budget] = entry
     sizes = {family: {budget: models[(family, budget, 0)]["bytes"] for budget in conditions[family]}

@@ -418,6 +418,11 @@
   "headline": "GEO alone loses to RAW everywhere; HYBRID beats RAW strictly from 3K; 43-parameter linear floor 0.02498",
   "result": "tools/s14/s14-result.json",
   "summary": "tools/s14/s14-result-summary.json",
-  "doc": "docs/S14_REPRESENTATION.md"
+  "doc": "docs/S14_REPRESENTATION.md",
+  "status": "DEVIATED-BUT-SEALED",
+  "deviation": "tools/s14/s14-deviation.json",
+  "preregistration_erratum": "tools/s14/s14-preregistration-erratum.json",
+  "replacements_ledger": "tools/s14/s14-replacements-ledger.json",
+  "retries_note": "the retries array above holds only the last driver run; the full ledger is s14-replacements-ledger.json (33 entries)"
  }
 }
