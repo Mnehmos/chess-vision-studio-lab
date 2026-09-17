@@ -1,0 +1,14 @@
+{
+ "authority": "oracle.stockfish.18.cold",
+ "budget_nodes": 32000,
+ "difference_count": 0,
+ "differences": [],
+ "id": "s13-cold-worker-check",
+ "identical": true,
+ "positions": 64,
+ "reading": "cold labels are a function of (engine, options, position, budget) alone; the worker partition is not a treatment variable",
+ "workers_compared": [
+  4,
+  12
+ ]
+}

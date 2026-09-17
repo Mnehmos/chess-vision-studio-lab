@@ -1,0 +1,238 @@
+{
+ "decision": "INCONCLUSIVE",
+ "economics": {
+  "CVS-4k": {
+   "ms_per_label": 7.5,
+   "realized_nodes": 74570561,
+   "unit_multiples": 2.0
+  },
+  "SF-1M": {
+   "ms_per_label": 1562.15,
+   "realized_nodes": 18489830782,
+   "unit_multiples": 495.9
+  },
+  "SF-32k": {
+   "ms_per_label": 41.9,
+   "realized_nodes": 599554132,
+   "unit_multiples": 16.08
+  }
+ },
+ "evidence": {
+  "calibration": [
+   "tools/s13/s13-calibration.json",
+   "tools/s13/s13-calibration-amendment.json"
+  ],
+  "disagreement": "tools/s13/s13-disagreement.json",
+  "dual_exam": "tools/s13/s13-dual-exam.json",
+  "preregistration": "tools/s13/s13-preregistration.json",
+  "result": "tools/s13/s13-result.json",
+  "state": "tools/s13/s13-state.json"
+ },
+ "experiment": "X0009",
+ "per_width": {
+  "1": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": 0.003767,
+     "SF-1M - SF-32k": 0.001198
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": 0.003969,
+     "SF-1M - SF-32k": 0.001013
+    }
+   },
+   "interaction": {
+    "bounds": [
+     -0.000549,
+     -0.000227
+    ],
+    "mean": -0.000388
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.016271,
+     "SF-DEEP": 0.026238
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.020038,
+     "SF-DEEP": 0.030208
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.018839,
+     "SF-DEEP": 0.029194
+    }
+   },
+   "primary_SF32k_minus_CVS4k": {
+    "CVS-DEEP": {
+     "bounds": [
+      0.002047,
+      0.003089
+     ],
+     "d": 0.002568,
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "bounds": [
+      0.00242,
+      0.003492
+     ],
+     "d": 0.002956,
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "16": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": 0.005628,
+     "SF-1M - SF-32k": 0.001274
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": 0.003529,
+     "SF-1M - SF-32k": 0.001262
+    }
+   },
+   "interaction": {
+    "bounds": [
+     0.001524,
+     0.002648
+    ],
+    "mean": 0.002086
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.017991,
+     "SF-DEEP": 0.029291
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.023618,
+     "SF-DEEP": 0.032821
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.022344,
+     "SF-DEEP": 0.031559
+    }
+   },
+   "primary_SF32k_minus_CVS4k": {
+    "CVS-DEEP": {
+     "bounds": [
+      0.00336,
+      0.005347
+     ],
+     "d": 0.004353,
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "bounds": [
+      0.000933,
+      0.003602
+     ],
+     "d": 0.002267,
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "32": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": 0.006165,
+     "SF-1M - SF-32k": 0.001502
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": 0.004034,
+     "SF-1M - SF-32k": 0.001481
+    }
+   },
+   "interaction": {
+    "bounds": [
+     0.001527,
+     0.002692
+    ],
+    "mean": 0.00211
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.01904,
+     "SF-DEEP": 0.030314
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.025205,
+     "SF-DEEP": 0.034348
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.023703,
+     "SF-DEEP": 0.032867
+    }
+   },
+   "primary_SF32k_minus_CVS4k": {
+    "CVS-DEEP": {
+     "bounds": [
+      0.0037,
+      0.005627
+     ],
+     "d": 0.004663,
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "bounds": [
+      0.001479,
+      0.003628
+     ],
+     "d": 0.002554,
+     "verdict": "SF-32k_worse"
+    }
+   }
+  },
+  "4": {
+   "dose": {
+    "CVS-DEEP": {
+     "SF-1M - CVS-4k": 0.003473,
+     "SF-1M - SF-32k": 0.000894
+    },
+    "SF-DEEP": {
+     "SF-1M - CVS-4k": 0.00332,
+     "SF-1M - SF-32k": 0.001269
+    }
+   },
+   "interaction": {
+    "bounds": [
+     5.9e-05,
+     0.000999
+    ],
+    "mean": 0.000529
+   },
+   "means": {
+    "CVS-4k": {
+     "CVS-DEEP": 0.016261,
+     "SF-DEEP": 0.026939
+    },
+    "SF-1M": {
+     "CVS-DEEP": 0.019734,
+     "SF-DEEP": 0.030259
+    },
+    "SF-32k": {
+     "CVS-DEEP": 0.018841,
+     "SF-DEEP": 0.028989
+    }
+   },
+   "primary_SF32k_minus_CVS4k": {
+    "CVS-DEEP": {
+     "bounds": [
+      0.001918,
+      0.003241
+     ],
+     "d": 0.002579,
+     "verdict": "SF-32k_worse"
+    },
+    "SF-DEEP": {
+     "bounds": [
+      0.001372,
+      0.002729
+     ],
+     "d": 0.002051,
+     "verdict": "SF-32k_worse"
+    }
+   }
+  }
+ }
+}

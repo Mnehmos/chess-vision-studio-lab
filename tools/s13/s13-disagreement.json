@@ -1,0 +1,201 @@
+{
+ "authorities_sf": {
+  "cold": "oracle.stockfish.18.cold",
+  "warm": "oracle.stockfish.18"
+ },
+ "authority_cvs": "legacy.cvs.search.shallow/deep (producer 36e9b159\u2026)",
+ "blocks": {
+  "CVS-400k vs SF-DEEP (exam ids) [cold]": {
+   "best_move_disagreement_rate": null,
+   "best_move_pairs": 0,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 199,
+    "pearson_cp": 0.9667611103365706,
+    "pearson_expected_score": 0.9574946875031342,
+    "spearman_cp": 0.9525800730237733
+   },
+   "mate_rows_cvs": 1,
+   "mate_rows_sf": 1,
+   "mean_abs_cp": 69.65829145728644,
+   "median_abs_cp": 52,
+   "non_mate_pairs": 199,
+   "note": "exam ids: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 159,
+   "positions": 200,
+   "sign_disagreement_rate": 0.06532663316582915
+  },
+  "CVS-400k vs SF-DEEP (exam ids) [warm (superseded)]": {
+   "best_move_disagreement_rate": null,
+   "best_move_pairs": 0,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 199,
+    "pearson_cp": 0.9681038706686532,
+    "pearson_expected_score": 0.9583570570972864,
+    "spearman_cp": 0.9539021867040102
+   },
+   "mate_rows_cvs": 1,
+   "mate_rows_sf": 1,
+   "mean_abs_cp": 68.98492462311557,
+   "median_abs_cp": 53,
+   "non_mate_pairs": 199,
+   "note": "exam ids: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 158,
+   "positions": 200,
+   "sign_disagreement_rate": 0.06532663316582915
+  },
+  "CVS-4k vs SF-1M [cold]": {
+   "best_move_disagreement_rate": 0.6328505181198832,
+   "best_move_pairs": 17467,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 17467,
+    "pearson_cp": 0.8709733022092433,
+    "pearson_expected_score": 0.9074298485540748,
+    "spearman_cp": 0.9070663081400535
+   },
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 1481,
+   "mean_abs_cp": 131.56397778668347,
+   "median_abs_cp": 95,
+   "non_mate_pairs": 17467,
+   "note": "SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 277,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.1037384782733154
+  },
+  "CVS-4k vs SF-1M [warm (superseded)]": {
+   "best_move_disagreement_rate": 0.6345823306978343,
+   "best_move_pairs": 17454,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 17454,
+    "pearson_cp": 0.8616242143470785,
+    "pearson_expected_score": 0.9076030438318262,
+    "spearman_cp": 0.9071705469614592
+   },
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 132.6368740689813,
+   "median_abs_cp": 96,
+   "non_mate_pairs": 17454,
+   "note": "SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 278,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10284175547152515
+  },
+  "CVS-4k vs SF-32k [cold]": {
+   "best_move_disagreement_rate": 0.6321073944638598,
+   "best_move_pairs": 18027,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 18027,
+    "pearson_cp": 0.9135744818874924,
+    "pearson_expected_score": 0.9197683040699043,
+    "spearman_cp": 0.9181678880245551
+   },
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 919,
+   "mean_abs_cp": 105.80961890497586,
+   "median_abs_cp": 77,
+   "non_mate_pairs": 18027,
+   "note": "SF-32k: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 228,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10523104232540079
+  },
+  "CVS-4k vs SF-32k [warm (superseded)]": {
+   "best_move_disagreement_rate": 0.6349672840190751,
+   "best_move_pairs": 18034,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 18034,
+    "pearson_cp": 0.9208191254104923,
+    "pearson_expected_score": 0.9201189450231058,
+    "spearman_cp": 0.9184456896657535
+   },
+   "mate_rows_cvs": 346,
+   "mate_rows_sf": 910,
+   "mean_abs_cp": 106.63319285793501,
+   "median_abs_cp": 77,
+   "non_mate_pairs": 18034,
+   "note": "SF-32k: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 230,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.10358212265720305
+  },
+  "SF-32k vs SF-1M [cold]": {
+   "best_move_disagreement_rate": 0.25807005494505497,
+   "best_move_pairs": 17472,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 17472,
+    "pearson_cp": 0.942909392482554,
+    "pearson_expected_score": 0.995541687339981,
+    "spearman_cp": 0.9949807272740779
+   },
+   "mate_rows_cvs": 919,
+   "mate_rows_sf": 1481,
+   "mean_abs_cp": 45.93171932234432,
+   "median_abs_cp": 24,
+   "non_mate_pairs": 17472,
+   "note": "SF-32k vs SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 101,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.014194139194139194
+  },
+  "SF-32k vs SF-1M [warm (superseded)]": {
+   "best_move_disagreement_rate": 0.29855620488140255,
+   "best_move_pairs": 17454,
+   "correlations": {
+    "expected_score_transform": "sigmoid(cp / K), K = 256 (the Lab's supervision target)",
+    "pairs": 17454,
+    "pearson_cp": 0.9348342185966685,
+    "pearson_expected_score": 0.9951883098877166,
+    "spearman_cp": 0.9945148748197249
+   },
+   "mate_rows_cvs": 910,
+   "mate_rows_sf": 1496,
+   "mean_abs_cp": 46.87739200183339,
+   "median_abs_cp": 24,
+   "non_mate_pairs": 17454,
+   "note": "SF-32k vs SF-1M: descriptive evidence, never a selection mechanism",
+   "p90_abs_cp": 102,
+   "positions": 18953,
+   "sign_disagreement_rate": 0.015698407241892975
+  }
+ },
+ "correlation_note": "Pearson and Spearman on paired non-mate cp values, plus Pearson on the Lab's expected-score transform sigmoid(cp/K), K = 256 \u2014 the quantity a student is trained to predict",
+ "id": "s13-teacher-disagreement",
+ "matcher": "|cp| >= 100000 treated as a mate sentinel and excluded from cp statistics; mate rows counted and reported",
+ "purpose": "characterize the authorities on the frozen positions BEFORE training; no label value was used to select or filter a position",
+ "teacher_identity": {
+  "author": "the Stockfish developers (see AUTHORS file)",
+  "binary": "F:\\tools\\stockfish\\stockfish\\stockfish-windows-x86-64-avx2.exe",
+  "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+  "expected": {
+   "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "nets": [
+    "nn-c288c895ea92.nnue",
+    "nn-37f18f62d772.nnue"
+   ],
+   "options": {
+    "Hash": 16,
+    "MultiPV": 1,
+    "Threads": 1
+   }
+  },
+  "name": "Stockfish 18",
+  "netSelection": "per position: the small net is used when |simple_eval| > 962 (Eval::use_smallnet), deterministically, with no option to disable",
+  "nets": [
+   "nn-c288c895ea92.nnue",
+   "nn-37f18f62d772.nnue"
+  ],
+  "options": {
+   "Hash": 16,
+   "MultiPV": 1,
+   "Threads": 1
+  }
+ }
+}

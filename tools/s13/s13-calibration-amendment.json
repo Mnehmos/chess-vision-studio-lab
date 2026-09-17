@@ -1,0 +1,167 @@
+{
+ "amended_rule": {
+  "dose_arm": {
+   "label": "SF-1M",
+   "nodes": 1000000
+  },
+  "exam": {
+   "label": "SF-DEEP",
+   "nodes": 4000000
+  },
+  "primary_arm": {
+   "label": "SF-32k",
+   "nodes": 32000
+  },
+  "rule": "no rung is converged; equal spend is unreachable; control on the cheapest calibrated rung plus one dose rung, and report the economic ladder in full"
+ },
+ "attempt_1": {
+  "artifact": "tools/s13/s13-calibration.json",
+  "hash": "sha256:478aea894b62ac1bdbf36dee551f404ceabaae63e5d9466658c6c708a6b2c470",
+  "outcome": "no candidate qualified",
+  "rule": {
+   "candidates": [
+    32000,
+    128000,
+    512000
+   ],
+   "choice": "cheapest qualifying candidate; fail if none",
+   "escalation": [
+    1000000,
+    4000000
+   ],
+   "mate_rows": "|cp| >= 100000 (mate sentinel) excluded from cp statistics",
+   "qualifies": {
+    "best_move_agreement_min": 0.99,
+    "mean_abs_cp_max": 15.0,
+    "sign_agreement_min": 0.99
+   },
+   "reference_nodes": 2000000
+  }
+ },
+ "cost_multiples_vs_cvs_4k": {
+  "SF-1M": 173.2,
+  "SF-32k": 6.666666666666667,
+  "SF-DEEP": 668.5333333333333
+ },
+ "cvs_cost_measurement": {
+  "budget": {
+   "nodeBudget": 4000
+  },
+  "mean_wall_ms": 7.5,
+  "median_wall_ms": 6.5,
+  "method": "AnalyzeTransport + AnalyzeSearchProvider over the same 64 calibration positions, wall clock per label including the JSON-lines round trip",
+  "p10_wall_ms": 5.0,
+  "p90_wall_ms": 7.8,
+  "positions": 64,
+  "realized_nodes_mean": 3939,
+  "realized_nodes_min": 78,
+  "under_run_rows": 1
+ },
+ "determinism": {
+  "4000000": {
+   "deterministic": true,
+   "identical_bestmove": 8,
+   "identical_cp": 8,
+   "positions": 8
+  }
+ },
+ "guardrail": "chosen before any student exists; no downstream outcome was inspected",
+ "id": "s13-calibration-amendment",
+ "measured_table": {
+  "1000000": {
+   "best_move_agreement": 0.847457627118644,
+   "exact_cp_agreement": 0.0847457627118644,
+   "mate_rows": 4,
+   "mean_abs_cp": 16.54237288135593,
+   "mean_depth": 27.390625,
+   "mean_nodes": 984394.953125,
+   "mean_wall_ms": 1299.3023765625367,
+   "median_abs_cp": 11,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 1.0
+  },
+  "128000": {
+   "best_move_agreement": 0.7966101694915254,
+   "exact_cp_agreement": 0.01694915254237288,
+   "mate_rows": 4,
+   "mean_abs_cp": 33.88135593220339,
+   "mean_depth": 21.390625,
+   "mean_nodes": 126163.71875,
+   "mean_wall_ms": 173.6151296877324,
+   "median_abs_cp": 20,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 1.0
+  },
+  "32000": {
+   "best_move_agreement": 0.7457627118644068,
+   "exact_cp_agreement": 0.01694915254237288,
+   "mate_rows": 2,
+   "mean_abs_cp": 40.45762711864407,
+   "mean_depth": 18.203125,
+   "mean_nodes": 31599.34375,
+   "mean_wall_ms": 49.997276563772175,
+   "median_abs_cp": 19,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9830508474576272
+  },
+  "4000000": {
+   "best_move_agreement": 0.8983050847457628,
+   "exact_cp_agreement": 0.05084745762711865,
+   "mate_rows": 5,
+   "mean_abs_cp": 14.610169491525424,
+   "mean_depth": 35.078125,
+   "mean_nodes": 3898135.453125,
+   "mean_wall_ms": 5014.373299999534,
+   "median_abs_cp": 11,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 1.0
+  },
+  "512000": {
+   "best_move_agreement": 0.8135593220338984,
+   "exact_cp_agreement": 0.06779661016949153,
+   "mate_rows": 4,
+   "mean_abs_cp": 18.52542372881356,
+   "mean_depth": 25.578125,
+   "mean_nodes": 504128.890625,
+   "mean_wall_ms": 675.7380984358861,
+   "median_abs_cp": 11,
+   "non_mate_pairs": 59,
+   "positions": 64,
+   "sign_agreement": 0.9830508474576272
+  }
+ },
+ "supersedes_decision_not_measurements": "tools/s13/s13-calibration.json (unchanged; its comparison table is reused verbatim)",
+ "teacher": {
+  "author": "the Stockfish developers (see AUTHORS file)",
+  "binary": "F:\\tools\\stockfish\\stockfish\\stockfish-windows-x86-64-avx2.exe",
+  "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+  "expected": {
+   "binarySha256": "c86215fa1977d53b82ed854540a4c7b025be4cd042276c85ba3de53fb9118911",
+   "nets": [
+    "nn-c288c895ea92.nnue",
+    "nn-37f18f62d772.nnue"
+   ],
+   "options": {
+    "Hash": 16,
+    "MultiPV": 1,
+    "Threads": 1
+   }
+  },
+  "name": "Stockfish 18",
+  "netSelection": "per position: the small net is used when |simple_eval| > 962 (Eval::use_smallnet), deterministically, with no option to disable",
+  "nets": [
+   "nn-c288c895ea92.nnue",
+   "nn-37f18f62d772.nnue"
+  ],
+  "options": {
+   "Hash": 16,
+   "MultiPV": 1,
+   "Threads": 1
+  }
+ },
+ "why_the_rule_failed": "Stockfish labels are not converged at any affordable budget: even 4M-vs-2M best-move agreement is 0.898"
+}

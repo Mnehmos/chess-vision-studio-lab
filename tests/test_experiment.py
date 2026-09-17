@@ -342,3 +342,48 @@ def test_an_arm_may_declare_its_own_seed_subset(lab):
             eval_protocol_id=protocol.id, widths=list(WIDTHS), seeds=[0, 1, 2],
             source_id="S0001", normalization_id="N0001", candidate_universe_hash="sha256:" + "u" * 64,
             order_seed=1, order_hash="sha256:" + "o" * 64, analysis=decision, experiment_id=other_xid)
+
+
+def _attempt_cells(lab, declared_cells, node_budgets, arm_scales, tag):
+    """Build fresh arms under a fresh X id and try to freeze the declared cell list."""
+    normalization, train, exam, recipe, protocol = build_lab(lab)
+    xid = lab.store.next_id("X")
+    arms = [arm_material(lab, normalization, recipe, protocol, xid, scale=scale, suffix=f"E{tag}{index}")
+            for index, scale in enumerate(arm_scales)]
+    try:
+        experiment = lab.create_experiment(
+            name="explicit cells", preregistration_hash="sha256:" + "p" * 64,
+            reference_unit_nodes=37_285_491, scales=dict(SCALES), node_budgets=list(node_budgets),
+            declared_cells=declared_cells, arms=arms, eval_protocol_id=protocol.id,
+            widths=list(WIDTHS), seeds=list(SEEDS), source_id="S0001", normalization_id="N0001",
+            candidate_universe_hash="sha256:" + "u" * 64, order_seed=20260920,
+            order_hash="sha256:" + "o" * 64, analysis={"primary": "explicit cells"},
+            experiment_id=xid, notes="explicit cell list")
+        return experiment, None
+    except LabError as error:
+        return None, str(error)
+
+
+def test_an_explicit_cell_list_expresses_a_non_product_lattice(lab):
+    """S13: teachers over the same positions at honestly unequal spend are not a grid.
+
+    With an explicit cell list the lattice is exactly what is declared — the two-cell list below
+    is a strict subset of the four-cell product of the same axes — and it is still exhaustive.
+    """
+    experiment, error = _attempt_cells(lab, [("2x", 16000), ("5x", 16000)], [16000, 40000],
+                                       ["2x", "5x"], "a")
+    assert error is None, error
+    assert sorted((arm.scale, arm.node_budget) for arm in experiment.arms) ==         [("2x", 16000), ("5x", 16000)]
+
+    # every declared cell must be run
+    _, error = _attempt_cells(lab, [("2x", 16000), ("5x", 16000)], [16000, 40000], ["2x"], "b")
+    assert "missing" in error
+    # an arm outside the declared cells is refused
+    _, error = _attempt_cells(lab, [("2x", 16000)], [16000, 40000], ["2x", "5x"], "c")
+    assert "not declared" in error
+    # a cell outside the declared axes is refused, not silently accepted
+    _, error = _attempt_cells(lab, [("2x", 16000), ("5x", 99000)], [16000, 40000], ["2x", "5x"], "d")
+    assert "outside the declared" in error
+    # a repeated cell is refused
+    _, error = _attempt_cells(lab, [("2x", 16000), ("2x", 16000)], [16000, 40000], ["2x"], "e")
+    assert "repeats" in error
