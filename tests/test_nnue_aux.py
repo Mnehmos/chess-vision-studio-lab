@@ -101,3 +101,42 @@ def test_auxiliary_targets_never_depend_on_labels():
     values, buckets = nnue.encode_aux([{"fen": MATE, "record_id": "no-labels-here"}], "geo")
     assert values.shape == (1, 21) and buckets.shape == (1, 21)
     assert facts_registry_hash().startswith("sha256:")
+
+
+def test_paired_aux_and_control_arms_share_init_and_batch_order():
+    """PR #46 review: the ONLY difference between paired arms must be the loss.
+
+    Both arms of a seed take their persistent weights from the same stream and their minibatches
+    from the same sampler stream, regardless of how many draws the auxiliary heads consume.
+    """
+    seed, inputs, hidden = 7, 24, 4
+    control = nnue.initialize_for_run(seed, inputs, hidden, 0.05, 400.0)
+    treatment = nnue.initialize_for_run(seed, inputs, hidden, 0.05, 400.0,
+                                       aux_dimensions=nnue.aux_dimensions("geo"))
+    for name in ("w1", "b1", "w2", "b2"):
+        assert np.array_equal(control.params[name], treatment.params[name]), \
+            f"persistent {name} differs between paired arms"
+    assert treatment.aux_enabled and "wv" in treatment.params
+
+    # identical first 20 minibatches for the same seed, whatever the aux heads drew
+    _p, _a, sampler_control = nnue.run_rng_streams(seed)
+    _p2, _a2, sampler_treatment = nnue.run_rng_streams(seed)
+    control_batches = [b.copy() for b, _ in zip(nnue.batch_stream(500, 32, sampler_control), range(20))]
+    treatment_batches = [b.copy() for b, _ in zip(nnue.batch_stream(500, 32, sampler_treatment), range(20))]
+    assert len(control_batches) == len(treatment_batches) == 20
+    for index, (left, right) in enumerate(zip(control_batches, treatment_batches)):
+        assert np.array_equal(left, right), f"batch {index} differs between paired arms"
+    assert not np.array_equal(control_batches[0], control_batches[1])
+
+
+def test_the_sampler_stream_is_independent_of_other_draws():
+    """Drawing persistent and auxiliary parameters must not move the sampler."""
+    seed, inputs, hidden = 11, 16, 3
+    _p, _a, sampler_before = nnue.run_rng_streams(seed)
+    first = next(nnue.batch_stream(200, 16, sampler_before)).copy()
+    nnue.initialize_for_run(seed, inputs, hidden, 0.05, 400.0,
+                            aux_dimensions=nnue.aux_dimensions("geo"))
+    nnue.initialize_for_run(seed, inputs, hidden, 0.05, 400.0)
+    _p, _a, sampler_after = nnue.run_rng_streams(seed)
+    second = next(nnue.batch_stream(200, 16, sampler_after)).copy()
+    assert np.array_equal(first, second)

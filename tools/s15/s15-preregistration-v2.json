@@ -1,0 +1,194 @@
+{
+ "arms": {
+  "RAW-SCORE": {
+   "AUX": "none",
+   "role": "control: scalar score supervision only"
+  },
+  "RAW-SCORE+AUX-GEO": {
+   "AUX": "geo",
+   "AUX_WEIGHT": 0.0823074,
+   "role": "treatment: the same trunk and score head, plus training-only heads predicting the auxiliary targets"
+  }
+ },
+ "auxiliary_targets": {
+  "bucket_logits": 84,
+  "families": 21,
+  "hash": "sha256:382c8487b557bed97d169736840a803a3431908f3dc3526bf57d477dc61e2bbf",
+  "manifest": "tools/s15/s15-aux-manifest.json",
+  "never_depends_on": [
+   "teacher search",
+   "the target score",
+   "outcome",
+   "best move",
+   "evaluation split membership"
+  ],
+  "value_targets": 21
+ },
+ "capacity": {
+  "accounting": "total = persistent inference parameters + training-only auxiliary parameters; both reported, neither hidden",
+  "ladder": [
+   {
+    "AUX": "none",
+    "H": 1,
+    "inference_parameters": 771,
+    "total_parameters": 771,
+    "training_only_parameters": 0
+   },
+   {
+    "AUX": "geo",
+    "H": 1,
+    "inference_parameters": 771,
+    "total_parameters": 981,
+    "training_only_parameters": 210
+   },
+   {
+    "AUX": "none",
+    "H": 4,
+    "inference_parameters": 3081,
+    "total_parameters": 3081,
+    "training_only_parameters": 0
+   },
+   {
+    "AUX": "geo",
+    "H": 4,
+    "inference_parameters": 3081,
+    "total_parameters": 3606,
+    "training_only_parameters": 525
+   },
+   {
+    "AUX": "none",
+    "H": 16,
+    "inference_parameters": 12321,
+    "total_parameters": 12321,
+    "training_only_parameters": 0
+   },
+   {
+    "AUX": "geo",
+    "H": 16,
+    "inference_parameters": 12321,
+    "total_parameters": 14106,
+    "training_only_parameters": 1785
+   },
+   {
+    "AUX": "none",
+    "H": 32,
+    "inference_parameters": 24641,
+    "total_parameters": 24641,
+    "training_only_parameters": 0
+   },
+   {
+    "AUX": "geo",
+    "H": 32,
+    "inference_parameters": 24641,
+    "total_parameters": 28106,
+    "training_only_parameters": 3465
+   }
+  ],
+  "primary_cells": 160,
+  "widths": [
+   1,
+   4,
+   16,
+   32
+  ]
+ },
+ "contract": {
+  "exam": "E0004 CVS-DEEP 400k over the 200 held-out identities",
+  "student": "RAW-768 -> H clipped-ReLU -> score; MAX_UPDATES 760 x BATCH 256 = 194560 presentations for every cell; cold start; T0004-derived optimizer/LR/init/K/LAMBDA",
+  "teacher": "CVS-4k over D0036 (S13/S14 unchanged; TargetSpec sha256:6b8bd7dcc1ac\u2026 asserted against X0008's sealed 4k arm)"
+ },
+ "fairness": [
+  "identical RAW-768 inputs in both arms",
+  "identical score labels, positions and split identities",
+  "identical persistent score topology and optimizer",
+  "identical update count",
+  "no inference-time inputs added to the treatment arm",
+  "training-only parameters and extra training FLOPs reported",
+  "no per-arm LR/optimizer tuning",
+  "no teacher-authority change"
+ ],
+ "family_ablation": {
+  "lattice": "a SECOND experiment, frozen only if the trigger fires",
+  "matrix": {
+   "cells": 120,
+   "modes": [
+    "geo-no-king",
+    "geo-no-mobility",
+    "geo-no-pawns",
+    "geo-no-rooks",
+    "geo-no-hanging",
+    "geo-no-bishop"
+   ],
+   "seeds": 20,
+   "width": 1
+  },
+  "not_run_is_a_result": "if the trigger does not fire, no ablation runs and the absence is recorded as the rule's outcome",
+  "reading": "per family group, (full - removed) change in score loss at the sentinel width; negative findings preserved",
+  "trigger": "run iff the H=1 primary contrast's one-sided UPPER bound is below zero (auxiliary strictly better at the smallest width). The rule is frozen here, before outcomes"
+ },
+ "guardrails": [
+  "no search or game-strength claims",
+  "no GEO/HYBRID inputs at inference",
+  "no active learning",
+  "no combinatorial ablations",
+  "geometry is target-side supervision only"
+ ],
+ "id": "s15-auxiliary-geometry",
+ "issue": "Mnehmos/chess-vision-studio-lab#42 (slice of #18)",
+ "loss": {
+  "auxiliary": "mean(value MSE over families) + mean(4-class cross-entropy over families), each averaged so no family dominates by column count",
+  "schedule": "fixed for the whole run; no per-seed or per-width tuning",
+  "score": "MSE(sigmoid(pred/K), target) \u2014 unchanged",
+  "total": "score + AUX_WEIGHT * auxiliary",
+  "weight": 0.0823074,
+  "weight_provenance": {
+   "artifact": "tools/s15/s15-aux-weight-calibration.json",
+   "hash": "sha256:1a7effa4858a8efc5d427ef42eec7b57074e631c12ed68b8bff6de5cb1669ab4",
+   "rule": "25% of the score loss's trunk gradient at initialisation, measured on TRAINING rows only"
+  }
+ },
+ "primary_analysis": {
+  "caveat": "better auxiliary prediction is not evidence of better chess judgment unless the score exam also improves",
+  "contrast": "per width, paired by seed: RAW-SCORE+AUX-GEO - RAW-SCORE on E0004 test_loss, separate one-sided 95% exact-t bounds at that width's df",
+  "metrics": [
+   "test_loss",
+   "cp_mae",
+   "sign_agreement (all recorded per run)",
+   "train/validation/test gap",
+   "persistent inference parameter count",
+   "training-only auxiliary parameter count",
+   "train wall time",
+   "inference throughput after auxiliary heads are disabled",
+   "auxiliary prediction quality by named family"
+  ],
+  "no_pooling": "widths reported separately; no global winner"
+ },
+ "questions": [
+  "does explicit semantic supervision help a RAW evaluator learn a better static representation even when no semantic features are supplied at inference?",
+  "if it helps, does it reduce the learned capacity needed for a given quality?",
+  "which named geometry families provide useful training signal?"
+ ],
+ "random_streams": {
+  "consequence": "paired arms of a seed start from identical persistent weights and see identical example orders; the only difference between them is the loss",
+  "contract": "np.random.SeedSequence(run.seed).spawn(3) -> persistent init, auxiliary init, minibatch sampling; no stream is shared and no draw advances another",
+  "inference_note": "this is a training-side contract only; deployed models are unchanged",
+  "test": "tests/test_nnue_aux.py::test_paired_aux_and_control_arms_share_init_and_batch_order"
+ },
+ "status": "materialized before the lattice is frozen and before any outcome is inspected",
+ "stop_conditions": [
+  "the D0036 TargetSpec hash differs from X0008's sealed 4k arm",
+  "the auxiliary targets do not align with the encoded training rows",
+  "the geometry registry hash differs from the manifest's pin",
+  "membership fails"
+ ],
+ "supersedes": "X0013 (preserved, sealed; its arms did not share a minibatch stream \u2014 see tools/s15/s15-x0013-supersession.json)",
+ "unchanged_from_v1": [
+  "teacher/exam contract",
+  "auxiliary manifest",
+  "AUX_WEIGHT calibration rule and value",
+  "width ladder",
+  "primary analysis",
+  "family-ablation trigger rule"
+ ],
+ "version": 2
+}

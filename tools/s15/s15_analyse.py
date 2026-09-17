@@ -34,8 +34,12 @@ from cvslab.schemas import Experiment, Run, RunStatus
 from cvslab.service import LabService, protocol_target_spec, recipe_target_spec
 from cvslab.store import LabError, Store
 
-RESULT = S15 / "s15-result.json"
-SUMMARY = S15 / "s15-result-summary.json"
+V2 = "--v2" in sys.argv                       # the split-stream replacement (X0014)
+RESULT = S15 / ("s15-result-v2.json" if V2 else "s15-result.json")
+SUMMARY = S15 / ("s15-result-summary-v2.json" if V2 else "s15-result-summary.json")
+XID_KEY = "xid_v2" if V2 else "xid"
+PREREG_KEY = "preregistration_v2" if V2 else "preregistration"
+ABLATION_KEY = "ablation_v2" if V2 else "ablation"
 ARMS = ("RAW-SCORE", "AUX-GEO")
 
 
@@ -44,7 +48,7 @@ def svc() -> LabService:
 
 
 def collect(service: LabService):
-    experiment: Experiment = service.store.get_as(state()["xid"], Experiment)
+    experiment: Experiment = service.store.get_as(state()[XID_KEY], Experiment)
     arm_of = {}
     recipe_of = {}
     for arm in experiment.arms:
@@ -136,7 +140,7 @@ def _aux_quality(service, models, hidden: int) -> dict:
 
 
 def _train_spec(service: LabService):
-    experiment = service.store.get_as(state()["xid"], Experiment)
+    experiment = service.store.get_as(state()[XID_KEY], Experiment)
     return recipe_target_spec(service.store.get(experiment.arms[0].training_recipe_id))
 
 
@@ -159,7 +163,7 @@ def _throughput(models) -> dict:
 
 def _ablation_contrasts(service: LabService, values) -> dict:
     st = state()
-    record = st.get("ablation")
+    record = st.get(ABLATION_KEY)
     if not record or not record.get("fired") or "xid" not in record:
         return {"fired": False, "outcome": (record or {}).get("outcome", "not evaluated")}
     experiment: Experiment = service.store.get_as(record["xid"], Experiment)
@@ -235,10 +239,16 @@ def step_report() -> int:
                                   "is a train-vs-exam distribution gap, not a classic overfit gap"},
         "inference_throughput": _throughput(models),
         "family_ablation": _ablation_contrasts(service, values),
+        "random_streams": ("split: persistent init, auxiliary init and minibatch sampling are "
+                           "independent streams from the run seed, so paired arms share their "
+                           "example order (X0013, which shared one stream, is preserved as "
+                           "superseded)" if V2 else
+                           "shared generator: X0013's arms did not share a minibatch order — "
+                           "preserved as superseded, see s15-x0013-supersession.json"),
         "fairness": {"extra_training_only_params_reported": True, "no_inference_inputs_added": True,
                      "no_per_arm_lr_tuning": True, "no_teacher_change": True},
-        "evidence": {"result": "tools/s15/s15-result.json",
-                     "preregistration": "tools/s15/s15-preregistration.json",
+        "evidence": {"result": f"tools/s15/s15-result{'-v2' if V2 else ''}.json",
+                     "preregistration": f"tools/s15/s15-preregistration{'-v2' if V2 else ''}.json",
                      "aux_manifest": "tools/s15/s15-aux-manifest.json",
                      "calibration": "tools/s15/s15-aux-weight-calibration.json",
                      "state": "tools/s15/s15-state.json"},
@@ -268,7 +278,7 @@ def step_report() -> int:
 def step_seal() -> int:
     service = svc()
     result = json.loads(RESULT.read_text(encoding="utf-8"))
-    experiment = service.seal_experiment(state()["xid"], result)
+    experiment = service.seal_experiment(state()[XID_KEY], result)
     print(f"{experiment.id} sealed: {json.dumps(experiment.result.get('membership'), default=str)}",
           flush=True)
     return 0
@@ -277,6 +287,7 @@ def step_seal() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("step", choices=["report", "seal"])
+    parser.add_argument("--v2", action="store_true", help="analyse the split-stream replacement")
     args = parser.parse_args()
     return {"report": step_report, "seal": step_seal}[args.step]()
 

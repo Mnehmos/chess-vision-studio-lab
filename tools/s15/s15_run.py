@@ -33,6 +33,7 @@ from cvslab.targets import TargetSpec
 
 MANIFEST = S15 / "s15-aux-manifest.json"
 PREREG = S15 / "s15-preregistration.json"
+PREREG_HASH = S15 / "s15-preregistration.hash"
 DECLARATION = ("S15 arm: identical RAW-768 inputs, positions, score labels, split identities, "
                "optimizer and update count as its paired arm; the only difference is training-only "
                "auxiliary geometry supervision, discarded at inference")

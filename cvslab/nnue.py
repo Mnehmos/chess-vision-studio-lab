@@ -235,6 +235,37 @@ def targets(split: EncodedSplit, lam: float, k: float) -> np.ndarray:
     return np.where(has_result, blended, eval_target)
 
 
+def run_rng_streams(seed: int):
+    """(persistent-init, auxiliary-init, minibatch-sampling) - INDEPENDENT streams from one seed.
+
+    Splitting them is what makes a paired RAW/AUX comparison causal: auxiliary draws cannot advance
+    the sampler's stream, so both arms of a seed see the same examples in the same order and the
+    only difference between them is the loss.
+    """
+    persistent, auxiliary, sampling = np.random.SeedSequence(int(seed)).spawn(3)
+    return (np.random.default_rng(persistent), np.random.default_rng(auxiliary),
+            np.random.default_rng(sampling))
+
+
+def initialize_for_run(seed: int, inputs: int, hidden: int, init_std: float, out_scale: float,
+                       aux_dimensions: tuple = (0, 0)) -> "RawNnue":
+    """The model a run starts from: persistent weights from the persistent stream, training-only
+    heads from the auxiliary stream (never from the sampler's)."""
+    persistent, auxiliary, _sampling = run_rng_streams(seed)
+    return RawNnue.initialize(inputs, hidden, init_std, out_scale, persistent,
+                              aux_dimensions=aux_dimensions, aux_rng=auxiliary)
+
+
+def batch_stream(n_rows: int, batch: int, rng: np.random.Generator):
+    """Minibatch indices for the fixed-update regime: shuffle, walk without replacement, drop the
+    tail partial batch, reshuffle on exhaustion. Shared by `train` and its regression test."""
+    order = np.arange(n_rows)
+    while True:
+        rng.shuffle(order)
+        for start in range(0, n_rows - batch + 1, batch):
+            yield order[start:start + batch]
+
+
 class RawNnue:
     def __init__(self, params: dict[str, np.ndarray], out_scale: float):
         self.params = params
@@ -246,7 +277,14 @@ class RawNnue:
 
     @classmethod
     def initialize(cls, inputs: int, hidden: int, init_std: float, out_scale: float,
-                   rng: np.random.Generator, aux_dimensions: tuple[int, int] = (0, 0)) -> "RawNnue":
+                   rng: np.random.Generator, aux_dimensions: tuple[int, int] = (0, 0),
+                   aux_rng: Optional[np.random.Generator] = None) -> "RawNnue":
+        """Persistent weights from `rng`; training-only heads from `aux_rng` when given.
+
+        Persistent draws come first and never depend on whether auxiliary heads exist, so two arms
+        of one seed start from identical persistent weights; the auxiliary stream is separate so its
+        draw count cannot shift anything else.
+        """
         bound = 1.0 / math.sqrt(hidden)
         params = {
             "w1": rng.normal(0.0, init_std, size=(inputs, hidden)),
@@ -257,12 +295,13 @@ class RawNnue:
         values_dim, bucket_logits = aux_dimensions
         if values_dim or bucket_logits:
             # TRAINING-ONLY heads: they read the shared hidden layer and never touch predict_cp
+            aux_rng = aux_rng if aux_rng is not None else rng
             aux_bound = 1.0 / math.sqrt(hidden)
             if values_dim:
-                params["wv"] = rng.uniform(-aux_bound, aux_bound, size=(hidden, values_dim))
+                params["wv"] = aux_rng.uniform(-aux_bound, aux_bound, size=(hidden, values_dim))
                 params["bv"] = np.zeros(values_dim)
             if bucket_logits:
-                params["wb"] = rng.uniform(-aux_bound, aux_bound, size=(hidden, bucket_logits))
+                params["wb"] = aux_rng.uniform(-aux_bound, aux_bound, size=(hidden, bucket_logits))
                 params["bb"] = np.zeros(bucket_logits)
         return cls(params, out_scale)
 
@@ -408,43 +447,39 @@ def train(model: RawNnue, train_split: EncodedSplit, val_split: EncodedSplit, cf
         # exhaustion; stop after exactly max_updates updates.
         checkpoint_every = max(1, max_updates // 20)
         updates = 0
-        passes = 0
-        while updates < max_updates:
-            rng.shuffle(order)
-            passes += 1
-            for start in range(0, len(order) - batch + 1, batch):
-                if updates >= max_updates:
-                    break
-                idx = order[start:start + batch]
-                batch_aux = None
-                if aux is not None:
-                    batch_aux = (aux[0][idx], aux[1][idx])
-                loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k,
-                                                   aux=batch_aux, aux_weight=aux_weight)
-                updates += 1
-                step += 1          # Adam's bias-correction counter advances here too
-                for name, grad in grads.items():
-                    param = model.params[name]
-                    if optimizer == "sgd":
-                        param -= lr * grad
-                        continue
-                    m, v = moments[name]
-                    m *= beta1
-                    m += (1.0 - beta1) * grad
-                    v *= beta2
-                    v += (1.0 - beta2) * grad * grad
-                    param -= lr * (m / (1.0 - beta1 ** step)) / (np.sqrt(v / (1.0 - beta2 ** step)) + eps)
-                if on_epoch and (updates % checkpoint_every == 0 or updates == max_updates):
-                    val_loss = (float(np.mean(per_position_loss(model.predict_cp(val_split.X), t_val, k)))
-                                if len(val_split) else math.nan)
-                    on_epoch({
-                        "epoch": updates,             # in this regime the log index IS the update count
-                        "train_loss": _finite_or_none(loss),
-                        "val_loss": _finite_or_none(val_loss),
-                        "examples_per_second": round(batch / max(time.perf_counter() - started, 1e-9) *
-                                                     updates, 1),
-                        "elapsed_seconds": round(time.perf_counter() - started, 4),
-                    })
+        stream = batch_stream(len(train_split), batch, rng)
+        for idx in stream:
+            if updates >= max_updates:
+                break
+            batch_aux = None
+            if aux is not None:
+                batch_aux = (aux[0][idx], aux[1][idx])
+            loss, grads = model.loss_and_grads(train_split.X[idx].astype(np.float64), t_train[idx], k,
+                                               aux=batch_aux, aux_weight=aux_weight)
+            updates += 1
+            step += 1          # Adam's bias-correction counter advances here too
+            for name, grad in grads.items():
+                param = model.params[name]
+                if optimizer == "sgd":
+                    param -= lr * grad
+                    continue
+                m, v = moments[name]
+                m *= beta1
+                m += (1.0 - beta1) * grad
+                v *= beta2
+                v += (1.0 - beta2) * grad * grad
+                param -= lr * (m / (1.0 - beta1 ** step)) / (np.sqrt(v / (1.0 - beta2 ** step)) + eps)
+            if on_epoch and (updates % checkpoint_every == 0 or updates == max_updates):
+                val_loss = (float(np.mean(per_position_loss(model.predict_cp(val_split.X), t_val, k)))
+                            if len(val_split) else math.nan)
+                on_epoch({
+                    "epoch": updates,             # in this regime the log index IS the update count
+                    "train_loss": _finite_or_none(loss),
+                    "val_loss": _finite_or_none(val_loss),
+                    "examples_per_second": round(batch / max(time.perf_counter() - started, 1e-9) *
+                                                 updates, 1),
+                    "elapsed_seconds": round(time.perf_counter() - started, 4),
+                })
         return
 
     for epoch in range(epochs):
