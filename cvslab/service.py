@@ -639,19 +639,35 @@ class LabService:
                  f"{protocol.split}={len(eval_split)} discarded={compute.discarded_examples}")
 
             rng = np.random.default_rng(run.seed)
+            aux_mode = str(cfg.get("AUX", "none"))
             if str(cfg.get("ARCH", "crelu1")) == "linear":
                 model = nnue.LinearEval.initialize(nnue.input_dim(input_kind), float(cfg["INIT_STD"]),
                                                    float(cfg["OUT_SCALE_CP"]), rng)
             else:
                 model = nnue.RawNnue.initialize(nnue.input_dim(input_kind), int(cfg["H"]),
-                                                float(cfg["INIT_STD"]), float(cfg["OUT_SCALE_CP"]), rng)
+                                                float(cfg["INIT_STD"]), float(cfg["OUT_SCALE_CP"]), rng,
+                                                aux_dimensions=nnue.aux_dimensions(aux_mode))
+            aux_train = aux_val = None
+            if aux_mode != "none":
+                # training-only supervision: geometry targets are deterministic functions of the
+                # position, and they are never supplied to the deployed evaluator
+                aux_train = nnue.encode_aux(data.load_split(self.store, dataset, "train"), aux_mode)
+                aux_val = nnue.encode_aux(data.load_split(self.store, dataset, "val"), aux_mode)
+                if len(aux_train[0]) != len(train_split):
+                    raise _PreflightFailed(
+                        f"auxiliary targets ({len(aux_train[0])}) do not align with the encoded "
+                        f"training split ({len(train_split)})")
+                emit(f"auxiliary supervision {aux_mode}: {aux_train[0].shape[1]} value targets, "
+                     f"{aux_train[0].shape[1] * nnue.AUX_BUCKET_CLASSES} bucket logits, "
+                     f"weight {float(cfg.get('AUX_WEIGHT', 0.0))}")
 
             def on_epoch(entry: dict) -> None:
                 run.training_curve.append(EpochLog(**entry))
                 emit(f"epoch {entry['epoch']} train={entry['train_loss']} val={entry['val_loss']} "
                      f"ex/s={entry['examples_per_second']}")
 
-            nnue.train(model, train_split, val_split, cfg, rng, on_epoch=on_epoch)
+            nnue.train(model, train_split, val_split, cfg, rng, on_epoch=on_epoch,
+                       aux=aux_train, aux_weight=float(cfg.get("AUX_WEIGHT", 0.0)))
             # Two regimes, one definition each (the S8 patch briefly redefined the historical
             # one by counting only full batches; see the S9 repair note):
             #   epoch-bounded: every sample in every epoch counts, partial tail batch included

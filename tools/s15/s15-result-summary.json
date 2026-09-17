@@ -1,0 +1,60 @@
+{
+ "evidence": {
+  "aux_manifest": "tools/s15/s15-aux-manifest.json",
+  "calibration": "tools/s15/s15-aux-weight-calibration.json",
+  "preregistration": "tools/s15/s15-preregistration.json",
+  "result": "tools/s15/s15-result.json",
+  "state": "tools/s15/s15-state.json"
+ },
+ "experiment": "X0013",
+ "family_ablation": {
+  "fired": false,
+  "outcome": "not evaluated"
+ },
+ "per_width": {
+  "1": {
+   "d_aux_minus_control": 0.000114,
+   "mean_aux": 0.016386,
+   "mean_control": 0.016271,
+   "one_sided_bounds": [
+    -0.001262,
+    0.00149
+   ],
+   "training_only_params": 210,
+   "verdict": "unresolved"
+  },
+  "16": {
+   "d_aux_minus_control": -0.001637,
+   "mean_aux": 0.016354,
+   "mean_control": 0.017991,
+   "one_sided_bounds": [
+    -0.002648,
+    -0.000625
+   ],
+   "training_only_params": 1785,
+   "verdict": "aux_better"
+  },
+  "32": {
+   "d_aux_minus_control": -0.002246,
+   "mean_aux": 0.016794,
+   "mean_control": 0.01904,
+   "one_sided_bounds": [
+    -0.003272,
+    -0.001221
+   ],
+   "training_only_params": 3465,
+   "verdict": "aux_better"
+  },
+  "4": {
+   "d_aux_minus_control": -0.001436,
+   "mean_aux": 0.014825,
+   "mean_control": 0.016261,
+   "one_sided_bounds": [
+    -0.002197,
+    -0.000674
+   ],
+   "training_only_params": 525,
+   "verdict": "aux_better"
+  }
+ }
+}

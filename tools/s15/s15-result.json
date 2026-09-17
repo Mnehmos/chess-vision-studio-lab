@@ -1,0 +1,765 @@
+{
+ "contract": {
+  "arms": {
+   "AUX-GEO": "AUX=geo, weight 0.0823074 (25% of the score loss's trunk gradient at initialisation)",
+   "RAW-SCORE": "AUX=none"
+  },
+  "exam": "E0004 CVS-DEEP 400k over the 200 held-out identities",
+  "identical": [
+   "RAW-768 inputs",
+   "positions and split identities",
+   "score labels",
+   "optimizer and update count",
+   "persistent score topology"
+  ],
+  "teacher": "CVS-4k over D0036 (unchanged)"
+ },
+ "evidence": {
+  "aux_manifest": "tools/s15/s15-aux-manifest.json",
+  "calibration": "tools/s15/s15-aux-weight-calibration.json",
+  "preregistration": "tools/s15/s15-preregistration.json",
+  "result": "tools/s15/s15-result.json",
+  "state": "tools/s15/s15-state.json"
+ },
+ "experiment": "X0013",
+ "fairness": {
+  "extra_training_only_params_reported": true,
+  "no_inference_inputs_added": true,
+  "no_per_arm_lr_tuning": true,
+  "no_teacher_change": true
+ },
+ "family_ablation": {
+  "fired": false,
+  "outcome": "not evaluated"
+ },
+ "gap_at_widest": {
+  "note": "no validation split exists for D0036 (fractions 1.0/0.0/0.0); this is a train-vs-exam distribution gap, not a classic overfit gap",
+  "per_arm": {
+   "AUX-GEO": {
+    "exam_loss": 0.01679350595691649,
+    "gap": -0.009283679652685102,
+    "train_loss": 0.007509826304231389
+   },
+   "RAW-SCORE": {
+    "exam_loss": 0.01903997311696655,
+    "gap": -0.013990126958463408,
+    "train_loss": 0.005049846158503141
+   }
+  }
+ },
+ "inference_throughput": {
+  "AUX-GEO": {
+   "inference_parameters": 24641,
+   "positions_per_second": 505048.0
+  },
+  "RAW-SCORE": {
+   "inference_parameters": 24641,
+   "positions_per_second": 450837.8
+  },
+  "note": "both arms deploy the same RAW-768 -> score evaluator; the treatment model's auxiliary arrays are present in the artifact but predict_cp never reads them"
+ },
+ "per_width": {
+  "1": {
+   "aux_quality": {
+    "families": [
+     {
+      "bucket_accuracy": 0.88125,
+      "family": "KING_DANGER",
+      "value_mae": 0.037116437932112716,
+      "value_mse": 0.0044083259109348365
+     },
+     {
+      "bucket_accuracy": 0.53475,
+      "family": "KING_ZONE_PRESSURE",
+      "value_mae": 0.21923226308737903,
+      "value_mse": 0.08315173889221546
+     },
+     {
+      "bucket_accuracy": 0.431,
+      "family": "KING_OPEN_FILE",
+      "value_mae": 0.25834833612474517,
+      "value_mse": 0.11530596941573278
+     },
+     {
+      "bucket_accuracy": 0.45675,
+      "family": "KING_SHIELD",
+      "value_mae": 0.3072960960964967,
+      "value_mse": 0.14861338516656883
+     },
+     {
+      "bucket_accuracy": 0.9295,
+      "family": "KING_CENTRAL_EXPOSURE",
+      "value_mae": 0.07770057442396358,
+      "value_mse": 0.015893220836606013
+     },
+     {
+      "bucket_accuracy": 0.8375,
+      "family": "ENEMY_QUEEN_NEAR_KING",
+      "value_mae": 0.10468678576753666,
+      "value_mse": 0.0408388476675866
+     },
+     {
+      "bucket_accuracy": 0.99775,
+      "family": "OPEN_CENTER_KING",
+      "value_mae": 0.015657426950888936,
+      "value_mse": 0.002773797040613878
+     },
+     {
+      "bucket_accuracy": 0.59925,
+      "family": "KING_ESCAPE_DEFICIT",
+      "value_mae": 0.20839193931075198,
+      "value_mse": 0.10232185718133838
+     },
+     {
+      "bucket_accuracy": 0.51875,
+      "family": "HANGING_MATERIAL",
+      "value_mae": 0.25576655923576996,
+      "value_mse": 0.18618581226017933
+     },
+     {
+      "bucket_accuracy": 0.37875,
+      "family": "MOBILITY_KNIGHT",
+      "value_mae": 0.3832799613717283,
+      "value_mse": 0.2570587905048905
+     },
+     {
+      "bucket_accuracy": 0.32325,
+      "family": "MOBILITY_BISHOP",
+      "value_mae": 0.3991625185900793,
+      "value_mse": 0.2619802054121719
+     },
+     {
+      "bucket_accuracy": 0.38175,
+      "family": "MOBILITY_ROOK",
+      "value_mae": 0.4083618699987469,
+      "value_mse": 0.2861646327762719
+     },
+     {
+      "bucket_accuracy": 0.58125,
+      "family": "MOBILITY_QUEEN",
+      "value_mae": 0.2542834442715297,
+      "value_mse": 0.14188690771577037
+     },
+     {
+      "bucket_accuracy": 0.5815,
+      "family": "PASSED_PAWN",
+      "value_mae": 0.5774415838299024,
+      "value_mse": 0.7298455303414174
+     },
+     {
+      "bucket_accuracy": 0.73425,
+      "family": "CONNECTED_PASSED_PAWN",
+      "value_mae": 0.1637129436794629,
+      "value_mse": 0.0732078024010809
+     },
+     {
+      "bucket_accuracy": 0.603,
+      "family": "ROOK_OPEN_FILE",
+      "value_mae": 0.1605843303428769,
+      "value_mse": 0.053442959324025534
+     },
+     {
+      "bucket_accuracy": 0.65675,
+      "family": "ROOK_SEMI_OPEN_FILE",
+      "value_mae": 0.1341703712884676,
+      "value_mse": 0.04743614980752253
+     },
+     {
+      "bucket_accuracy": 0.896,
+      "family": "ROOK_SEVENTH",
+      "value_mae": 0.0494010964648179,
+      "value_mse": 0.013134837304985103
+     },
+     {
+      "bucket_accuracy": 0.66,
+      "family": "DOUBLED_PAWN",
+      "value_mae": 0.13330022083586818,
+      "value_mse": 0.0453128930656862
+     },
+     {
+      "bucket_accuracy": 0.3755,
+      "family": "ISOLATED_PAWN",
+      "value_mae": 0.35114124382999834,
+      "value_mse": 0.24265453527539244
+     },
+     {
+      "bucket_accuracy": 0.782,
+      "family": "BISHOP_PAIR",
+      "value_mae": 0.1681542413088572,
+      "value_mse": 0.09502636173957169
+     }
+    ],
+    "sampled_rows": 4000
+   },
+   "contrast": {
+    "d": 0.00011430629033069399,
+    "mean_aux": 0.016385542480318913,
+    "mean_control": 0.01627123618998822,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0012617093802821686,
+     0.0014903219609435565
+    ],
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0015512880923827538,
+     0.0017799006730441417
+    ],
+    "verdict": "unresolved"
+   },
+   "cp_mae": {
+    "AUX-GEO": 134.80648591331737,
+    "RAW-SCORE": 136.68803900145204
+   },
+   "params": {
+    "AUX-GEO": {
+     "aux_weight": 0.0823074,
+     "inference_parameters": 771,
+     "total_parameters": 981,
+     "training_only_parameters": 210
+    },
+    "RAW-SCORE": {
+     "aux_weight": 0.0,
+     "inference_parameters": 771,
+     "total_parameters": 771,
+     "training_only_parameters": 0
+    }
+   },
+   "sign_agreement": {
+    "AUX-GEO": 0.9,
+    "RAW-SCORE": 0.919375
+   },
+   "wall_seconds_mean": {
+    "AUX-GEO": 11.29,
+    "RAW-SCORE": 5.97
+   }
+  },
+  "16": {
+   "aux_quality": {
+    "families": [
+     {
+      "bucket_accuracy": 0.88125,
+      "family": "KING_DANGER",
+      "value_mae": 0.037795691484615125,
+      "value_mse": 0.004321696222268978
+     },
+     {
+      "bucket_accuracy": 0.539,
+      "family": "KING_ZONE_PRESSURE",
+      "value_mae": 0.21536392246459057,
+      "value_mse": 0.07860281461544788
+     },
+     {
+      "bucket_accuracy": 0.48875,
+      "family": "KING_OPEN_FILE",
+      "value_mae": 0.2412578591434576,
+      "value_mse": 0.09570875160589054
+     },
+     {
+      "bucket_accuracy": 0.4575,
+      "family": "KING_SHIELD",
+      "value_mae": 0.28379007500773096,
+      "value_mse": 0.12610538853877248
+     },
+     {
+      "bucket_accuracy": 0.9295,
+      "family": "KING_CENTRAL_EXPOSURE",
+      "value_mae": 0.08078392415580567,
+      "value_mse": 0.01417129530594402
+     },
+     {
+      "bucket_accuracy": 0.83775,
+      "family": "ENEMY_QUEEN_NEAR_KING",
+      "value_mae": 0.10738034933053328,
+      "value_mse": 0.03767031131190781
+     },
+     {
+      "bucket_accuracy": 0.99775,
+      "family": "OPEN_CENTER_KING",
+      "value_mae": 0.018667815332718572,
+      "value_mse": 0.002692026921793573
+     },
+     {
+      "bucket_accuracy": 0.643,
+      "family": "KING_ESCAPE_DEFICIT",
+      "value_mae": 0.21478059895210067,
+      "value_mse": 0.09611200531435199
+     },
+     {
+      "bucket_accuracy": 0.52025,
+      "family": "HANGING_MATERIAL",
+      "value_mae": 0.2523760162123648,
+      "value_mse": 0.18515050134273264
+     },
+     {
+      "bucket_accuracy": 0.4365,
+      "family": "MOBILITY_KNIGHT",
+      "value_mae": 0.3420441936025675,
+      "value_mse": 0.18791909485137773
+     },
+     {
+      "bucket_accuracy": 0.409,
+      "family": "MOBILITY_BISHOP",
+      "value_mae": 0.32037309422114574,
+      "value_mse": 0.1644660669322752
+     },
+     {
+      "bucket_accuracy": 0.39125,
+      "family": "MOBILITY_ROOK",
+      "value_mae": 0.3870998252575318,
+      "value_mse": 0.25326747304588837
+     },
+     {
+      "bucket_accuracy": 0.62725,
+      "family": "MOBILITY_QUEEN",
+      "value_mae": 0.2516957268977052,
+      "value_mse": 0.12309902257000675
+     },
+     {
+      "bucket_accuracy": 0.63425,
+      "family": "PASSED_PAWN",
+      "value_mae": 0.5059561448100135,
+      "value_mse": 0.5066107879782801
+     },
+     {
+      "bucket_accuracy": 0.73375,
+      "family": "CONNECTED_PASSED_PAWN",
+      "value_mae": 0.15947544506436145,
+      "value_mse": 0.06118472979689834
+     },
+     {
+      "bucket_accuracy": 0.61875,
+      "family": "ROOK_OPEN_FILE",
+      "value_mae": 0.1650240744980461,
+      "value_mse": 0.050523873785937666
+     },
+     {
+      "bucket_accuracy": 0.65825,
+      "family": "ROOK_SEMI_OPEN_FILE",
+      "value_mae": 0.14362615520437738,
+      "value_mse": 0.04464067020632467
+     },
+     {
+      "bucket_accuracy": 0.901,
+      "family": "ROOK_SEVENTH",
+      "value_mae": 0.05026842194365041,
+      "value_mse": 0.01313843412136227
+     },
+     {
+      "bucket_accuracy": 0.65975,
+      "family": "DOUBLED_PAWN",
+      "value_mae": 0.13980155531114344,
+      "value_mse": 0.044320605514255776
+     },
+     {
+      "bucket_accuracy": 0.44325,
+      "family": "ISOLATED_PAWN",
+      "value_mae": 0.35081681817957566,
+      "value_mse": 0.22325431508920496
+     },
+     {
+      "bucket_accuracy": 0.78275,
+      "family": "BISHOP_PAIR",
+      "value_mae": 0.1923987352416247,
+      "value_mse": 0.0733348839356068
+     }
+    ],
+    "sampled_rows": 4000
+   },
+   "contrast": {
+    "d": -0.0016369940519883914,
+    "mean_aux": 0.016353719350245495,
+    "mean_control": 0.017990713402233887,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.002648493594433334,
+     -0.0006254945095434488
+    ],
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0028613608902404225,
+     -0.00041262721373636004
+    ],
+    "verdict": "aux_better"
+   },
+   "cp_mae": {
+    "AUX-GEO": 126.262026778217,
+    "RAW-SCORE": 133.9590317020393
+   },
+   "params": {
+    "AUX-GEO": {
+     "aux_weight": 0.0823074,
+     "inference_parameters": 12321,
+     "total_parameters": 14106,
+     "training_only_parameters": 1785
+    },
+    "RAW-SCORE": {
+     "aux_weight": 0.0,
+     "inference_parameters": 12321,
+     "total_parameters": 12321,
+     "training_only_parameters": 0
+    }
+   },
+   "sign_agreement": {
+    "AUX-GEO": 0.8975,
+    "RAW-SCORE": 0.89
+   },
+   "wall_seconds_mean": {
+    "AUX-GEO": 13.66,
+    "RAW-SCORE": 5.6
+   }
+  },
+  "32": {
+   "aux_quality": {
+    "families": [
+     {
+      "bucket_accuracy": 0.879,
+      "family": "KING_DANGER",
+      "value_mae": 0.039111794612294304,
+      "value_mse": 0.004240953241685623
+     },
+     {
+      "bucket_accuracy": 0.55775,
+      "family": "KING_ZONE_PRESSURE",
+      "value_mae": 0.21075081610527402,
+      "value_mse": 0.0737166023676991
+     },
+     {
+      "bucket_accuracy": 0.51725,
+      "family": "KING_OPEN_FILE",
+      "value_mae": 0.22609094499178195,
+      "value_mse": 0.08439435836419436
+     },
+     {
+      "bucket_accuracy": 0.45825,
+      "family": "KING_SHIELD",
+      "value_mae": 0.254610239507564,
+      "value_mse": 0.10357823681056331
+     },
+     {
+      "bucket_accuracy": 0.92925,
+      "family": "KING_CENTRAL_EXPOSURE",
+      "value_mae": 0.07874018997957614,
+      "value_mse": 0.01268941938826186
+     },
+     {
+      "bucket_accuracy": 0.85525,
+      "family": "ENEMY_QUEEN_NEAR_KING",
+      "value_mae": 0.11056913550274038,
+      "value_mse": 0.03728727698911449
+     },
+     {
+      "bucket_accuracy": 0.99775,
+      "family": "OPEN_CENTER_KING",
+      "value_mae": 0.020297003070971823,
+      "value_mse": 0.0026700175805027845
+     },
+     {
+      "bucket_accuracy": 0.6625,
+      "family": "KING_ESCAPE_DEFICIT",
+      "value_mae": 0.21733859195530406,
+      "value_mse": 0.09717434013615107
+     },
+     {
+      "bucket_accuracy": 0.51725,
+      "family": "HANGING_MATERIAL",
+      "value_mae": 0.24914084015024424,
+      "value_mse": 0.1842531641774245
+     },
+     {
+      "bucket_accuracy": 0.44125,
+      "family": "MOBILITY_KNIGHT",
+      "value_mae": 0.1982815766089942,
+      "value_mse": 0.06259506352818622
+     },
+     {
+      "bucket_accuracy": 0.43275,
+      "family": "MOBILITY_BISHOP",
+      "value_mae": 0.2895794613958321,
+      "value_mse": 0.13342591184450536
+     },
+     {
+      "bucket_accuracy": 0.42125,
+      "family": "MOBILITY_ROOK",
+      "value_mae": 0.36423913227246757,
+      "value_mse": 0.22280539916367326
+     },
+     {
+      "bucket_accuracy": 0.6685,
+      "family": "MOBILITY_QUEEN",
+      "value_mae": 0.2537654557280426,
+      "value_mse": 0.1228618006003328
+     },
+     {
+      "bucket_accuracy": 0.66425,
+      "family": "PASSED_PAWN",
+      "value_mae": 0.42535939182048627,
+      "value_mse": 0.33008064314582874
+     },
+     {
+      "bucket_accuracy": 0.73075,
+      "family": "CONNECTED_PASSED_PAWN",
+      "value_mae": 0.15630037430740243,
+      "value_mse": 0.053369393560725384
+     },
+     {
+      "bucket_accuracy": 0.63275,
+      "family": "ROOK_OPEN_FILE",
+      "value_mae": 0.15827673589848773,
+      "value_mse": 0.046456921477111064
+     },
+     {
+      "bucket_accuracy": 0.656,
+      "family": "ROOK_SEMI_OPEN_FILE",
+      "value_mae": 0.14371347866133016,
+      "value_mse": 0.04272953818903224
+     },
+     {
+      "bucket_accuracy": 0.9325,
+      "family": "ROOK_SEVENTH",
+      "value_mae": 0.05389352294611641,
+      "value_mse": 0.012673976793978511
+     },
+     {
+      "bucket_accuracy": 0.661,
+      "family": "DOUBLED_PAWN",
+      "value_mae": 0.14179010566137432,
+      "value_mse": 0.04129385569634682
+     },
+     {
+      "bucket_accuracy": 0.444,
+      "family": "ISOLATED_PAWN",
+      "value_mae": 0.3374452809212027,
+      "value_mse": 0.2030123835769696
+     },
+     {
+      "bucket_accuracy": 0.78975,
+      "family": "BISHOP_PAIR",
+      "value_mae": 0.18536961113300376,
+      "value_mse": 0.06307502721864006
+     }
+    ],
+    "sampled_rows": 4000
+   },
+   "contrast": {
+    "d": -0.0022464671600500585,
+    "mean_aux": 0.01679350595691649,
+    "mean_control": 0.01903997311696655,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0032724153508569918,
+     -0.001220518969243125
+    ],
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.003488323324959842,
+     -0.0010046109951402753
+    ],
+    "verdict": "aux_better"
+   },
+   "cp_mae": {
+    "AUX-GEO": 128.1390981729956,
+    "RAW-SCORE": 138.89229762453152
+   },
+   "params": {
+    "AUX-GEO": {
+     "aux_weight": 0.0823074,
+     "inference_parameters": 24641,
+     "total_parameters": 28106,
+     "training_only_parameters": 3465
+    },
+    "RAW-SCORE": {
+     "aux_weight": 0.0,
+     "inference_parameters": 24641,
+     "total_parameters": 24641,
+     "training_only_parameters": 0
+    }
+   },
+   "sign_agreement": {
+    "AUX-GEO": 0.905,
+    "RAW-SCORE": 0.890625
+   },
+   "wall_seconds_mean": {
+    "AUX-GEO": 12.97,
+    "RAW-SCORE": 5.66
+   }
+  },
+  "4": {
+   "aux_quality": {
+    "families": [
+     {
+      "bucket_accuracy": 0.88125,
+      "family": "KING_DANGER",
+      "value_mae": 0.03580773479970534,
+      "value_mse": 0.004397311205291982
+     },
+     {
+      "bucket_accuracy": 0.53425,
+      "family": "KING_ZONE_PRESSURE",
+      "value_mae": 0.21824418127128556,
+      "value_mse": 0.08269145310844729
+     },
+     {
+      "bucket_accuracy": 0.48575,
+      "family": "KING_OPEN_FILE",
+      "value_mae": 0.25657885097876487,
+      "value_mse": 0.11135674844502098
+     },
+     {
+      "bucket_accuracy": 0.45675,
+      "family": "KING_SHIELD",
+      "value_mae": 0.30566451185323057,
+      "value_mse": 0.14788541618591755
+     },
+     {
+      "bucket_accuracy": 0.9295,
+      "family": "KING_CENTRAL_EXPOSURE",
+      "value_mae": 0.07710586318044671,
+      "value_mse": 0.015867615289343707
+     },
+     {
+      "bucket_accuracy": 0.8375,
+      "family": "ENEMY_QUEEN_NEAR_KING",
+      "value_mae": 0.10394646053386046,
+      "value_mse": 0.040589573867277746
+     },
+     {
+      "bucket_accuracy": 0.99775,
+      "family": "OPEN_CENTER_KING",
+      "value_mae": 0.015928898683204448,
+      "value_mse": 0.002768448365696857
+     },
+     {
+      "bucket_accuracy": 0.599,
+      "family": "KING_ESCAPE_DEFICIT",
+      "value_mae": 0.2096349877157378,
+      "value_mse": 0.1017053500601747
+     },
+     {
+      "bucket_accuracy": 0.5185,
+      "family": "HANGING_MATERIAL",
+      "value_mae": 0.24679939052253816,
+      "value_mse": 0.1863329675151615
+     },
+     {
+      "bucket_accuracy": 0.42425,
+      "family": "MOBILITY_KNIGHT",
+      "value_mae": 0.38241295282555937,
+      "value_mse": 0.25486642783792707
+     },
+     {
+      "bucket_accuracy": 0.38075,
+      "family": "MOBILITY_BISHOP",
+      "value_mae": 0.38723119475017004,
+      "value_mse": 0.245959726885213
+     },
+     {
+      "bucket_accuracy": 0.37675,
+      "family": "MOBILITY_ROOK",
+      "value_mae": 0.404052554311501,
+      "value_mse": 0.27990109835415405
+     },
+     {
+      "bucket_accuracy": 0.5815,
+      "family": "MOBILITY_QUEEN",
+      "value_mae": 0.2571730184458055,
+      "value_mse": 0.13547053640708254
+     },
+     {
+      "bucket_accuracy": 0.63775,
+      "family": "PASSED_PAWN",
+      "value_mae": 0.515549656117951,
+      "value_mse": 0.5653308049268971
+     },
+     {
+      "bucket_accuracy": 0.73425,
+      "family": "CONNECTED_PASSED_PAWN",
+      "value_mae": 0.16078828914739232,
+      "value_mse": 0.06393168908384901
+     },
+     {
+      "bucket_accuracy": 0.5935,
+      "family": "ROOK_OPEN_FILE",
+      "value_mae": 0.15777217330999777,
+      "value_mse": 0.05303591316276067
+     },
+     {
+      "bucket_accuracy": 0.65675,
+      "family": "ROOK_SEMI_OPEN_FILE",
+      "value_mae": 0.14068332504052347,
+      "value_mse": 0.0455740074492938
+     },
+     {
+      "bucket_accuracy": 0.896,
+      "family": "ROOK_SEVENTH",
+      "value_mae": 0.049751800052106575,
+      "value_mse": 0.0131958040517367
+     },
+     {
+      "bucket_accuracy": 0.66,
+      "family": "DOUBLED_PAWN",
+      "value_mae": 0.13852360105405973,
+      "value_mse": 0.04567508575158014
+     },
+     {
+      "bucket_accuracy": 0.4315,
+      "family": "ISOLATED_PAWN",
+      "value_mae": 0.35022139671544056,
+      "value_mse": 0.24186329464145695
+     },
+     {
+      "bucket_accuracy": 0.782,
+      "family": "BISHOP_PAIR",
+      "value_mae": 0.17423016381060688,
+      "value_mse": 0.09303774697899587
+     }
+    ],
+    "sampled_rows": 4000
+   },
+   "contrast": {
+    "d": -0.0014356959162156342,
+    "mean_aux": 0.014825372816516271,
+    "mean_control": 0.016261068732731906,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0021974267529007215,
+     -0.0006739650795305471
+    ],
+    "t_one_sided": 1.7291328115213664,
+    "two_sided_ci": [
+     -0.0023577309117598457,
+     -0.0005136609206714228
+    ],
+    "verdict": "aux_better"
+   },
+   "cp_mae": {
+    "AUX-GEO": 126.13929312020124,
+    "RAW-SCORE": 131.82687119082144
+   },
+   "params": {
+    "AUX-GEO": {
+     "aux_weight": 0.0823074,
+     "inference_parameters": 3081,
+     "total_parameters": 3606,
+     "training_only_parameters": 525
+    },
+    "RAW-SCORE": {
+     "aux_weight": 0.0,
+     "inference_parameters": 3081,
+     "total_parameters": 3081,
+     "training_only_parameters": 0
+    }
+   },
+   "sign_agreement": {
+    "AUX-GEO": 0.91,
+    "RAW-SCORE": 0.8975
+   },
+   "wall_seconds_mean": {
+    "AUX-GEO": 12.63,
+    "RAW-SCORE": 6.63
+   }
+  }
+ },
+ "preregistration_hash": "sha256:224c1280aad1db5387d6af9d39797d1567489ef7b6b57e2f2785ed3c1d5f8a41",
+ "question": "does explicit semantic supervision help a RAW evaluator learn a better static representation even when no semantic features are supplied at inference?"
+}
