@@ -6,15 +6,19 @@ Experiment **X0015**, sealed at `record_hash sha256:a9ff1ef21477b2508f747b923896
 [Mnehmos/chess-vision-studio-lab#43](https://github.com/Mnehmos/chess-vision-studio-lab/issues/43),
 the factorial capstone of the static phase (#18/#20).
 
-**Answer.** Teacher quality and explicit structure are close to **independent resources with a small
-consistent complementarity**: the better teacher (CVS-4k) wins in every representation and at every
-capacity, the better representation (HYBRID) wins at the larger capacity, and the interaction —
-whether the teacher effect depends on the representation — is **negative in all four
-capacity × exam combinations** (the CVS advantage is slightly *smaller* for HYBRID), though only one
-of the four intervals is strictly resolved. The practical reading is the interesting part: **the
-cheap teacher with HYBRID beats the 8×-more-expensive teacher with RAW on both exams at the
-informative capacity**, so explicit structure more than compensates for teacher spend — but it does
-not erase the teacher ordering.
+**Answer.** Both main effects reproduce inside one controlled matrix, and the interaction is
+negative everywhere but only partly resolved:
+
+> **All four interaction estimates are negative; one is statistically resolved and three are
+> unresolved. HYBRID consistently attenuates the Stockfish penalty relative to RAW, but the
+> strength of that interaction is only partly resolved.**
+
+The teacher ordering is uniform — the cheap CVS-4k teacher wins in every representation and at
+every capacity on both exams — and the representation crossover reproduces S14 (HYBRID worse at
+H=1, better at H=4). Because the same teacher that costs 8× more is *also worse in every tested
+cell*, the factorial cannot identify whether representation substitutes for **beneficial** teacher
+compute; what it does show is an economically attractive **dominance result**: CVS-4k + HYBRID beats
+SF-32k + RAW on both exams at the informative capacity.
 
 ## The minimal matrix (selected from prior evidence, before any S16 outcome)
 
@@ -61,15 +65,26 @@ better at H=4 (S14's finding, including its non-monotonicity).
 | H4 | SF-DEEP | −0.001131 | [−0.002375, +0.000113] | unresolved |
 
 **All four point estimates are negative and none is positive**; one interval is strictly resolved.
-The honest label is therefore `NEGATIVE_INTERACTION_PARTLY_RESOLVED` — a consistent
-complementarity-leaning direction (a stronger teacher helps the semantic representation a little
-more, or hurts it a little less) with three of four intervals still crossing zero. The interaction
-is an order of magnitude smaller than either main effect, so the dominant reading is **near
-additivity**, not a strong interaction.
+The label is therefore `NEGATIVE_INTERACTION_PARTLY_RESOLVED`, and the defensible reading is exactly
+that sentence: HYBRID consistently attenuates the Stockfish penalty relative to RAW, with the
+strength of the interaction only partly resolved.
 
-## Does structure buy the same capability with a cheaper teacher?
+Two cautions that belong with the numbers, not in a footnote:
 
-At the informative capacity (H=4), on the CVS-DEEP exam:
+* the interaction is **not** an order of magnitude smaller than the main effects — at H4 on the SF
+  exam the interaction is −0.001131 while the teacher effect on HYBRID is +0.001454, i.e. the same
+  general scale — so "near additivity" would be an overstatement;
+* three intervals crossing zero do **not** establish independence. Unresolved is unresolved:
+  the data are consistent with a small interaction in either direction, and this matrix cannot
+  distinguish "independent" from "weakly complement-leaning".
+
+## Dominance: does the cheap teacher with structure beat the expensive teacher without it?
+
+This comparison is a **dominance result, not an identified substitution effect**: the more expensive
+teacher (SF-32k) is *also the worse teacher* in every tested cell, so "structure substitutes for
+teacher compute" cannot be concluded from it — that would require a more expensive teacher that is
+actually better, which this program's frozen contracts do not provide. At the informative capacity
+(H=4):
 
 | cell | teacher spend | exam loss (CVS-DEEP) | exam loss (SF-DEEP) |
 |---|---:|---:|---:|
@@ -79,9 +94,11 @@ At the informative capacity (H=4), on the CVS-DEEP exam:
 | SF-32k / RAW | 16.1× | 0.019131 | 0.030063 |
 
 The cheap teacher with HYBRID **beats the 8×-pricier teacher with RAW by 0.0058 (CVS exam) and
-0.0043 (SF exam)** — explicit structure substitutes for a large amount of teacher spend. It does
-*not* close the gap to using both: SF-32k/HYBRID is still worse than CVS-4k/HYBRID (the teacher
-main effect), which is the S13 stockfish cost problem, not a representation problem.
+0.0043 (SF exam)**. That is an economically attractive dominance result — spend 2.0× on labels and
+add structure rather than 16.1× on labels — and it is all it is: since SF-32k is both pricier and
+worse here, the comparison does not isolate what representation would buy against a teacher that
+actually helps. Nor does it close the gap to using both: SF-32k/HYBRID is still worse than
+CVS-4k/HYBRID, which is S13's Stockfish-cost finding, unchanged by representation.
 
 ## Economics and accounting (per cell)
 
@@ -102,13 +119,13 @@ at this scale.
 
 ## What the factorial says (and what it does not)
 
-* **Substitutes?** Partly, in the economic sense: structure buys back more than an 8× teacher price
-  difference at H=4.
-* **Complements?** Weakly and consistently in the interaction sense: the teacher effect is smaller
-  for HYBRID in all four combinations, one interval resolved.
-* **Independent?** Closest to the data at this resolution: the two main effects dominate and the
-  interaction is an order of magnitude smaller, with three intervals unresolved. Calling it a strong
-  interaction would be over-reading 160 cells.
+* **Substitutes?** Not identified. The dominance result (cheap teacher + HYBRID beats expensive
+  teacher + RAW) is real, but substitution cannot be tested against a teacher that is both pricier
+  and worse.
+* **Complements?** Consistently signed, partly resolved: all four interaction estimates are
+  negative — HYBRID attenuates the Stockfish penalty — with one interval excluding zero.
+* **Independent?** Not established either: three intervals cross zero, so independence is one of
+  several readings the data are consistent with, not a finding.
 * **Authority-specific?** No: both exams agree on the teacher ordering, on the representation
   crossover, and on the interaction's sign.
 
@@ -138,4 +155,5 @@ teacher ever pays once the student can use it.
 | dual-exam pass + analysis + seal | `tools/s16/s16_analyse.py` |
 | dual-exam scores (validated against recorded metrics) | `tools/s16/s16-dual-exam.json` / `.hash` |
 | state / result / summary | `tools/s16/s16-state.json`, `s16-result.json`, `s16-result-summary.json` |
+| wording erratum (interpretation claims) | `tools/s16/s16-wording-erratum.json` / `.hash` |
 | sealed lattice | `labstore/X/X0015.json` (`SEALED`, 160/160) |

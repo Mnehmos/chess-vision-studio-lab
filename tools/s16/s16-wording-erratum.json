@@ -1,0 +1,38 @@
+{
+ "correction_lives_in": [
+  "docs/S16_TEACHER_REPRESENTATION.md",
+  "PR #47 title and body",
+  "this record"
+ ],
+ "corrections": [
+  {
+   "claim": "the interaction is 'an order of magnitude smaller than either main effect' and the dominant reading is 'near additivity'",
+   "corrected": "all four interaction estimates are negative; one is statistically resolved and three are unresolved. HYBRID consistently attenuates the Stockfish penalty relative to RAW, but the strength of that interaction is only partly resolved",
+   "why_wrong": "at H4 on the SF exam the interaction is -0.001131 while the teacher effect on HYBRID is +0.001454 - the same general scale, not an order of magnitude smaller. Three intervals crossing zero also do not establish independence"
+  },
+  {
+   "claim": "explicit structure 'substitutes for a large amount of teacher spend'",
+   "corrected": "an economically attractive dominance result - 2.0x teacher spend with structure beats 16.1x without it - and nothing more; identifying substitution would require a pricier teacher that is actually better, which the frozen S13 contracts do not provide",
+   "why_wrong": "the more expensive Stockfish teacher is ALSO the worse teacher in every tested cell, so CVS-4k + HYBRID beating SF-32k + RAW is a dominance result and does not identify substitution for beneficial teacher compute"
+  }
+ ],
+ "experiment": "X0015",
+ "id": "s16-wording-erratum",
+ "kind": "additive wording correction to the REPORT and PR prose; the sealed result and every number are unaffected",
+ "reported_in": "docs/S16_TEACHER_REPRESENTATION.md",
+ "sealed_record_hash": "sha256:a9ff1ef21477b2508f747b92389684e9563ec6d4bef70ac13cdec193ea7af98b",
+ "sealed_result_is_clean": {
+  "checked": "the sealed X0015 result was searched for the offending phrasing",
+  "found": {
+   "near additiv": 0,
+   "order of magnitude": 0,
+   "substitution claim": 0
+  },
+  "note": "the strings 'substitutes' and 'independent' appear only inside the predeclared question list that the issue itself posed, never as a claim; the sealed pattern label (NEGATIVE_INTERACTION_PARTLY_RESOLVED) and its counts are descriptive and accurate, and pattern_note already refuses to force unresolved intervals into a significance claim"
+ },
+ "unchanged": [
+  "every measured number, contrast, interval, mean, parameter count and economic figure",
+  "the sealed pattern label and its counts (4 negative, 1 resolved)",
+  "the main-effect findings: the teacher ordering is uniform and the representation crossover reproduces S14"
+ ]
+}
