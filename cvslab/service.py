@@ -623,12 +623,14 @@ class LabService:
                                   "against different supervision"))))
                 if train_hash != eval_hash and not declared:
                     raise _PreflightFailed("training and evaluation TargetSpecs differ")
+            input_kind = str(cfg.get("INPUT", "RAW"))
             train_split, dropped_train = nnue.encode_records(data.load_split(self.store, dataset, "train"),
-                                                             target_spec=train_spec)
+                                                             target_spec=train_spec, input_kind=input_kind)
             val_split, dropped_val = nnue.encode_records(data.load_split(self.store, dataset, "val"),
-                                                         target_spec=train_spec)
+                                                         target_spec=train_spec, input_kind=input_kind)
             eval_split, dropped_eval = nnue.encode_records(
-                data.load_split(self.store, eval_dataset, protocol.split), target_spec=eval_spec)
+                data.load_split(self.store, eval_dataset, protocol.split), target_spec=eval_spec,
+                input_kind=input_kind)
             compute.accepted_examples = len(train_split) + len(val_split) + len(eval_split)
             compute.discarded_examples = dropped_train + dropped_val + dropped_eval
             if not len(train_split) or not len(eval_split):
@@ -637,8 +639,12 @@ class LabService:
                  f"{protocol.split}={len(eval_split)} discarded={compute.discarded_examples}")
 
             rng = np.random.default_rng(run.seed)
-            model = nnue.RawNnue.initialize(nnue.INPUT_DIM, int(cfg["H"]), float(cfg["INIT_STD"]),
-                                            float(cfg["OUT_SCALE_CP"]), rng)
+            if str(cfg.get("ARCH", "crelu1")) == "linear":
+                model = nnue.LinearEval.initialize(nnue.input_dim(input_kind), float(cfg["INIT_STD"]),
+                                                   float(cfg["OUT_SCALE_CP"]), rng)
+            else:
+                model = nnue.RawNnue.initialize(nnue.input_dim(input_kind), int(cfg["H"]),
+                                                float(cfg["INIT_STD"]), float(cfg["OUT_SCALE_CP"]), rng)
 
             def on_epoch(entry: dict) -> None:
                 run.training_curve.append(EpochLog(**entry))
@@ -1043,7 +1049,14 @@ class LabService:
         return keys
 
     def membership_report(self, experiment) -> dict:
-        """Exactly one terminal run per expected cell, no duplicates, no extras."""
+        """Exactly one COMPLETED run per expected cell, no extras, no unresolvable duplicates.
+
+        A cell whose first attempt crashed (INVALID) may be REPLACED by one later COMPLETED run:
+        the crash stays recorded as immutable evidence and the retry counts, which is how a
+        crashed cell is honestly recovered without discarding a whole frozen study. Anything
+        harder than that — two COMPLETED runs, or a COMPLETED beside a QUEUED/RUNNING/FAILED —
+        is still a duplicate and fails closed.
+        """
         expected = self.expected_membership(experiment)
         runs = [r for r in self.store.list("R", verify=True, kind=Run)
                 if r.experiment_id == experiment.id]
@@ -1051,16 +1064,28 @@ class LabService:
         for run in runs:
             by_key.setdefault((run.ablation_id, run.seed), []).append(run)
         missing = sorted(key for key in expected if key not in by_key)
-        duplicates = {f"{key[0]}:{key[1]}": [r.id for r in value]
-                      for key, value in by_key.items() if len(value) > 1}
+        duplicates: dict = {}
+        replaced: dict = {}
+        completed: list = []
+        invalid: list = []
+        for key, value in by_key.items():
+            done = [run for run in value if run.status == RunStatus.COMPLETED]
+            others = [run for run in value if run.status != RunStatus.COMPLETED]
+            if len(value) == 1:
+                if done:
+                    completed.append(key)
+                elif value[0].status == RunStatus.INVALID:
+                    invalid.append(key)
+            elif len(done) == 1 and others and all(run.status == RunStatus.INVALID for run in others):
+                completed.append(key)
+                replaced[f"{key[0]}:{key[1]}"] = [run.id for run in value]
+            else:
+                duplicates[f"{key[0]}:{key[1]}"] = [run.id for run in value]
         extra = sorted(key for key in by_key if key not in expected)
         nonterminal = sorted(run.id for run in runs if run.status not in TERMINAL_RUN_STATUSES)
-        completed = sorted(key for key, value in by_key.items()
-                           if len(value) == 1 and value[0].status == RunStatus.COMPLETED)
-        invalid = sorted(key for key, value in by_key.items()
-                         if len(value) == 1 and value[0].status == RunStatus.INVALID)
         return {"experiment": experiment.id, "expected_cells": len(expected), "runs_found": len(runs),
                 "completed_cells": len(completed), "invalid_cells": len(invalid),
+                "replaced_cells": replaced,
                 "missing": [[key[0], key[1]] for key in missing], "duplicates": duplicates,
                 "extra": [[key[0], key[1]] for key in extra], "nonterminal": nonterminal}
 
@@ -1072,8 +1097,11 @@ class LabService:
             problems.append(f"{len(report['missing'])} expected cells have no run "
                             f"(first: {report['missing'][0]})")
         if report["duplicates"]:
-            problems.append(f"{len(report['duplicates'])} cells have more than one run "
+            problems.append(f"{len(report['duplicates'])} cells have an unresolvable run set "
                             f"({list(report['duplicates'])[0]})")
+        if report["invalid_cells"]:
+            problems.append(f"{len(report['invalid_cells'])} cells hold only an INVALID run "
+                            f"(first: {report['invalid_cells'][0]}) — retry those cells")
         if report["extra"]:
             problems.append(f"{len(report['extra'])} runs are not in the design "
                             f"(first: {report['extra'][0]})")

@@ -1,0 +1,640 @@
+{
+ "count": 33,
+ "crash_reasons": {
+  "ValueError: need at least one array to stack": 32,
+  "orphaned RUNNING: the executing driver died; retried by a la": 1
+ },
+ "derived_from": "the store's run records and X0012's sealed membership (replaced_cells)",
+ "entries": [
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 0
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:32Z",
+    "run_id": "R3829",
+    "started_at": "2026-09-17T16:27:51Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4009",
+    "started_at": "2026-09-17T17:03:42Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 1
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3830",
+    "started_at": "2026-09-17T16:27:59Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4010",
+    "started_at": "2026-09-17T17:03:50Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 10
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3839",
+    "started_at": "2026-09-17T16:29:14Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4019",
+    "started_at": "2026-09-17T17:05:02Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 11
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3840",
+    "started_at": "2026-09-17T16:29:23Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4020",
+    "started_at": "2026-09-17T17:05:10Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 12
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3841",
+    "started_at": "2026-09-17T16:29:32Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4021",
+    "started_at": "2026-09-17T17:05:18Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 13
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3842",
+    "started_at": "2026-09-17T16:29:41Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4022",
+    "started_at": "2026-09-17T17:05:26Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 14
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3843",
+    "started_at": "2026-09-17T16:29:50Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4023",
+    "started_at": "2026-09-17T17:05:33Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 15
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3844",
+    "started_at": "2026-09-17T16:30:00Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4024",
+    "started_at": "2026-09-17T17:05:42Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 16
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3845",
+    "started_at": "2026-09-17T16:30:09Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4025",
+    "started_at": "2026-09-17T17:05:49Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 17
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3846",
+    "started_at": "2026-09-17T16:30:18Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4026",
+    "started_at": "2026-09-17T17:05:57Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 18
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3847",
+    "started_at": "2026-09-17T16:30:27Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4027",
+    "started_at": "2026-09-17T17:06:05Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 19
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3848",
+    "started_at": "2026-09-17T16:30:36Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4028",
+    "started_at": "2026-09-17T17:06:13Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 2
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3831",
+    "started_at": "2026-09-17T16:28:07Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4011",
+    "started_at": "2026-09-17T17:03:58Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 3
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3832",
+    "started_at": "2026-09-17T16:28:15Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4012",
+    "started_at": "2026-09-17T17:04:05Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 4
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3833",
+    "started_at": "2026-09-17T16:28:23Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4013",
+    "started_at": "2026-09-17T17:04:13Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 5
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3834",
+    "started_at": "2026-09-17T16:28:32Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4014",
+    "started_at": "2026-09-17T17:04:21Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 6
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3835",
+    "started_at": "2026-09-17T16:28:40Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4015",
+    "started_at": "2026-09-17T17:04:30Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 7
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3836",
+    "started_at": "2026-09-17T16:28:48Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4016",
+    "started_at": "2026-09-17T17:04:38Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 8
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3837",
+    "started_at": "2026-09-17T16:28:57Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4017",
+    "started_at": "2026-09-17T17:04:46Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0228",
+    "seed": 9
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3838",
+    "started_at": "2026-09-17T16:29:05Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:40Z",
+    "run_id": "R4018",
+    "started_at": "2026-09-17T17:04:54Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 0
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3849",
+    "started_at": "2026-09-17T16:30:45Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4029",
+    "started_at": "2026-09-17T17:06:21Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 1
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3850",
+    "started_at": "2026-09-17T16:30:55Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4030",
+    "started_at": "2026-09-17T17:06:29Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 10
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3859",
+    "started_at": "2026-09-17T16:32:13Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4039",
+    "started_at": "2026-09-17T17:07:40Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 11
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3860",
+    "started_at": "2026-09-17T16:32:22Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4040",
+    "started_at": "2026-09-17T17:07:48Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 12
+   },
+   "crash": {
+    "error": "orphaned RUNNING: the executing driver died; retried by a later driver",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3861",
+    "started_at": "2026-09-17T16:32:30Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:42:28Z",
+    "run_id": "R4041",
+    "started_at": "2026-09-17T17:07:56Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 2
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3851",
+    "started_at": "2026-09-17T16:31:03Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4031",
+    "started_at": "2026-09-17T17:06:37Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 3
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3852",
+    "started_at": "2026-09-17T16:31:12Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4032",
+    "started_at": "2026-09-17T17:06:45Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 4
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3853",
+    "started_at": "2026-09-17T16:31:21Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4033",
+    "started_at": "2026-09-17T17:06:53Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 5
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3854",
+    "started_at": "2026-09-17T16:31:30Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4034",
+    "started_at": "2026-09-17T17:07:01Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 6
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3855",
+    "started_at": "2026-09-17T16:31:38Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4035",
+    "started_at": "2026-09-17T17:07:09Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 7
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3856",
+    "started_at": "2026-09-17T16:31:47Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4036",
+    "started_at": "2026-09-17T17:07:17Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 8
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3857",
+    "started_at": "2026-09-17T16:31:56Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4037",
+    "started_at": "2026-09-17T17:07:25Z",
+    "status": "COMPLETED"
+   }
+  },
+  {
+   "cell": {
+    "ablation_id": "A0229",
+    "seed": 9
+   },
+   "crash": {
+    "error": "ValueError: need at least one array to stack",
+    "queued_at": "2026-09-17T16:18:33Z",
+    "run_id": "R3858",
+    "started_at": "2026-09-17T16:32:05Z",
+    "status": "INVALID"
+   },
+   "retry": {
+    "queued_at": "2026-09-17T16:40:41Z",
+    "run_id": "R4038",
+    "started_at": "2026-09-17T17:07:33Z",
+    "status": "COMPLETED"
+   }
+  }
+ ],
+ "experiment": "X0012",
+ "id": "s14-replacements-ledger",
+ "why": "the preregistered stop condition 'a lattice cell cannot train or evaluate' fired 33 times (an empty-validation-split bug in the new GEO encoder). Every crash stays immutable in the store beside its retry; this ledger exports the full auditable list (s14-state.json's retries array holds only the last driver invocation's entries)."
+}

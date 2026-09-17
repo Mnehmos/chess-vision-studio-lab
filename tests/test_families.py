@@ -19,7 +19,7 @@ def test_coerce_rejects_out_of_range_and_wrong_types():
     with pytest.raises(LabError):
         families.coerce(families.switch_map("NNUE")["H"], 1.5)
     with pytest.raises(LabError):
-        families.coerce(families.switch_map("NNUE")["INPUT"], "GEO")
+        families.coerce(families.switch_map("NNUE")["INPUT"], "PIECE_LIST")  # never a registered choice
     with pytest.raises(LabError):
         families.coerce(families.switch_map("NNUE")["LR"], "not-a-number")
 

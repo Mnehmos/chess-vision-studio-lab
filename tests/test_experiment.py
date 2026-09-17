@@ -272,9 +272,9 @@ def test_incomplete_membership_is_refused(lab):
     assert report["expected_cells"] == expected and report["completed_cells"] == expected
 
     lab.queue_runs(arms[0]["ablations"][0], seeds=(0,))      # a duplicate cell
-    with pytest.raises(LabError, match="more than one run"):
+    with pytest.raises(LabError, match="unresolvable run set"):
         lab.assert_experiment_complete(experiment)
-    with pytest.raises(LabError, match="more than one run"):
+    with pytest.raises(LabError, match="unresolvable run set"):
         lab.seal_experiment(experiment.id, {"decision": "early"})
 
 
@@ -387,3 +387,47 @@ def test_an_explicit_cell_list_expresses_a_non_product_lattice(lab):
     # a repeated cell is refused
     _, error = _attempt_cells(lab, [("2x", 16000), ("2x", 16000)], [16000, 40000], ["2x"], "e")
     assert "repeats" in error
+
+
+def test_an_invalid_attempt_may_be_replaced_by_one_completed_run(lab):
+    """Crashes are recoverable without discarding a frozen study; ambiguity is not.
+
+    A cell may hold one INVALID attempt plus one COMPLETED retry — the crash stays recorded as
+    evidence and the retry counts. Two COMPLETED runs in one cell, or a COMPLETED beside a
+    non-invalid run, remain duplicates and refuse to seal.
+    """
+    from cvslab.schemas import Run as RunRecord, RunStatus
+
+    normalization, train, exam, recipe, protocol, xid, arms, experiment = miniature(lab)
+    arm_ablation = arms[0]["ablations"][0]
+    run = lab.execute_run(lab.queue_runs(arm_ablation, seeds=[0])[0].id)
+    assert run.status == RunStatus.COMPLETED
+
+    crash = lab.store.create(RunRecord(
+        id=lab.store.next_id("R"), ablation_id=arm_ablation, hypothesis_id=run.hypothesis_id,
+        display_label=run.display_label, seed=0, status=RunStatus.INVALID,
+        effective_config=run.effective_config, config_hash=run.config_hash,
+        identity_hash=run.identity_hash, param_count=run.param_count, dataset_id=run.dataset_id,
+        dataset_manifest_hash=run.dataset_manifest_hash,
+        training_recipe_id=run.training_recipe_id, recipe_hash=run.recipe_hash,
+        eval_protocol_id=run.eval_protocol_id, protocol_hash=run.protocol_hash,
+        eval_dataset_id=run.eval_dataset_id, eval_dataset_manifest_hash=run.eval_dataset_manifest_hash,
+        train_target_spec_hash=run.train_target_spec_hash,
+        eval_target_spec_hash=run.eval_target_spec_hash,
+        supervision_divergence=run.supervision_divergence, experiment_id=run.experiment_id,
+        queued_at=run.queued_at,
+        error="simulated crash: the crash stays recorded and the retry counts"))
+
+    report = lab.membership_report(experiment)
+    key = f"{arm_ablation}:0"
+    assert sorted(report["replaced_cells"][key]) == sorted([run.id, crash.id])
+    assert report["completed_cells"] == 1                     # only this cell is complete so far
+    assert report["invalid_cells"] == 0 and report["duplicates"] == {}
+
+    # a second COMPLETED run in the same cell is unresolvable, however it got there
+    retry = lab.queue_runs(arm_ablation, seeds=[0])[0]
+    assert lab.execute_run(retry.id).status.value == "COMPLETED"
+    report = lab.membership_report(experiment)
+    assert key in report["duplicates"]
+    with pytest.raises(LabError, match="unresolvable"):
+        lab.assert_experiment_complete(experiment)

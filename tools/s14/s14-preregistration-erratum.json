@@ -1,0 +1,38 @@
+{
+ "id": "s14-preregistration-erratum",
+ "preregistration": "tools/s14/s14-preregistration.json",
+ "preregistration_hash": "sha256:39eb793bfaf8a0999df967b3ff1e59f408684f8bcc8013d1f048764196429df9",
+ "experiment": "X0012",
+ "kind": "additive erratum; the frozen file is not rewritten",
+ "fields": [
+  {
+   "path": "lattice.cells",
+   "recorded_value": 280,
+   "correct_value": 260,
+   "why": "the generator computed sum(conditions per family) * seeds + seeds, adding an extra 20 for the GEO linear floor that the per-family sum had already counted. The ladder the same file enumerates is 4 (RAW) + 5 (GEO, including the linear floor) + 4 (HYBRID) = 13 conditions x 20 seeds = 260, which is exactly what X0012 froze and executed (expected membership 260; sealed membership 260/260). The error was arithmetical and never affected the design: the frozen membership and the sealed result both say 260.",
+   "generator_fix": "tools/s14/s14_run.py now computes the cell count from the enumerated ladder rows directly, so the declared count can never disagree with the enumeration again"
+  },
+  {
+   "path": "analysis.capability (wording)",
+   "recorded_reading": "capability per learned parameter",
+   "correct_reading": "loss divided by parameter count is NOT a capability or efficiency score: it mechanically decreases as the denominator grows. The matched frontier itself (exam loss at matched budgets, with exact counts and mismatches reported) is the measurement. The sealed result's capability_per_1000_params field is retained as arithmetic, not as a score, and the report derives no claim from it.",
+   "analyser_fix": "tools/s14/s14_analyse.py renames the field to loss_per_1000_parameters_mechanical and labels it as not an efficiency score"
+  },
+  {
+   "path": "analysis.semantic_ablation (wording)",
+   "recorded_reading": "which named geometry families materially affect the static evaluator",
+   "correct_reading": "the lesion table says THIS FROZEN SENTINEL (the HYBRID 12K-budget seed-0 model) is sensitive to these input groups at inference; it is not a general statement of feature importance across models, budgets or seeds",
+   "analyser_fix": "tools/s14/s14_analyse.py narrows the reading string to sentinel sensitivity"
+  }
+ ],
+ "unaffected": [
+  "the ladder itself, the frozen geometry manifest, the teacher/exam contract, every seed",
+  "the sealed 260-cell membership and all measured contrasts",
+  "the qualitative frontier (GEO never replaces RAW; HYBRID strictly better from 3K up; non-monotone at 1K; the 43-parameter floor)"
+ ],
+ "related": {
+  "deviation_record": "tools/s14/s14-deviation.json",
+  "replacements_ledger": "tools/s14/s14-replacements-ledger.json"
+ },
+ "reported_in": "docs/S14_REPRESENTATION.md"
+}

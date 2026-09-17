@@ -1,0 +1,209 @@
+{
+ "analysis": {
+  "capability": "exam loss per learned parameter per family; exact counts and budget mismatch reported beside every comparison",
+  "costs": "train wall time (recorded per run), serialized model size (artifact bytes), and inference cost measured BOTH as feature encoding and forward pass (positions/second, python implementation, reported as measured)",
+  "no_pooling": "budgets are reported separately; no global winner score",
+  "overfit_gap": "loss on the training rows minus exam loss per model, labelled as a distribution gap (there is no held-out validation split)",
+  "primary": "per budget, paired by seed: test_loss differences GEO-RAW, HYBRID-RAW and HYBRID-GEO with separate one-sided 95% exact-t bounds at each pair's df",
+  "semantic_ablation": "on the preregistered sentinel (HYBRID at the 12K budget, seed 0), zero one named geometry group's input columns at a time at INFERENCE on the frozen weights; report FULL - group loss change. No retraining, no combinatorial ablations",
+  "slices": "exam error by phase (opening/middlegame/endgame) and material bucket, computed deterministically from the exam FENs"
+ },
+ "dependency": {
+  "exam": "E0004 CVS-DEEP 400k over the 200 held-out identities",
+  "teacher": "CVS-4k over D0036 (S12/S13's CVS arm; TargetSpec hash sha256:6b8bd7dcc1ac\u2026 asserted against X0008's sealed 4k arm)",
+  "why": "S13's selected static contract reused unchanged so representation is the ONLY changing variable"
+ },
+ "geometry_manifest": {
+  "derivation": "position only; no label, teacher, move or outcome information enters the representation",
+  "file": "tools/s14/s14-geometry-manifest.json",
+  "hash": "sha256:a35dd752b91ec21d3d7913c372b9a0bfb75c898af8747c31312c69b70a88484d"
+ },
+ "guardrails": [
+  "teacher authority does not change inside S14",
+  "no search or game claims",
+  "no auxiliary geometry prediction loss (that is S15)",
+  "no hand-crafted feature tuning after outcomes are visible",
+  "no silent feature dropping for missing values (the registry emits all families for every position)",
+  "no copying of legacy semantic model code",
+  "negative and non-monotonic results are preserved"
+ ],
+ "id": "s14-representation",
+ "issue": "Mnehmos/chess-vision-studio-lab#41 (controlled slice of #18)",
+ "ladder": {
+  "formula": {
+   "crelu1": "inputs*H + 2H + 1",
+   "linear": "inputs + 1"
+  },
+  "input_dims": {
+   "GEO": 42,
+   "HYBRID": 810,
+   "RAW": 768
+  },
+  "note": "H chosen as the exact-count nearest neighbour of each target, generated from cvslab.families.param_count (never hand-entered), frozen before any outcome",
+  "rows": [
+   {
+    "H": 1,
+    "budget_target": 1000,
+    "input": "RAW",
+    "learned_parameters": 771,
+    "mismatch": -229
+   },
+   {
+    "H": 4,
+    "budget_target": 3000,
+    "input": "RAW",
+    "learned_parameters": 3081,
+    "mismatch": 81
+   },
+   {
+    "H": 16,
+    "budget_target": 12000,
+    "input": "RAW",
+    "learned_parameters": 12321,
+    "mismatch": 321
+   },
+   {
+    "H": 32,
+    "budget_target": 25000,
+    "input": "RAW",
+    "learned_parameters": 24641,
+    "mismatch": -359
+   },
+   {
+    "H": 23,
+    "budget_target": 1000,
+    "input": "GEO",
+    "learned_parameters": 1013,
+    "mismatch": 13
+   },
+   {
+    "H": 68,
+    "budget_target": 3000,
+    "input": "GEO",
+    "learned_parameters": 2993,
+    "mismatch": -7
+   },
+   {
+    "H": 273,
+    "budget_target": 12000,
+    "input": "GEO",
+    "learned_parameters": 12013,
+    "mismatch": 13
+   },
+   {
+    "H": 568,
+    "budget_target": 25000,
+    "input": "GEO",
+    "learned_parameters": 24993,
+    "mismatch": -7
+   },
+   {
+    "H": 1,
+    "budget_target": 1000,
+    "input": "HYBRID",
+    "learned_parameters": 813,
+    "mismatch": -187
+   },
+   {
+    "H": 4,
+    "budget_target": 3000,
+    "input": "HYBRID",
+    "learned_parameters": 3249,
+    "mismatch": 249
+   },
+   {
+    "H": 15,
+    "budget_target": 12000,
+    "input": "HYBRID",
+    "learned_parameters": 12181,
+    "mismatch": 181
+   },
+   {
+    "H": 31,
+    "budget_target": 25000,
+    "input": "HYBRID",
+    "learned_parameters": 25173,
+    "mismatch": 173
+   },
+   {
+    "ARCH": "linear",
+    "H": 1,
+    "budget_target": "linear-floor",
+    "input": "GEO",
+    "learned_parameters": 43,
+    "mismatch": null
+   }
+  ],
+  "targets": [
+   1000,
+   3000,
+   12000,
+   25000
+  ]
+ },
+ "lattice": {
+  "arms": [
+   "S14-RAW",
+   "S14-GEO",
+   "S14-HYBRID"
+  ],
+  "budgets": [
+   1000,
+   3000,
+   12000,
+   25000,
+   "linear-floor"
+  ],
+  "cells": 280
+ },
+ "questions": [
+  "how much opaque learned capacity can be replaced by named deterministic chess structure?",
+  "does explicit geometry add useful information to RAW-768, or can the raw network already recover it efficiently?",
+  "at matched learned-parameter budgets, which representation gives the best static judgment per parameter and per unit inference cost?"
+ ],
+ "representations": {
+  "GEO": "the 42 named registry columns (see the manifest)",
+  "HYBRID": "RAW ++ GEO in one input vector (810 columns)",
+  "RAW": "768 piece-square columns, side-to-move relative (existing)",
+  "architectures": {
+   "crelu1": "inputs -> H clipped-ReLU -> 1",
+   "linear": "inputs -> 1 (the white-box semantic floor; GEO only, Stage A)"
+  }
+ },
+ "stage_order": "GEO-LINEAR (the 43-parameter direct floor) is measured inside the same frozen lattice, and the report distinguishes named-input observability (linear) from hidden-unit opacity (crelu1)",
+ "status": "materialized before the lattice is frozen and before any outcome is inspected",
+ "stop_conditions": [
+  "the D0036 TargetSpec hash differs from X0008's sealed 4k arm",
+  "a lattice cell cannot train or evaluate",
+  "the geometry registry hash differs from the manifest's pin",
+  "membership or the frozen budget mapping fails"
+ ],
+ "student": {
+  "divergence_declaration": "S14 representation arm: same positions, same teacher labels, same student compute and same exam as its paired arms; only the input representation and the matched learned-parameter budget change",
+  "recipe": "T0004-derived; identical optimizer/LR/init/K/LAMBDA for every arm; cold start every run; no per-family tuning",
+  "regime": "fixed updates: MAX_UPDATES 760 x BATCH 256 = 194560 presentations for every cell",
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ]
+ },
+ "version": 1
+}

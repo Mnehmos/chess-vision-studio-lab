@@ -7,7 +7,9 @@ from typing import Iterable, Mapping
 from .schemas import ConfigDiff, ConfigValue, Switch
 from .store import LabError
 
-INPUT_DIMS = {"RAW": 768}
+INPUT_DIMS = {"RAW": 768, "GEO": 42, "HYBRID": 810}
+# GEO = 2 named columns per cvslab.facts.GEOMETRY_FAMILIES entry (value rescaled by the family's
+# own bucket-3 threshold, bucket/3, sign-flipped for black to move); HYBRID = RAW ++ GEO.
 
 # Config keys that are not experimental switches but must still travel with a
 # configuration and be covered by its hash (e.g. the frozen supervision spec).
@@ -15,9 +17,19 @@ RESERVED_CONFIG_KEYS = frozenset({"TARGET_SPEC"})
 
 NNUE_SWITCHES: list[Switch] = [
     Switch(
-        key="INPUT", label="Input representation", kind="enum", default="RAW", choices=["RAW"], axis="representation",
-        description="RAW = 768 piece-square planes from the side to move (mirror + colour swap for black). "
-        "GEO and HYBRID representations are registered in Phase 2.",
+        key="INPUT", label="Input representation", kind="enum", default="RAW",
+        choices=["RAW", "GEO", "HYBRID"], axis="representation",
+        description="RAW = 768 piece-square planes from the side to move (mirror + colour swap for "
+        "black). GEO = the 42 named deterministic geometry columns of the cvslab.facts registry "
+        "(White-POV delta / the family's own bucket-3 threshold, bucket/3, sign-flipped for black). "
+        "HYBRID = RAW ++ GEO in one input vector. All three are side-to-move relative.",
+    ),
+    Switch(
+        key="ARCH", label="Architecture", kind="enum", default="crelu1", choices=["crelu1", "linear"],
+        axis="capacity",
+        description="crelu1 = inputs -> H clipped-ReLU -> 1 (learned params = inputs*H + 2H + 1). "
+        "linear = inputs -> 1 directly, the white-box semantic floor (learned params = inputs + 1; "
+        "H is ignored).",
     ),
     Switch(
         key="H", label="Hidden width", kind="int", default=1, min=1, max=4096, axis="capacity",
@@ -130,6 +142,8 @@ def parameter_shapes(family: str, config: Mapping[str, ConfigValue]) -> dict[str
     if family != "NNUE":
         raise LabError(f"no parameter model registered for family {family}")
     inputs, hidden = INPUT_DIMS[str(config["INPUT"])], int(config["H"])
+    if str(config.get("ARCH", "crelu1")) == "linear":
+        return {"w": [inputs], "b": []}
     return {"w1": [inputs, hidden], "b1": [hidden], "w2": [hidden], "b2": []}
 
 

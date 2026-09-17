@@ -1,0 +1,43 @@
+{
+ "id": "s14-deviation",
+ "experiment": "X0012",
+ "sealed_record_hash_source": "labstore/X/X0012.json (record_hash sha256:75676df8…)",
+ "status": "DEVIATED-BUT-SEALED",
+ "preregistration": "tools/s14/s14-preregistration.json (hash sha256:39eb793b…)",
+ "deviation": "a preregistered stop condition fired during execution and the study continued after an outcome-blind repair, rather than halting",
+ "what_the_preregistration_said": {
+  "stop_conditions": [
+   "the D0036 TargetSpec hash differs from X0008's sealed 4k arm",
+   "a lattice cell cannot train or evaluate",
+   "the geometry registry hash differs from the manifest's pin",
+   "membership or the frozen budget mapping fails"
+  ],
+  "implication": "under the preregistered text, cells that cannot train are a stop; the study instead repaired the encoder and retried the cells"
+ },
+ "what_happened": [
+  "the new GEO encoder raised ValueError('need at least one array to stack') on D0036's EMPTY validation split (fractions 1.0/0.0/0.0): np.stack([]) has no zero-row guard, unlike the RAW branch's np.zeros((0, 768)). 32 GEO cells recorded INVALID; one further cell was RUNNING when the first driver was stopped and was marked INVALID as an orphan.",
+  "the repair was a two-line zero-row guard in cvslab/nnue.py encode_records - a pure input-path fix that changes no supervision, no design, no seed and no metric.",
+  "to retry the cells without discarding the frozen study, the Lab gained replacement semantics: a cell whose only attempt is INVALID may hold one later COMPLETED run; the crash stays immutable evidence beside its retry; two COMPLETED runs remain unresolvable. Tested in tests/test_experiment.py::test_an_invalid_attempt_may_be_replaced_by_one_completed_run.",
+  "all 33 affected cells were retried and COMPLETED; X0012 sealed 260/260 with every crash/retry pair listed in the membership's replaced_cells."
+ ],
+ "outcome_blindness_of_the_repair": [
+  "before the fix, only run STATUSES had been observed (counts of COMPLETED/INVALID); no loss value, contrast or summary had been computed or read",
+  "the fix touches only the encoding of an empty input list; it cannot change any filled split",
+  "the retry runs are deterministic re-executions of the same frozen cells (same ablation, seed, dataset, recipe and exam), and the replacement rule was added to the Lab as a general capability with tests, not as a study-specific patch"
+ ],
+ "what_did_not_change": [
+  "the lattice (3 families x 4 budgets + the GEO linear floor x 20 seeds), the ladder, the geometry manifest, the teacher/exam contract, the seeds, the student-compute regime",
+  "the 227 cells that completed on their first attempt",
+  "the analysis plan and the frozen preregistration file (its 280-cell arithmetic error is recorded additively in s14-preregistration-erratum.json)"
+ ],
+ "consequences_for_interpretation": [
+  "the global frontier statements rest on a deviated execution: the deviation is confined to 33 GEO cells whose first attempt crashed before training completed, and their retries are ordinary frozen-cell executions",
+  "a pristine preregistered replication would need its own preregistration; nothing here is rewritten"
+ ],
+ "evidence": {
+  "replacements_ledger": "tools/s14/s14-replacements-ledger.json (33 entries, crash and retry run ids with reasons, derived from the store)",
+  "erratum": "tools/s14/s14-preregistration-erratum.json",
+  "state": "tools/s14/s14-state.json",
+  "doc": "docs/S14_REPRESENTATION.md"
+ }
+}
