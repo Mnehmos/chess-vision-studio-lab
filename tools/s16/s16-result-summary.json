@@ -1,0 +1,224 @@
+{
+ "evidence": {
+  "dual_exam": "tools/s16/s16-dual-exam.json",
+  "preregistration": "tools/s16/s16-preregistration.json",
+  "result": "tools/s16/s16-result.json",
+  "state": "tools/s16/s16-state.json"
+ },
+ "experiment": "X0015",
+ "observed_interaction_pattern": "NEGATIVE_INTERACTION_PARTLY_RESOLVED",
+ "per_capacity": {
+  "1": {
+   "CVS-DEEP": {
+    "interaction": {
+     "interaction": -0.000353,
+     "one_sided_bounds": [
+      -0.000935,
+      0.000229
+     ],
+     "verdict": "unresolved"
+    },
+    "means": {
+     "CVS-4k/HYBRID": 0.018871,
+     "CVS-4k/RAW": 0.015989,
+     "SF-32k/HYBRID": 0.020829,
+     "SF-32k/RAW": 0.018301
+    },
+    "representation_effect": {
+     "CVS-4k": {
+      "d": 0.002881,
+      "one_sided_bounds": [
+       0.0015305656542823802,
+       0.004232204171062388
+      ],
+      "verdict": "positive"
+     },
+     "SF-32k": {
+      "d": 0.002528,
+      "one_sided_bounds": [
+       0.001291622090627803,
+       0.0037652443034749458
+      ],
+      "verdict": "positive"
+     }
+    },
+    "teacher_effect": {
+     "HYBRID": {
+      "d": 0.001959,
+      "one_sided_bounds": [
+       0.001423239478461439,
+       0.0024938589412111154
+      ],
+      "verdict": "positive"
+     },
+     "RAW": {
+      "d": 0.002312,
+      "one_sided_bounds": [
+       0.0018766728039046612,
+       0.002746329047009913
+      ],
+      "verdict": "positive"
+     }
+    }
+   },
+   "SF-DEEP": {
+    "interaction": {
+     "interaction": -0.00056,
+     "one_sided_bounds": [
+      -0.001062,
+      -5.8e-05
+     ],
+     "verdict": "negative"
+    },
+    "means": {
+     "CVS-4k/HYBRID": 0.029842,
+     "CVS-4k/RAW": 0.02635,
+     "SF-32k/HYBRID": 0.031581,
+     "SF-32k/RAW": 0.028649
+    },
+    "representation_effect": {
+     "CVS-4k": {
+      "d": 0.003492,
+      "one_sided_bounds": [
+       0.0018924580405703703,
+       0.005090790097466554
+      ],
+      "verdict": "positive"
+     },
+     "SF-32k": {
+      "d": 0.002932,
+      "one_sided_bounds": [
+       0.0013813392703916425,
+       0.004482136669923414
+      ],
+      "verdict": "positive"
+     }
+    },
+    "teacher_effect": {
+     "HYBRID": {
+      "d": 0.001739,
+      "one_sided_bounds": [
+       0.001323446129841495,
+       0.002154034970989868
+      ],
+      "verdict": "positive"
+     },
+     "RAW": {
+      "d": 0.002299,
+      "one_sided_bounds": [
+       0.0018497057792851725,
+       0.002747547519268059
+      ],
+      "verdict": "positive"
+     }
+    }
+   }
+  },
+  "4": {
+   "CVS-DEEP": {
+    "interaction": {
+     "interaction": -0.00085,
+     "one_sided_bounds": [
+      -0.002065,
+      0.000366
+     ],
+     "verdict": "unresolved"
+    },
+    "means": {
+     "CVS-4k/HYBRID": 0.013296,
+     "CVS-4k/RAW": 0.01628,
+     "SF-32k/HYBRID": 0.015297,
+     "SF-32k/RAW": 0.019131
+    },
+    "representation_effect": {
+     "CVS-4k": {
+      "d": -0.002984,
+      "one_sided_bounds": [
+       -0.0038871695797971957,
+       -0.0020812094075289634
+      ],
+      "verdict": "negative"
+     },
+     "SF-32k": {
+      "d": -0.003834,
+      "one_sided_bounds": [
+       -0.005043620656370016,
+       -0.0026239175714141212
+      ],
+      "verdict": "negative"
+     }
+    },
+    "teacher_effect": {
+     "HYBRID": {
+      "d": 0.002001,
+      "one_sided_bounds": [
+       0.001496075872073857,
+       0.0025062673613464766
+      ],
+      "verdict": "positive"
+     },
+     "RAW": {
+      "d": 0.002851,
+      "one_sided_bounds": [
+       0.0018405209529135257,
+       0.0038609815209647872
+      ],
+      "verdict": "positive"
+     }
+    }
+   },
+   "SF-DEEP": {
+    "interaction": {
+     "interaction": -0.001131,
+     "one_sided_bounds": [
+      -0.002375,
+      0.000113
+     ],
+     "verdict": "unresolved"
+    },
+    "means": {
+     "CVS-4k/HYBRID": 0.025726,
+     "CVS-4k/RAW": 0.027478,
+     "SF-32k/HYBRID": 0.02718,
+     "SF-32k/RAW": 0.030063
+    },
+    "representation_effect": {
+     "CVS-4k": {
+      "d": -0.001752,
+      "one_sided_bounds": [
+       -0.0029511885845271433,
+       -0.000553369797962167
+      ],
+      "verdict": "negative"
+     },
+     "SF-32k": {
+      "d": -0.002884,
+      "one_sided_bounds": [
+       -0.004091544473616548,
+       -0.0016756202027177665
+      ],
+      "verdict": "negative"
+     }
+    },
+    "teacher_effect": {
+     "HYBRID": {
+      "d": 0.001454,
+      "one_sided_bounds": [
+       0.0009191473166911913,
+       0.001988101925950898
+      ],
+      "verdict": "positive"
+     },
+     "RAW": {
+      "d": 0.002585,
+      "one_sided_bounds": [
+       0.0015406273735567994,
+       0.0036292281629302942
+      ],
+      "verdict": "positive"
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,262 @@
+{
+ "analysis": {
+  "economics": "per-cell teacher nodes/ms, student presentations, persistent parameters, training-only parameters, plus measured inference throughput",
+  "hypotheses": {
+   "authority_specific": "the sign differs between the two exams",
+   "complements": "interaction < 0 (the teacher helps HYBRID more)",
+   "independent": "interval contains 0 with each main effect intact",
+   "substitutes": "interaction > 0 for SF-better (semantics shrink the teacher benefit)"
+  },
+  "interaction": "difference-in-differences per capacity and exam: (SF - CVS | HYBRID) - (SF - CVS | RAW), paired by seed, exact one-sided 95% bounds at that contrast's df",
+  "no_ranking": "no pooled overall score and no universal winner",
+  "per_exam": "every quantity is reported separately for CVS-DEEP (E0004) and SF-DEEP (E0006/D0043); the two are never pooled",
+  "representation_effect": "within each teacher and capacity: HYBRID - RAW, paired by seed",
+  "teacher_effect": "within each representation and capacity: SF - CVS, paired by seed"
+ },
+ "frozen_inputs": {
+  "S13": "two pinned teacher authorities + the dual exam contract (X0010, cold: E0006/D0043)",
+  "S14": "RAW/GEO/HYBRID identities and parameter accounting (X0012)",
+  "S15": "training-only auxiliary supervision (X0014; not carried here)"
+ },
+ "guardrails": [
+  "no new teacher-budget tuning",
+  "no new geometry vocabulary",
+  "no per-cell optimizer tuning",
+  "no game or search claims",
+  "no pooled score across exams",
+  "no cell selection after outcomes",
+  "no factorial change after partial results",
+  "null, heterogeneous or inconvenient interactions are preserved"
+ ],
+ "id": "s16-teacher-representation",
+ "issue": "Mnehmos/chess-vision-studio-lab#43 (factorial capstone of the static phase; #18/#20)",
+ "matrix": {
+  "capacities": [
+   1,
+   4
+  ],
+  "cell_count": 160,
+  "cells": [
+   {
+    "H": 1,
+    "arm_id": "S16-CVS-4k-RAW",
+    "dataset": "D0036",
+    "inference_parameters": 771,
+    "node_budget": 4000,
+    "persistent_parameters": 771,
+    "representation": "RAW",
+    "scale": "2.0x",
+    "scale_nodes": 74570561,
+    "teacher": "CVS-4k",
+    "train_spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 4,
+    "arm_id": "S16-CVS-4k-RAW",
+    "dataset": "D0036",
+    "inference_parameters": 3081,
+    "node_budget": 4000,
+    "persistent_parameters": 3081,
+    "representation": "RAW",
+    "scale": "2.0x",
+    "scale_nodes": 74570561,
+    "teacher": "CVS-4k",
+    "train_spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 1,
+    "arm_id": "S16-CVS-4k-HYBRID",
+    "dataset": "D0036",
+    "inference_parameters": 813,
+    "node_budget": 4000,
+    "persistent_parameters": 813,
+    "representation": "HYBRID",
+    "scale": "2.0x",
+    "scale_nodes": 74570561,
+    "teacher": "CVS-4k",
+    "train_spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 4,
+    "arm_id": "S16-CVS-4k-HYBRID",
+    "dataset": "D0036",
+    "inference_parameters": 3249,
+    "node_budget": 4000,
+    "persistent_parameters": 3249,
+    "representation": "HYBRID",
+    "scale": "2.0x",
+    "scale_nodes": 74570561,
+    "teacher": "CVS-4k",
+    "train_spec_hash": "sha256:6b8bd7dcc1acce86a136ccbf6c6b33e444e58fb4adbde325b799708fed3d3d43",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 1,
+    "arm_id": "S16-SF-32k-RAW",
+    "dataset": "D0044",
+    "inference_parameters": 771,
+    "node_budget": 32000,
+    "persistent_parameters": 771,
+    "representation": "RAW",
+    "scale": "16.1x",
+    "scale_nodes": 599592682,
+    "teacher": "SF-32k",
+    "train_spec_hash": "sha256:28d9613d8be373bcfbe64133c225e8bbbbe5938f84e4c01c0f8839f701d478c5",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 4,
+    "arm_id": "S16-SF-32k-RAW",
+    "dataset": "D0044",
+    "inference_parameters": 3081,
+    "node_budget": 32000,
+    "persistent_parameters": 3081,
+    "representation": "RAW",
+    "scale": "16.1x",
+    "scale_nodes": 599592682,
+    "teacher": "SF-32k",
+    "train_spec_hash": "sha256:28d9613d8be373bcfbe64133c225e8bbbbe5938f84e4c01c0f8839f701d478c5",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 1,
+    "arm_id": "S16-SF-32k-HYBRID",
+    "dataset": "D0044",
+    "inference_parameters": 813,
+    "node_budget": 32000,
+    "persistent_parameters": 813,
+    "representation": "HYBRID",
+    "scale": "16.1x",
+    "scale_nodes": 599592682,
+    "teacher": "SF-32k",
+    "train_spec_hash": "sha256:28d9613d8be373bcfbe64133c225e8bbbbe5938f84e4c01c0f8839f701d478c5",
+    "training_only_parameters": 0
+   },
+   {
+    "H": 4,
+    "arm_id": "S16-SF-32k-HYBRID",
+    "dataset": "D0044",
+    "inference_parameters": 3249,
+    "node_budget": 32000,
+    "persistent_parameters": 3249,
+    "representation": "HYBRID",
+    "scale": "16.1x",
+    "scale_nodes": 599592682,
+    "teacher": "SF-32k",
+    "train_spec_hash": "sha256:28d9613d8be373bcfbe64133c225e8bbbbe5938f84e4c01c0f8839f701d478c5",
+    "training_only_parameters": 0
+   }
+  ],
+  "declared_cells": [
+   [
+    "2.0x",
+    4000
+   ],
+   [
+    "16.1x",
+    32000
+   ]
+  ],
+  "representations": [
+   "RAW",
+   "HYBRID"
+  ],
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "selection_rules": {
+   "auxiliary_arm": "EXCLUDED by the predeclared rule: S15's supported effect lives at H16/H32, outside this matrix's capacities (H=1/H=4 were unresolved there), so adding it would change the factorial's capacity axis rather than extend it",
+   "capacities": "two scales only, S14's sentinel (H=1) and knee (H=4); their exact parameter counts are reported per cell and the mismatch between representations is disclosed (RAW 771 vs HYBRID 813 at H=1; 3,081 vs 3,249 at H=4)",
+   "frozen_before": "no S16 outcome existed when these rules were written",
+   "representations": "RAW plus the strongest explicit semantic representation justified by S14. GEO is EXCLUDED by the predeclared rule: S14 measured it strictly worse than RAW at every matched budget, so it cannot inform an interaction question that HYBRID already answers. HYBRID is included: strictly better than RAW from the 3K budget up",
+   "teachers": "exactly the two authorities S13 established, at S13's frozen training contracts; no recalibration (CVS-4k primary; Stockfish 32k cold primary)"
+  },
+  "shared": {
+   "cold_start": true,
+   "exams": {
+    "CVS-DEEP": {
+     "dataset": "D0010",
+     "nodes": 400000,
+     "protocol": "E0004"
+    },
+    "SF-DEEP": {
+     "dataset": "D0043",
+     "nodes": 4000000,
+     "protocol": "E0006"
+    }
+   },
+   "optimizer": "T0004-derived; identical for every cell",
+   "positions": 18953,
+   "record_ids_hash": "sha256:7d5a8a785148b975a06d630da9a3efd5c5aca6aa74b1705e1ac78fb800d15f2a",
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "student_compute": "MAX_UPDATES 760 x BATCH 256"
+  },
+  "teachers": [
+   "CVS-4k",
+   "SF-32k"
+  ]
+ },
+ "questions": [
+  "does explicit semantic representation reduce the need for a stronger/more expensive teacher?",
+  "does Stockfish supervision help RAW and HYBRID students equally, or is the benefit representation-dependent?",
+  "are teacher quality and explicit structure substitutes, complements, or largely independent resources?"
+ ],
+ "selection_rules": {
+  "auxiliary_arm": "EXCLUDED by the predeclared rule: S15's supported effect lives at H16/H32, outside this matrix's capacities (H=1/H=4 were unresolved there), so adding it would change the factorial's capacity axis rather than extend it",
+  "capacities": "two scales only, S14's sentinel (H=1) and knee (H=4); their exact parameter counts are reported per cell and the mismatch between representations is disclosed (RAW 771 vs HYBRID 813 at H=1; 3,081 vs 3,249 at H=4)",
+  "frozen_before": "no S16 outcome existed when these rules were written",
+  "representations": "RAW plus the strongest explicit semantic representation justified by S14. GEO is EXCLUDED by the predeclared rule: S14 measured it strictly worse than RAW at every matched budget, so it cannot inform an interaction question that HYBRID already answers. HYBRID is included: strictly better than RAW from the 3K budget up",
+  "teachers": "exactly the two authorities S13 established, at S13's frozen training contracts; no recalibration (CVS-4k primary; Stockfish 32k cold primary)"
+ },
+ "status": "materialized before the lattice is frozen and before any S16 outcome exists",
+ "stop_conditions": [
+  "the two teacher datasets do not share their record ids",
+  "a lattice cell cannot train or evaluate",
+  "the dual-exam pass cannot reproduce the in-lab CVS metrics",
+  "membership fails"
+ ],
+ "version": 1
+}
