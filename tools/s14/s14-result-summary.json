@@ -1,0 +1,175 @@
+{
+ "evidence": {
+  "geometry_manifest": "tools/s14/s14-geometry-manifest.json",
+  "preregistration": "tools/s14/s14-preregistration.json",
+  "result": "tools/s14/s14-result.json",
+  "state": "tools/s14/s14-state.json"
+ },
+ "experiment": "X0012",
+ "inference_cost": {
+  "encode_GEO_positions_per_second": 5652.4,
+  "encode_RAW_positions_per_second": 187755.5,
+  "forward_positions_per_second_hybrid25k": 396627.1,
+  "forward_positions_per_second_raw25k": 434665.4,
+  "note": "encoding measured in the python implementation as shipped; the forward pass is batched numpy over the 200 exam positions"
+ },
+ "per_budget": {
+  "1000": {
+   "contrasts": {
+    "GEO-RAW": {
+     "bounds": [
+      0.005912,
+      0.007643
+     ],
+     "d": 0.006777
+    },
+    "HYBRID-GEO": {
+     "bounds": [
+      -0.006263,
+      -0.004463
+     ],
+     "d": -0.005363
+    },
+    "HYBRID-RAW": {
+     "bounds": [
+      0.000104,
+      0.002725
+     ],
+     "d": 0.001414
+    }
+   },
+   "means": {
+    "GEO": 0.023048566363397846,
+    "HYBRID": 0.01768546410686144,
+    "RAW": 0.01627123618998822
+   },
+   "params": {
+    "GEO": 1013,
+    "HYBRID": 813,
+    "RAW": 771
+   }
+  },
+  "12000": {
+   "contrasts": {
+    "GEO-RAW": {
+     "bounds": [
+      0.00659,
+      0.008137
+     ],
+     "d": 0.007363
+    },
+    "HYBRID-GEO": {
+     "bounds": [
+      -0.012278,
+      -0.010728
+     ],
+     "d": -0.011503
+    },
+    "HYBRID-RAW": {
+     "bounds": [
+      -0.005149,
+      -0.003131
+     ],
+     "d": -0.00414
+    }
+   },
+   "means": {
+    "GEO": 0.02535396168122976,
+    "HYBRID": 0.013851064177013735,
+    "RAW": 0.017990713402233887
+   },
+   "params": {
+    "GEO": 12013,
+    "HYBRID": 12181,
+    "RAW": 12321
+   }
+  },
+  "25000": {
+   "contrasts": {
+    "GEO-RAW": {
+     "bounds": [
+      0.006482,
+      0.008107
+     ],
+     "d": 0.007295
+    },
+    "HYBRID-GEO": {
+     "bounds": [
+      -0.012355,
+      -0.010946
+     ],
+     "d": -0.01165
+    },
+    "HYBRID-RAW": {
+     "bounds": [
+      -0.005561,
+      -0.003151
+     ],
+     "d": -0.004356
+    }
+   },
+   "means": {
+    "GEO": 0.026334560706678087,
+    "HYBRID": 0.01468414629892988,
+    "RAW": 0.01903997311696655
+   },
+   "params": {
+    "GEO": 24993,
+    "HYBRID": 25173,
+    "RAW": 24641
+   }
+  },
+  "3000": {
+   "contrasts": {
+    "GEO-RAW": {
+     "bounds": [
+      0.006548,
+      0.008291
+     ],
+     "d": 0.00742
+    },
+    "HYBRID-GEO": {
+     "bounds": [
+      -0.011267,
+      -0.009731
+     ],
+     "d": -0.010499
+    },
+    "HYBRID-RAW": {
+     "bounds": [
+      -0.004092,
+      -0.002067
+     ],
+     "d": -0.00308
+    }
+   },
+   "means": {
+    "GEO": 0.023680668492110986,
+    "HYBRID": 0.013181490330974217,
+    "RAW": 0.016261068732731906
+   },
+   "params": {
+    "GEO": 2993,
+    "HYBRID": 3249,
+    "RAW": 3081
+   }
+  },
+  "linear-floor": {
+   "contrasts": {},
+   "means": {
+    "GEO": 0.024978302054278295,
+    "HYBRID": null,
+    "RAW": null
+   },
+   "params": 43
+  }
+ },
+ "semantic_ablation": {
+  "bishop_pair": 0.001573,
+  "hanging_material": 0.001006,
+  "king_safety": 6.2e-05,
+  "mobility": 0.001069,
+  "pawn_structure": -0.000198,
+  "rook_files": -6e-05
+ }
+}

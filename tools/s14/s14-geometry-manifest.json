@@ -1,0 +1,340 @@
+{
+ "authority": "deterministic.cvs.geometry.v1",
+ "columns": [
+  {
+   "column": 0,
+   "family": "KING_DANGER",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 20.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 1,
+   "family": "KING_DANGER",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 2.0/8.0/20.0)"
+  },
+  {
+   "column": 2,
+   "family": "KING_ZONE_PRESSURE",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 6.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 3,
+   "family": "KING_ZONE_PRESSURE",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/3.0/6.0)"
+  },
+  {
+   "column": 4,
+   "family": "KING_OPEN_FILE",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 5,
+   "family": "KING_OPEN_FILE",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 6,
+   "family": "KING_SHIELD",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 7,
+   "family": "KING_SHIELD",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 8,
+   "family": "KING_CENTRAL_EXPOSURE",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 4.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 9,
+   "family": "KING_CENTRAL_EXPOSURE",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/4.0)"
+  },
+  {
+   "column": 10,
+   "family": "ENEMY_QUEEN_NEAR_KING",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 11,
+   "family": "ENEMY_QUEEN_NEAR_KING",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 12,
+   "family": "OPEN_CENTER_KING",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 13,
+   "family": "OPEN_CENTER_KING",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 14,
+   "family": "KING_ESCAPE_DEFICIT",
+   "group": "king_safety",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 15,
+   "family": "KING_ESCAPE_DEFICIT",
+   "group": "king_safety",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 16,
+   "family": "HANGING_MATERIAL",
+   "group": "hanging_material",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 6.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 17,
+   "family": "HANGING_MATERIAL",
+   "group": "hanging_material",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/3.0/6.0)"
+  },
+  {
+   "column": 18,
+   "family": "MOBILITY_KNIGHT",
+   "group": "mobility",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 9.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 19,
+   "family": "MOBILITY_KNIGHT",
+   "group": "mobility",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 2.0/5.0/9.0)"
+  },
+  {
+   "column": 20,
+   "family": "MOBILITY_BISHOP",
+   "group": "mobility",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 11.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 21,
+   "family": "MOBILITY_BISHOP",
+   "group": "mobility",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 2.0/6.0/11.0)"
+  },
+  {
+   "column": 22,
+   "family": "MOBILITY_ROOK",
+   "group": "mobility",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 12.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 23,
+   "family": "MOBILITY_ROOK",
+   "group": "mobility",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 2.0/6.0/12.0)"
+  },
+  {
+   "column": 24,
+   "family": "MOBILITY_QUEEN",
+   "group": "mobility",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 16.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 25,
+   "family": "MOBILITY_QUEEN",
+   "group": "mobility",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 3.0/9.0/16.0)"
+  },
+  {
+   "column": 26,
+   "family": "PASSED_PAWN",
+   "group": "pawn_structure",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 27,
+   "family": "PASSED_PAWN",
+   "group": "pawn_structure",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 28,
+   "family": "CONNECTED_PASSED_PAWN",
+   "group": "pawn_structure",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 29,
+   "family": "CONNECTED_PASSED_PAWN",
+   "group": "pawn_structure",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 30,
+   "family": "ROOK_OPEN_FILE",
+   "group": "rook_files",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 31,
+   "family": "ROOK_OPEN_FILE",
+   "group": "rook_files",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 32,
+   "family": "ROOK_SEMI_OPEN_FILE",
+   "group": "rook_files",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 33,
+   "family": "ROOK_SEMI_OPEN_FILE",
+   "group": "rook_files",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 34,
+   "family": "ROOK_SEVENTH",
+   "group": "rook_files",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 35,
+   "family": "ROOK_SEVENTH",
+   "group": "rook_files",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 36,
+   "family": "DOUBLED_PAWN",
+   "group": "pawn_structure",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 37,
+   "family": "DOUBLED_PAWN",
+   "group": "pawn_structure",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 38,
+   "family": "ISOLATED_PAWN",
+   "group": "pawn_structure",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 3.0 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 39,
+   "family": "ISOLATED_PAWN",
+   "group": "pawn_structure",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 1.0/2.0/3.0)"
+  },
+  {
+   "column": 40,
+   "family": "BISHOP_PAIR",
+   "group": "bishop_pair",
+   "kind": "value",
+   "semantics": "White-POV signed delta, divided by the family's own bucket-3 threshold 1.5 (the registry's magnitude unit), sign-flipped for black to move"
+  },
+  {
+   "column": 41,
+   "family": "BISHOP_PAIR",
+   "group": "bishop_pair",
+   "kind": "bucket",
+   "semantics": "the registry's 0-3 magnitude bucket divided by 3 (thresholds 0.5/1.0/1.5)"
+  }
+ ],
+ "derivation": "position only; no label, teacher score, best move, outcome or test-time information enters the representation",
+ "groups": {
+  "bishop_pair": [
+   "BISHOP_PAIR"
+  ],
+  "hanging_material": [
+   "HANGING_MATERIAL"
+  ],
+  "king_safety": [
+   "KING_DANGER",
+   "KING_ZONE_PRESSURE",
+   "KING_OPEN_FILE",
+   "KING_SHIELD",
+   "KING_CENTRAL_EXPOSURE",
+   "ENEMY_QUEEN_NEAR_KING",
+   "OPEN_CENTER_KING",
+   "KING_ESCAPE_DEFICIT"
+  ],
+  "mobility": [
+   "MOBILITY_KNIGHT",
+   "MOBILITY_BISHOP",
+   "MOBILITY_ROOK",
+   "MOBILITY_QUEEN"
+  ],
+  "pawn_structure": [
+   "PASSED_PAWN",
+   "CONNECTED_PASSED_PAWN",
+   "DOUBLED_PAWN",
+   "ISOLATED_PAWN"
+  ],
+  "rook_files": [
+   "ROOK_OPEN_FILE",
+   "ROOK_SEMI_OPEN_FILE",
+   "ROOK_SEVENTH"
+  ]
+ },
+ "input_dim": 42,
+ "missingness": "none: extract_geometry emits every family for every position (0.0 value, bucket 0 when absent)",
+ "pov": "side-to-move relative, exactly like RAW (colour swap + mirror); the registry's deltas are White-POV and are sign-flipped for black to move",
+ "registry_hash": "sha256:a91c902a51cd2fef28d87e3124a458c221359f95c8d00a219491fc16c3ee63ec",
+ "registry_version": 1
+}

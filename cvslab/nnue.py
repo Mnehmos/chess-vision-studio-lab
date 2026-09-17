@@ -18,6 +18,44 @@ import numpy as np
 from .schemas import MetricDef
 
 INPUT_DIM = 768
+
+# GEO: the deterministic geometry registry (cvslab.facts), pinned by its own hash. One pair of
+# columns per registered family - the White-POV signed delta rescaled by the family's OWN bucket-3
+# threshold (the registry's magnitude unit, not an invented normalizer) and the registry's 0-3
+# magnitude bucket scaled to [0,1] - then sign-flipped for black to move, so the model is
+# side-to-move relative exactly like RAW (colour swap + mirror). Every column resolves to a named
+# registry entry; extract_geometry always emits all families, so there is no missingness path.
+from .facts import GEOMETRY_FAMILIES, extract_geometry  # noqa: E402
+
+GEO_INPUT_DIM = 2 * len(GEOMETRY_FAMILIES)
+INPUT_DIMS = {"RAW": INPUT_DIM, "GEO": GEO_INPUT_DIM, "HYBRID": INPUT_DIM + GEO_INPUT_DIM}
+
+
+def input_dim(kind: str) -> int:
+    try:
+        return INPUT_DIMS[kind]
+    except KeyError:
+        raise ValueError(f"unknown input representation {kind!r}; known: {sorted(INPUT_DIMS)}") from None
+
+
+def geo_columns() -> list[tuple[str, str]]:
+    """The named GEO columns in order: (family, kind) with kind in {value, bucket}."""
+    return [(name, kind) for name, _thresholds in GEOMETRY_FAMILIES for kind in ("value", "bucket")]
+
+
+def encode_fen_geo(fen: str) -> np.ndarray:
+    """(42,) float64, side-to-move POV, derived from the position ONLY (never a label)."""
+    import chess
+
+    board = chess.Board(fen)
+    geometry = extract_geometry(board)
+    sign = 1.0 if board.turn else -1.0
+    out = np.empty(GEO_INPUT_DIM, dtype=np.float64)
+    for index, (name, (_t0, _t1, t2)) in enumerate(GEOMETRY_FAMILIES):
+        entry = geometry[name]
+        out[2 * index] = sign * float(entry["value"]) / t2
+        out[2 * index + 1] = float(entry["bucket"]) / 3.0
+    return out
 PIECE_IDX = {"P": 0, "N": 1, "B": 2, "R": 3, "Q": 4, "K": 5, "p": 6, "n": 7, "b": 8, "r": 9, "q": 10, "k": 11}
 CP_CLIP = 2000.0
 
@@ -67,17 +105,18 @@ class EncodedSplit:
         return len(self.record_ids)
 
 
-def encode_records(records: list[dict], *, target_spec=None) -> tuple[EncodedSplit, int]:
-    """Encode canonical records.
+def encode_records(records: list[dict], *, target_spec=None, input_kind: str = "RAW") -> tuple[EncodedSplit, int]:
+    """Encode canonical records under an input representation.
 
     With a frozen ``TargetSpec`` the supervision is that spec's single matching label per
     record (strict: zero or multiple matches raise — an integrity failure, never a silent
     discard). Without a spec the legacy eval_cp behaviour applies (rows lacking the label
-    are discarded and counted).
+    are discarded and counted). ``input_kind`` selects RAW (768 piece-square), GEO (the 42
+    named registry columns) or HYBRID (RAW ++ GEO); the supervision is identical for all.
     """
     from .targets import extract_target
 
-    feats, cps, results, ids = [], [], [], []
+    feats, cps, results, ids, fens = [], [], [], [], []
     discarded = 0
     for record in records:
         indices, white_to_move = encode_fen(record["fen"])
@@ -95,12 +134,25 @@ def encode_records(records: list[dict], *, target_spec=None) -> tuple[EncodedSpl
                 cp = -cp
         res = record.get("result")
         feats.append(indices)
+        fens.append(record["fen"])
         cps.append(cp)
         results.append(math.nan if res is None else (float(res) if white_to_move else 1.0 - float(res)))
         ids.append(record["record_id"])
-    X = np.zeros((len(feats), INPUT_DIM), dtype=np.uint8)
-    for row, indices in enumerate(feats):
-        X[row, indices] = 1
+    if input_kind == "RAW":
+        X = np.zeros((len(feats), INPUT_DIM), dtype=np.uint8)
+        for row, indices in enumerate(feats):
+            X[row, indices] = 1
+    elif input_kind == "GEO":
+        X = (np.stack([encode_fen_geo(fen) for fen in fens]) if fens
+             else np.zeros((0, GEO_INPUT_DIM), dtype=np.float64))
+    elif input_kind == "HYBRID":
+        X = np.zeros((len(feats), INPUT_DIMS["HYBRID"]), dtype=np.float64)
+        for row, indices in enumerate(feats):
+            X[row, indices] = 1.0
+        for row, fen in enumerate(fens):
+            X[row, INPUT_DIM:] = encode_fen_geo(fen)
+    else:
+        raise ValueError(f"unknown input representation {input_kind!r}")
     return EncodedSplit(X, np.array(cps, dtype=np.float64), np.array(results, dtype=np.float64), ids), discarded
 
 
@@ -156,6 +208,51 @@ class RawNnue:
         g_z = np.outer(g_y, p["w2"]) * ((z > 0.0) & (z < 1.0))
         grads = {"w1": X.T @ g_z, "b1": g_z.sum(axis=0), "w2": h.T @ g_y, "b2": np.array(g_y.sum())}
         return float(np.mean(diff ** 2)), grads
+
+    def all_finite(self) -> bool:
+        return all(bool(np.all(np.isfinite(v))) for v in self.params.values())
+
+
+class LinearEval:
+    """inputs -> 1 direct model: the white-box semantic floor (named inputs, no hidden layer).
+
+    Same output convention as RawNnue: centipawns = (X @ w + b) * out_scale, loss =
+    MSE(sigmoid(pred / K), target). Learned parameters = inputs + 1, exactly.
+    """
+
+    def __init__(self, params: dict[str, np.ndarray], out_scale: float):
+        self.params = params
+        self.out_scale = out_scale
+
+    @property
+    def hidden(self) -> int:
+        return 0
+
+    @property
+    def inputs(self) -> int:
+        return int(self.params["w"].shape[0])
+
+    @classmethod
+    def initialize(cls, inputs: int, init_std: float, out_scale: float,
+                   rng: np.random.Generator) -> "LinearEval":
+        bound = 1.0 / math.sqrt(inputs)
+        return cls({"w": rng.normal(0.0, init_std, size=inputs),
+                    "b": np.array(rng.uniform(-bound, bound))}, out_scale)
+
+    def predict_cp(self, X: np.ndarray, batch: int = 8192) -> np.ndarray:
+        p = self.params
+        out = np.empty(X.shape[0])
+        for start in range(0, X.shape[0], batch):
+            out[start:start + batch] = (X[start:start + batch].astype(np.float64) @ p["w"] + p["b"]) \
+                * self.out_scale
+        return out
+
+    def loss_and_grads(self, X: np.ndarray, t: np.ndarray, k: float) -> tuple[float, dict[str, np.ndarray]]:
+        p = self.params
+        prob = sigmoid((X @ p["w"] + p["b"]) * self.out_scale / k)
+        diff = prob - t
+        g_y = 2.0 * diff / len(t) * prob * (1.0 - prob) * self.out_scale / k
+        return float(np.mean(diff ** 2)), {"w": X.T @ g_y, "b": np.array(g_y.sum())}
 
     def all_finite(self) -> bool:
         return all(bool(np.all(np.isfinite(v))) for v in self.params.values())
@@ -282,42 +379,64 @@ def bootstrap_mean(values: np.ndarray, samples: int, seed: int) -> tuple[Optiona
     return float(v.mean()), float(low), float(high), n
 
 
-def serialize(model: RawNnue, cfg: Mapping, meta: dict) -> dict:
-    """JSON net in the format read by the Rust engine's `Nnue::load` (raw 768 mode)."""
-    return {
-        "arch": f"{INPUT_DIM}x{model.hidden}cReLU-1",
-        "hidden": model.hidden,
-        "outputScaleCp": float(cfg["OUT_SCALE_CP"]),
-        "k": float(cfg["K"]),
-        "lambda": float(cfg["LAMBDA"]),
-        "w1": model.params["w1"].tolist(),
-        "b1": model.params["b1"].tolist(),
-        "w2": model.params["w2"].tolist(),
-        "b2": float(model.params["b2"]),
-        "note": "stm-POV, mirror+colorswap for black; produced by CVS Lab; UNPROMOTED",
-        "promotable": False,
-        "cvslab": meta,
-    }
+def _param_names(payload: dict) -> tuple[str, ...]:
+    return ("w", "b") if "w" in payload else ("w1", "b1", "w2", "b2")
+
+
+def serialize(model, cfg: Mapping, meta: dict) -> dict:
+    """JSON net; the clipped-ReLU format matches the Rust loader's `Nnue::load` (raw 768 mode)."""
+    if isinstance(model, LinearEval):
+        payload = {
+            "arch": f"{model.inputs}-linear-1", "hidden": 0, "inputDim": model.inputs,
+            "input": str(cfg.get("INPUT", "GEO")), "archKind": "linear",
+            "outputScaleCp": float(cfg["OUT_SCALE_CP"]), "k": float(cfg["K"]),
+            "lambda": float(cfg["LAMBDA"]),
+            "w": model.params["w"].tolist(), "b": float(model.params["b"]),
+        }
+    else:
+        payload = {
+            "arch": f"{model.params['w1'].shape[0]}x{model.hidden}cReLU-1", "hidden": model.hidden,
+            "inputDim": int(model.params["w1"].shape[0]), "input": str(cfg.get("INPUT", "RAW")),
+            "archKind": "crelu1",
+            "outputScaleCp": float(cfg["OUT_SCALE_CP"]), "k": float(cfg["K"]),
+            "lambda": float(cfg["LAMBDA"]),
+            "w1": model.params["w1"].tolist(), "b1": model.params["b1"].tolist(),
+            "w2": model.params["w2"].tolist(), "b2": float(model.params["b2"]),
+        }
+    payload.update({"note": "stm-POV, mirror+colorswap for black; produced by CVS Lab; UNPROMOTED",
+                    "promotable": False, "cvslab": meta})
+    return payload
 
 
 def serialized_shapes(payload: dict) -> dict[str, list[int]]:
-    return {name: list(np.asarray(payload[name], dtype=np.float64).shape) for name in ("w1", "b1", "w2", "b2")}
+    return {name: list(np.asarray(payload[name], dtype=np.float64).shape)
+            for name in _param_names(payload)}
 
 
 def serialized_param_count(payload: dict) -> int:
     """Count learned parameters from the serialized arrays themselves, not from a formula."""
-    return sum(int(np.asarray(payload[name], dtype=np.float64).size) for name in ("w1", "b1", "w2", "b2"))
+    return sum(int(np.asarray(payload[name], dtype=np.float64).size)
+               for name in _param_names(payload))
 
 
-def load_serialized(payload: dict) -> RawNnue:
+def load_serialized(payload: dict):
+    if payload.get("archKind") == "linear" or "w" in payload:
+        params = {"w": np.asarray(payload["w"], dtype=np.float64),
+                  "b": np.asarray(payload["b"], dtype=np.float64)}
+        expected = {"w": (int(payload.get("inputDim", params["w"].shape[0])),), "b": ()}
+        for name, shape in expected.items():
+            if params[name].shape != shape:
+                raise ValueError(f"serialized {name} has shape {params[name].shape}, expected {shape}")
+        return LinearEval(params, float(payload["outputScaleCp"]))
     hidden = int(payload["hidden"])
+    inputs = int(payload.get("inputDim", INPUT_DIM))
     params = {
         "w1": np.asarray(payload["w1"], dtype=np.float64),
         "b1": np.asarray(payload["b1"], dtype=np.float64),
         "w2": np.asarray(payload["w2"], dtype=np.float64),
         "b2": np.asarray(payload["b2"], dtype=np.float64),
     }
-    expected = {"w1": (INPUT_DIM, hidden), "b1": (hidden,), "w2": (hidden,), "b2": ()}
+    expected = {"w1": (inputs, hidden), "b1": (hidden,), "w2": (hidden,), "b2": ()}
     for name, shape in expected.items():
         if params[name].shape != shape:
             raise ValueError(f"serialized {name} has shape {params[name].shape}, expected {shape}")
