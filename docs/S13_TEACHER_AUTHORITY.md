@@ -205,6 +205,20 @@ authority and budget together by design and does **not** isolate label shape fro
 A successor can hold the distribution fixed (clamp or subsample mate rows, rank-normalize targets)
 and re-ask.
 
+## Errata on the sealed X0010 metadata
+
+Two *metadata* fields in X0010's sealed result carried warm identifiers from a hard-coded string in
+the report code: `cells.exams` cited `SF-DEEP (E0005/D0040)` where the cold contract froze
+`E0006/D0043`, and `evidence.preregistration` pointed at `s13-preregistration.json` where X0010 is
+bound to **v2** (`sha256:ac8be438…`). No number, bound, verdict, mean or membership is affected —
+every per-width figure came from the cold dual-exam artifact, which records `E0006/D0043` correctly,
+and the experiment's own `preregistration_hash` was always the v2 value. The sealed record and its
+byte-identical artifact are **not** rewritten (`update_experiment` refuses a sealed study); the
+correction is recorded additively in `tools/s13/s13-result-cold-erratum.json` (hash
+`sha256:7070f111…`), the report code now derives both the cited exam identities (from the store) and
+the preregistration path (from the contract), and `tests/test_s13_report_metadata.py` fails if a warm
+identifier ever reappears as a code literal.
+
 ## Non-claims
 
 * No Stockfish-as-truth, no playing-strength claim, no games, no GEO/HYBRID inputs, no outcome or
@@ -230,5 +244,6 @@ and re-ask.
 | disagreement with correlation | `tools/s13/s13-disagreement.json` |
 | driver / analysis | `tools/s13/s13_run.py`, `tools/s13/s13_analyse.py` |
 | state / results / dual-exam table | `s13-state.json`, `s13-result-cold.json`, `s13-result-summary-cold.json`, `s13-dual-exam-cold.json` |
+| metadata erratum (sealed X0010 result) | `tools/s13/s13-result-cold-erratum.json` / `.hash` |
 | Stockfish teacher + tests | `cvslab/funnel/stockfish.py`, `tests/test_funnel_stockfish.py`, `tests/fake_uci_engine.py` |
 | sealed lattices | `labstore/X/X0010.json` (`SEALED`, 240/240 — the finding), `X0009` (sealed, superseded) |

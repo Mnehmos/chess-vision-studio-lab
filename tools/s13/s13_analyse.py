@@ -39,11 +39,25 @@ SUMMARY = S13 / f"s13-result-summary{SFX}.json"
 XID_KEY = "xid" if CONTRACT == "warm" else "xid_cold"
 EXAM_KEY = "exam" if CONTRACT == "warm" else "exam_cold"
 CONDITIONS_KEY = "conditions" if CONTRACT == "warm" else "conditions_cold"
+PREREG_KEY = "preregistration_cold" if CONTRACT == "cold" else "preregistration"
+CVS_EXAM_PROTOCOL = "E0004"      # CVS-DEEP, the in-lab exam; its dataset is read from the store
+DEFAULT_PREREG = f"tools/s13/s13-preregistration{'-v2' if CONTRACT == 'cold' else ''}.json"
 STATE = S13 / "s13-state.json"
 WIDTHS = (1, 4, 16, 32)
 SEEDS = tuple(range(20))
 LABELS = ("CVS-4k", "SF-32k", "SF-1M")
 MATE_CP = 100_000
+
+
+def exam_labels(cvs_protocol_id: str, cvs_dataset_id: str, sf_protocol_id: str,
+                sf_dataset_id: str) -> list[str]:
+    """The exam identities a report cites, DERIVED from what the study actually bound.
+
+    X0010's sealed result cited `E0005/D0040` because the warm identifiers were literals here;
+    the derivation exists so a future contract cannot inherit another study's exam ids.
+    """
+    return [f"CVS-DEEP ({cvs_protocol_id}/{cvs_dataset_id})",
+            f"SF-DEEP ({sf_protocol_id}/{sf_dataset_id})"]
 
 
 def svc() -> LabService:
@@ -150,6 +164,15 @@ def step_verify() -> int:
     return 0
 
 
+def exams_cited(service: LabService) -> list[str]:
+    """The two exam identities, read from the store: the CVS protocol's own dataset plus whatever
+    SF-DEEP dataset/protocol the active contract froze."""
+    cvs_protocol = service.store.get(CVS_EXAM_PROTOCOL)
+    sf = state()[EXAM_KEY]
+    return exam_labels(cvs_protocol.id, cvs_protocol.dataset_id,
+                       sf["protocol_id"], sf["dataset_id"])
+
+
 def _read_scores() -> dict:
     return json.loads(DUAL.read_text(encoding="utf-8"))["scores"]
 
@@ -240,7 +263,7 @@ def step_report() -> int:
                     "under two independent frozen static exams?",
         "cells": {"expected": experiment.expected_run_count,
                   "scored": sum(len(v) for arm in values.values() for v in arm.values()),
-                  "exams": ["CVS-DEEP (E0004/D0010)", "SF-DEEP (E0005/D0040)"],
+                  "exams": exams_cited(service),
                   "widths": list(WIDTHS), "seeds": list(SEEDS)},
         "per_width": per_width,
         "decision": decision,
@@ -260,9 +283,10 @@ def step_report() -> int:
         "economics": {label: state()[CONDITIONS_KEY][label] for label in LABELS},
         "scope": {"no_stockfish_as_truth": True, "losses_never_averaged": True,
                   "no_playing_strength_claim": True},
-        "evidence": {"dual_exam": f"tools/s13/s13-dual-exam{SFX}.json",
+        "evidence": {"preregistration": state().get(PREREG_KEY, {}).get(
+                         "file", DEFAULT_PREREG),
+                     "dual_exam": f"tools/s13/s13-dual-exam{SFX}.json",
                      "result": f"tools/s13/s13-result{SFX}.json",
-                     "preregistration": "tools/s13/s13-preregistration.json",
                      "calibration": ["tools/s13/s13-calibration.json",
                                      "tools/s13/s13-calibration-amendment.json",
                                      "tools/s13/s13-calibration-cold.json"],

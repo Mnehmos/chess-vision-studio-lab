@@ -1,0 +1,35 @@
+{
+ "id": "s13-result-x0010-erratum",
+ "experiment": "X0010",
+ "sealed_result_record_hash": "sha256:c228700f7458c90ddca14c87496196eb0c85aa88696d4f2516b946ebb3ddb788",
+ "artifact": "tools/s13/s13-result-cold.json",
+ "artifact_matches_sealed_result_exactly": true,
+ "kind": "metadata drift in two fields; no number, table, bound, verdict or membership is affected",
+ "stale_fields": [
+  {
+   "path": "cells.exams",
+   "sealed_value": ["CVS-DEEP (E0004/D0010)", "SF-DEEP (E0005/D0040)"],
+   "correct_value": ["CVS-DEEP (E0004/D0010)", "SF-DEEP (E0006/D0043)"],
+   "why": "the SF-DEEP identifier was a hard-coded string in tools/s13/s13_analyse.py step_report, written for the warm experiment X0009; the cold contract froze D0043 + E0006, which the dual-exam artifact records correctly (tools/s13/s13-dual-exam-cold.json: exams.SF-DEEP.protocol_id = E0006, dataset_id = D0043). Every per-width number in this result was computed from the dual-exam artifact, so the numbers were always the cold ones."
+  },
+  {
+   "path": "evidence.preregistration",
+   "sealed_value": "tools/s13/s13-preregistration.json",
+   "correct_value": "tools/s13/s13-preregistration-v2.json",
+   "why": "same hard-coded warm path. X0010 is bound to the v2 preregistration (hash sha256:ac8be438295ae7d3e78fa715de8ecc211d08e308d138abc91ec388987ef0fc1f), recorded in the experiment's own preregistration_hash field, which was always correct."
+  }
+ ],
+ "unaffected": [
+  "every result number, bound, verdict, mean and contrast (all derived from the cold dual-exam artifact)",
+  "the sealed decision (INCONCLUSIVE) and the observed pattern (CVS_BETTER_ON_BOTH_EXAMS)",
+  "the experiment's preregistration_hash, member membership (240/240) and arm identities"
+ ],
+ "why_not_rewritten": "X0010 is SEALED and its result payload is immutable (Store.update_experiment refuses a sealed study). The repository's precedent is to correct additively: this erratum, the code fix, and the regression test are the correction; the sealed record and its byte-identical artifact stay as they are.",
+ "code_fix": {
+  "file": "tools/s13/s13_analyse.py",
+  "what": "the report now derives the cited exam identities from the store (the CVS protocol's own dataset plus the active contract's SF-DEEP dataset/protocol) and the preregistration path from the contract, instead of hard-coding the warm ones",
+  "regression_test": "tests/test_s13_report_metadata.py (three cases: the label builder follows the bound ids; no warm identifier exists as a code literal outside docstrings; the contract keys are the cold ones)",
+  "note": "the fix changes future reports only; this result artifact is not regenerated"
+ },
+ "reported_in": "docs/S13_TEACHER_AUTHORITY.md"
+}
