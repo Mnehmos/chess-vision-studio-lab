@@ -1,0 +1,124 @@
+{
+ "curve_summary": {
+  "best_loss": 0.015583599296894377,
+  "best_rung": 2,
+  "flat_or_worse_rungs": [
+   4,
+   32,
+   64,
+   128,
+   512
+  ],
+  "knee_marginal_gain": -0.00040585741301069837,
+  "knee_rung": 2,
+  "non_monotonic_better_steps": []
+ },
+ "evidence": {
+  "preregistration": "tools/s17/s17-preregistration.json",
+  "result": "tools/s17/s17-result.json",
+  "state": "tools/s17/s17-state.json"
+ },
+ "experiment": "X0016",
+ "primary_curve": [
+  {
+   "H": 1,
+   "mean_test_loss": 0.015989,
+   "parameters": 771,
+   "step": null,
+   "step_verdict": null
+  },
+  {
+   "H": 2,
+   "mean_test_loss": 0.015584,
+   "parameters": 1541,
+   "step": -0.000406,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 4,
+   "mean_test_loss": 0.01628,
+   "parameters": 3081,
+   "step": 0.000697,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 8,
+   "mean_test_loss": 0.017324,
+   "parameters": 6161,
+   "step": 0.001044,
+   "step_verdict": "worse"
+  },
+  {
+   "H": 16,
+   "mean_test_loss": 0.018735,
+   "parameters": 12321,
+   "step": 0.001412,
+   "step_verdict": "worse"
+  },
+  {
+   "H": 32,
+   "mean_test_loss": 0.019586,
+   "parameters": 24641,
+   "step": 0.000851,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 64,
+   "mean_test_loss": 0.019585,
+   "parameters": 49281,
+   "step": 0.000183,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 128,
+   "mean_test_loss": 0.020105,
+   "parameters": 98561,
+   "step": 0.00052,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 256,
+   "mean_test_loss": 0.019717,
+   "parameters": 197121,
+   "step": -0.000388,
+   "step_verdict": "unresolved"
+  },
+  {
+   "H": 512,
+   "mean_test_loss": 0.020725,
+   "parameters": 394241,
+   "step": 0.001008,
+   "step_verdict": "unresolved"
+  }
+ ],
+ "undertraining_control": [
+  {
+   "H": 128,
+   "control_minus_primary": 0.000846,
+   "control_x4": 0.020951,
+   "primary": 0.020105,
+   "verdict": "worse"
+  },
+  {
+   "H": 256,
+   "control_minus_primary": 7.6e-05,
+   "control_x4": 0.019793,
+   "primary": 0.019717,
+   "verdict": "unresolved"
+  },
+  {
+   "H": 512,
+   "control_minus_primary": -0.000123,
+   "control_x4": 0.020602,
+   "primary": 0.020725,
+   "verdict": "unresolved"
+  }
+ ],
+ "undertraining_verdict": {
+  "reading": "control rungs that recovered the primary loss at the same width indicate the primary turn-up was undersupplied training compute; rungs that did not indicate capacity saturation WITHIN the 4x envelope",
+  "rescued_widths": [],
+  "still_worse_widths": [
+   128
+  ]
+ }
+}
