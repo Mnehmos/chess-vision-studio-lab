@@ -1,0 +1,389 @@
+{
+ "contract": {
+  "control": "3040 updates (4x) at H=[128, 256, 512]",
+  "exam": "E0004",
+  "primary": "760 updates x 256 = 194560 presentations at every width",
+  "teacher": "CVS-4k over D0036"
+ },
+ "curve_summary": {
+  "best_loss": 0.015583599296894377,
+  "best_rung": 2,
+  "flat_or_worse_rungs": [
+   4,
+   32,
+   64,
+   128,
+   512
+  ],
+  "knee_marginal_gain": -0.00040585741301069837,
+  "knee_rung": 2,
+  "non_monotonic_better_steps": []
+ },
+ "evidence": {
+  "preregistration": "tools/s17/s17-preregistration.json",
+  "result": "tools/s17/s17-result.json",
+  "state": "tools/s17/s17-state.json"
+ },
+ "experiment": "X0016",
+ "non_claims": [
+  "no search, game or strength claims",
+  "one population, one teacher, one exam",
+  "the control envelope is 4x, not 'unlimited compute'",
+  "H=256 approximates the historical ~200K-parameter scale as a comparison point only, not inherited truth"
+ ],
+ "preregistration_hash": "sha256:ef775882bd980a8fc3fd2b5212b2a2cfd527cf90873f39781a43078c5ffa41c7",
+ "primary_curve": [
+  {
+   "H": 1,
+   "cp_mae": 134.69403390678355,
+   "mean_test_loss": 0.015989456709905075,
+   "model_bytes": 18442,
+   "parameters": 771,
+   "presentations": 194560,
+   "presentations_per_parameter": 252.34760051880676,
+   "seeds": 20,
+   "sign_agreement": 0.9075,
+   "wall_seconds": 5.27
+  },
+  {
+   "H": 2,
+   "cp_mae": 132.31936065210724,
+   "mean_test_loss": 0.015583599296894377,
+   "model_bytes": 34828,
+   "parameters": 1541,
+   "presentations": 194560,
+   "presentations_per_parameter": 126.25567813108371,
+   "seeds": 20,
+   "sign_agreement": 0.914375,
+   "step_vs_previous": {
+    "better_or_worse": "better",
+    "d": -0.00040585741301069837,
+    "label": "H2 vs H1",
+    "mean_a": 0.015583599296894377,
+    "mean_b": 0.015989456709905075,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0008843432861131411,
+     7.262846009174436e-05
+    ],
+    "per_added_parameter": -5.270875493645433e-07,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 5.54
+  },
+  {
+   "H": 4,
+   "cp_mae": 131.2888233436576,
+   "mean_test_loss": 0.01628032374868423,
+   "model_bytes": 67860,
+   "parameters": 3081,
+   "presentations": 194560,
+   "presentations_per_parameter": 63.148328464784164,
+   "seeds": 20,
+   "sign_agreement": 0.898125,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.0006967244517898524,
+    "label": "H4 vs H2",
+    "mean_a": 0.01628032374868423,
+    "mean_b": 0.015583599296894377,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.00016277614398967966,
+     0.0015562250475693845
+    ],
+    "per_added_parameter": 4.5241847518821585e-07,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 5.13
+  },
+  {
+   "H": 8,
+   "cp_mae": 132.81577479580213,
+   "mean_test_loss": 0.01732387588321189,
+   "model_bytes": 134166,
+   "parameters": 6161,
+   "presentations": 194560,
+   "presentations_per_parameter": 31.579289076448628,
+   "seeds": 20,
+   "sign_agreement": 0.90125,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.0010435521345276634,
+    "label": "H8 vs H4",
+    "mean_a": 0.01732387588321189,
+    "mean_b": 0.01628032374868423,
+    "n": 20,
+    "one_sided_bounds": [
+     0.00022615679567423714,
+     0.0018609474733810897
+    ],
+    "per_added_parameter": 3.388156280933972e-07,
+    "verdict": "worse"
+   },
+   "wall_seconds": 5.0
+  },
+  {
+   "H": 16,
+   "cp_mae": 138.47330165898475,
+   "mean_test_loss": 0.0187354793868883,
+   "model_bytes": 266626,
+   "parameters": 12321,
+   "presentations": 194560,
+   "presentations_per_parameter": 15.790926061196332,
+   "seeds": 20,
+   "sign_agreement": 0.890625,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.0014116035036764066,
+    "label": "H16 vs H8",
+    "mean_a": 0.0187354793868883,
+    "mean_b": 0.01732387588321189,
+    "n": 20,
+    "one_sided_bounds": [
+     7.873503534643273e-05,
+     0.0027444719720063804
+    ],
+    "per_added_parameter": 2.2915641293448158e-07,
+    "verdict": "worse"
+   },
+   "wall_seconds": 5.13
+  },
+  {
+   "H": 32,
+   "cp_mae": 140.05431548984348,
+   "mean_test_loss": 0.01958600645947341,
+   "model_bytes": 532672,
+   "parameters": 24641,
+   "presentations": 194560,
+   "presentations_per_parameter": 7.895783450346983,
+   "seeds": 20,
+   "sign_agreement": 0.88625,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.0008505270725851128,
+    "label": "H32 vs H16",
+    "mean_a": 0.01958600645947341,
+    "mean_b": 0.0187354793868883,
+    "n": 20,
+    "one_sided_bounds": [
+     -0.0007368037731883741,
+     0.0024378579183586
+    ],
+    "per_added_parameter": 6.903628835918123e-08,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 5.22
+  },
+  {
+   "H": 64,
+   "cp_mae": 142.30126435560777,
+   "mean_test_loss": 0.019584589972211325,
+   "model_bytes": 1066321,
+   "parameters": 49281,
+   "presentations": 194560,
+   "presentations_per_parameter": 3.947971834987115,
+   "seeds": 10,
+   "sign_agreement": 0.8825000000000001,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.00018278707215342512,
+    "label": "H64 vs H32",
+    "mean_a": 0.019584589972211325,
+    "mean_b": 0.01958600645947341,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.002070262388048894,
+     0.002435836532355744
+    ],
+    "per_added_parameter": 7.418306499733162e-09,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 5.99
+  },
+  {
+   "H": 128,
+   "cp_mae": 143.97312438655655,
+   "mean_test_loss": 0.020104613698133402,
+   "model_bytes": 2135964,
+   "parameters": 98561,
+   "presentations": 194560,
+   "presentations_per_parameter": 1.9740059455565588,
+   "seeds": 10,
+   "sign_agreement": 0.88,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.0005200237259220762,
+    "label": "H128 vs H64",
+    "mean_a": 0.020104613698133402,
+    "mean_b": 0.019584589972211325,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.0010340632517428648,
+     0.0020741107035870173
+    ],
+    "per_added_parameter": 1.0552429503288885e-08,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 6.86
+  },
+  {
+   "H": 256,
+   "cp_mae": 145.00222022052955,
+   "mean_test_loss": 0.019716911756901392,
+   "model_bytes": 4279771,
+   "parameters": 197121,
+   "presentations": 194560,
+   "presentations_per_parameter": 0.987007979870232,
+   "seeds": 10,
+   "sign_agreement": 0.875,
+   "step_vs_previous": {
+    "better_or_worse": "better",
+    "d": -0.000387701941232008,
+    "label": "H256 vs H128",
+    "mean_a": 0.019716911756901392,
+    "mean_b": 0.020104613698133402,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.0013826429932041087,
+     0.0006072391107400927
+    ],
+    "per_added_parameter": -3.93366417646112e-09,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 10.01
+  },
+  {
+   "H": 512,
+   "cp_mae": 148.27961103667644,
+   "mean_test_loss": 0.020725303560393798,
+   "model_bytes": 8573714,
+   "parameters": 394241,
+   "presentations": 194560,
+   "presentations_per_parameter": 0.49350524171762955,
+   "seeds": 10,
+   "sign_agreement": 0.85,
+   "step_vs_previous": {
+    "better_or_worse": "worse",
+    "d": 0.001008391803492405,
+    "label": "H512 vs H256",
+    "mean_a": 0.020725303560393798,
+    "mean_b": 0.019716911756901392,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.0004603097576681497,
+     0.0024770933646529594
+    ],
+    "per_added_parameter": 5.115624003106762e-09,
+    "verdict": "unresolved"
+   },
+   "wall_seconds": 15.84
+  }
+ ],
+ "question": "how much capacity does the RAW evaluator need before more parameters stop buying capability, and is the turn-up at fixed student compute a capacity effect or an undertraining effect?",
+ "slices": {
+  "H32": {
+   "endgame": 0.039624,
+   "middlegame": 0.021929,
+   "opening": 0.010789
+  },
+  "H512": {
+   "endgame": 0.061475,
+   "middlegame": 0.030326,
+   "opening": 0.013489
+  }
+ },
+ "undertraining_control": [
+  {
+   "H": 128,
+   "control_minus_primary": {
+    "d": 0.0008464053879647226,
+    "label": "control x4 vs primary | H128",
+    "mean_a": 0.020951019086098123,
+    "mean_b": 0.020104613698133402,
+    "n": 10,
+    "one_sided_bounds": [
+     8.99553977813303e-05,
+     0.0016028553781481149
+    ],
+    "verdict": "worse"
+   },
+   "control_vs_knee": {
+    "d": 0.004631,
+    "mean_a": 0.020951,
+    "mean_b": 0.015584,
+    "verdict": "worse"
+   },
+   "mean_test_loss": 0.020951019086098123,
+   "parameters": 98561,
+   "presentations": 778240,
+   "presentations_per_parameter": 7.896023782226235,
+   "primary_mean": 0.020104613698133402,
+   "seeds": 10,
+   "wall_seconds": 12.62
+  },
+  {
+   "H": 256,
+   "control_minus_primary": {
+    "d": 7.568501416677816e-05,
+    "label": "control x4 vs primary | H256",
+    "mean_a": 0.01979259677106817,
+    "mean_b": 0.019716911756901392,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.0005793209066114934,
+     0.0007306909349450496
+    ],
+    "verdict": "unresolved"
+   },
+   "control_vs_knee": {
+    "d": 0.003472,
+    "mean_a": 0.019793,
+    "mean_b": 0.015584,
+    "verdict": "worse"
+   },
+   "mean_test_loss": 0.01979259677106817,
+   "parameters": 197121,
+   "presentations": 778240,
+   "presentations_per_parameter": 3.948031919480928,
+   "primary_mean": 0.019716911756901392,
+   "seeds": 10,
+   "wall_seconds": 25.06
+  },
+  {
+   "H": 512,
+   "control_minus_primary": {
+    "d": -0.00012349981867558582,
+    "label": "control x4 vs primary | H512",
+    "mean_a": 0.020601803741718213,
+    "mean_b": 0.020725303560393798,
+    "n": 10,
+    "one_sided_bounds": [
+     -0.0009415499109105894,
+     0.0006945502735594179
+    ],
+    "verdict": "unresolved"
+   },
+   "control_vs_knee": {
+    "d": 0.004281,
+    "mean_a": 0.020602,
+    "mean_b": 0.015584,
+    "verdict": "worse"
+   },
+   "mean_test_loss": 0.020601803741718213,
+   "parameters": 394241,
+   "presentations": 778240,
+   "presentations_per_parameter": 1.9740209668705182,
+   "primary_mean": 0.020725303560393798,
+   "seeds": 10,
+   "wall_seconds": 42.3
+  }
+ ],
+ "undertraining_verdict": {
+  "reading": "control rungs that recovered the primary loss at the same width indicate the primary turn-up was undersupplied training compute; rungs that did not indicate capacity saturation WITHIN the 4x envelope",
+  "rescued_widths": [],
+  "still_worse_widths": [
+   128
+  ]
+ }
+}

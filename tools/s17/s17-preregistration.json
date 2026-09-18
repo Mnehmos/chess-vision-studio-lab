@@ -1,0 +1,202 @@
+{
+ "acceptance": {
+  "every_width_same_contract": true,
+  "exact_counts_generated_by_lab": "cvslab.families.parameter_shapes",
+  "gen10_is_comparison_not_truth": "H=256 (~197K parameters) approximates the historical scale as a comparison point only",
+  "marginal_gain_reported": true,
+  "non_monotonic_rungs_kept_visible": true
+ },
+ "analysis": {
+  "cost": "train wall time, serialized bytes, inference throughput per width",
+  "marginal_gains": "per rung, the paired-by-seed loss change vs the previous rung, per added parameter, with exact one-sided bounds",
+  "no_ranking": "no pooled score; the curve and its marginal gains are the result",
+  "primary_curve": "test_loss against exact parameter count and against presentations per parameter, with seed uncertainty at every rung",
+  "slices": "phase and material slices at the knee and at H=512, computed from the exam FENs",
+  "thresholds": "first useful rung (best loss below the H=1 rung with bounds excluding zero), the knee (the rung with the largest marginal gain), the diminishing-return region (marginal gains whose bounds include zero), and every non-monotonic step",
+  "undertraining_test": "for H=128/256/512: control vs primary at the same width, paired by seed; a control rung that recovers the knee's loss indicates undertraining, one that does not indicates capacity saturation (within the 4x envelope)"
+ },
+ "contract": {
+  "control_regime": "MAX_UPDATES 3040 = 4x the primary updates, applied to H=[128, 256, 512] only",
+  "exam": "E0004 CVS-DEEP 400k over the 200 held-out identities",
+  "input": "RAW-768 for every rung",
+  "primary_regime": "MAX_UPDATES 760 x BATCH 256 = 194560 presentations at EVERY width (the frozen S13-S16 student-compute contract)",
+  "random_streams": {
+   "consequence": "every run of a seed sees the same initialization and example order, so width is the only changing variable",
+   "streams": "np.random.SeedSequence(seed).spawn(3): persistent init, auxiliary init (unused here, AUX=none everywhere), minibatch sampling",
+   "test": "tests/test_nnue_aux.py::test_paired_aux_and_control_arms_share_init_and_batch_order"
+  },
+  "teacher": "CVS-4k over D0036 (the S13-S16 contract unchanged; TargetSpec sha256:6b8bd7dcc1ac\u2026 asserted against X0008's sealed 4k arm)"
+ },
+ "control_rule": {
+  "anchor": "H=128 is the smallest control width, so the report can see whether extra compute merely rescues the largest models or moves the curve more generally",
+  "limitation_stated_up_front": "if 4x does not rescue a width, the evidence distinguishes 'capacity saturated' from 'compute helped less than 4x', NOT from 'no amount of compute helps'",
+  "rule": "one constant multiplier, 4x, identical for all three control widths; no per-width tuning, no tuning after outcomes",
+  "why_not_proportional_to_parameters": "updates proportional to parameter count would multiply H=512's run time by ~128 (days); a constant factor is the largest predeclared multiplier that keeps the control arm inside a few hours"
+ },
+ "guardrails": [
+  "no new labels",
+  "no teacher change",
+  "no per-width tuning",
+  "no optimizer change",
+  "no geometry or auxiliary supervision in this study",
+  "negative and non-monotonic results preserved"
+ ],
+ "id": "s17-scaling-ladder",
+ "issue": "Mnehmos/chess-vision-studio-lab#17 (the axis S14, S15 and S16 all pointed at)",
+ "ladder": {
+  "batch": 256,
+  "control_factor": 4,
+  "control_updates": 3040,
+  "control_widths": [
+   128,
+   256,
+   512
+  ],
+  "counts_generated_by": "cvslab.families.parameter_shapes / count_parameters",
+  "ladder": [
+   1,
+   2,
+   4,
+   8,
+   16,
+   32,
+   64,
+   128,
+   256,
+   512
+  ],
+  "primary_updates": 760,
+  "rows": [
+   {
+    "H": 1,
+    "arm": "primary",
+    "inference_parameters": 771,
+    "parameters": 771,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 252.34760051880676,
+    "seeds": 20
+   },
+   {
+    "H": 2,
+    "arm": "primary",
+    "inference_parameters": 1541,
+    "parameters": 1541,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 126.25567813108371,
+    "seeds": 20
+   },
+   {
+    "H": 4,
+    "arm": "primary",
+    "inference_parameters": 3081,
+    "parameters": 3081,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 63.148328464784164,
+    "seeds": 20
+   },
+   {
+    "H": 8,
+    "arm": "primary",
+    "inference_parameters": 6161,
+    "parameters": 6161,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 31.579289076448628,
+    "seeds": 20
+   },
+   {
+    "H": 16,
+    "arm": "primary",
+    "inference_parameters": 12321,
+    "parameters": 12321,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 15.790926061196332,
+    "seeds": 20
+   },
+   {
+    "H": 32,
+    "arm": "primary",
+    "inference_parameters": 24641,
+    "parameters": 24641,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 7.895783450346983,
+    "seeds": 20
+   },
+   {
+    "H": 64,
+    "arm": "primary",
+    "inference_parameters": 49281,
+    "parameters": 49281,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 3.947971834987115,
+    "seeds": 10
+   },
+   {
+    "H": 128,
+    "arm": "primary",
+    "inference_parameters": 98561,
+    "parameters": 98561,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 1.9740059455565588,
+    "seeds": 10
+   },
+   {
+    "H": 256,
+    "arm": "primary",
+    "inference_parameters": 197121,
+    "parameters": 197121,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 0.987007979870232,
+    "seeds": 10
+   },
+   {
+    "H": 512,
+    "arm": "primary",
+    "inference_parameters": 394241,
+    "parameters": 394241,
+    "primary_presentations": 194560,
+    "primary_presentations_per_parameter": 0.49350524171762955,
+    "seeds": 10
+   },
+   {
+    "H": 128,
+    "arm": "control x4",
+    "inference_parameters": 98561,
+    "parameters": 98561,
+    "primary_presentations": 778240,
+    "primary_presentations_per_parameter": 7.896023782226235,
+    "seeds": 10
+   },
+   {
+    "H": 256,
+    "arm": "control x4",
+    "inference_parameters": 197121,
+    "parameters": 197121,
+    "primary_presentations": 778240,
+    "primary_presentations_per_parameter": 3.948031919480928,
+    "seeds": 10
+   },
+   {
+    "H": 512,
+    "arm": "control x4",
+    "inference_parameters": 394241,
+    "parameters": 394241,
+    "primary_presentations": 778240,
+    "primary_presentations_per_parameter": 1.9740209668705182,
+    "seeds": 10
+   }
+  ],
+  "seed_policy": {
+   "note": "the control arms use the same seed lists as their widths' primary arms",
+   "rule": "20 seeds for H <= 32, 10 for H >= 64",
+   "why": "predeclared cost policy; the small-width seed list is the S13-S16 list so those anchor points stay comparable"
+  }
+ },
+ "question": "how much learned capacity does the raw 768-input evaluator need before more parameters stop buying useful capability \u2014 and is the turn-up that S14 saw at fixed student compute a capacity effect or an undertraining effect?",
+ "status": "materialized before the lattice is frozen and before any S17 outcome exists",
+ "stop_conditions": [
+  "the D0036 TargetSpec hash differs from X0008's sealed 4k arm",
+  "a rung cannot train or evaluate",
+  "membership fails"
+ ],
+ "version": 1
+}
