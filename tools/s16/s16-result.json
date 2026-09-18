@@ -1,0 +1,534 @@
+{
+ "economics": {
+  "note": "teacher-side costs are S13/S14's frozen measurements; student compute is identical in every cell",
+  "rows": [
+   {
+    "cell": "CVS-4k/RAW/H1",
+    "persistent_parameters": 771,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 7.5,
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/RAW/H4",
+    "persistent_parameters": 3081,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 7.5,
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/HYBRID/H1",
+    "persistent_parameters": 813,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 7.5,
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/HYBRID/H4",
+    "persistent_parameters": 3249,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 7.5,
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/RAW/H1",
+    "persistent_parameters": 771,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 79.73,
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/RAW/H4",
+    "persistent_parameters": 3081,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 79.73,
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/HYBRID/H1",
+    "persistent_parameters": 813,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 79.73,
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/HYBRID/H4",
+    "persistent_parameters": 3249,
+    "student_presentations": 194560,
+    "teacher_ms_per_label": 79.73,
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "training_only_parameters": 0
+   }
+  ]
+ },
+ "evidence": {
+  "dual_exam": "tools/s16/s16-dual-exam.json",
+  "preregistration": "tools/s16/s16-preregistration.json",
+  "result": "tools/s16/s16-result.json",
+  "state": "tools/s16/s16-state.json"
+ },
+ "experiment": "X0015",
+ "matrix": {
+  "capacities": [
+   1,
+   4
+  ],
+  "cells": 160,
+  "exams": [
+   "CVS-DEEP",
+   "SF-DEEP"
+  ],
+  "representations": [
+   "RAW",
+   "HYBRID"
+  ],
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18,
+   19
+  ],
+  "shared_rows": "D0036 and D0044 carry the same 18,953 record ids in the same order (record_ids_hash sha256:7d5a8a78\u2026)",
+  "teachers": [
+   "CVS-4k",
+   "SF-32k"
+  ]
+ },
+ "non_claims": [
+  "no pooled score across the two exams",
+  "no game or search claims",
+  "static-evaluator results only",
+  "one population, one optimizer, 20 seeds"
+ ],
+ "observed_interaction_counts": {
+  "intervals": 4,
+  "negative_point_estimates": 4,
+  "positive_point_estimates": 0,
+  "resolved": 1
+ },
+ "observed_interaction_pattern": "NEGATIVE_INTERACTION_PARTLY_RESOLVED",
+ "pattern_note": "the label counts resolved intervals and the sign of every point estimate separately; unresolved intervals are reported, never forced into a claim of significance",
+ "per_capacity": {
+  "1": {
+   "cell_metrics": {
+    "CVS-4k/HYBRID": {
+     "cp_mae": 148.67977166667396,
+     "model_bytes": 19618,
+     "sign_agreement": 0.910625,
+     "test_loss_cvs_exam": 0.018870841622577458,
+     "wall_seconds": 8.29
+    },
+    "CVS-4k/RAW": {
+     "cp_mae": 134.69403390678355,
+     "model_bytes": 18439,
+     "sign_agreement": 0.9075,
+     "test_loss_cvs_exam": 0.015989456709905075,
+     "wall_seconds": 4.98
+    },
+    "SF-32k/HYBRID": {
+     "cp_mae": 153.31729453862886,
+     "model_bytes": 19570,
+     "sign_agreement": 0.880625,
+     "test_loss_cvs_exam": 0.02082939083241374,
+     "wall_seconds": 9.43
+    },
+    "SF-32k/RAW": {
+     "cp_mae": 140.6808022805447,
+     "model_bytes": 18476,
+     "sign_agreement": 0.89375,
+     "test_loss_cvs_exam": 0.018300957635362363,
+     "wall_seconds": 6.4
+    }
+   },
+   "exam": {
+    "CVS-DEEP": {
+     "interaction": {
+      "d": -0.00035295171562100956,
+      "interaction": -0.00035295171562100956,
+      "label": "(SF-CVS | HYBRID) - (SF-CVS | RAW) | H1 | CVS-DEEP",
+      "mean_a": 0.0019585492098362772,
+      "mean_b": 0.002311500925457287,
+      "n": 20,
+      "one_sided_bounds": [
+       -0.0009353740190068585,
+       0.00022947058776483941
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "verdict": "unresolved"
+     },
+     "interaction_symmetric_check": -0.00035295171562100956,
+     "means": {
+      "CVS-4k/HYBRID": 0.018870841622577458,
+      "CVS-4k/RAW": 0.015989456709905075,
+      "SF-32k/HYBRID": 0.02082939083241374,
+      "SF-32k/RAW": 0.018300957635362363
+     },
+     "representation_effect": {
+      "CVS-4k": {
+       "d": 0.002881384912672384,
+       "label": "representation HYBRID-RAW | CVS-4k | H1 | CVS-DEEP",
+       "mean_a": 0.018870841622577458,
+       "mean_b": 0.015989456709905075,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0015305656542823802,
+        0.004232204171062388
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "SF-32k": {
+       "d": 0.0025284331970513744,
+       "label": "representation HYBRID-RAW | SF-32k | H1 | CVS-DEEP",
+       "mean_a": 0.02082939083241374,
+       "mean_b": 0.018300957635362363,
+       "n": 20,
+       "one_sided_bounds": [
+        0.001291622090627803,
+        0.0037652443034749458
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     },
+     "teacher_effect": {
+      "HYBRID": {
+       "d": 0.0019585492098362772,
+       "label": "teacher SF-CVS | HYBRID | H1 | CVS-DEEP",
+       "mean_a": 0.02082939083241374,
+       "mean_b": 0.018870841622577458,
+       "n": 20,
+       "one_sided_bounds": [
+        0.001423239478461439,
+        0.0024938589412111154
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "RAW": {
+       "d": 0.002311500925457287,
+       "label": "teacher SF-CVS | RAW | H1 | CVS-DEEP",
+       "mean_a": 0.018300957635362363,
+       "mean_b": 0.015989456709905075,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0018766728039046612,
+        0.002746329047009913
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     }
+    },
+    "SF-DEEP": {
+     "interaction": {
+      "d": -0.0005598860988609343,
+      "interaction": -0.0005598860988609343,
+      "label": "(SF-CVS | HYBRID) - (SF-CVS | RAW) | H1 | SF-DEEP",
+      "mean_a": 0.0017387405504156813,
+      "mean_b": 0.0022986266492766158,
+      "n": 20,
+      "one_sided_bounds": [
+       -0.001061761429700505,
+       -5.801076802136357e-05
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "verdict": "negative"
+     },
+     "interaction_symmetric_check": -0.0005598860988609343,
+     "means": {
+      "CVS-4k/HYBRID": 0.029842007014807662,
+      "CVS-4k/RAW": 0.0263503829457892,
+      "SF-32k/HYBRID": 0.03158074756522335,
+      "SF-32k/RAW": 0.028649009595065816
+     },
+     "representation_effect": {
+      "CVS-4k": {
+       "d": 0.0034916240690184624,
+       "label": "representation HYBRID-RAW | CVS-4k | H1 | SF-DEEP",
+       "mean_a": 0.029842007014807662,
+       "mean_b": 0.0263503829457892,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0018924580405703703,
+        0.005090790097466554
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "SF-32k": {
+       "d": 0.0029317379701575283,
+       "label": "representation HYBRID-RAW | SF-32k | H1 | SF-DEEP",
+       "mean_a": 0.03158074756522335,
+       "mean_b": 0.028649009595065816,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0013813392703916425,
+        0.004482136669923414
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     },
+     "teacher_effect": {
+      "HYBRID": {
+       "d": 0.0017387405504156815,
+       "label": "teacher SF-CVS | HYBRID | H1 | SF-DEEP",
+       "mean_a": 0.03158074756522335,
+       "mean_b": 0.029842007014807662,
+       "n": 20,
+       "one_sided_bounds": [
+        0.001323446129841495,
+        0.002154034970989868
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "RAW": {
+       "d": 0.0022986266492766158,
+       "label": "teacher SF-CVS | RAW | H1 | SF-DEEP",
+       "mean_a": 0.028649009595065816,
+       "mean_b": 0.0263503829457892,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0018497057792851725,
+        0.002747547519268059
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     }
+    }
+   }
+  },
+  "4": {
+   "cell_metrics": {
+    "CVS-4k/HYBRID": {
+     "cp_mae": 119.15401789441981,
+     "model_bytes": 71803,
+     "sign_agreement": 0.9175,
+     "test_loss_cvs_exam": 0.01329613425502115,
+     "wall_seconds": 8.41
+    },
+    "CVS-4k/RAW": {
+     "cp_mae": 131.2888233436576,
+     "model_bytes": 67857,
+     "sign_agreement": 0.898125,
+     "test_loss_cvs_exam": 0.01628032374868423,
+     "wall_seconds": 5.22
+    },
+    "SF-32k/HYBRID": {
+     "cp_mae": 124.10864657392864,
+     "model_bytes": 71836,
+     "sign_agreement": 0.9075,
+     "test_loss_cvs_exam": 0.015297305871731316,
+     "wall_seconds": 9.45
+    },
+    "SF-32k/RAW": {
+     "cp_mae": 139.13984811981527,
+     "model_bytes": 67779,
+     "sign_agreement": 0.876875,
+     "test_loss_cvs_exam": 0.019131074985623386,
+     "wall_seconds": 6.84
+    }
+   },
+   "exam": {
+    "CVS-DEEP": {
+     "interaction": {
+      "d": -0.0008495796202289895,
+      "interaction": -0.0008495796202289895,
+      "label": "(SF-CVS | HYBRID) - (SF-CVS | RAW) | H4 | CVS-DEEP",
+      "mean_a": 0.002001171616710167,
+      "mean_b": 0.0028507512369391566,
+      "n": 20,
+      "one_sided_bounds": [
+       -0.0020653124694224485,
+       0.00036615322896446927
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "verdict": "unresolved"
+     },
+     "interaction_symmetric_check": -0.0008495796202289895,
+     "means": {
+      "CVS-4k/HYBRID": 0.01329613425502115,
+      "CVS-4k/RAW": 0.01628032374868423,
+      "SF-32k/HYBRID": 0.015297305871731316,
+      "SF-32k/RAW": 0.019131074985623386
+     },
+     "representation_effect": {
+      "CVS-4k": {
+       "d": -0.0029841894936630795,
+       "label": "representation HYBRID-RAW | CVS-4k | H4 | CVS-DEEP",
+       "mean_a": 0.01329613425502115,
+       "mean_b": 0.01628032374868423,
+       "n": 20,
+       "one_sided_bounds": [
+        -0.0038871695797971957,
+        -0.0020812094075289634
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "negative"
+      },
+      "SF-32k": {
+       "d": -0.003833769113892069,
+       "label": "representation HYBRID-RAW | SF-32k | H4 | CVS-DEEP",
+       "mean_a": 0.015297305871731316,
+       "mean_b": 0.019131074985623386,
+       "n": 20,
+       "one_sided_bounds": [
+        -0.005043620656370016,
+        -0.0026239175714141212
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "negative"
+      }
+     },
+     "teacher_effect": {
+      "HYBRID": {
+       "d": 0.002001171616710167,
+       "label": "teacher SF-CVS | HYBRID | H4 | CVS-DEEP",
+       "mean_a": 0.015297305871731316,
+       "mean_b": 0.01329613425502115,
+       "n": 20,
+       "one_sided_bounds": [
+        0.001496075872073857,
+        0.0025062673613464766
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "RAW": {
+       "d": 0.0028507512369391566,
+       "label": "teacher SF-CVS | RAW | H4 | CVS-DEEP",
+       "mean_a": 0.019131074985623386,
+       "mean_b": 0.01628032374868423,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0018405209529135257,
+        0.0038609815209647872
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     }
+    },
+    "SF-DEEP": {
+     "interaction": {
+      "d": -0.001131303146922502,
+      "interaction": -0.001131303146922502,
+      "label": "(SF-CVS | HYBRID) - (SF-CVS | RAW) | H4 | SF-DEEP",
+      "mean_a": 0.0014536246213210447,
+      "mean_b": 0.002584927768243547,
+      "n": 20,
+      "one_sided_bounds": [
+       -0.0023753942346110275,
+       0.00011278794076602372
+      ],
+      "t_one_sided": 1.7291328115213664,
+      "verdict": "unresolved"
+     },
+     "interaction_symmetric_check": -0.001131303146922502,
+     "means": {
+      "CVS-4k/HYBRID": 0.025726118817045177,
+      "CVS-4k/RAW": 0.027478398008289835,
+      "SF-32k/HYBRID": 0.027179743438366225,
+      "SF-32k/RAW": 0.03006332577653338
+     },
+     "representation_effect": {
+      "CVS-4k": {
+       "d": -0.0017522791912446551,
+       "label": "representation HYBRID-RAW | CVS-4k | H4 | SF-DEEP",
+       "mean_a": 0.025726118817045177,
+       "mean_b": 0.027478398008289835,
+       "n": 20,
+       "one_sided_bounds": [
+        -0.0029511885845271433,
+        -0.000553369797962167
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "negative"
+      },
+      "SF-32k": {
+       "d": -0.002883582338167157,
+       "label": "representation HYBRID-RAW | SF-32k | H4 | SF-DEEP",
+       "mean_a": 0.027179743438366225,
+       "mean_b": 0.03006332577653338,
+       "n": 20,
+       "one_sided_bounds": [
+        -0.004091544473616548,
+        -0.0016756202027177665
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "negative"
+      }
+     },
+     "teacher_effect": {
+      "HYBRID": {
+       "d": 0.0014536246213210447,
+       "label": "teacher SF-CVS | HYBRID | H4 | SF-DEEP",
+       "mean_a": 0.027179743438366225,
+       "mean_b": 0.025726118817045177,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0009191473166911913,
+        0.001988101925950898
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      },
+      "RAW": {
+       "d": 0.002584927768243547,
+       "label": "teacher SF-CVS | RAW | H4 | SF-DEEP",
+       "mean_a": 0.03006332577653338,
+       "mean_b": 0.027478398008289835,
+       "n": 20,
+       "one_sided_bounds": [
+        0.0015406273735567994,
+        0.0036292281629302942
+       ],
+       "t_one_sided": 1.7291328115213664,
+       "verdict": "positive"
+      }
+     }
+    }
+   }
+  }
+ },
+ "preregistration_hash": "sha256:c82bb6d1e5f8a5903db54ccb0ce1aac009e4a31d98487f8adef1e247bd0758e4",
+ "questions": [
+  "does explicit semantic representation reduce the need for a stronger teacher?",
+  "does Stockfish supervision help RAW and HYBRID equally?",
+  "are teacher quality and explicit structure substitutes, complements, or independent?"
+ ]
+}

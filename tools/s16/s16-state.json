@@ -1,0 +1,299 @@
+{
+ "preregistration": {
+  "file": "tools/s16/s16-preregistration.json",
+  "hash": "sha256:c82bb6d1e5f8a5903db54ccb0ce1aac009e4a31d98487f8adef1e247bd0758e4"
+ },
+ "xid": "X0015",
+ "experiment": {
+  "id": "X0015",
+  "arms": 4,
+  "cells": 160
+ },
+ "conditions": {
+  "CVS-4k|RAW": {
+   "1": "A0253",
+   "4": "A0254"
+  },
+  "CVS-4k|HYBRID": {
+   "1": "A0255",
+   "4": "A0256"
+  },
+  "SF-32k|RAW": {
+   "1": "A0257",
+   "4": "A0258"
+  },
+  "SF-32k|HYBRID": {
+   "1": "A0259",
+   "4": "A0260"
+  }
+ },
+ "economics": {
+  "rows": [
+   {
+    "cell": "CVS-4k/RAW/H1",
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "teacher_ms_per_label": 7.5,
+    "student_presentations": 194560,
+    "persistent_parameters": 771,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/RAW/H4",
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "teacher_ms_per_label": 7.5,
+    "student_presentations": 194560,
+    "persistent_parameters": 3081,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/HYBRID/H1",
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "teacher_ms_per_label": 7.5,
+    "student_presentations": 194560,
+    "persistent_parameters": 813,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "CVS-4k/HYBRID/H4",
+    "teacher_nodes": 74570561,
+    "teacher_nodes_per_label": 4000,
+    "teacher_ms_per_label": 7.5,
+    "student_presentations": 194560,
+    "persistent_parameters": 3249,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/RAW/H1",
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "teacher_ms_per_label": 79.73,
+    "student_presentations": 194560,
+    "persistent_parameters": 771,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/RAW/H4",
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "teacher_ms_per_label": 79.73,
+    "student_presentations": 194560,
+    "persistent_parameters": 3081,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/HYBRID/H1",
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "teacher_ms_per_label": 79.73,
+    "student_presentations": 194560,
+    "persistent_parameters": 813,
+    "training_only_parameters": 0
+   },
+   {
+    "cell": "SF-32k/HYBRID/H4",
+    "teacher_nodes": 599592682,
+    "teacher_nodes_per_label": 32000,
+    "teacher_ms_per_label": 79.73,
+    "student_presentations": 194560,
+    "persistent_parameters": 3249,
+    "training_only_parameters": 0
+   }
+  ],
+  "note": "teacher-side costs are S13/S14's frozen measurements; student compute is identical in every cell"
+ },
+ "queued": {
+  "A0253": [
+   "R4362",
+   "R4363",
+   "R4364",
+   "R4365",
+   "R4366",
+   "R4367",
+   "R4368",
+   "R4369",
+   "R4370",
+   "R4371",
+   "R4372",
+   "R4373",
+   "R4374",
+   "R4375",
+   "R4376",
+   "R4377",
+   "R4378",
+   "R4379",
+   "R4380",
+   "R4381"
+  ],
+  "A0254": [
+   "R4382",
+   "R4383",
+   "R4384",
+   "R4385",
+   "R4386",
+   "R4387",
+   "R4388",
+   "R4389",
+   "R4390",
+   "R4391",
+   "R4392",
+   "R4393",
+   "R4394",
+   "R4395",
+   "R4396",
+   "R4397",
+   "R4398",
+   "R4399",
+   "R4400",
+   "R4401"
+  ],
+  "A0255": [
+   "R4402",
+   "R4403",
+   "R4404",
+   "R4405",
+   "R4406",
+   "R4407",
+   "R4408",
+   "R4409",
+   "R4410",
+   "R4411",
+   "R4412",
+   "R4413",
+   "R4414",
+   "R4415",
+   "R4416",
+   "R4417",
+   "R4418",
+   "R4419",
+   "R4420",
+   "R4421"
+  ],
+  "A0256": [
+   "R4422",
+   "R4423",
+   "R4424",
+   "R4425",
+   "R4426",
+   "R4427",
+   "R4428",
+   "R4429",
+   "R4430",
+   "R4431",
+   "R4432",
+   "R4433",
+   "R4434",
+   "R4435",
+   "R4436",
+   "R4437",
+   "R4438",
+   "R4439",
+   "R4440",
+   "R4441"
+  ],
+  "A0257": [
+   "R4442",
+   "R4443",
+   "R4444",
+   "R4445",
+   "R4446",
+   "R4447",
+   "R4448",
+   "R4449",
+   "R4450",
+   "R4451",
+   "R4452",
+   "R4453",
+   "R4454",
+   "R4455",
+   "R4456",
+   "R4457",
+   "R4458",
+   "R4459",
+   "R4460",
+   "R4461"
+  ],
+  "A0258": [
+   "R4462",
+   "R4463",
+   "R4464",
+   "R4465",
+   "R4466",
+   "R4467",
+   "R4468",
+   "R4469",
+   "R4470",
+   "R4471",
+   "R4472",
+   "R4473",
+   "R4474",
+   "R4475",
+   "R4476",
+   "R4477",
+   "R4478",
+   "R4479",
+   "R4480",
+   "R4481"
+  ],
+  "A0259": [
+   "R4482",
+   "R4483",
+   "R4484",
+   "R4485",
+   "R4486",
+   "R4487",
+   "R4488",
+   "R4489",
+   "R4490",
+   "R4491",
+   "R4492",
+   "R4493",
+   "R4494",
+   "R4495",
+   "R4496",
+   "R4497",
+   "R4498",
+   "R4499",
+   "R4500",
+   "R4501"
+  ],
+  "A0260": [
+   "R4502",
+   "R4503",
+   "R4504",
+   "R4505",
+   "R4506",
+   "R4507",
+   "R4508",
+   "R4509",
+   "R4510",
+   "R4511",
+   "R4512",
+   "R4513",
+   "R4514",
+   "R4515",
+   "R4516",
+   "R4517",
+   "R4518",
+   "R4519",
+   "R4520",
+   "R4521"
+  ]
+ },
+ "run_statuses": {
+  "COMPLETED": 160
+ },
+ "analysis": {
+  "experiment": "X0015",
+  "record_hash": "sha256:a9ff1ef21477b2508f747b92389684e9563ec6d4bef70ac13cdec193ea7af98b",
+  "membership": "160/160 COMPLETED, 0 invalid, 0 replaced",
+  "headline": "teacher and representation effects near-additive; interaction negative in 4/4 cells (1 resolved); cheap teacher + HYBRID beats 8x-pricier teacher + RAW on both exams at H4",
+  "pattern": "NEGATIVE_INTERACTION_PARTLY_RESOLVED",
+  "result": "tools/s16/s16-result.json",
+  "summary": "tools/s16/s16-result-summary.json",
+  "dual_exam": "tools/s16/s16-dual-exam.json",
+  "doc": "docs/S16_TEACHER_REPRESENTATION.md"
+ }
+}
